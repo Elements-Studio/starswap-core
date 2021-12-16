@@ -378,7 +378,7 @@ module TokenSwap {
     }
 
     public fun fee_address(): address {
-        @0xd231d9da8e37fc3d9ff3f576cf978535
+        @0x0a4183ac9335a9f5804014eab01c0abc
     }
 
     public fun get_swap_fee_switch(): bool {

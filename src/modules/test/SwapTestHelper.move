@@ -15,7 +15,7 @@ module SwapTestHelper {
     const TOKEN_HOLDER_ADDRESS : address = @0x4783d08fb16990bd35d83f3e23bf93b8;
     const ADMIN_ADDRESS : address = @0x4783d08fb16990bd35d83f3e23bf93b8;
     const XUSDT_ADDRESS : address = @0x2d81a0427d64ff61b11ede9085efa5ad;
-    const FEE_ADDRESS : address = @0xd231d9da8e37fc3d9ff3f576cf978535;
+    const FEE_ADDRESS : address = @0x0a4183ac9335a9f5804014eab01c0abc;
 
     public fun get_admin_address(): address {
         ADMIN_ADDRESS

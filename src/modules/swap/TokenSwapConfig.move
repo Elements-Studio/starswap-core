@@ -13,8 +13,8 @@ module TokenSwapConfig {
     const ERROR_NOT_HAS_PRIVILEGE: u64 = 101;
 
     // Numerator and denumerator default fixed value
-    const DEFAULT_OPERATION_NUMERATOR: u64 = 20;
-    const DEFAULT_OPERATION_DENUMERATOR: u64 = 100;
+    const DEFAULT_OPERATION_NUMERATOR: u64 = 10;
+    const DEFAULT_OPERATION_DENUMERATOR: u64 = 60;
     const DEFAULT_POUNDAGE_NUMERATOR: u64 = 3;
     const DEFAULT_POUNDAGE_DENUMERATOR: u64 = 1000;
 
@@ -39,7 +39,7 @@ module TokenSwapConfig {
         }
     }
 
-    /// Swap fee allocation mode: LP Providor 80%, Operation management 20%
+    /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     /// Poundage number of liquidity token pair
     public fun get_poundage_rate<X: copy + drop + store,
                                  Y: copy + drop + store>(): (u64, u64) {

@@ -1,6 +1,6 @@
 //! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 200000 0x1::STC::STC
 //! account: feetokenholder, 0x2d81a0427d64ff61b11ede9085efa5ad, 400000 0x1::STC::STC
-//! account: feeadmin, 0xd231d9da8e37fc3d9ff3f576cf978535
+//! account: feeadmin, 0x0a4183ac9335a9f5804014eab01c0abc
 //! account: exchanger, 100000 0x1::STC::STC
 //! account: lp_provider, 500000 0x1::STC::STC
 //! account: alice, 500000 0x1::STC::STC

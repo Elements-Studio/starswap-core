@@ -112,13 +112,13 @@ module TokenSwapScripts {
 
     /// Poundage rate from swap fee
     public(script) fun set_poundage_rate<X: copy + drop + store,
-                                         Y: copy + drop + store>(signer: &signer, num: u64, denum: u64) {
-        TokenSwapRouter::set_poundage_rate<X, Y>(signer, num, denum);
+                                         Y: copy + drop + store>(signer: signer, num: u64, denum: u64) {
+        TokenSwapRouter::set_poundage_rate<X, Y>(&signer, num, denum);
     }
 
     /// Operation rate from all swap fee
-    public(script) fun set_swap_fee_operation_rate(signer: &signer, num: u64, denum: u64) {
-        TokenSwapRouter::set_swap_fee_operation_rate(signer, num, denum);
+    public(script) fun set_swap_fee_operation_rate(signer: signer, num: u64, denum: u64) {
+        TokenSwapRouter::set_swap_fee_operation_rate(&signer, num, denum);
     }
 
     /// Get amount in with token pair pondage rate

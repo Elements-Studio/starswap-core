@@ -17,7 +17,7 @@ module TokenSwapFee {
 
     /// Initialize default operation fee config
     public fun init_swap_oper_fee_config(signer: &signer) {
-        TokenSwapConfig::set_swap_fee_operation_rate(signer, 20, 100);
+        TokenSwapConfig::set_swap_fee_operation_rate(signer, 10, 60);
     }
 
     public fun handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store>(tx_address: address, token_x: Token::Token<X>) {
