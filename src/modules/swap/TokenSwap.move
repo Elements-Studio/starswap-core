@@ -18,7 +18,7 @@ module TokenSwap {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
 
 
-    struct LiquidityToken<X, Y> has key, store {}
+    struct LiquidityToken<X, Y> has key, store, copy, drop {}
 
     struct LiquidityTokenCapability<X, Y> has key, store {
         mint: Token::MintCapability<LiquidityToken<X, Y>>,
