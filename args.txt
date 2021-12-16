@@ -1,0 +1,9 @@
+# This is a batch file. To write an expected value test that runs `move <command1> <args1>;move <command2> <args2>`, write
+# `run src/scripts/init.move --signers 0xf`
+# `<command2> <args2>`
+# '#' is a comment.
+
+clean
+publish
+check
+run src/scripts/init.move --signers 0x1
