@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+
 module YieldFarming {
     use 0x1::Token;
     use 0x1::Signer;
     use 0x1::Timestamp;
     use 0x1::Errors;
     use 0x1::Math;
-    use 0x1::U256::{Self, U256};
+    use 0x1::U256;
+
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::BigExponential;
 
     const ERR_FARMING_INIT_REPEATE: u64 = 101;
     const ERR_FARMING_NOT_STILL_FREEZE: u64 = 102;
@@ -16,7 +19,6 @@ module YieldFarming {
     const ERR_FARMING_STAKE_NOT_EXISTS: u64 = 104;
     const ERR_FARMING_HAVERST_NO_GAIN: u64 = 105;
     const ERR_FARMING_TOTAL_WEIGHT_IS_ZERO: u64 = 106;
-    const ERR_EXP_DIVIDE_BY_ZERO: u64 = 107;
     const ERR_FARMING_BALANCE_EXCEEDED: u64 = 108;
     const ERR_FARMING_NOT_ENOUGH_ASSET: u64 = 109;
     const ERR_FARMING_TIMESTAMP_INVALID: u64 = 110;
@@ -24,110 +26,6 @@ module YieldFarming {
     const ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW: u64 = 112;
     const ERR_FARMING_NOT_ALIVE: u64 = 113;
     const ERR_FARMING_ALIVE_STATE_INVALID: u64 = 114;
-    const ERR_U128_OVERFLOW: u64 = 115;
-
-    const EXP_MAX_SCALE: u128 = 9;
-    const U128_MAX:u128 = 340282366920938463463374607431768211455;  //length(U128_MAX)==39
-
-    //////////////////////////////////////////////////////////////////////
-    // Exponential functions
-
-    const EXP_SCALE: u128 = 1000000000000000000;// e18
-    const EQUAL: u8 = 0;
-    const LESS_THAN: u8 = 1;
-    const GREATER_THAN: u8 = 2;
-
-    struct Exp has copy, store, drop {
-        mantissa: U256
-    }
-
-    public fun exp_scale(): u128 {
-        return EXP_SCALE
-    }
-
-    fun exp_direct(num: u128): Exp {
-        Exp {
-            mantissa: U256::from_u128(num)
-        }
-    }
-
-    fun exp_from_u256(num: U256): Exp {
-        Exp {
-            mantissa: num
-        }
-    }
-
-    fun exp_direct_expand(num: u128): Exp {
-        Exp {
-            mantissa: mul_u128(num, EXP_SCALE)
-        }
-    }
-
-    fun mantissa(a: Exp): U256 {
-        *&a.mantissa
-    }
-
-    public fun exp(num: u128, denom: u128): Exp {
-//        if overflow move will abort
-        let scaledNumerator: U256 = mul_u128(num, EXP_SCALE);
-        let rational = U256::div(scaledNumerator, U256::from_u128(denom));
-        Exp {
-            mantissa: rational
-        }
-    }
-
-    fun add_u128(a: u128, b: u128): u128 {
-        a + b
-    }
-
-    public fun add_exp(a: Exp, b: Exp): Exp {
-        Exp {
-            mantissa: U256::add(*&a.mantissa, *&b.mantissa)
-        }
-    }
-
-    fun sub_u128(a: u128, b: u128): u128 {
-        a - b
-    }
-
-    fun mul_u128(a: u128, b: u128): U256 {
-        if (a == 0 || b == 0) {
-            return U256::zero()
-        };
-        let a_u256 = U256::from_u128(a);
-        let b_u256 = U256::from_u128(b);
-        U256::mul(a_u256, b_u256)
-    }
-
-    fun div_u128(a: u128, b: u128): u128 {
-        if (b == 0) {
-            abort Errors::invalid_argument(ERR_EXP_DIVIDE_BY_ZERO)
-        };
-        if (a == 0) {
-            return 0
-        };
-        a / b
-    }
-
-    fun truncate(exp: Exp): u128 {
-//        return exp.mantissa / EXP_SCALE
-        let r_u256 = U256::div(*&exp.mantissa, U256::from_u128(EXP_SCALE));
-        let u128_max = U256::from_u128(U128_MAX);
-        let cmp_order = U256::compare(&r_u256, &u128_max);
-        if (cmp_order == GREATER_THAN) {
-            abort Errors::invalid_argument(ERR_U128_OVERFLOW)
-        };
-        U256::to_u128(&r_u256)
-    }
-
-    public fun to_safe_u128(x: U256): u128 {
-        let u128_max = U256::from_u128(U128_MAX);
-        let cmp_order = U256::compare(&x, &u128_max);
-        if (cmp_order == GREATER_THAN) {
-            abort Errors::invalid_argument(ERR_U128_OVERFLOW)
-        };
-        U256::to_u128(&x)
-    }
 
     /// The object of yield farming
     /// RewardTokenT meaning token of yield farming
@@ -166,13 +64,13 @@ module YieldFarming {
     public fun initialize<
         PoolType: store,
         RewardTokenT: store>(account: &signer, treasury_token: Token::Token<RewardTokenT>) {
-        let scaling_factor = Math::pow(10, (EXP_MAX_SCALE as u64));
+        let scaling_factor = Math::pow(10, BigExponential::exp_scale_limition());
         let token_scale = Token::scaling_factor<RewardTokenT>();
         assert(token_scale <= scaling_factor, Errors::limit_exceeded(ERR_FARMING_TOKEN_SCALE_OVERFLOW));
         assert(!exists_at<PoolType, RewardTokenT>(
             Signer::address_of(account)), Errors::invalid_state(ERR_FARMING_INIT_REPEATE));
 
-        move_to(account, Farming<PoolType, RewardTokenT> {
+        move_to(account, Farming<PoolType, RewardTokenT>{
             treasury_token,
         });
     }
@@ -188,7 +86,7 @@ module YieldFarming {
 
         let now_seconds = Timestamp::now_seconds();
 
-        move_to(account, FarmingAsset<PoolType, AssetT> {
+        move_to(account, FarmingAsset<PoolType, AssetT>{
             asset_total_weight: 0,
             harvest_index: 0,
             last_update_timestamp: now_seconds,
@@ -196,31 +94,30 @@ module YieldFarming {
             start_time: now_seconds + delay,
             alive: true
         });
-        ParameterModifyCapability<PoolType, AssetT> {}
+        ParameterModifyCapability<PoolType, AssetT>{}
     }
 
     /// Remove asset for make this pool to the state of not alive
     /// Please make sure all user unstaking from this pool
-//    public fun remove_asset<PoolType: store, AssetT: store>(
-//        broker: address,
-//        cap: ParameterModifyCapability) acquires FarmingAsset {
-//        let ParameterModifyCapability {} = cap;
-//        let FarmingAsset<PoolType, AssetT> {
-//            asset_total_weight: _,
-//            harvest_index: _,
-//            last_update_timestamp: _,
-//            release_per_second: _,
-//            start_time: _,
-//            alive: _,
-//        } = move_from<FarmingAsset<PoolType, AssetT>>(broker);
-//    }
+    //    public fun remove_asset<PoolType: store, AssetT: store>(
+    //        broker: address,
+    //        cap: ParameterModifyCapability) acquires FarmingAsset {
+    //        let ParameterModifyCapability {} = cap;
+    //        let FarmingAsset<PoolType, AssetT> {
+    //            asset_total_weight: _,
+    //            harvest_index: _,
+    //            last_update_timestamp: _,
+    //            release_per_second: _,
+    //            start_time: _,
+    //            alive: _,
+    //        } = move_from<FarmingAsset<PoolType, AssetT>>(broker);
+    //    }
 
     public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,
         release_per_second: u128,
         alive: bool) acquires FarmingAsset {
-
         // Not support to shuttingdown alive state.
         assert(alive, Errors::invalid_state(ERR_FARMING_ALIVE_STATE_INVALID));
 
@@ -246,7 +143,6 @@ module YieldFarming {
         asset: AssetT,
         asset_weight: u128,
         _cap: &ParameterModifyCapability<PoolType, AssetT>): HarvestCapability<PoolType, AssetT> acquires FarmingAsset {
-
         // Debug::print(account);
         let account_address = Signer::address_of(account);
         assert(!exists_stake_at_address<PoolType, AssetT>(account_address),
@@ -264,7 +160,7 @@ module YieldFarming {
         if (farming_asset.asset_total_weight <= 0) {
             // Stake as first user
             let gain = farming_asset.release_per_second * (time_period as u128);
-            move_to(account, Stake<PoolType, AssetT> {
+            move_to(account, Stake<PoolType, AssetT>{
                 asset,
                 asset_weight,
                 last_harvest_index: 0,
@@ -274,7 +170,7 @@ module YieldFarming {
             farming_asset.asset_total_weight = asset_weight;
         } else {
             let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
-            move_to(account, Stake<PoolType, AssetT> {
+            move_to(account, Stake<PoolType, AssetT>{
                 asset,
                 asset_weight,
                 last_harvest_index: new_harvest_index,
@@ -284,7 +180,7 @@ module YieldFarming {
             farming_asset.harvest_index = new_harvest_index;
         };
         farming_asset.last_update_timestamp = now_seconds;
-        HarvestCapability<PoolType, AssetT> {}
+        HarvestCapability<PoolType, AssetT>{}
     }
 
     /// Unstake asset from farming pool
@@ -299,7 +195,7 @@ module YieldFarming {
         let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
 
-        let Stake<PoolType, AssetT> { last_harvest_index, asset_weight, asset, gain } =
+        let Stake<PoolType, AssetT>{ last_harvest_index, asset_weight, asset, gain } =
             move_from<Stake<PoolType, AssetT>>(Signer::address_of(account));
 
         let now_seconds = Timestamp::now_seconds();
@@ -444,8 +340,11 @@ module YieldFarming {
         assert(last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
         let time_period = now_seconds - last_update_timestamp;
         let addtion_index = release_per_second * (time_period as u128);
-        let index_u256 = U256::add(U256::from_u128(harvest_index), mantissa(exp_direct_expand(addtion_index)));
-        to_safe_u128(index_u256)
+        let index_u256 = U256::add(
+            U256::from_u128(harvest_index),
+            BigExponential::mantissa(BigExponential::exp_direct_expand(addtion_index))
+        );
+        BigExponential::to_safe_u128(index_u256)
     }
 
     /// There is calculating from harvest index and global parameters
@@ -460,8 +359,11 @@ module YieldFarming {
         let time_period = now_seconds - last_update_timestamp;
         let numr = release_per_second * (time_period as u128);
         let denom = asset_total_weight;
-        let index_u256 = U256::add(U256::from_u128(harvest_index), mantissa(exp(numr, denom)));
-        to_safe_u128(index_u256)
+        let index_u256 = U256::add(
+            U256::from_u128(harvest_index),
+            BigExponential::mantissa(BigExponential::exp(numr, denom))
+        );
+        BigExponential::to_safe_u128(index_u256)
     }
 
     /// This function will return a gain index
@@ -470,7 +372,7 @@ module YieldFarming {
                                          asset_weight: u128): u128 {
         assert(harvest_index >= last_harvest_index, Errors::invalid_argument(ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW));
         let amount_u256 = U256::mul(U256::from_u128(asset_weight), U256::from_u128(harvest_index - last_harvest_index));
-        truncate(exp_from_u256(amount_u256))
+        BigExponential::truncate(BigExponential::exp_from_u256(amount_u256))
     }
 
     /// Check the Farming of TokenT is exists.
