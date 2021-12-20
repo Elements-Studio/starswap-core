@@ -67,8 +67,7 @@ module YieldFarming {
         let scaling_factor = Math::pow(10, BigExponential::exp_scale_limition());
         let token_scale = Token::scaling_factor<RewardTokenT>();
         assert(token_scale <= scaling_factor, Errors::limit_exceeded(ERR_FARMING_TOKEN_SCALE_OVERFLOW));
-        assert(!exists_at<PoolType, RewardTokenT>(
-            Signer::address_of(account)), Errors::invalid_state(ERR_FARMING_INIT_REPEATE));
+        assert(!exists_at<PoolType, RewardTokenT>(Signer::address_of(account)), Errors::invalid_state(ERR_FARMING_INIT_REPEATE));
 
         move_to(account, Farming<PoolType, RewardTokenT>{
             treasury_token,

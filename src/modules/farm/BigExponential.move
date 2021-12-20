@@ -18,7 +18,7 @@ module BigExponential {
     const ERR_U128_OVERFLOW: u64 = 102;
 
     const EXP_SCALE: u128 = 1000000000000000000;
-    const EXP_MAX_SCALE: u64 = 9;
+    const EXP_MAX_SCALE: u64 = 18;
     const U128_MAX: u128 = 340282366920938463463374607431768211455;  //length(U128_MAX)==39
 
     struct Exp has copy, store, drop {
