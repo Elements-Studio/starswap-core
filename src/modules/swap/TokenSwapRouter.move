@@ -50,25 +50,27 @@ module TokenSwapRouter {
 
     /// Register swap pair by comparing sort
     public fun register_swap_pair<X: copy + drop + store,
-                                  Y: copy + drop + store>(account: &signer) {
+                                  Y: copy + drop + store>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            TokenSwap::register_swap_pair<X, Y>(account);
+            TokenSwap::register_swap_pair<X, Y>(signer);
+            TokenSwap::emit_token_pair_register_event<X, Y>(signer);
         } else {
-            TokenSwap::register_swap_pair<Y, X>(account);
+            TokenSwap::register_swap_pair<Y, X>(signer);
+            TokenSwap::emit_token_pair_register_event<Y, X>(signer);
         };
     }
 
 
     public fun liquidity<X: copy + drop + store,
-                         Y: copy + drop + store>(account: address): u128 {
+                         Y: copy + drop + store>(signer: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            Account::balance<LiquidityToken<X, Y>>(account)
+            Account::balance<LiquidityToken<X, Y>>(signer)
         } else {
-            Account::balance<LiquidityToken<Y, X>>(account)
+            Account::balance<LiquidityToken<Y, X>>(signer)
         }
     }
 
@@ -304,21 +306,21 @@ module TokenSwapRouter {
 
     /// Withdraw liquidity from users
     public fun withdraw_liquidity_token<X: copy + drop + store, Y: copy + drop + store>(
-        account: &signer,
+        signer: &signer,
         amount: u128
     ): Token::Token<LiquidityToken<X, Y>> {
-        let user_liquidity = liquidity<X, Y>(Signer::address_of(account));
+        let user_liquidity = liquidity<X, Y>(Signer::address_of(signer));
         assert(amount <= user_liquidity, ERROR_ROUTER_WITHDRAW_INSUFFICIENT);
 
-        Account::withdraw<LiquidityToken<X, Y>>(account, amount)
+        Account::withdraw<LiquidityToken<X, Y>>(signer, amount)
     }
 
     /// Deposit liquidity token into user source list
     public fun deposit_liquidity_token<X: copy + drop + store, Y: copy + drop + store>(
-        account: address,
+        signer: address,
         to_deposit: Token::Token<LiquidityToken<X, Y>>
     ) {
-        Account::deposit<LiquidityToken<X, Y>>(account, to_deposit);
+        Account::deposit<LiquidityToken<X, Y>>(signer, to_deposit);
     }
 
     /// Poundage number of liquidity token pair

@@ -25,6 +25,17 @@ module TokenSwap {
         burn: Token::BurnCapability<LiquidityToken<X, Y>>,
     }
 
+
+    /// Event emitted when add token pair register.
+    struct TokenPairRegisterEvent has drop, store {
+        /// token code of X type
+        x_token_code: Token::TokenCode,
+        /// token code of X type
+        y_token_code: Token::TokenCode,
+        /// signer of token pair register
+        signer: address,
+    }
+
     /// Event emitted when add token liquidity.
     struct AddLiquidityEvent has drop, store {
         /// liquidity value by user X and Y type
@@ -86,6 +97,7 @@ module TokenSwap {
         last_price_x_cumulative: U256,
         last_price_y_cumulative: U256,
         last_k: U256,
+        token_pair_register_event: Event::EventHandle<TokenPairRegisterEvent>,
         // reserve0 * reserve1, as of immediately after the most recent liquidity event
         add_liquidity_event: Event::EventHandle<AddLiquidityEvent>,
         remove_liquidity_event: Event::EventHandle<RemoveLiquidityEvent>,
@@ -148,6 +160,7 @@ module TokenSwap {
             last_price_x_cumulative: U256::zero(),
             last_price_y_cumulative: U256::zero(),
             last_k: U256::zero(),
+            token_pair_register_event: Event::new_event_handle<TokenPairRegisterEvent>(signer),
             add_liquidity_event: Event::new_event_handle<AddLiquidityEvent>(signer),
             remove_liquidity_event: Event::new_event_handle<RemoveLiquidityEvent>(signer),
             swap_event: Event::new_event_handle<SwapEvent>(signer),
@@ -279,6 +292,19 @@ module TokenSwap {
 
         update<X, Y>(x_reserve, y_reserve);
         (x_swapped, y_swapped, x_swap_fee, y_swap_fee)
+    }
+
+
+    /// Emit token pair register event
+    public fun emit_token_pair_register_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+    ) acquires TokenPair {
+        let token_pair = borrow_global_mut<TokenPair<X, Y>>(admin_address());
+        Event::emit_event(&mut token_pair.token_pair_register_event, TokenPairRegisterEvent{
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: Signer::address_of(signer),
+        });
     }
 
 

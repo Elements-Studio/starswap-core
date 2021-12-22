@@ -1,14 +1,24 @@
 # Starswap-core
 
-A move implements of Swap.
+Starswap is a general purpose DEX on Starcoin. 
+
 
 ## Compile Contracts
 
-`move check && move publish`
+```
+move clean
+move check 
+move publish  --ignore-breaking-changes
+```
 
-## Run Tests
+## Run Functional Tests
 
 ```
-move check && move publish
 move functional-test
+```
+
+## Run Unit Tests
+
+```
+move unit-test -g
 ```
