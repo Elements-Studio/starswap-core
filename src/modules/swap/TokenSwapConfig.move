@@ -5,7 +5,6 @@
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 
 module TokenSwapConfig {
-
     use 0x1::Config;
     use 0x1::Signer;
     use 0x1::Errors;
@@ -87,6 +86,10 @@ module TokenSwapConfig {
 
     public fun admin_address(): address {
         @0x4783d08fb16990bd35d83f3e23bf93b8
+    }
+
+    public fun fee_address(): address {
+        @0x0a4183ac9335a9f5804014eab01c0abc
     }
 }
 }

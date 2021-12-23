@@ -3,9 +3,9 @@
 
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapFee {
-
     use 0x1::Account;
     use 0x1::Token;
+    use 0x1::Event;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::{Self};
@@ -15,20 +15,47 @@ module TokenSwapFee {
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;
 
-    /// Initialize default operation fee config
+    /// Event emitted when token swap .
+    struct SwapFeeEvent has drop, store {
+        /// token code of X type
+        x_token_code: Token::TokenCode,
+        /// token code of X type
+        y_token_code: Token::TokenCode,
+        signer: address,
+        fee_addree: address,
+        swap_fee: u128,
+        fee_out: u128,
+    }
+
+    struct TokenSwapFeeEvent has key, store {
+        swap_fee_event: Event::EventHandle<SwapFeeEvent>,
+    }
+
+    /// Initialize token swap fee
+    public fun initialize_token_swap_fee(signer: &signer) {
+        init_swap_oper_fee_config(signer);
+
+        move_to(signer, TokenSwapFeeEvent{
+            swap_fee_event: Event::new_event_handle<SwapFeeEvent>(signer),
+        });
+    }
+
+    /// init default operation fee config
     public fun init_swap_oper_fee_config(signer: &signer) {
         TokenSwapConfig::set_swap_fee_operation_rate(signer, 10, 60);
     }
 
-    public fun handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store>(tx_address: address, token_x: Token::Token<X>) {
-        intra_handle_token_swap_fee<X, Y, XUSDT>(tx_address, token_x)
+    public fun handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store>(signer_address: address, token_x: Token::Token<X>
+    ) acquires TokenSwapFeeEvent {
+        intra_handle_token_swap_fee<X, Y, XUSDT>(signer_address, token_x)
     }
 
 
     /// X is token to pay for fee
     fun intra_handle_token_swap_fee<X: copy + drop + store,
                                     Y: copy + drop + store,
-                                    FeeToken: copy + drop + store>(tx_address: address, token_x: Token::Token<X>) {
+                                    FeeToken: copy + drop + store>(signer_address: address, token_x: Token::Token<X>
+    ) acquires TokenSwapFeeEvent {
         let fee_address = TokenSwap::fee_address();
         let (fee_handle, swap_fee, fee_out);
         // the token to pay for fee, is fee token
@@ -50,13 +77,30 @@ module TokenSwapFee {
             let order = TokenSwap::compare_token<X, Y>();
             assert(order != 0, ERROR_SWAP_INVALID_TOKEN_PAIR);
             if (order == 1) {
-                TokenSwap::emit_swap_fee_event<X, Y>(tx_address, swap_fee, fee_out);
+                emit_swap_fee_event<X, Y>(signer_address, swap_fee, fee_out);
             }else {
-                TokenSwap::emit_swap_fee_event<Y, X>(tx_address, swap_fee, fee_out);
+                emit_swap_fee_event<Y, X>(signer_address, swap_fee, fee_out);
             };
         }
     }
 
+
+    /// Emit swap fee event
+    fun emit_swap_fee_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer_address: address,
+        swap_fee: u128,
+        fee_out: u128,
+    ) acquires TokenSwapFeeEvent {
+        let token_swap_fee_event = borrow_global_mut<TokenSwapFeeEvent>(TokenSwapConfig::admin_address());
+        Event::emit_event(&mut token_swap_fee_event.swap_fee_event, SwapFeeEvent{
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: signer_address,
+            fee_addree: TokenSwapConfig::fee_address(),
+            swap_fee,
+            fee_out,
+        });
+    }
 
     fun swap_fee_direct_deposit<X: copy + drop + store, Y: copy + drop + store>(token_x: Token::Token<X>): (bool, u128, u128) {
         let fee_address = TokenSwap::fee_address();

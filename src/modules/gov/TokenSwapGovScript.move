@@ -10,7 +10,7 @@ module TokenSwapGovScript {
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public(script) fun genesis_initialize(account: signer) {
         TokenSwapGov::genesis_initialize(&account);
-        TokenSwapFee::init_swap_oper_fee_config(&account);
+        TokenSwapFee::initialize_token_swap_fee(&account);
     }
 
     /// Harverst STAR by given pool type, call ed by user
