@@ -207,6 +207,8 @@ script {
         let (token_reserve_2, stc_reserve_2) = TokenSwapRouter::get_reserves<TokenMock::WUSDT, STC::STC>();
         Debug::print(&token_reserve_2);
         Debug::print(&stc_reserve_2);
+        assert(stc_reserve == stc_reserve_2, 1112);
+        assert(token_reserve == token_reserve_2, 1112);
     }
 }
 // check: EXECUTED

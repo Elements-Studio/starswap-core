@@ -56,7 +56,7 @@ module TokenSwapFee {
                                     Y: copy + drop + store,
                                     FeeToken: copy + drop + store>(signer_address: address, token_x: Token::Token<X>
     ) acquires TokenSwapFeeEvent {
-        let fee_address = TokenSwap::fee_address();
+        let fee_address = TokenSwapConfig::fee_address();
         let (fee_handle, swap_fee, fee_out);
         // the token to pay for fee, is fee token
         if (Token::is_same_token<X, FeeToken>()) {
@@ -103,7 +103,7 @@ module TokenSwapFee {
     }
 
     fun swap_fee_direct_deposit<X: copy + drop + store, Y: copy + drop + store>(token_x: Token::Token<X>): (bool, u128, u128) {
-        let fee_address = TokenSwap::fee_address();
+        let fee_address = TokenSwapConfig::fee_address();
         if (Account::is_accepts_token<X>(fee_address)) {
             let x_value = Token::value(&token_x);
             Account::deposit(fee_address, token_x);
@@ -129,7 +129,7 @@ module TokenSwapFee {
             return (false, 0, 0)
         };
 
-        let fee_address = TokenSwap::fee_address();
+        let fee_address = TokenSwapConfig::fee_address();
         let order = TokenSwap::compare_token<X, FeeToken>();
         assert(order != 0, ERROR_SWAP_INVALID_TOKEN_PAIR);
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, FeeToken>();

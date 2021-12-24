@@ -218,7 +218,7 @@ module TokenSwapRouter {
         Token::destroy_zero(token_y_fee);
 
         //handle swap fee
-        if (TokenSwap::get_swap_fee_switch()) {
+        if (TokenSwapConfig::get_swap_fee_switch()) {
             TokenSwapFee::handle_token_swap_fee<X, Y>(Signer::address_of(signer), token_x_fee);
         } else {
             Token::destroy_zero(token_x_fee);
@@ -258,7 +258,7 @@ module TokenSwapRouter {
         Token::destroy_zero(token_y_fee);
 
         //handle swap fee
-        if (TokenSwap::get_swap_fee_switch()) {
+        if (TokenSwapConfig::get_swap_fee_switch()) {
             TokenSwapFee::handle_token_swap_fee<X, Y>(Signer::address_of(signer), token_x_fee);
         } else {
             Token::destroy_zero(token_x_fee);
