@@ -5,7 +5,7 @@ module FixedPoint128 {
 //    use 0x1::Debug;
 
     const RESOLUTION: u8 = 128;
-    const Q128: u128 = 340282366920938463463374607431768211455u128; // 2**112
+    const Q128: u128 = 340282366920938463463374607431768211455u128; // 2**128
     const Q256_HEX: vector<u8> = x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"; // 2**256
     const LOWER_MASK: u128 = 340282366920938463463374607431768211455u128; // decimal of UQ128x128 (lower 128 bits), equal to 0xffffffffffffffffffffffffffffffff
     const U128_MAX: u128 = 340282366920938463463374607431768211455u128;

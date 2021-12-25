@@ -5,18 +5,20 @@
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 
 module TokenSwapConfig {
-
     use 0x1::Config;
     use 0x1::Signer;
     use 0x1::Errors;
-
-    const ERROR_NOT_HAS_PRIVILEGE: u64 = 101;
 
     // Numerator and denumerator default fixed value
     const DEFAULT_OPERATION_NUMERATOR: u64 = 10;
     const DEFAULT_OPERATION_DENUMERATOR: u64 = 60;
     const DEFAULT_POUNDAGE_NUMERATOR: u64 = 3;
     const DEFAULT_POUNDAGE_DENUMERATOR: u64 = 1000;
+
+    const SWAP_FEE_SWITCH_ON: bool = true;
+    const SWAP_FEE_SWITCH_OFF: bool = false;
+
+    const ERROR_NOT_HAS_PRIVILEGE: u64 = 101;
 
     struct SwapFeePoundageConfig<X, Y> has copy, drop, store {
         numerator: u64,
@@ -87,6 +89,14 @@ module TokenSwapConfig {
 
     public fun admin_address(): address {
         @0x4783d08fb16990bd35d83f3e23bf93b8
+    }
+
+    public fun fee_address(): address {
+        @0x0a4183ac9335a9f5804014eab01c0abc
+    }
+
+    public fun get_swap_fee_switch(): bool {
+        SWAP_FEE_SWITCH_ON
     }
 }
 }

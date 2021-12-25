@@ -39,6 +39,18 @@ script {
 
 
 //! new-transaction
+//! sender: admin
+script {
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
+
+    fun init_token_swap_fee(signer: signer) {
+        TokenSwapFee::initialize_token_swap_fee(&signer);
+    }
+}
+// check: EXECUTED
+
+
+//! new-transaction
 //! sender: feetokenholder
 address alice = {{alice}};
 script {

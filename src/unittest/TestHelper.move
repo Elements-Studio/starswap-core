@@ -13,6 +13,7 @@ module TestHelper {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
     use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
 
     struct GenesisSignerCapability has key {
         cap: Account::SignerCapability,
@@ -46,6 +47,7 @@ module TestHelper {
         init_admin_account(&admin_signer, &xusdt_signer);
         SwapTestHelper::init_token_pairs_register(&admin_signer);
         SwapTestHelper::init_token_pairs_liquidity(&admin_signer);
+        TokenSwapFee::initialize_token_swap_fee(&admin_signer);
         CommonHelper::safe_accept_token<XUSDT>(&fee_signer);
     }
 

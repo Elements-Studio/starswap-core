@@ -188,3 +188,27 @@ script {
     }
 }
 // check: EXECUTED
+
+
+//! new-transaction
+//! sender: exchanger
+address alice = {{alice}};
+script {
+    use 0x1::STC;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
+    use 0x1::Debug;
+
+    fun get_reserves(_: signer) {
+        let (stc_reserve, token_reserve) = TokenSwapRouter::get_reserves<STC::STC, TokenMock::WUSDT>();
+        Debug::print(&100100);
+        Debug::print(&stc_reserve);
+        Debug::print(&token_reserve);
+        let (token_reserve_2, stc_reserve_2) = TokenSwapRouter::get_reserves<TokenMock::WUSDT, STC::STC>();
+        Debug::print(&token_reserve_2);
+        Debug::print(&stc_reserve_2);
+        assert(stc_reserve == stc_reserve_2, 1112);
+        assert(token_reserve == token_reserve_2, 1112);
+    }
+}
+// check: EXECUTED

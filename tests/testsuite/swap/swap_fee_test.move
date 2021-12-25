@@ -20,6 +20,7 @@ script {
 
 // check: EXECUTED
 
+
 //! new-transaction
 //! sender: alice
 address alice = {{alice}};
@@ -31,6 +32,18 @@ script {
         CommonHelper::safe_mint<WETH>(&signer, 600000u128);
         CommonHelper::safe_mint<WUSDT>(&signer, 500000u128);
         CommonHelper::safe_mint<WDAI>(&signer, 200000u128);
+    }
+}
+// check: EXECUTED
+
+
+//! new-transaction
+//! sender: admin
+script {
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
+
+    fun init_token_swap_fee(signer: signer) {
+        TokenSwapFee::initialize_token_swap_fee(&signer);
     }
 }
 // check: EXECUTED

@@ -1,6 +1,5 @@
-// address 0x2 {
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
-/// STAR is a governance token of Starcoin blockchain DAPP.
+/// STAR is a governance token of Starswap DAPP.
 /// It uses apis defined in the `Token` module.
 module STAR {
     use 0x1::Token;
