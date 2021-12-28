@@ -3,7 +3,6 @@
 
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapScripts {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
@@ -124,7 +123,7 @@ module TokenSwapScripts {
     /// Get amount in with token pair pondage rate
     public fun get_amount_in<X: copy + drop + store,
                              Y: copy + drop + store>(x_value: u128): u128 {
-        let (reserve_x, reverse_y) = TokenSwap::get_reserves<X, Y>();
+        let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_in(x_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
@@ -132,7 +131,7 @@ module TokenSwapScripts {
     /// Get amount out with token pair pondage rate
     public fun get_amount_out<X: copy + drop + store,
                               Y: copy + drop + store>(x_in_value: u128): u128 {
-        let (reserve_x, reverse_y) = TokenSwap::get_reserves<X, Y>();
+        let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
