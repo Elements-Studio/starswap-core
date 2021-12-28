@@ -124,7 +124,7 @@ module TokenSwapScripts {
     public fun get_amount_in<X: copy + drop + store,
                              Y: copy + drop + store>(x_value: u128): u128 {
         let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
-        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
+        let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_in(x_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
 
@@ -132,7 +132,7 @@ module TokenSwapScripts {
     public fun get_amount_out<X: copy + drop + store,
                               Y: copy + drop + store>(x_in_value: u128): u128 {
         let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
-        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
+        let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
 }
