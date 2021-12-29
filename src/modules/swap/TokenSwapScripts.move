@@ -4,7 +4,6 @@
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapScripts {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter2;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter3;

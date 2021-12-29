@@ -9,8 +9,8 @@ module TokenSwapRouter {
     use 0x1::Token;
     use 0x1::U256::U256;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_ROUTER_INSUFFICIENT_X_AMOUNT: u64 = 1002;
