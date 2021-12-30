@@ -7,6 +7,7 @@ module TokenSwapScripts {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter2;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter3;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
 
     /// register swap for admin user
     public(script) fun register_swap_pair<X: copy + drop + store,
@@ -134,5 +135,10 @@ module TokenSwapScripts {
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
+
+    public(script) fun initialize_token_swap_fee(signer: signer) {
+        TokenSwapFee::initialize_token_swap_fee(&signer);
+    }
+
 }
 }
