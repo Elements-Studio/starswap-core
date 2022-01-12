@@ -9,12 +9,10 @@ module TokenSwapOracleLibrary {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
 
-
     /// helper function that returns the current block timestamp within the range of u64, i.e. [0, 2**32 - 1]
     public fun current_block_timestamp(): u64 {
         Timestamp::now_seconds() % (1u64 << 32)
     }
-
 
     /// TWAP price oracle, include update price accumulators, on the first call per block
     public fun current_cumulative_prices<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u64) {
