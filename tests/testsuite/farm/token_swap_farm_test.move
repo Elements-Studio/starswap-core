@@ -1,34 +1,26 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: bob, 10000000000000 0x1::STC::STC
 //! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 10000000000000 0x1::STC::STC
-//! account: liquidier, 10000000000000 0x1::STC::STC
-//! account: exchanger
-//! account: tokenholder, 0x49156896A605F092ba1862C50a9036c9
-
+//! account: alice, 0x49156896A605F092ba1862C50a9036c9, 10000000000000 0x1::STC::STC
 
 //! block-prologue
 //! author: genesis
 //! block-number: 1
 //! block-time: 86410000
 
-
 //! new-transaction
 //! sender: admin
-address alice = {{alice}};
+address admin = {{admin}};
 script {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WETH, WBTC};
 
-    fun init_token(signer: signer) {
+    fun admin_init_token(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 9u8);
         TokenMock::register_token<WBTC>(&signer, 9u8);
     }
 }
 // check: EXECUTED
 
-
 //! new-transaction
 //! sender: alice
-address admin = {{admin}};
 address alice = {{alice}};
 script {
     use 0x1::Account;
@@ -39,58 +31,51 @@ script {
         Account::do_accept_token<WETH>(&signer);
     }
 }
-
+// check: EXECUTED
 
 //! new-transaction
 //! sender: admin
-address admin = {{admin}};
 address alice = {{alice}};
+address admin = {{admin}};
 script {
     use 0x1::Account;
     use 0x1::Math;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WBTC, WETH};
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
 
     fun admin_register_token_pair_and_mint(signer: signer) {
         //token pair register must be swap admin account
-        TokenSwapRouter::register_swap_pair<WBTC, WETH>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WBTC, WETH>(), 1001);
+        TokenSwapRouter::register_swap_pair<TokenMock::WBTC, TokenMock::WETH>(&signer);
+        assert(TokenSwapRouter::swap_pair_exists<TokenMock::WBTC, TokenMock::WETH>(), 1001);
 
         let precision: u8 = 9;
         let scaling_factor = Math::pow(10, (precision as u64));
 
-            {
-                // Resister and mint BTC
-                CommonHelper::safe_mint<WBTC>(&signer, 100000000 * scaling_factor);
+        // Resister and mint BTC and deposit to alice
+        CommonHelper::safe_mint<TokenMock::WBTC>(&signer, 100000000 * scaling_factor);
+        Account::deposit<TokenMock::WBTC>(@alice, TokenMock::mint_token<TokenMock::WBTC>(100000000 * scaling_factor));
 
-                let mint_token_to_alice = TokenMock::mint_token<WBTC>(100000000 * scaling_factor);
-                Account::deposit<WBTC>(@alice, mint_token_to_alice);
-            };
-
-            {
-                // Resister and mint ETH
-                CommonHelper::safe_mint<WETH>(&signer, 100000000 * scaling_factor);
-
-                let mint_token_to_alice = TokenMock::mint_token<WETH>(100000000 * scaling_factor);
-                Account::deposit<WETH>(@alice, mint_token_to_alice);
-            };
+        // Resister and mint ETH and deposit to alice
+        CommonHelper::safe_mint<TokenMock::WETH>(&signer, 100000000 * scaling_factor);
+        Account::deposit<TokenMock::WETH>(@alice, TokenMock::mint_token<TokenMock::WETH>(100000000 * scaling_factor));
 
         let amount_btc_desired: u128 = 10 * scaling_factor;
         let amount_eth_desired: u128 = 50 * scaling_factor;
         let amount_btc_min: u128 = 1 * scaling_factor;
         let amount_eth_min: u128 = 1 * scaling_factor;
-        TokenSwapRouter::add_liquidity<WBTC, WETH>(
+        TokenSwapRouter::add_liquidity<TokenMock::WBTC, TokenMock::WETH>(
             &signer,
             amount_btc_desired,
             amount_eth_desired,
             amount_btc_min,
             amount_eth_min);
-        let total_liquidity: u128 = TokenSwapRouter::total_liquidity<WBTC, WETH>();
+        let total_liquidity: u128 = TokenSwapRouter::total_liquidity<TokenMock::WBTC, TokenMock::WETH>();
         assert(total_liquidity > amount_btc_min, 1002);
     }
 }
 // check: EXECUTED
+
 
 //! new-transaction
 //! sender: admin
@@ -103,6 +88,8 @@ script {
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
         TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
+        // TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
+
     }
 }
 // check: EXECUTED
@@ -210,7 +197,6 @@ script {
 }
 // check: EXECUTED
 
-
 //! new-transaction
 //! sender: alice
 address admin = {{admin}};
@@ -250,7 +236,6 @@ script {
     use 0x1::Signer;
     use 0x1::Debug;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    //use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
 
     fun alice_unstake(signer: signer) {
@@ -268,6 +253,29 @@ script {
         let _stake_amount2 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount2);
         assert(_stake_amount2 == 0, 1013);
+    }
+}
+// check: EXECUTED
+
+
+//! new-transaction
+//! sender: admin
+address admin = {{admin}};
+script {
+    use 0x1::Debug;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+
+    fun admin_set_release_multi(signer: signer) {
+        // Set to 10x
+        TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
+        let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
+        assert(alive, 1014);
+        assert(release_per_sec == 1000000000, 1015); // Check relesase per second
+
+        let mutiple = TokenSwapFarmRouter::get_farm_multiple<WBTC, WETH>(&signer);
+        Debug::print(&mutiple);
+        assert(mutiple == 10, 1016);
     }
 }
 // check: EXECUTED

@@ -119,7 +119,7 @@ module TokenSwapFarm {
         move_to(signer, FarmCapability<X, Y>{
             cap,
             release_per_seconds,
-            multiple : 1
+            multiple: 1
         });
 
         //// TODO (9191stc): Add to DAO
@@ -147,8 +147,11 @@ module TokenSwapFarm {
 
         let broker = Signer::address_of(signer);
         let cap = borrow_global_mut<FarmCapability<X, Y>>(broker);
+        cap.multiple = multiple;
 
-        let (alive, _, _, _, ) = YieldFarming::query_info<PoolTypeLiquidityMint, STAR::STAR>(broker);
+        let (alive, _, _, _, ) =
+            YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(broker);
+
         let relese_per_sec_mul = cap.release_per_seconds * (multiple as u128);
         YieldFarming::modify_parameter<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
             &cap.cap,
