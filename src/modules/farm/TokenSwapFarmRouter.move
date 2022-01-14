@@ -114,5 +114,30 @@ module TokenSwapFarmRouter {
             TokenSwapFarm::query_release_per_second<Y, X>()
         }
     }
+
+    /// Set farm mutiple of second per releasing
+    public fun set_farm_multiple<X: copy + drop + store,
+                                 Y: copy + drop + store>(signer: &signer, multiple: u64) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::set_farm_multiple<X, Y>(signer, multiple);
+        } else {
+            TokenSwapFarm::set_farm_multiple<Y, X>(signer, multiple);
+        }
+    }
+
+    /// Get farm mutiple of second per releasing
+    public fun get_farm_multiple<X: copy + drop + store,
+                                 Y: copy + drop + store>(signer: &signer): u64 {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::get_farm_multiple<X, Y>(signer)
+        } else {
+            TokenSwapFarm::get_farm_multiple<Y, X>(signer)
+        }
+    }
+
 }
 }
