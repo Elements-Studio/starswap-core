@@ -88,8 +88,6 @@ script {
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
         TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
-        // TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
-
     }
 }
 // check: EXECUTED
@@ -266,7 +264,7 @@ script {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
 
-    fun admin_set_release_multi(signer: signer) {
+    fun admin_set_release_multi_basic(signer: signer) {
         // Set to 10x
         TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
         let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();

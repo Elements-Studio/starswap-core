@@ -80,11 +80,14 @@ module TokenSwapFarm {
     struct FarmCapability<X, Y> has key, store {
         cap: YieldFarming::ParameterModifyCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
         release_per_seconds: u128,
-        multiple: u64,
     }
 
     struct FarmHarvestCapability<X, Y> has key, store {
         cap: YieldFarming::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
+    }
+
+    struct FarmMultiple<X, Y> has key, store {
+        multiple: u64,
     }
 
     /// Initialize farm big pool
@@ -119,6 +122,9 @@ module TokenSwapFarm {
         move_to(signer, FarmCapability<X, Y>{
             cap,
             release_per_seconds,
+        });
+
+        move_to(signer, FarmMultiple<X, Y>{
             multiple: 1
         });
 
@@ -141,13 +147,14 @@ module TokenSwapFarm {
 
     /// Set farm mutiple of second per releasing
     public fun set_farm_multiple<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer, multiple: u64) acquires FarmCapability {
+                                 Y: copy + drop + store>(signer: &signer, multiple: u64)
+    acquires FarmCapability, FarmMultiple {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
-        let cap = borrow_global_mut<FarmCapability<X, Y>>(broker);
-        cap.multiple = multiple;
+        let cap = borrow_global<FarmCapability<X, Y>>(broker);
+        let farm_mult = borrow_global_mut<FarmMultiple<X, Y>>(broker);
 
         let (alive, _, _, _, ) =
             YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(broker);
@@ -159,17 +166,18 @@ module TokenSwapFarm {
             relese_per_sec_mul,
             alive,
         );
+        farm_mult.multiple = multiple;
     }
 
     /// Get farm mutiple of second per releasing
     public fun get_farm_multiple<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer): u64 acquires FarmCapability {
+                                 Y: copy + drop + store>(signer: &signer): u64 acquires FarmMultiple {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
-        let cap = borrow_global_mut<FarmCapability<X, Y>>(broker);
-        cap.multiple
+        let farm_mult = borrow_global_mut<FarmMultiple<X, Y>>(broker);
+        farm_mult.multiple
     }
 
     /// Reset activation of farm from token type X and Y

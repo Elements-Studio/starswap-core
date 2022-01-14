@@ -60,7 +60,7 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::set_farm_multiple<X, Y>(&signer, mutiple);
     }
 
-    public(script) fun get_farm_multiple<X: copy + drop + store, Y: copy + drop + store>(signer: signer) : u64 {
+    public fun get_farm_multiple<X: copy + drop + store, Y: copy + drop + store>(signer: signer) : u64 {
         TokenSwapFarmRouter::get_farm_multiple<X, Y>(&signer)
     }
 }

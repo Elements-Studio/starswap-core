@@ -79,9 +79,10 @@ module YieldFarming {
         account: &signer,
         release_per_second: u128,
         delay: u64): ParameterModifyCapability<PoolType, AssetT> {
-        assert(!exists_asset_at<PoolType, AssetT>(
-            Signer::address_of(account)),
-            Errors::invalid_state(ERR_FARMING_INIT_REPEATE));
+        assert(
+            !exists_asset_at<PoolType, AssetT>(Signer::address_of(account)),
+            Errors::invalid_state(ERR_FARMING_INIT_REPEATE)
+        );
 
         let now_seconds = Timestamp::now_seconds();
 
@@ -123,14 +124,14 @@ module YieldFarming {
         // assert(farming_asset.alive != alive, Errors::invalid_state(ERR_FARMING_ALIVE_STATE_INVALID));
 
         let now_seconds = Timestamp::now_seconds();
-
-        farming_asset.release_per_second = release_per_second;
         farming_asset.last_update_timestamp = now_seconds;
 
         // if the pool is alive, then update index
         if (farming_asset.alive) {
             farming_asset.harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
         };
+
+        farming_asset.release_per_second = release_per_second;
         farming_asset.alive = alive;
     }
 
@@ -143,8 +144,7 @@ module YieldFarming {
         _cap: &ParameterModifyCapability<PoolType, AssetT>): HarvestCapability<PoolType, AssetT> acquires FarmingAsset {
         // Debug::print(account);
         let account_address = Signer::address_of(account);
-        assert(!exists_stake_at_address<PoolType, AssetT>(account_address),
-            Errors::invalid_state(ERR_FARMING_STAKE_EXISTS));
+        assert(!exists_stake_at_address<PoolType, AssetT>(account_address), Errors::invalid_state(ERR_FARMING_STAKE_EXISTS));
 
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
         assert(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
