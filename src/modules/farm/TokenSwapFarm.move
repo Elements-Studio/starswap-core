@@ -86,8 +86,8 @@ module TokenSwapFarm {
         cap: YieldFarming::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
     }
 
-    struct FarmMultipler<X, Y> has key, store {
-        multipler: u64,
+    struct FarmMultiplier<X, Y> has key, store {
+        multiplier: u64,
     }
 
     /// Initialize farm big pool
@@ -109,7 +109,6 @@ module TokenSwapFarm {
                         Y: copy + drop + store>(
         signer: &signer,
         release_per_seconds: u128) acquires FarmPoolEvent {
-
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -124,11 +123,11 @@ module TokenSwapFarm {
             release_per_seconds,
         });
 
-        move_to(signer, FarmMultipler<X, Y>{
-            multipler: 1
+        move_to(signer, FarmMultiplier<X, Y>{
+            multiplier: 1
         });
 
-        //// TODO (9191stc): Add to DAO
+        // TODO (9191stc): Add to DAO
         // GovernanceDaoProposal::plugin<
         //    PoolTypeProposal<X, Y, GovTokenT>,
         //    GovTokenT>(account, modify_cap);
@@ -145,35 +144,35 @@ module TokenSwapFarm {
             });
     }
 
-    /// Set farm mutiple of second per releasing
-    public fun set_farm_multiple<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer, multiple: u64)
-    acquires FarmCapability, FarmMultipler {
+    /// Set farm mutiplier of second per releasing
+    public fun set_farm_multiplier<X: copy + drop + store,
+                                   Y: copy + drop + store>(signer: &signer, multiplier: u64)
+    acquires FarmCapability, FarmMultiplier {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
         let cap = borrow_global<FarmCapability<X, Y>>(broker);
-        let farm_mult = borrow_global_mut<FarmMultipler<X, Y>>(broker);
+        let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(broker);
 
         let (alive, _, _, _, ) =
             YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(broker);
 
-        let relese_per_sec_mul = cap.release_per_seconds * (multiple as u128);
+        let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
         YieldFarming::modify_parameter<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
             &cap.cap,
             broker,
             relese_per_sec_mul,
             alive,
         );
-        farm_mult.multipler = multiple;
+        farm_mult.multiplier = multiplier;
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multipler<X: copy + drop + store,
-                                 Y: copy + drop + store>(): u64 acquires FarmMultipler {
-        let farm_mult = borrow_global_mut<FarmMultipler<X, Y>>(STAR::token_address());
-        farm_mult.multipler
+    public fun get_farm_multiplier<X: copy + drop + store,
+                                   Y: copy + drop + store>(): u64 acquires FarmMultiplier {
+        let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
+        farm_mult.multiplier
     }
 
     /// Reset activation of farm from token type X and Y
