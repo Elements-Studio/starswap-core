@@ -11,6 +11,7 @@ module TokenSwapGov {
 
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarm;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{
     PoolTypeTeam,
     PoolTypeInvestor,
@@ -26,8 +27,10 @@ module TokenSwapGov {
     const GOV_PERCENT_TEAM: u64 = 10;
     // 10%
     const GOV_PERCENT_INVESTOR: u64 = 10;
-    // 30%
-    const GOV_PERCENT_LIQUIDITY: u64 = 30;
+    // 15%
+    const GOV_PERCENT_LIQUIDITY: u64 = 15;
+    // 15%
+    const GOV_PERCENT_SYRUP: u64 = 15;
     // 2%
     const GOV_PERCENT_MAINTAINANCE: u64 = 2;
     // 5%
@@ -43,6 +46,7 @@ module TokenSwapGov {
         let total = GOV_PERCENT_TEAM +
                     GOV_PERCENT_INVESTOR +
                     GOV_PERCENT_LIQUIDITY +
+                    GOV_PERCENT_SYRUP +
                     GOV_PERCENT_MAINTAINANCE +
                     GOV_PERCENT_MARKET_MANAGE +
                     GOV_PERCENT_STOCK_MANAGE +
@@ -51,8 +55,9 @@ module TokenSwapGov {
         assert(total == 100, 1001);
 
         assert(calculate_amount_from_percent(GOV_PERCENT_INVESTOR) == 10000000, 1002);
-        assert(calculate_amount_from_percent(GOV_PERCENT_LIQUIDITY) == 30000000, 1003);
-        assert(calculate_amount_from_percent(GOV_PERCENT_DAO_CROSSCHAIN) == 42000000, 1004);
+        assert(calculate_amount_from_percent(GOV_PERCENT_LIQUIDITY) == 15000000, 1003);
+        assert(calculate_amount_from_percent(GOV_PERCENT_SYRUP) == 15000000, 1004);
+        assert(calculate_amount_from_percent(GOV_PERCENT_DAO_CROSSCHAIN) == 42000000, 1005);
     }
 
 
@@ -83,10 +88,15 @@ module TokenSwapGov {
             burn_cap
         });
 
-        // Release 30% for liquidity token stake
+        // Release 15% for liquidity token stake
         let lptoken_stake_total = calculate_amount_from_percent(GOV_PERCENT_LIQUIDITY) * (scaling_factor as u128);
         let lptoken_stake_total_token = Account::withdraw<STAR::STAR>(account, lptoken_stake_total);
         TokenSwapFarm::initialize_farm_pool(account, lptoken_stake_total_token);
+
+        // Release 15% for syrup token stake
+        let syrup_stake_total = calculate_amount_from_percent(GOV_PERCENT_SYRUP) * (scaling_factor as u128);
+        let syrup_stake_total_token = Account::withdraw<STAR::STAR>(account, syrup_stake_total);
+        TokenSwapSyrup::initialize<STAR::STAR>(account, syrup_stake_total_token);
 
         // Release 10% for team in 2 years
         let team_total = calculate_amount_from_percent(GOV_PERCENT_TEAM) * (scaling_factor as u128);
