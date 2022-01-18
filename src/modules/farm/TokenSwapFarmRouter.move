@@ -128,14 +128,14 @@ module TokenSwapFarmRouter {
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multiple<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer): u64 {
+    public fun get_farm_multipler<X: copy + drop + store,
+                                 Y: copy + drop + store>(): u64 {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            TokenSwapFarm::get_farm_multiple<X, Y>(signer)
+            TokenSwapFarm::get_farm_multipler<X, Y>()
         } else {
-            TokenSwapFarm::get_farm_multiple<Y, X>(signer)
+            TokenSwapFarm::get_farm_multipler<Y, X>()
         }
     }
 

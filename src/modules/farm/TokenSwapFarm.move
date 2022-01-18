@@ -86,8 +86,8 @@ module TokenSwapFarm {
         cap: YieldFarming::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
     }
 
-    struct FarmMultiple<X, Y> has key, store {
-        multiple: u64,
+    struct FarmMultipler<X, Y> has key, store {
+        multipler: u64,
     }
 
     /// Initialize farm big pool
@@ -124,8 +124,8 @@ module TokenSwapFarm {
             release_per_seconds,
         });
 
-        move_to(signer, FarmMultiple<X, Y>{
-            multiple: 1
+        move_to(signer, FarmMultipler<X, Y>{
+            multipler: 1
         });
 
         //// TODO (9191stc): Add to DAO
@@ -148,13 +148,13 @@ module TokenSwapFarm {
     /// Set farm mutiple of second per releasing
     public fun set_farm_multiple<X: copy + drop + store,
                                  Y: copy + drop + store>(signer: &signer, multiple: u64)
-    acquires FarmCapability, FarmMultiple {
+    acquires FarmCapability, FarmMultipler {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
         let cap = borrow_global<FarmCapability<X, Y>>(broker);
-        let farm_mult = borrow_global_mut<FarmMultiple<X, Y>>(broker);
+        let farm_mult = borrow_global_mut<FarmMultipler<X, Y>>(broker);
 
         let (alive, _, _, _, ) =
             YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(broker);
@@ -166,18 +166,14 @@ module TokenSwapFarm {
             relese_per_sec_mul,
             alive,
         );
-        farm_mult.multiple = multiple;
+        farm_mult.multipler = multiple;
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multiple<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer): u64 acquires FarmMultiple {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        let broker = Signer::address_of(signer);
-        let farm_mult = borrow_global_mut<FarmMultiple<X, Y>>(broker);
-        farm_mult.multiple
+    public fun get_farm_multipler<X: copy + drop + store,
+                                 Y: copy + drop + store>(): u64 acquires FarmMultipler {
+        let farm_mult = borrow_global_mut<FarmMultipler<X, Y>>(STAR::token_address());
+        farm_mult.multipler
     }
 
     /// Reset activation of farm from token type X and Y

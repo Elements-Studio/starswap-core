@@ -271,9 +271,9 @@ script {
         assert(alive, 1014);
         assert(release_per_sec == 1000000000, 1015); // Check relesase per second
 
-        let mutiple = TokenSwapFarmRouter::get_farm_multiple<WBTC, WETH>(&signer);
-        Debug::print(&mutiple);
-        assert(mutiple == 10, 1016);
+        let mutipler = TokenSwapFarmRouter::get_farm_multipler<WBTC, WETH>();
+        Debug::print(&mutipler);
+        assert(mutipler == 10, 1016);
     }
 }
 // check: EXECUTED
