@@ -119,6 +119,11 @@ module TokenSwapScripts {
         TokenSwapRouter::set_swap_fee_operation_rate(&signer, num, denum);
     }
 
+    /// Set fee auto convert switch config
+    public(script) fun set_fee_auto_convert_switch(signer: signer, auto_convert_switch: bool) {
+        TokenSwapRouter::set_fee_auto_convert_switch(&signer, auto_convert_switch);
+    }
+
     /// Get amount in with token pair pondage rate
     public fun get_amount_in<X: copy + drop + store,
                              Y: copy + drop + store>(x_value: u128): u128 {

@@ -178,7 +178,7 @@ module TokenSwap {
         Token::deposit(&mut token_pair.token_y_reserve, y);
         let liquidity_cap = borrow_global<LiquidityTokenCapability<X, Y>>(TokenSwapConfig::admin_address());
         let mint_token = Token::mint_with_capability(&liquidity_cap.mint, liquidity);
-        update<X, Y>(x_reserve, y_reserve);
+        update_oracle<X, Y>(x_reserve, y_reserve);
         emit_mint_event<X, Y>(x_value, y_value, liquidity);
 
         mint_token
@@ -199,7 +199,7 @@ module TokenSwap {
         burn_liquidity(to_burn);
         let x_token = Token::withdraw(&mut token_pair.token_x_reserve, x);
         let y_token = Token::withdraw(&mut token_pair.token_y_reserve, y);
-        update<X, Y>(x_reserve, y_reserve);
+        update_oracle<X, Y>(x_reserve, y_reserve);
         emit_burn_event<X, Y>(x, y, to_burn_value);
         (x_token, y_token)
     }
@@ -273,7 +273,7 @@ module TokenSwap {
             y_swap_fee = Token::zero();
         };
 
-        update<X, Y>(x_reserve, y_reserve);
+        update_oracle<X, Y>(x_reserve, y_reserve);
         emit_swap_event<X, Y>(x_in_value, y_out, y_in_value, x_out);
         (x_swapped, y_swapped, x_swap_fee, y_swap_fee)
     }
@@ -363,13 +363,11 @@ module TokenSwap {
     }
 
     // TWAP price oracle, include update price accumulators, on the first call per block
-    fun update<X: copy + drop + store, Y: copy + drop + store>(
-        _x_reserve: u128,
-        _y_reserve: u128,
+    fun update_oracle<X: copy + drop + store, Y: copy + drop + store>(
+        x_reserve: u128,
+        y_reserve: u128,
     ) acquires TokenPair {
         let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        let x_reserve = Token::value(&token_pair.token_x_reserve);
-        let y_reserve = Token::value(&token_pair.token_y_reserve);
         let last_block_timestamp = token_pair.last_block_timestamp;
         let block_timestamp = Timestamp::now_seconds() % (1u64 << 32);
         let time_elapsed: u64 = block_timestamp - last_block_timestamp;
