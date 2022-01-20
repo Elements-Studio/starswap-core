@@ -62,7 +62,7 @@ module TokenSwapFee {
         // Close fee auto converted to usdt logic
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
         // the token to pay for fee, is fee token
-        if (auto_convert_switch || Token::is_same_token<X, FeeToken>()) {
+        if (!auto_convert_switch || Token::is_same_token<X, FeeToken>()) {
             (fee_handle, swap_fee, fee_out) = swap_fee_direct_deposit<X, Y>(token_x);
         } else {
             // check [X, FeeToken] token pair exist
