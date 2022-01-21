@@ -6,9 +6,12 @@ address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module YieldFarmingLibrary {
 
     use 0x1::U256;
+    use 0x1::Errors;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::BigExponential;
 
     const ERR_FARMING_TIMESTAMP_INVALID : u64 = 101;
+    const ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW : u64 = 102;
+    const ERR_FARMING_TOTAL_WEIGHT_IS_ZERO : u64 = 103;
 
     /// There is calculating from harvest index and global parameters without asset_total_weight
     public fun calculate_harvest_index_weight_zero(harvest_index: u128,
