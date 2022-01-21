@@ -203,9 +203,12 @@ module YieldFarmingV3 {
         farming_asset.asset_total_weight = total_asset_weight;
         farming_asset.last_update_timestamp = now_seconds;
 
-        HarvestCapability<PoolType, AssetT>{ stake_id: items.next_id }
+        // Return values
+        (
+            HarvestCapability<PoolType, AssetT>{ stake_id: items.next_id },
+            items.next_id
+        )
     }
-
 
     /// Unstake asset from farming pool
     public fun unstake<PoolType: store, RewardTokenT: store, AssetT: store>(
@@ -272,7 +275,7 @@ module YieldFarmingV3 {
         // Get stake from stake list
         let HarvestCapability<PoolType, AssetT>{ stake_id } = cap;
         let items = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
-        let stake = get_stake<PoolType, AssetT>(&items.items, stake_id);
+        let stake = get_stake<PoolType, AssetT>>(&items.items, stake_id);
 
         let now_seconds = Timestamp::now_seconds();
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
@@ -336,8 +339,10 @@ module YieldFarmingV3 {
 
     /// Query stake weight from user staking objects.
     public fun query_stake<PoolType: store,
-                           AssetT: store>(account: address): u128 acquires Stake {
-        let stake = borrow_global_mut<Stake<PoolType, AssetT>>(account);
+                           AssetT: store>(account: address, id: u64): u128 acquires StakeList {
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
+        let stake = get_stake(&stake_list.items, id);
+        assert(stake.id == id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
         stake.asset_weight
     }
 
@@ -375,15 +380,16 @@ module YieldFarmingV3 {
     }
 
 
-    fun find_idx_by_id<PoolType: store, AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): Option<u64> {
+    fun find_idx_by_id<PoolType: store,
+                       AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): Option<u64> {
         let len = Vector::length(c);
         if (len == 0) {
             return Option::none()
         };
         let idx = len - 1;
         loop {
-            let stake = Vector::borrow(c, idx);
-            if (stake.id == id) {
+            let el = Vector::borrow(c, idx);
+            if (el.id == id) {
                 return Option::some(idx)
             };
             if (idx == 0) {
@@ -393,18 +399,19 @@ module YieldFarmingV3 {
         }
     }
 
-    fun get_stake<PoolType: store, AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): Stake<PoolType, AssetType> {
-        let idx = find_idx_by_id(c, id);
+    fun get_stake<PoolType: store,
+                  AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): &ElementT {
+        let idx = find_idx_by_id<PoolType, AssetType>(c, id);
         assert(Option::is_none(idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         Vector::borrow(c, Option::destoy_some(idx))
     }
 
-    fun pop_stake<PoolType: store, AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): Stake<PoolType, AssetType> {
-        let idx = find_idx_by_id(c, id);
+    fun pop_stake<PoolType: store,
+                  AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): ElementT {
+        let idx = find_idx_by_id<PoolType, AssetType>(c, id);
         assert(Option::is_none(idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         Vector::remove(c, Option::destoy_some(idx))
     }
-
 
     /// Check the Farming of TokenT is exists.
     public fun exists_at<PoolType: store, RewardTokenT: store>(broker: address): bool {
