@@ -6,7 +6,7 @@ address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapSyrup {
     use 0x1::Signer;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarming;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
 
@@ -20,7 +20,11 @@ module TokenSwapSyrup {
         multiple: u64,
     }
 
-    struct SyrupHarvestCapability<TokenT> has key, store {
+    struct SyrupStakeList<TokenT> has key, store {
+        items: vector<SyrupStake<TokenT>>,
+    }
+
+    struct SyrupStake<TokenT> has key, store {
         /// Harvest capability for Syrup
         harvest_cap: YieldFarming::HarvestCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         /// Time stamp of end staking, user can unstake/harvest after this point
@@ -123,7 +127,7 @@ module TokenSwapSyrup {
     }
 
     /// Set farm mutiple of second per releasing
-    public fun set_farm_multiple<TokenT: copy + drop + store>(signer: &signer, multiple: u64)
+    public fun set_pool_multiplier<TokenT: copy + drop + store>(signer: &signer, multiple: u64)
     acquires Syrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
@@ -144,85 +148,43 @@ module TokenSwapSyrup {
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multiple<TokenT: copy + drop + store>(signer: &signer): u64 acquires Syrup {
+    public fun get_pool_multiplier<TokenT: copy + drop + store>(signer: &signer): u64 acquires Syrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
-
-        let broker = Signer::address_of(signer);
-        let syrup = borrow_global_mut<Syrup<TokenT>>(broker);
+        let syrup = borrow_global_mut<Syrup<TokenT>>(Signer::address_of(signer));
         syrup.multiple
     }
 
-    /// Stake token type to
+    /// Stake token type to syrup
     public fun stake<TokenT: store>(signer: &signer,
-                                    locking_time: u64,
+                                    pledge_time: u64,
                                     amount: u128) acquires SyrupEvent, SyrupHarvestCapability {
         let account_addr = Signer::address_of(signer);
         if (!Account::is_accept_token<STAR::STAR>(account_addr)) {
             Account::do_accept_token<STAR::STAR>(signer);
         };
 
-        // Actual stake
-        let syrup = borrow_global<Syrup<TokenT>>>(STAR::token_address());
-        let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
-            let FarmHarvestCapability<X, Y>{ cap : unwrap_harvest_cap } =
-                move_from<FarmHarvestCapability<X, Y>>(account_addr);
-
-            // Unstake all liquidity token and reward token
-            let (own_token, reward_token) = YieldFarming::unstake<
-                PoolTypeFarmPool,
-                STAR::STAR,
-                Token::Token<LiquidityToken<X, Y>>
-            >(signer, STAR::token_address(), unwrap_harvest_cap);
-            Account::deposit<STAR::STAR>(account_addr, reward_token);
-            own_token
-        } else {
-            Token::zero<LiquidityToken<X, Y>>()
-        };
-
-//        // Withdraw addtion token. Addtionally, combine addtion token and own token.
-//        let addition_token = TokenSwapRouter::withdraw_liquidity_token<X, Y>(signer, amount);
-//        let total_token = Token::join<LiquidityToken<X, Y>>(own_token, addition_token);
-//        let total_amount = Token::value<LiquidityToken<X, Y>>(&total_token);
-
-        let new_harvest_cap = YieldFarming::stake<
-            PoolTypeFarmPool,
-            STAR::STAR,
-            Token::Token<LiquidityToken<X, Y>>>(
+        let stake_token = Account::withdraw<TokenT>(account_addr, amount);
+        let multiplier = pledage_time_to_multiplier(pledge_time);
+        let (cap, idx) = YieldFarmingV3::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             signer,
             STAR::token_address(),
-            total_token,
-            total_amount,
-            &farm_cap.cap
-        );
-
-        // Store a capability to account
-        move_to(account, SyrupHarvestCapability<TokenT>{
-            harvest_cap: new_harvest_cap,
-            end_time: locking_time
-        });
-
-        // Emit stake event
-        let event = borrow_global<SyrupEvent>(STAR::token_address());
-        Event::emit_event(&mut event.stake_event_handler,
-            StakeEvent{
-                token_code: Token::token_code<TokenT>(),
-                signer: account_addr,
-                admin: STAR::token_address(),
-                amount,
-            });
+            stake_token,
+            amount,
+            multiplier,
+            &syrup.param_cap);
     }
 
     public fun unstake<TokenT: store>() {
 
     }
 
-    public fun harvest<TokenT: store>() {
+    public fun total_staked<TokenT: store>() {
 
     }
 
-    public fun total_staked<TokenT: store>() {
-
+    public fun pledage_time_to_multiplier(pledge: u64): u64 {
+        1
     }
 }
 }
