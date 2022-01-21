@@ -167,6 +167,19 @@ script {
 // check: EXECUTED
 
 
+
+//! new-transaction
+//! sender: admin
+script {
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+
+    fun open_swap_fee_auto_convert_switch(signer: signer) {
+        TokenSwapRouter::set_fee_auto_convert_switch(&signer, true);
+    }
+}
+// check: EXECUTED
+
+
 //! new-transaction
 //! sender: alice
 address alice = {{alice}};

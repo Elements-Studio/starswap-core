@@ -344,5 +344,11 @@ module TokenSwapRouter {
                                            denum: u64) {
         TokenSwapConfig::set_swap_fee_operation_rate(signer, num, denum);
     }
+
+    /// Set fee auto convert switch config
+    public fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
+        TokenSwapConfig::set_fee_auto_convert_switch(signer, auto_convert_switch);
+    }
+
 }
 }
