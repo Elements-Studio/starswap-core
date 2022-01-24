@@ -52,7 +52,7 @@ module YieldFarmingV3 {
     }
 
     /// To store user's asset token
-    struct Stake<PoolType, AssetT> has key, store {
+    struct Stake<PoolType, AssetT> has store, copy, drop {
         id: u64,
         asset: AssetT,
         asset_weight: u128,
@@ -153,29 +153,23 @@ module YieldFarmingV3 {
     /// Call by stake user, staking amount of asset in order to get yield farming token
     public fun stake<PoolType: store, RewardTokenT: store, AssetT: store>(
         signer: &signer,
-        broker: address,
+        broker_addr: address,
         asset: AssetT,
         asset_weight: u128,
         asset_multiplier: u64,
         _cap: &ParameterModifyCapability<PoolType, AssetT>) : (HarvestCapability<PoolType, AssetT>, u64)
     acquires StakeList, FarmingAsset {
-        assert(exists_asset_at<PoolType, AssetT>(broker), Errors::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS));
-        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        assert(exists_asset_at<PoolType, AssetT>(broker_addr), Errors::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS));
+        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
 
         assert(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
-        if (farming_asset.asset_total_weight > 0) {
-            assert(
-                ((asset_multiplier as u128) * asset_weight) < farming_asset.asset_total_weight,
-                Errors::invalid_state(ERR_FARMING_MULTIPLIER_OVERFLOW)
-            );
-        };
 
         // Check locking time
         let now_seconds = Timestamp::now_seconds();
         assert(farming_asset.start_time <= now_seconds, Errors::invalid_state(ERR_FARMING_NOT_STILL_FREEZE));
 
-        let account = Signer::address_of(signer);
-        if (!exists<StakeList<PoolType, AssetT>>(account)) {
+        let user_addr = Signer::address_of(signer);
+        if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
             move_to(signer, StakeList<PoolType, AssetT>{
                 next_id: 0,
                 items: Vector::empty<Stake<PoolType, AssetT>>(),
@@ -197,10 +191,10 @@ module YieldFarmingV3 {
             )
         };
 
-        let items = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
-        items.next_id = items.next_id + 1;
-        Vector::push_back<Stake<PoolType, AssetT>>(&mut items.items, Stake<PoolType, AssetT>{
-            id: items.next_id,
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        let stake_id = stake_list.next_id + 1;
+        Vector::push_back<Stake<PoolType, AssetT>>(&mut stake_list.items, Stake<PoolType, AssetT>{
+            id: stake_id,
             asset,
             asset_weight,
             last_harvest_index: harvest_index,
@@ -212,10 +206,11 @@ module YieldFarmingV3 {
         farming_asset.asset_total_weight = total_asset_weight;
         farming_asset.last_update_timestamp = now_seconds;
 
+        stake_list.next_id = stake_id;
         // Return values
         (
-            HarvestCapability<PoolType, AssetT>{ stake_id: items.next_id },
-            items.next_id
+            HarvestCapability<PoolType, AssetT>{ stake_id },
+            stake_id
         )
     }
 
@@ -273,15 +268,15 @@ module YieldFarmingV3 {
     public fun harvest<PoolType: store,
                        RewardTokenT: store,
                        AssetT: store>(
-        account: address,
-        broker: address,
+        user_addr: address,
+        broker_addr: address,
         amount: u128,
         cap: &HarvestCapability<PoolType, AssetT>): Token::Token<RewardTokenT> acquires Farming, FarmingAsset, StakeList {
-        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker);
-        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker_addr);
+        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
 
         // Get stake from stake list
-        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, cap.stake_id);
 
         let now_seconds = Timestamp::now_seconds();
@@ -318,15 +313,17 @@ module YieldFarmingV3 {
     /// The user can quering all yield farming amount in any time and scene
     public fun query_gov_token_amount<PoolType: store,
                                       RewardTokenT: store,
-                                      AssetT: store>(account: address, broker: address): u128 acquires FarmingAsset, Stake {
-        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let stake = borrow_global_mut<Stake<PoolType, AssetT>>(account);
+                                      AssetT: store>(user_addr: address, broker_addr: address, id: u64): u128 acquires FarmingAsset, StakeList {
+        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let now_seconds = Timestamp::now_seconds();
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
             farming_asset,
             now_seconds
         );
+
+        let stake = get_stake(&mut stake_list.items, id);
 
         let new_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
@@ -409,14 +406,14 @@ module YieldFarmingV3 {
     fun get_stake<PoolType: store,
                   AssetType: store>(c: &mut vector<Stake<PoolType, AssetType>>, id: u64): &mut Stake<PoolType, AssetType> {
         let idx = find_idx_by_id<PoolType, AssetType>(c, id);
-        assert(Option::is_none<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        assert(Option::is_some<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         Vector::borrow_mut<Stake<PoolType, AssetType>>(c, Option::destroy_some<u64>(idx))
     }
 
     fun pop_stake<PoolType: store,
                   AssetType: store>(c: &mut vector<Stake<PoolType, AssetType>>, id: u64): Stake<PoolType, AssetType> {
         let idx = find_idx_by_id<PoolType, AssetType>(c, id);
-        assert(Option::is_none(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        assert(Option::is_some(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         Vector::remove<Stake<PoolType, AssetType>>(c, Option::destroy_some<u64>(idx))
     }
 

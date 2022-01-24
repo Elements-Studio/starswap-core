@@ -187,7 +187,6 @@ module TokenSwapSyrup {
         let ladder_multiplier = pledage_time_to_multiplier(pledge_time);
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
-
         let (harvest_cap, id) = YieldFarming::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             signer,
             broker_addr,
@@ -196,7 +195,13 @@ module TokenSwapSyrup {
             ladder_multiplier,
             &syrup.param_cap);
 
-        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(Signer::address_of(signer));
+        if (!exists<SyrupStakeList<TokenT>>(user_addr)) {
+            move_to(signer, SyrupStakeList<TokenT>{
+                items: Vector::empty<SyrupStake<TokenT>>(),
+            });
+        };
+
+        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(user_addr);
         let now_seconds = Timestamp::now_seconds();
 
         Vector::push_back<SyrupStake<TokenT>>(&mut stake_list.items, SyrupStake<TokenT>{
@@ -207,6 +212,7 @@ module TokenSwapSyrup {
             end_time: now_seconds + pledge_time,
         });
 
+        // Publish stake event to chain
         let event = borrow_global_mut<SyrupEvent>(broker_addr);
         Event::emit_event(&mut event.stake_event_handler,
             StakeEvent {
