@@ -6,7 +6,7 @@ address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapGovPoolType {
     struct PoolTypeFarmPool has key, store {}
 
-    struct PoolTypeSyrupPool has key, store {}
+    struct PoolTypeSyrup has key, store {}
 
     struct PoolTypeTeam has key, store {}
 

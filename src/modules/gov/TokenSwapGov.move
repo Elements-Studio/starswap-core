@@ -96,7 +96,7 @@ module TokenSwapGov {
         // Release 15% for syrup token stake
         let syrup_stake_total = calculate_amount_from_percent(GOV_PERCENT_SYRUP) * (scaling_factor as u128);
         let syrup_stake_total_token = Account::withdraw<STAR::STAR>(account, syrup_stake_total);
-        TokenSwapSyrup::initialize<STAR::STAR>(account, syrup_stake_total_token);
+        TokenSwapSyrup::initialize(account, syrup_stake_total_token);
 
         // Release 10% for team in 2 years
         let team_total = calculate_amount_from_percent(GOV_PERCENT_TEAM) * (scaling_factor as u128);

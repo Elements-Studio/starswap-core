@@ -163,10 +163,12 @@ module YieldFarmingV3 {
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
 
         assert(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
-        assert(
-            ((asset_multiplier as u128) * asset_weight) < farming_asset.asset_total_weight,
-            Errors::invalid_state(ERR_FARMING_MULTIPLIER_OVERFLOW)
-        );
+        if (farming_asset.asset_total_weight > 0) {
+            assert(
+                ((asset_multiplier as u128) * asset_weight) < farming_asset.asset_total_weight,
+                Errors::invalid_state(ERR_FARMING_MULTIPLIER_OVERFLOW)
+            );
+        };
 
         // Check locking time
         let now_seconds = Timestamp::now_seconds();

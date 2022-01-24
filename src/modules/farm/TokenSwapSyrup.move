@@ -5,22 +5,30 @@
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapSyrup {
     use 0x1::Signer;
+    use 0x1::Token;
+    use 0x1::Event;
+    use 0x1::Account;
+    use 0x1::Errors;
+    use 0x1::Timestamp;
+    use 0x1::Vector;
+    use 0x1::Option;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
     const ERROR_STAKE_ID_INVALID: u64 = 103;
     const ERROR_HARVEST_STILL_LOCKING: u64 = 104;
+    const ERR_FARMING_STAKE_NOT_EXISTS: u64 = 105;
 
     /// Syrup pool of token type
     struct Syrup<TokenT> has key, store {
         /// Parameter modify capability for Syrup
         param_cap: YieldFarming::ParameterModifyCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         release_per_second: u128,
-        multiple: u64,
+        multiplier: u64,
     }
 
     struct SyrupStakeList<TokenT> has key, store {
@@ -32,7 +40,7 @@ module TokenSwapSyrup {
         /// Harvest capability for Syrup
         harvest_cap: YieldFarming::HarvestCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         /// Ladder multiplier
-        ladder_multiple: u64,
+        ladder_multiplier: u64,
         /// The time stamp of start staking
         start_time: u64,
         /// The time stamp of end staking, user can unstake/harvest after this point
@@ -91,23 +99,23 @@ module TokenSwapSyrup {
     }
 
     /// Initialize for Syrup pool
-    public fun initialze(signer: &signer, token: Token::Token<STAR::STAR>) {
-        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(account, token);
+    public fun initialize(signer: &signer, token: Token::Token<STAR::STAR>) {
+        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(signer, token);
 
-        move_to(account, SyrupEvent{
-            add_pool_event: Event::new_event_handle<AddFarmEvent>(account),
-            activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(account),
-            stake_event_handler: Event::new_event_handle<StakeEvent>(account),
-            unstake_event_handler: Event::new_event_handle<UnstakeEvent>(account),
+        move_to(signer, SyrupEvent{
+            add_pool_event: Event::new_event_handle<AddPoolEvent>(signer),
+            activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(signer),
+            stake_event_handler: Event::new_event_handle<StakeEvent>(signer),
+            unstake_event_handler: Event::new_event_handle<UnstakeEvent>(signer),
         });
     }
 
     /// Add syrup pool for token type
     public fun add_pool<TokenT: store>(signer: &signer,
                                        release_per_second: u128,
-                                       multiple: u64,
+                                       multiplier: u64,
                                        delay: u64)
-    acquires Syrup, SyrupEvent {
+    acquires SyrupEvent {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -116,13 +124,13 @@ module TokenSwapSyrup {
 
         let param_cap = YieldFarming::add_asset<PoolTypeSyrup, Token::Token<TokenT>>(
             signer,
-            release_per_second * multiple,
-            0);
+            release_per_second * (multiplier as u128),
+            delay);
 
         move_to(signer, Syrup<TokenT>{
             param_cap,
             release_per_second,
-            multiple,
+            multiplier,
         });
 
         let event = borrow_global_mut<SyrupEvent>(account);
@@ -135,24 +143,23 @@ module TokenSwapSyrup {
     }
 
     /// Set farm mutiple of second per releasing
-    public fun set_pool_multiplier<TokenT: copy + drop + store>(signer: &signer, multiple: u64)
-    acquires Syrup {
+    public fun set_pool_multiplier<TokenT: copy + drop + store>(signer: &signer, multiplier: u64) acquires Syrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
-        let broker = Signer::address_of(signer);
-        let syrup = borrow_global<Syrup<TokenT>>(broker);
+        let broker_addr = Signer::address_of(signer);
+        let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr);
 
         let (alive, _, _, _, ) =
-            YieldFarming::query_info<PoolTypeSyrup, Token::Token<TokenT>>(broker);
+            YieldFarming::query_info<PoolTypeSyrup, Token::Token<TokenT>>(broker_addr);
 
         YieldFarming::modify_parameter<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             &syrup.param_cap,
-            broker,
-            cap.release_per_second * (multiple as u128),
+            broker_addr,
+            syrup.release_per_second * (multiplier as u128),
             alive,
         );
-        syrup.multiple = multiple;
+        syrup.multiplier = multiplier;
     }
 
     /// Get farm mutiple of second per releasing
@@ -160,95 +167,119 @@ module TokenSwapSyrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
         let syrup = borrow_global_mut<Syrup<TokenT>>(Signer::address_of(signer));
-        syrup.multiple
+        syrup.multiplier
     }
 
     /// Stake token type to syrup
     public fun stake<TokenT: store>(signer: &signer,
                                     pledge_time: u64,
-                                    amount: u128) acquires SyrupStakeList {
+                                    amount: u128) acquires Syrup, SyrupStakeList, SyrupEvent {
         assert(pledge_time > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
 
-        let account_addr = Signer::address_of(signer);
-        if (!Account::is_accept_token<STAR::STAR>(account_addr)) {
+        let user_addr = Signer::address_of(signer);
+        let broker_addr = STAR::token_address();
+
+        if (!Account::is_accept_token<STAR::STAR>(user_addr)) {
             Account::do_accept_token<STAR::STAR>(signer);
         };
 
-        let stake_token = Account::withdraw<TokenT>(account_addr, amount);
-        let ladder_multiple = pledage_time_to_multiplier(pledge_time);
+        let stake_token = Account::withdraw<TokenT>(signer, amount);
+        let ladder_multiplier = pledage_time_to_multiplier(pledge_time);
 
-        let (harvest_cap, id) = YieldFarmingV3::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+        let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
+
+        let (harvest_cap, id) = YieldFarming::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             signer,
-            STAR::token_address(),
+            broker_addr,
             stake_token,
             amount,
-            ladder_multiple,
+            ladder_multiplier,
             &syrup.param_cap);
 
-        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(STAR::token_address());
-        let now_seconds = Timestamp::spec_now_seconds();
+        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(Signer::address_of(signer));
+        let now_seconds = Timestamp::now_seconds();
 
-        Vector::push_back<SyrupStake<TokenT>>(&stake_list.items, SyrupStake<TokenT>{
+        Vector::push_back<SyrupStake<TokenT>>(&mut stake_list.items, SyrupStake<TokenT>{
             id,
             harvest_cap,
-            ladder_multiple,
+            ladder_multiplier,
             start_time: now_seconds,
             end_time: now_seconds + pledge_time,
         });
+
+        let event = borrow_global_mut<SyrupEvent>(broker_addr);
+        Event::emit_event(&mut event.stake_event_handler,
+            StakeEvent {
+                token_code: Token::token_code<TokenT>(),
+                signer: user_addr,
+                amount,
+                admin: broker_addr,
+            });
     }
 
-    public fun unstake<TokenT: store>(signer: &signer, id: u64) acquires SyrupStakeList {
-        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(STAR::token_address());
+    public fun unstake<TokenT: store>(signer: &signer, id: u64) acquires SyrupStakeList, SyrupEvent {
+        let user_addr = Signer::address_of(signer);
+        let broker_addr = STAR::token_address();
+
+        let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(broker_addr);
         let stake = get_stake<TokenT>(&stake_list.items, id);
 
         assert(stake.id == id, Errors::invalid_state(ERROR_STAKE_ID_INVALID));
-        assert(stake.end_time < Timestamp::spec_now_seconds(), Errors::invalid_state(ERROR_HARVEST_STILL_LOCKING));
+        assert(stake.end_time < Timestamp::now_seconds(), Errors::invalid_state(ERROR_HARVEST_STILL_LOCKING));
 
-        let SyrupStake<TokenT>{
-            id: u64,
+        let SyrupStake<TokenT> {
+            id: _,
             harvest_cap,
-            ladder_multiple: _,
+            ladder_multiplier: _,
             start_time: _,
             end_time: _,
-        } = pop_stake<SyrupStake<TokenT>>(&stake_list.items, id);
+        } = pop_stake<TokenT>(&mut stake_list.items, id);
 
         let (
             unstaken_token,
             reward_token
-        ) = YieldFarmingV3::unstake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(signer, STAR::token_address(), harvest_cap);
+        ) = YieldFarming::unstake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(signer, broker_addr, harvest_cap);
 
-        let account = Signer::address_of(signer);
-        Account::desposit<TokenT>(account, unstaken_token);
-        Account::desposit<STAR::STAR>(account, reward_token);
+        Account::deposit<TokenT>(user_addr, unstaken_token);
+        Account::deposit<STAR::STAR>(user_addr, reward_token);
+
+        let event = borrow_global_mut<SyrupEvent>(broker_addr);
+        Event::emit_event(&mut event.unstake_event_handler,
+            UnstakeEvent{
+                signer: user_addr,
+                token_code: Token::token_code<TokenT>(),
+                admin: broker_addr,
+            });
     }
 
     public fun get_stake_info<TokenT: store>(signer: &signer, id: u64): (u64, u64, u64) acquires SyrupStakeList {
-        let stake_list = borrow_global<SyrupStakeList<TokenT>>(STAR::token_address());
+        let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
         let stake = get_stake(&stake_list.items, id);
-        (stake.start_time, stake.end_time, stake.ladder_multiple)
+        (stake.start_time, stake.end_time, stake.ladder_multiplier)
     }
 
     public fun get_total_stake_amount<TokenT: store>(): u128 {
-        YieldFarmingV3::query_total_stake<PoolTypeSyrup, Token::Token<TokenT>>()
+        YieldFarming::query_total_stake<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
     }
 
-    public fun pledage_time_to_multiplier(pledge: u64): u64 {
+    public fun pledage_time_to_multiplier(_pledge: u64): u64 {
+        // TODO(9191stc): Load from config
         1
     }
 
     fun get_stake<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): &SyrupStake<TokenT> {
         let idx = find_idx_by_id<TokenT>(c, id);
-        assert(Option::is_none(idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
-        Vector::borrow(c, Option::destoy_some(idx))
+        assert(Option::is_none<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        Vector::borrow(c, Option::destroy_some<u64>(idx))
     }
 
-    fun pop_stake<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): SyrupStake<TokenT> {
+    fun pop_stake<TokenT: store>(c: &mut vector<SyrupStake<TokenT>>, id: u64): SyrupStake<TokenT> {
         let idx = find_idx_by_id<TokenT>(c, id);
-        assert(Option::is_none(idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
-        Vector::remove(c, Option::destoy_some(idx))
+        assert(Option::is_none<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        Vector::remove(c, Option::destroy_some<u64>(idx))
     }
 
-    fun find_idx_by_id<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): Option<u64> {
+    fun find_idx_by_id<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): Option::Option<u64> {
         let len = Vector::length(c);
         if (len == 0) {
             return Option::none()
