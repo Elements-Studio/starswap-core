@@ -12,7 +12,6 @@ module YieldFarmingV3 {
     use 0x1::Option;
     use 0x1::Vector;
 
-
     use 0x4783d08fb16990bd35d83f3e23bf93b8::BigExponential;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingLibrary;
 
@@ -72,6 +71,7 @@ module YieldFarmingV3 {
     /// Harvest ability to harvest
     struct HarvestCapability<PoolType, AssetT> has key, store {
         stake_id: u64,
+        deadline: u64, // Indicates the deadline for the current harvesting permission
     }
 
     /// Called by token issuer
@@ -157,6 +157,7 @@ module YieldFarmingV3 {
         asset: AssetT,
         asset_weight: u128,
         asset_multiplier: u64,
+        deadline: u64,
         _cap: &ParameterModifyCapability<PoolType, AssetT>) : (HarvestCapability<PoolType, AssetT>, u64)
     acquires StakeList, FarmingAsset {
         assert(exists_asset_at<PoolType, AssetT>(broker_addr), Errors::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS));
@@ -209,8 +210,8 @@ module YieldFarmingV3 {
         stake_list.next_id = stake_id;
         // Return values
         (
-            HarvestCapability<PoolType, AssetT>{ stake_id },
-            stake_id
+            HarvestCapability<PoolType, AssetT>{ stake_id, deadline },
+            stake_id,
         )
     }
 
@@ -221,7 +222,7 @@ module YieldFarmingV3 {
         cap: HarvestCapability<PoolType, AssetT>)
     : (AssetT, Token::Token<RewardTokenT>) acquires Farming, FarmingAsset, StakeList {
         // Destroy capability
-        let HarvestCapability<PoolType, AssetT>{ stake_id } = cap;
+        let HarvestCapability<PoolType, AssetT>{ stake_id, deadline } = cap;
 
         let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
@@ -240,7 +241,12 @@ module YieldFarmingV3 {
         assert(stake_id == out_stake_id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
 
         // Calculate harvest
-        let now_seconds = Timestamp::now_seconds();
+        let now_seconds = if (deadline > 0 && deadline < Timestamp::now_seconds()) {
+            deadline
+        } else {
+            Timestamp::now_seconds()
+        };
+
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
         let asset_weight = stake_asset_weight * (stake_asset_multiplier as u128);
@@ -279,7 +285,12 @@ module YieldFarmingV3 {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, cap.stake_id);
 
-        let now_seconds = Timestamp::now_seconds();
+        let now_seconds = if (cap.deadline > 0 && cap.deadline < Timestamp::now_seconds()) {
+            cap.deadline
+        } else {
+            Timestamp::now_seconds()
+        };
+
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
         let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(

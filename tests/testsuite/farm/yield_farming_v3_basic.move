@@ -45,6 +45,7 @@ module alice::YieldFarmingWarpper {
             AssetType_A{ value },
             value,
             multiplier,
+            0,
             &cap.cap);
 
         let user_addr = Signer::address_of(signer);
