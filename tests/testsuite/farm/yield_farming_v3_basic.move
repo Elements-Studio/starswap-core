@@ -300,11 +300,7 @@ script {
         let last_update_timestamp: u64 = 86395;
         let _asset_total_weight = 10000000000000000000; //e19
 
-        let index_1 = YieldFarmingLibrary::calculate_harvest_index(
-            harvest_index,
-            _asset_total_weight,
-            last_update_timestamp,
-            Timestamp::now_seconds(), 2000000000);
+        let index_1 = YieldFarmingLibrary::calculate_harvest_index(harvest_index, _asset_total_weight, last_update_timestamp, Timestamp::now_seconds(), 2000000000);
         let withdraw_1 = YieldFarmingLibrary::calculate_withdraw_amount(index_1, harvest_index, _asset_total_weight);
         Debug::print(&index_1);
         Debug::print(&withdraw_1);

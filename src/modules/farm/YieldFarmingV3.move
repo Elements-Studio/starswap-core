@@ -256,6 +256,22 @@ module YieldFarmingV3 {
             asset_weight,
         );
 
+//        Debug::print(&11111111);
+//        Debug::print(&farming_asset.harvest_index);
+//        Debug::print(&farming_asset.asset_total_weight);
+//        Debug::print(&farming_asset.last_update_timestamp);
+//        Debug::print(&now_seconds);
+//        Debug::print(&farming_asset.release_per_second);
+//
+//        Debug::print(&10101010);
+//
+//        Debug::print(&new_harvest_index);
+//        Debug::print(&stake_latest_harvest_index);
+//        Debug::print(&asset_weight);
+//        Debug::print(&period_gain);
+//        Debug::print(&stake_gain);
+//        Debug::print(&11111111);
+
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, stake_gain + period_gain);
         assert(farming_asset.asset_total_weight >= asset_weight, Errors::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
 
@@ -335,7 +351,6 @@ module YieldFarmingV3 {
         );
 
         let stake = get_stake(&mut stake_list.items, id);
-
         let new_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
             stake.last_harvest_index,

@@ -69,14 +69,33 @@ script {
     fun alice_stake(signer: signer) {
         let scaling_factor = Math::pow(10, 9u64);
 
-        TokenSwapSyrup::stake<TokenMock::WETH>(&signer, 1000u64, 1000000 * scaling_factor);
+        TokenSwapSyrup::stake<TokenMock::WETH>(&signer, 1u64, 1000000 * scaling_factor);
         assert(TokenSwapSyrup::query_total_stake<TokenMock::WETH>() == (1000000u128 * scaling_factor), 10003);
 
-        TokenSwapSyrup::stake<TokenMock::WETH>(&signer, 2000u64, 1000000 * scaling_factor);
+        TokenSwapSyrup::stake<TokenMock::WETH>(&signer, 2u64, 1000000 * scaling_factor);
         assert(TokenSwapSyrup::query_total_stake<TokenMock::WETH>() == (2000000u128 * scaling_factor), 10004);
     }
 }
 // check: EXECUTED
+
+//! new-transaction
+//! sender: alice
+address alice = {{alice}};
+script {
+    use 0x1::Account;
+    use 0x1::Signer;
+
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
+
+    fun alice_unstake_early(signer: signer) {
+        let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
+        Account::deposit<TokenMock::WETH>(Signer::address_of(&signer), unstaked_token);
+        Account::deposit<STAR::STAR>(Signer::address_of(&signer), reward_token);
+    }
+}
+// check: "Keep(ABORTED { code: 26625"
 
 //! block-prologue
 //! author: genesis
@@ -91,6 +110,7 @@ script {
     use 0x1::Math;
     use 0x1::Token;
     use 0x1::Signer;
+    use 0x1::Debug;
 
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
@@ -100,9 +120,16 @@ script {
         let scaling_factor = Math::pow(10, 9u64);
 
         let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
+        let unstake_token_amount = Token::value<TokenMock::WETH>(&unstaked_token);
+        let reward_token_amount = Token::value<STAR::STAR>(&reward_token);
 
-        assert(Token::value<TokenMock::WETH>(&unstaked_token) == 1000000 * scaling_factor, 10001);
-        assert(Token::value<STAR::STAR>(&reward_token) == 100 * scaling_factor, 10002);
+        Debug::print(&unstake_token_amount);
+        Debug::print(&reward_token_amount);
+
+        assert(unstake_token_amount == 1000000 * scaling_factor, 10005);
+
+        // Check is half of amount from stakeing in two times
+        assert(reward_token_amount == 50 * scaling_factor, 10006);
 
         let user_addr = Signer::address_of(&signer);
         Account::deposit<TokenMock::WETH>(user_addr, unstaked_token);

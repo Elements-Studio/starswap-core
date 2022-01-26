@@ -1,0 +1,23 @@
+address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+module YieldFarmingLibraryTest {
+
+    #[test] use 0x1::Debug;
+    #[test] use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingLibrary;
+
+    #[test] fun test_withdraw_amount() {
+        let harvest_index = 1000000;
+        let asset_total_weight = 100000000;
+        let last_update_timestamp = 1;
+        let now_seconds = 11;
+        let release_per_second = 2;
+
+        let new_index = YieldFarmingLibrary::calculate_harvest_index(harvest_index,asset_total_weight, last_update_timestamp, now_seconds, release_per_second);
+        Debug::print(&new_index);
+        assert(new_index == 100001000000, 10001);
+
+        let amount = YieldFarmingLibrary::calculate_withdraw_amount(new_index, harvest_index, asset_total_weight);
+        Debug::print(&amount);
+        assert(amount == 10, 10002);
+    }
+}
+}

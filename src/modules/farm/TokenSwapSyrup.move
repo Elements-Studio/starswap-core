@@ -12,17 +12,16 @@ module TokenSwapSyrup {
     use 0x1::Timestamp;
     use 0x1::Vector;
     use 0x1::Option;
-    use 0x1::Debug;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
     const ERROR_STAKE_ID_INVALID: u64 = 103;
     const ERROR_HARVEST_STILL_LOCKING: u64 = 104;
-    const ERR_FARMING_STAKE_NOT_EXISTS: u64 = 105;
+    const ERROR_FARMING_STAKE_NOT_EXISTS: u64 = 105;
 
     /// Syrup pool of token type
     struct Syrup<TokenT> has key, store {
@@ -170,10 +169,11 @@ module TokenSwapSyrup {
     }
 
     /// Stake token type to syrup
+    /// @param: pledege_time per second
     public fun stake<TokenT: store>(signer: &signer,
-                                    pledge_time: u64,
+                                    pledge_time_sec: u64,
                                     amount: u128) acquires Syrup, SyrupStakeList, SyrupEvent {
-        assert(pledge_time > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
+        assert(pledge_time_sec > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
 
         let user_addr = Signer::address_of(signer);
         let broker_addr = STAR::token_address();
@@ -183,11 +183,11 @@ module TokenSwapSyrup {
         };
 
         let stake_token = Account::withdraw<TokenT>(signer, amount);
-        let ladder_multiplier = pledage_time_to_multiplier(pledge_time);
+        let ladder_multiplier = pledage_time_to_multiplier(pledge_time_sec);
 
         let now_seconds = Timestamp::now_seconds();
         let start_time = now_seconds;
-        let end_time = start_time + pledge_time;
+        let end_time = start_time + pledge_time_sec;
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
         let (harvest_cap, id) = YieldFarming::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
@@ -236,17 +236,12 @@ module TokenSwapSyrup {
         let broker_addr = STAR::token_address();
         assert(id > 0, Errors::invalid_state(ERROR_STAKE_ID_INVALID));
 
-        Debug::print(&11111111);
         let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(user_addr);
-
-        Debug::print(&stake_list.items);
         let stake = get_stake<TokenT>(&stake_list.items, id);
 
-        Debug::print(&22222222);
         assert(stake.id == id, Errors::invalid_state(ERROR_STAKE_ID_INVALID));
         assert(stake.end_time < Timestamp::now_seconds(), Errors::invalid_state(ERROR_HARVEST_STILL_LOCKING));
 
-        Debug::print(&33333333);
         let SyrupStake<TokenT> {
             id: _,
             harvest_cap,
@@ -255,7 +250,6 @@ module TokenSwapSyrup {
             end_time: _,
         } = pop_stake<TokenT>(&mut stake_list.items, id);
 
-        Debug::print(&44444444);
         let (
             unstaken_token,
             reward_token
@@ -282,22 +276,20 @@ module TokenSwapSyrup {
         YieldFarming::query_total_stake<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
     }
 
-    public fun pledage_time_to_multiplier(_pledge: u64): u64 {
+    public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
         // TODO(9191stc): Load from config
         1
     }
 
     fun get_stake<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): &SyrupStake<TokenT> {
         let idx = find_idx_by_id<TokenT>(c, id);
-        Debug::print(&101010101);
-        Debug::print(&id);
-        assert(Option::is_some<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        assert(Option::is_some<u64>(&idx), Errors::invalid_state(ERROR_FARMING_STAKE_NOT_EXISTS));
         Vector::borrow(c, Option::destroy_some<u64>(idx))
     }
 
     fun pop_stake<TokenT: store>(c: &mut vector<SyrupStake<TokenT>>, id: u64): SyrupStake<TokenT> {
         let idx = find_idx_by_id<TokenT>(c, id);
-        assert(Option::is_some<u64>(&idx), Errors::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
+        assert(Option::is_some<u64>(&idx), Errors::invalid_state(ERROR_FARMING_STAKE_NOT_EXISTS));
         Vector::remove(c, Option::destroy_some<u64>(idx))
     }
 
