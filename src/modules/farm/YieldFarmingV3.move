@@ -14,6 +14,7 @@ module YieldFarmingV3 {
 
     use 0x4783d08fb16990bd35d83f3e23bf93b8::BigExponential;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingLibrary;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingPoolType::{PoolTypeFarmPool};
 
     const ERR_FARMING_INIT_REPEATE: u64 = 101;
     const ERR_FARMING_NOT_STILL_FREEZE: u64 = 102;
@@ -194,6 +195,10 @@ module YieldFarmingV3 {
 
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake_id = stake_list.next_id + 1;
+        // force reset counter to 0 when pool type is farm
+        if (PoolTypeFarmPool == PoolType) {
+            stake_id = 0 ;
+        };
         Vector::push_back<Stake<PoolType, AssetT>>(&mut stake_list.items, Stake<PoolType, AssetT>{
             id: stake_id,
             asset,
@@ -401,6 +406,10 @@ module YieldFarmingV3 {
         if (len == 0) {
             return Option::none()
         };
+        if (PoolTypeFarmPool == PoolType) {
+            assert(len == 1, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
+            return Option::some(0)
+        };
         let idx = len - 1;
         loop {
             let el = Vector::borrow(c, idx);
@@ -436,6 +445,18 @@ module YieldFarmingV3 {
     /// Check the Farming of AsssetT is exists.
     public fun exists_asset_at<PoolType: store, AssetT: store>(broker: address): bool {
         exists<FarmingAsset<PoolType, AssetT>>(broker)
+    }
+
+    /// Check stake at address exists.
+    public fun exists_stake_at_address<PoolType: store, AssetT: store>(account: address): bool acquires StakeList{
+        if (exists<StakeList<PoolType, AssetT>>(account) ){
+            let stake_list = borrow_global<StakeList<PoolType, AssetT>>(account);
+            let len = Vector::length(&stake_list.items);
+            if (len > 0) {
+                return true
+            };
+        };
+        return false
     }
 }
 }
