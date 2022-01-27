@@ -256,22 +256,6 @@ module YieldFarmingV3 {
             asset_weight,
         );
 
-//        Debug::print(&11111111);
-//        Debug::print(&farming_asset.harvest_index);
-//        Debug::print(&farming_asset.asset_total_weight);
-//        Debug::print(&farming_asset.last_update_timestamp);
-//        Debug::print(&now_seconds);
-//        Debug::print(&farming_asset.release_per_second);
-//
-//        Debug::print(&10101010);
-//
-//        Debug::print(&new_harvest_index);
-//        Debug::print(&stake_latest_harvest_index);
-//        Debug::print(&asset_weight);
-//        Debug::print(&period_gain);
-//        Debug::print(&stake_gain);
-//        Debug::print(&11111111);
-
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, stake_gain + period_gain);
         assert(farming_asset.asset_total_weight >= asset_weight, Errors::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
 
@@ -338,25 +322,32 @@ module YieldFarmingV3 {
     }
 
     /// The user can quering all yield farming amount in any time and scene
-    public fun query_gov_token_amount<PoolType: store,
-                                      RewardTokenT: store,
-                                      AssetT: store>(user_addr: address, broker_addr: address, id: u64): u128 acquires FarmingAsset, StakeList {
+    public fun query_expect_gain<PoolType: store,
+                                 RewardTokenT: store,
+                                 AssetT: store>(user_addr: address,
+                                                broker_addr: address,
+                                                cap: &HarvestCapability<PoolType, AssetT>)
+    : u128 acquires FarmingAsset, StakeList {
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
-        let now_seconds = Timestamp::now_seconds();
+
+        let now_seconds = if (cap.deadline > 0 && cap.deadline < Timestamp::now_seconds()) {
+            cap.deadline
+        } else {
+            Timestamp::now_seconds()
+        };
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
             farming_asset,
             now_seconds
         );
 
-        let stake = get_stake(&mut stake_list.items, id);
+        let stake = get_stake(&mut stake_list.items, cap.stake_id);
         let new_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
             stake.last_harvest_index,
             stake.asset_weight
         );
-
         stake.gain + new_gain
     }
 
@@ -408,7 +399,6 @@ module YieldFarmingV3 {
             )
         }
     }
-
 
     fun find_idx_by_id<PoolType: store,
                        AssetType: store>(c: &vector<Stake<PoolType, AssetType>>, id: u64): Option::Option<u64> {

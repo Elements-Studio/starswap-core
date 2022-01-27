@@ -62,9 +62,8 @@ module alice::YieldFarmingWarpper {
 
     public fun unstake(signer: &signer, id: u64): (u128, u128) acquires StakeCapbabilityList {
         assert(id > 0, 10000);
-        let real_stake_id = id - 1;
         let cap_list = borrow_global_mut<StakeCapbabilityList>(Signer::address_of(signer));
-        let cap = Vector::remove(&mut cap_list.items, real_stake_id);
+        let cap = Vector::remove(&mut cap_list.items, id - 1);
         let (asset, token) = YieldFarming::unstake<PoolType_A, Usdx, AssetType_A>(signer, @alice, cap);
         let token_val = Token::value<Usdx>(&token);
         Account::deposit<Usdx>(Signer::address_of(signer), token);
@@ -73,14 +72,15 @@ module alice::YieldFarmingWarpper {
 
     public fun harvest(signer: &signer, id: u64): Token::Token<Usdx> acquires StakeCapbabilityList {
         assert(id > 0, 10000);
-        let real_stake_id = id - 1;
         let cap_list = borrow_global_mut<StakeCapbabilityList>(Signer::address_of(signer));
-        let cap = Vector::borrow(&cap_list.items, real_stake_id);
+        let cap = Vector::borrow(&cap_list.items, id - 1);
         YieldFarming::harvest<PoolType_A, Usdx, AssetType_A>(Signer::address_of(signer), @alice, 0, cap)
     }
 
-    public fun query_gov_token_amount(signer: address, id: u64): u128 {
-        YieldFarming::query_gov_token_amount<PoolType_A, Usdx, AssetType_A>(signer, @alice, id)
+    public fun query_expect_gain(user_addr: address, id: u64): u128 acquires StakeCapbabilityList {
+        let cap_list = borrow_global_mut<StakeCapbabilityList>(user_addr);
+        let cap = Vector::borrow(&cap_list.items, id - 1);
+        YieldFarming::query_expect_gain<PoolType_A, Usdx, AssetType_A>(user_addr, @alice, cap)
     }
 }
 // check: EXECUTED
@@ -247,7 +247,7 @@ script {
 
     /// 3. Cindy harvest after 20 seconds, checking whether has rewards.
     fun cindy_query_token_amount(account: signer) {
-        let amount00 = YieldFarmingWarpper::query_gov_token_amount(Signer::address_of(&account), 1);
+        let amount00 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&account), 1);
         Debug::print(&amount00);
         // assert(amount00 == 0, 10004);
         assert(amount00 > 0, 1008);
@@ -274,7 +274,7 @@ script {
 
     /// 4. Cindy harvest after 40 seconds, checking whether has rewards.
     fun cindy_harvest_afeter_40_seconds(signer: signer) {
-        let amount00 = YieldFarmingWarpper::query_gov_token_amount(Signer::address_of(&signer), 1);
+        let amount00 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
         Debug::print(&amount00);
 
         let token = YieldFarmingWarpper::harvest(&signer, 1);

@@ -39,8 +39,8 @@ module TokenSwapSyrup {
         id: u64,
         /// Harvest capability for Syrup
         harvest_cap: YieldFarming::HarvestCapability<PoolTypeSyrup, Token::Token<TokenT>>,
-        /// Ladder multiplier
-        ladder_multiplier: u64,
+        /// Stepwise multiplier
+        stepwise_multiplier: u64,
         /// The time stamp of start staking
         start_time: u64,
         /// The time stamp of end staking, user can unstake/harvest after this point
@@ -183,7 +183,7 @@ module TokenSwapSyrup {
         };
 
         let stake_token = Account::withdraw<TokenT>(signer, amount);
-        let ladder_multiplier = pledage_time_to_multiplier(pledge_time_sec);
+        let stepwise_multiplier = pledage_time_to_multiplier(pledge_time_sec);
 
         let now_seconds = Timestamp::now_seconds();
         let start_time = now_seconds;
@@ -195,7 +195,7 @@ module TokenSwapSyrup {
             broker_addr,
             stake_token,
             amount,
-            ladder_multiplier,
+            stepwise_multiplier,
             end_time,
             &syrup.param_cap);
 
@@ -210,7 +210,7 @@ module TokenSwapSyrup {
         Vector::push_back<SyrupStake<TokenT>>(&mut stake_list.items, SyrupStake<TokenT>{
             id,
             harvest_cap,
-            ladder_multiplier,
+            stepwise_multiplier,
             start_time,
             end_time,
         });
@@ -245,7 +245,7 @@ module TokenSwapSyrup {
         let SyrupStake<TokenT> {
             id: _,
             harvest_cap,
-            ladder_multiplier: _,
+            stepwise_multiplier: _,
             start_time: _,
             end_time: _,
         } = pop_stake<TokenT>(&mut stake_list.items, id);
@@ -269,11 +269,21 @@ module TokenSwapSyrup {
     public fun get_stake_info<TokenT: store>(signer: &signer, id: u64): (u64, u64, u64) acquires SyrupStakeList {
         let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
         let stake = get_stake(&stake_list.items, id);
-        (stake.start_time, stake.end_time, stake.ladder_multiplier)
+        (stake.start_time, stake.end_time, stake.stepwise_multiplier)
     }
 
     public fun query_total_stake<TokenT: store>(): u128 {
         YieldFarming::query_total_stake<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
+    }
+
+    public fun query_expect_gain<TokenT: store>(signer: &signer, id: u64): u128 acquires SyrupStakeList  {
+        let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
+        let stake = get_stake(&stake_list.items, id);
+        YieldFarming::query_expect_gain<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            Signer::address_of(signer),
+            STAR::token_address(),
+            &stake.harvest_cap
+        )
     }
 
     public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
