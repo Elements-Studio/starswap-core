@@ -14,7 +14,7 @@ module TokenSwapSyrup {
     use 0x1::Option;
     use 0x1::Debug;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingPoolType::{PoolTypeSyrup};
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
     use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
 

@@ -14,11 +14,7 @@ module TokenSwapFarm {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::LiquidityToken;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingPoolType::{PoolTypeFarmPool};
-
-
-    /// Farm Pool use a fixed index
-    const FARM_POOL_DEFAULT_INDEX: u64 = 0;
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeFarmPool};
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
 
@@ -91,6 +87,7 @@ module TokenSwapFarm {
     }
 
     struct FarmStake<X, Y> has key, store {
+        id: u64,
         /// Harvest capability for Farm
         cap: YieldFarming::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
     }
@@ -283,12 +280,13 @@ module TokenSwapFarm {
     }
 
     /// Return calculated APY
-    public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+    public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmStake {
+        let farm = borrow_global<FarmStake<X, Y>>(account);
         YieldFarming::query_gov_token_amount<
             PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>
-        >(account, STAR::token_address(), FARM_POOL_DEFAULT_INDEX)
+        >(account, STAR::token_address(), farm.id)
     }
 
     /// Query all stake amount
@@ -305,11 +303,12 @@ module TokenSwapFarm {
     }
 
     /// Query stake amount from user
-    public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+    public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmStake {
+        let farm = borrow_global<FarmStake<X, Y>>(account);
         YieldFarming::query_stake<
             PoolTypeFarmPool,
             Token::Token<LiquidityToken<X, Y>>
-        >(account, FARM_POOL_DEFAULT_INDEX)
+        >(account, farm.id)
     }
 
     /// Query release per second
@@ -327,8 +326,10 @@ module TokenSwapFarm {
         let account_addr = Signer::address_of(account);
         // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
         let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
-            let FarmStake<X, Y>{ cap : unwrap_harvest_cap } =
-                move_from<FarmStake<X, Y>>(account_addr);
+            let FarmStake<X, Y>{
+                id: _,
+                cap : unwrap_harvest_cap
+            } = move_from<FarmStake<X, Y>>(account_addr);
 
             // Unstake all liquidity token and reward token
             let (own_token, reward_token) = YieldFarming::unstake<
@@ -348,7 +349,7 @@ module TokenSwapFarm {
         let total_token = Token::join<LiquidityToken<X, Y>>(own_token, addition_token);
         let total_amount = Token::value<LiquidityToken<X, Y>>(&total_token);
 
-        let (new_harvest_cap, _) = YieldFarming::stake<
+        let (new_harvest_cap, stake_id) = YieldFarming::stake<
             PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>>(
@@ -360,7 +361,10 @@ module TokenSwapFarm {
             0,
             &farm_cap.cap
         );
-        FarmStake<X, Y>{ cap: new_harvest_cap }
+        FarmStake<X, Y>{
+            cap: new_harvest_cap,
+            id : stake_id,
+        }
     }
 
     /// Inner unstake operation that unstake all from pool and combind new amount to total asset, then restake.
@@ -370,7 +374,10 @@ module TokenSwapFarm {
                                                                       harvest_cap: FarmStake<X, Y>)
     : FarmStake<X, Y> {
         let account_addr = Signer::address_of(account);
-        let FarmStake{ cap: unwrap_harvest_cap } = harvest_cap;
+        let FarmStake{
+            cap: unwrap_harvest_cap,
+            id: _,
+        } = harvest_cap;
         assert(amount > 0, Errors::invalid_state(ERR_FARM_PARAM_ERROR));
 
         // unstake all from pool
@@ -390,7 +397,7 @@ module TokenSwapFarm {
         let own_asset_amount = Token::value<LiquidityToken<X, Y>>(&own_asset_token);
 
         // Restake to pool
-        let (new_harvest_cap, _) = YieldFarming::stake<
+        let (new_harvest_cap, stake_id) = YieldFarming::stake<
             PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>>(
@@ -402,7 +409,10 @@ module TokenSwapFarm {
             0,
             &farm_cap.cap
         );
-        FarmStake<X, Y>{ cap: new_harvest_cap }
+        FarmStake<X, Y>{
+            cap: new_harvest_cap,
+            id : stake_id,
+        }
     }
 }
 }
