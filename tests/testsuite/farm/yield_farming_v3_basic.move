@@ -82,6 +82,10 @@ module alice::YieldFarmingWarpper {
         let cap = Vector::borrow(&cap_list.items, id - 1);
         YieldFarming::query_expect_gain<PoolType_A, Usdx, AssetType_A>(user_addr, @alice, cap)
     }
+
+    public fun query_stake_list(signer: &signer): vector<u64> {
+        YieldFarming::query_stake_list<PoolType_A, AssetType_A>(signer)
+    }
 }
 // check: EXECUTED
 
@@ -181,28 +185,27 @@ script {
     use 0x1::Account;
     //use 0x1::Token;
     //use 0x1::Signer;
-    //use 0x1::Debug;
+    use 0x1::Vector;
+    use 0x1::Debug;
 
-    fun bob_stake_token_to_pool(account: signer) {
-        Account::do_accept_token<Usdx>(&account);
+    fun bob_stake_token_to_pool(signer: signer) {
+        Account::do_accept_token<Usdx>(&signer);
 
         // First stake operation
-        let stake_id = YieldFarmingWarpper::stake(&account, 100000000, 1);
+        let stake_id = YieldFarmingWarpper::stake(&signer, 100000000, 1);
         assert(stake_id == 1, 1004);
 
         // Second stake operation
-        stake_id = YieldFarmingWarpper::stake(&account, 100000000, 1);
+        stake_id = YieldFarmingWarpper::stake(&signer, 100000000, 1);
         assert(stake_id == 2, 1005);
 
         // Third stake operation
-        stake_id = YieldFarmingWarpper::stake(&account, 100000000, 1);
+        stake_id = YieldFarmingWarpper::stake(&signer, 100000000, 1);
         assert(stake_id == 3, 1006);
 
-        // let token = YieldFarmingWarpper::harvest(&account);
-        // let _amount = Token::value<Usdx>(&token);
-        // Debug::print(&_amount);
-        // assert(amount == 10000000000, 10002);
-        // Account::deposit<Usdx>(Signer::address_of(&account), token);
+        let stake_id_list = YieldFarmingWarpper::query_stake_list(&signer);
+        Debug::print(&stake_id_list);
+        assert(Vector::length(&stake_id_list) == 3, 1007);
     }
 }
 // check: EXECUTED
@@ -226,7 +229,7 @@ script {
         Account::do_accept_token<Usdx>(&account);
 
         let stake_id = YieldFarmingWarpper::stake(&account, 100000000, 1);
-        assert(stake_id == 1, 1007);
+        assert(stake_id == 1, 1008);
     }
 }
 // check: EXECUTED
@@ -311,8 +314,8 @@ script {
         let amount_2 = YieldFarmingLibrary::calculate_withdraw_amount(index_2, 0, 40000000000);
         Debug::print(&index_2);
         Debug::print(&amount_2);
-        assert(index_2 > 0, 1002);
-        assert(amount_2 >= 0, 1003);
+        assert(index_2 > 0, 1010);
+        assert(amount_2 >= 0, 1011);
     }
 }
 // check: EXECUTED

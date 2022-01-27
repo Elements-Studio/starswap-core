@@ -367,6 +367,29 @@ module YieldFarmingV3 {
         stake.asset_weight
     }
 
+    /// Query stake id list from user
+    public fun query_stake_list<PoolType: store,
+                                AssetT: store>(signer: &signer): vector<u64> acquires StakeList {
+        let user_addr = Signer::address_of(signer);
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        let len = Vector::length(&stake_list.items);
+        if (len <= 0) {
+            return Vector::empty<u64>()
+        };
+
+        let ret_list = Vector::empty<u64>();
+        let idx = 0;
+        loop {
+            if (idx >= len) {
+                break
+            };
+            let stake = Vector::borrow<Stake<PoolType, AssetT>>(&stake_list.items, idx);
+            Vector::push_back(&mut ret_list, stake.id);
+            idx = idx + 1;
+        };
+        ret_list
+    }
+
     /// Queyry pool info from pool type
     /// return value: (alive, release_per_second, asset_total_weight, harvest_index)
     public fun query_info<PoolType: store, AssetT: store>(broker: address): (bool, u128, u128, u128) acquires FarmingAsset {
@@ -378,6 +401,7 @@ module YieldFarmingV3 {
             asset.harvest_index
         )
     }
+
 
     /// Update farming asset
     fun calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset: &FarmingAsset<PoolType, AssetT>, now_seconds: u64): u128 {

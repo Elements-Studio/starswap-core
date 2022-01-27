@@ -41,6 +41,8 @@ module TokenSwapSyrup {
         harvest_cap: YieldFarming::HarvestCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         /// Stepwise multiplier
         stepwise_multiplier: u64,
+        /// Stake amount
+        token_amount: u128,
         /// The time stamp of start staking
         start_time: u64,
         /// The time stamp of end staking, user can unstake/harvest after this point
@@ -204,6 +206,7 @@ module TokenSwapSyrup {
         Vector::push_back<SyrupStake<TokenT>>(&mut stake_list.items, SyrupStake<TokenT>{
             id,
             harvest_cap,
+            token_amount: amount,
             stepwise_multiplier,
             start_time,
             end_time,
@@ -242,6 +245,7 @@ module TokenSwapSyrup {
             stepwise_multiplier: _,
             start_time: _,
             end_time: _,
+            token_amount: _,
         } = pop_stake<TokenT>(&mut stake_list.items, id);
 
         let (
@@ -260,10 +264,15 @@ module TokenSwapSyrup {
         (unstaken_token, reward_token)
     }
 
-    public fun get_stake_info<TokenT: store>(signer: &signer, id: u64): (u64, u64, u64) acquires SyrupStakeList {
+    public fun get_stake_info<TokenT: store>(signer: &signer, id: u64): (u64, u64, u64, u128) acquires SyrupStakeList {
         let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
         let stake = get_stake(&stake_list.items, id);
-        (stake.start_time, stake.end_time, stake.stepwise_multiplier)
+        (
+            stake.start_time,
+            stake.end_time,
+            stake.stepwise_multiplier,
+            stake.token_amount
+        )
     }
 
     public fun query_total_stake<TokenT: store>(): u128 {
@@ -280,17 +289,15 @@ module TokenSwapSyrup {
         )
     }
 
-
-    /// Get farm mutiple of second per releasing
-    public fun get_pool_multiplier<TokenT: copy + drop + store>(): u64 acquires Syrup {
-        let syrup = borrow_global_mut<Syrup<TokenT>>(STAR::token_address());
-        syrup.multiplier
+    /// Query stake id list from user
+    public fun query_stake_list<TokenT: store>(signer: &signer) : vector<u64> {
+        YieldFarming::query_stake_list<PoolTypeSyrup, Token::Token<TokenT>>(signer)
     }
 
-    /// query
+    /// query info for syrup pool
     public fun query_info<TokenT: store>(): (u64, u128) acquires Syrup {
         let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
-        (syrup.multiplie, syrup.release_per_second)
+        (syrup.multiplier, syrup.release_per_second)
     }
 
     public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
