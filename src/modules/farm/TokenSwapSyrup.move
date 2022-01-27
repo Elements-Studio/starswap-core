@@ -162,12 +162,6 @@ module TokenSwapSyrup {
         syrup.multiplier = multiplier;
     }
 
-    /// Get farm mutiple of second per releasing
-    public fun get_pool_multiplier<TokenT: copy + drop + store>(): u64 acquires Syrup {
-        let syrup = borrow_global_mut<Syrup<TokenT>>(STAR::token_address());
-        syrup.multiplier
-    }
-
     /// Stake token type to syrup
     /// @param: pledege_time per second
     public fun stake<TokenT: store>(signer: &signer,
@@ -284,6 +278,19 @@ module TokenSwapSyrup {
             STAR::token_address(),
             &stake.harvest_cap
         )
+    }
+
+
+    /// Get farm mutiple of second per releasing
+    public fun get_pool_multiplier<TokenT: copy + drop + store>(): u64 acquires Syrup {
+        let syrup = borrow_global_mut<Syrup<TokenT>>(STAR::token_address());
+        syrup.multiplier
+    }
+
+    /// query
+    public fun query_info<TokenT: store>(): (u64, u128) acquires Syrup {
+        let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
+        (syrup.multiplie, syrup.release_per_second)
     }
 
     public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
