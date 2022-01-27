@@ -46,6 +46,7 @@ script {
 
         // Release 100 amount for one second
         TokenSwapSyrup::add_pool<TokenMock::WETH>(&signer, 100 * scaling_factor, 1, 0);
+
         let (multiplier, _) = TokenSwapSyrup::query_info<TokenMock::WETH>();
         assert(multiplier == 1, 10001);
         assert(TokenSwapSyrup::query_total_stake<TokenMock::WETH>() == 0, 10002);
