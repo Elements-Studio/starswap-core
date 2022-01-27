@@ -264,8 +264,8 @@ module TokenSwapSyrup {
         (unstaken_token, reward_token)
     }
 
-    public fun get_stake_info<TokenT: store>(signer: &signer, id: u64): (u64, u64, u64, u128) acquires SyrupStakeList {
-        let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
+    public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) acquires SyrupStakeList {
+        let stake_list = borrow_global<SyrupStakeList<TokenT>>(user_addr);
         let stake = get_stake(&stake_list.items, id);
         (
             stake.start_time,
