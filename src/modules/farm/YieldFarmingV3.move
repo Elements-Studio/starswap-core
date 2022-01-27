@@ -369,8 +369,7 @@ module YieldFarmingV3 {
 
     /// Query stake id list from user
     public fun query_stake_list<PoolType: store,
-                                AssetT: store>(signer: &signer): vector<u64> acquires StakeList {
-        let user_addr = Signer::address_of(signer);
+                                AssetT: store>(user_addr: address): vector<u64> acquires StakeList {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let len = Vector::length(&stake_list.items);
         if (len <= 0) {

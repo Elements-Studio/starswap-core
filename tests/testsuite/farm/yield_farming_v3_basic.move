@@ -83,8 +83,8 @@ module alice::YieldFarmingWarpper {
         YieldFarming::query_expect_gain<PoolType_A, Usdx, AssetType_A>(user_addr, @alice, cap)
     }
 
-    public fun query_stake_list(signer: &signer): vector<u64> {
-        YieldFarming::query_stake_list<PoolType_A, AssetType_A>(signer)
+    public fun query_stake_list(user_addr: address): vector<u64> {
+        YieldFarming::query_stake_list<PoolType_A, AssetType_A>(user_addr)
     }
 }
 // check: EXECUTED
@@ -184,7 +184,7 @@ script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
     use 0x1::Account;
     //use 0x1::Token;
-    //use 0x1::Signer;
+    use 0x1::Signer;
     use 0x1::Vector;
     use 0x1::Debug;
 
@@ -203,7 +203,7 @@ script {
         stake_id = YieldFarmingWarpper::stake(&signer, 100000000, 1);
         assert(stake_id == 3, 1006);
 
-        let stake_id_list = YieldFarmingWarpper::query_stake_list(&signer);
+        let stake_id_list = YieldFarmingWarpper::query_stake_list(Signer::address_of(&signer));
         Debug::print(&stake_id_list);
         assert(Vector::length(&stake_id_list) == 3, 1007);
     }

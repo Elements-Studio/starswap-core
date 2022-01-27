@@ -290,8 +290,8 @@ module TokenSwapSyrup {
     }
 
     /// Query stake id list from user
-    public fun query_stake_list<TokenT: store>(signer: &signer) : vector<u64> {
-        YieldFarming::query_stake_list<PoolTypeSyrup, Token::Token<TokenT>>(signer)
+    public fun query_stake_list<TokenT: store>(user_addr: address) : vector<u64> {
+        YieldFarming::query_stake_list<PoolTypeSyrup, Token::Token<TokenT>>(user_addr)
     }
 
     /// query info for syrup pool
