@@ -264,19 +264,16 @@ script {
     /// Cindy harvest after 40 seconds, checking whether has rewards.
     fun cindy_harvest_afeter_40_seconds(signer: signer) {
         let amount00 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
-        Debug::print(&222222);
         Debug::print(&amount00);
 
         let token = YieldFarmingWarpper::harvest(&signer, 1);
         let amount1 = Token::value<Usdx>(&token);
-        Debug::print(&333333);
         Debug::print(&amount1);
         assert(amount1 == CalcHelper::precision(40), 1010);
         Account::deposit<Usdx>(Signer::address_of(&signer), token);
 
         // Unstake
         let (asset_val, rewards_token_val) = YieldFarmingWarpper::unstake(&signer, 1);
-        Debug::print(&444444);
         Debug::print(&asset_val);
         Debug::print(&rewards_token_val);
         assert(rewards_token_val == 0, 1011);
@@ -307,44 +304,54 @@ script {
 
         // First stake operation, 1x, deadline after 60 seconds
         let stake_id = YieldFarmingWarpper::stake(&signer, CalcHelper::precision(1), 1, 60);
-        assert(stake_id == 1, 1004);
+        assert(stake_id == 1, 10001);
 
         // Second stake operation, 2x
         stake_id = YieldFarmingWarpper::stake(&signer, CalcHelper::precision(1), 2, 0);
-        assert(stake_id == 2, 1005);
+        assert(stake_id == 2, 10002);
 
         // Third stake operation, 3x
         stake_id = YieldFarmingWarpper::stake(&signer, CalcHelper::precision(1), 3, 0);
-        assert(stake_id == 3, 1006);
+        assert(stake_id == 3, 10003);
+
+        // Third stake operation, 1x
+        stake_id = YieldFarmingWarpper::stake(&signer, CalcHelper::precision(1), 1, 0);
+        assert(stake_id == 4, 10004);
 
         let stake_id_list = YieldFarmingWarpper::query_stake_list(Signer::address_of(&signer));
         Debug::print(&stake_id_list);
-        assert(Vector::length(&stake_id_list) == 3, 1007);
+        assert(Vector::length(&stake_id_list) == 4, 10005);
     }
 }
 // check: EXECUTED
 
-////! new-transaction
-////! sender: bob
-//address alice = {{alice}};
-//address bob = {{bob}};
-//script {
-//    use 0x1::Token;
-//    use 0x1::Debug;
-//    use 0x1::Signer;
-//    use 0x1::Account;
-//    use alice::YieldFarmingWarpper;
-//
-//    /// bob harvest after 40 seconds, checking whether has rewards.
-//    fun bob_harvest_mul2x_deadline0_after40(signer: signer) {
-//        let token = YieldFarmingWarpper::harvest(&signer, 2);
-//        let amount1 = Token::value<YieldFarmingWarpper::Usdx>(&token);
-//        Debug::print(&amount1);
-//        assert(amount1 > 0, 1009);
-//        Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
-//    }
-//}
-//// check: EXECUTED
+//! block-prologue
+//! author: genesis
+//! block-number: 5
+//! block-time: 86504000
+
+//! new-transaction
+//! sender: bob
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use 0x1::Token;
+    use 0x1::Debug;
+    use 0x1::Signer;
+    use 0x1::Account;
+
+    use alice::YieldFarmingWarpper;
+    use alice::CalcHelper;
+
+    fun bob_harvest_4th_mul1x_deadline0_after4(signer: signer) {
+        let token = YieldFarmingWarpper::harvest(&signer, 4);
+        let amount = Token::value<YieldFarmingWarpper::Usdx>(&token);
+        Debug::print(&amount);
+        Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
+        assert(amount == CalcHelper::precision(1), 10006);
+    }
+}
+// check: EXECUTED
 //
 ////! new-transaction
 ////! sender: bob
