@@ -43,9 +43,6 @@ module TokenSwap {
         x_token_code: Token::TokenCode,
         /// token code of X type
         y_token_code: Token::TokenCode,
-        /// Add amount of liquidity which pair of x and y
-        x_value: u128,
-        y_value: u128,
         /// liquidity value by user X and Y type
         liquidity: u128,
     }
