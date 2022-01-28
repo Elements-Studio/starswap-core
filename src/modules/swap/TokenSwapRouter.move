@@ -23,7 +23,6 @@ module TokenSwapRouter {
     const ERROR_ROUTER_WITHDRAW_INSUFFICIENT: u64 = 1009;
     const ERROR_ROUTER_SWAP_ROUTER_PAIR_INVALID: u64 = 1010;
 
-
     ///swap router depth
     const ROUTER_SWAP_ROUTER_DEPTH_ONE: u64 = 1;
     const ROUTER_SWAP_ROUTER_DEPTH_TWO: u64 = 2;
@@ -133,7 +132,11 @@ module TokenSwapRouter {
 
         let liquidity: u128 = Token::value<LiquidityToken<X, Y>>(&liquidity_token);
         assert(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
-        Account::deposit(Signer::address_of(signer), liquidity_token);
+
+        let user_address = Signer::address_of(signer);
+
+        TokenSwap::emit_add_liquidity_event(user_address, &liquidity_token);
+        Account::deposit(user_address, liquidity_token);
     }
 
     fun intra_calculate_amount_for_liquidity<X: copy + drop + store, Y: copy + drop + store>(

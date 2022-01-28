@@ -25,7 +25,6 @@ module TokenSwap {
         burn: Token::BurnCapability<LiquidityToken<X, Y>>,
     }
 
-
     /// Event emitted when add token pair register.
     struct TokenPairRegisterEvent has drop, store {
         /// token code of X type
@@ -39,12 +38,14 @@ module TokenSwap {
     /// Event emitted while add liquidity to x and y.
     /// In order to distinguish `MintEvent` from mint.
     struct AddLiquidityEvent has drop, store {
+        /// liquidity value by user X and Y type
+        liquidity: u128,
         /// token code of X type
         x_token_code: Token::TokenCode,
         /// token code of X type
         y_token_code: Token::TokenCode,
-        /// liquidity value by user X and Y type
-        liquidity: u128,
+        /// Committer
+        signer: address,
     }
 
     /// Event emitted when add token liquidity.
@@ -196,9 +197,6 @@ module TokenSwap {
         // Emit MintEvent
         emit_mint_event<X, Y>(x_value, y_value, liquidity);
 
-        // Emit AddLiquiditiEvent
-        emit_add_liquidity_event<X, Y>(x_value, y_value, liquidity);
-
         mint_token
     }
 
@@ -309,6 +307,19 @@ module TokenSwap {
         });
     }
 
+    public fun emit_add_liquidity_event<X: copy + drop + store,
+                                        Y: copy + drop + store>(
+        user_address: address,
+        liquidity_token: &Token::Token<LiquidityToken<X, Y>>
+    ) acquires TokenPair {
+        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
+            liquidity: Token::value<LiquidityToken<X, Y>>(liquidity_token),
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: user_address,
+        });
+    }
 
     /// Emit mint event
     public fun emit_mint_event<X: copy + drop + store, Y: copy + drop + store>(
@@ -359,22 +370,6 @@ module TokenSwap {
             y_out,
             y_in,
             x_out,
-        });
-    }
-
-    /// Emit add liquidity event
-    public fun emit_add_liquidity_event<X: copy + drop + store, Y: copy + drop + store>(
-        x_value: u128,
-        y_value: u128,
-        liquidity: u128,
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
-            x_token_code: Token::token_code<X>(),
-            y_token_code: Token::token_code<Y>(),
-            x_value,
-            y_value,
-            liquidity,
         });
     }
 
