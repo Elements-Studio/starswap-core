@@ -28,7 +28,6 @@ module TokenSwapSyrup {
         /// Parameter modify capability for Syrup
         param_cap: YieldFarming::ParameterModifyCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         release_per_second: u128,
-        multiplier: u64,
     }
 
     struct SyrupStakeList<TokenT> has key, store {
@@ -115,7 +114,6 @@ module TokenSwapSyrup {
     /// Add syrup pool for token type
     public fun add_pool<TokenT: store>(signer: &signer,
                                        release_per_second: u128,
-                                       multiplier: u64,
                                        delay: u64)
     acquires SyrupEvent {
         // Only called by the genesis
@@ -126,13 +124,12 @@ module TokenSwapSyrup {
 
         let param_cap = YieldFarming::add_asset<PoolTypeSyrup, Token::Token<TokenT>>(
             signer,
-            release_per_second * (multiplier as u128),
+            release_per_second,
             delay);
 
         move_to(signer, Syrup<TokenT>{
             param_cap,
             release_per_second,
-            multiplier,
         });
 
         let event = borrow_global_mut<SyrupEvent>(account);
@@ -144,8 +141,9 @@ module TokenSwapSyrup {
             });
     }
 
-    /// Set farm mutiple of second per releasing
-    public fun set_pool_multiplier<TokenT: copy + drop + store>(signer: &signer, multiplier: u64) acquires Syrup {
+    /// Set release per second for token type pool
+    public fun set_release_per_second<TokenT: copy + drop + store>(signer: &signer,
+                                                                   release_per_second: u128) acquires Syrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -158,10 +156,10 @@ module TokenSwapSyrup {
         YieldFarming::modify_parameter<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             &syrup.param_cap,
             broker_addr,
-            syrup.release_per_second * (multiplier as u128),
+            release_per_second,
             alive,
         );
-        syrup.multiplier = multiplier;
+        syrup.release_per_second = release_per_second;
     }
 
     /// Stake token type to syrup
@@ -192,7 +190,7 @@ module TokenSwapSyrup {
             stake_token,
             amount,
             stepwise_multiplier,
-            end_time,
+            pledge_time_sec,
             &syrup.param_cap);
 
         if (!exists<SyrupStakeList<TokenT>>(user_addr)) {
@@ -295,9 +293,9 @@ module TokenSwapSyrup {
     }
 
     /// query info for syrup pool
-    public fun query_info<TokenT: store>(): (u64, u128) acquires Syrup {
+    public fun query_release_per_second<TokenT: store>(): u128 acquires Syrup {
         let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
-        (syrup.multiplier, syrup.release_per_second)
+        syrup.release_per_second
     }
 
     public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
