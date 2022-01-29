@@ -282,11 +282,11 @@ module TokenSwapFarm {
     /// Return calculated APY
     public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmStake {
         let farm = borrow_global<FarmStake<X, Y>>(account);
-        YieldFarming::query_gov_token_amount<
+        YieldFarming::query_expect_gain<
             PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>
-        >(account, STAR::token_address(), farm.id)
+        >(account, STAR::token_address(), &farm.cap)
     }
 
     /// Query all stake amount
