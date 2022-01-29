@@ -13,6 +13,32 @@ module YieldFarmingLibrary {
     const ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW : u64 = 102;
     const ERR_FARMING_TOTAL_WEIGHT_IS_ZERO : u64 = 103;
 
+    /// Update farming asset
+    public fun calculate_harvest_index_with_asse_info(
+        asset_total_weight: u128,
+        asset_harvest_index: u128,
+        asset_last_update_timestamp: u64,
+        asset_release_per_second: u128,
+        now_seconds: u64): u128 {
+        // Recalculate harvest index
+        if (asset_total_weight <= 0) {
+            calculate_harvest_index_weight_zero(
+                asset_harvest_index,
+                asset_last_update_timestamp,
+                now_seconds,
+                asset_release_per_second
+            )
+        } else {
+            calculate_harvest_index(
+                asset_harvest_index,
+                asset_total_weight,
+                asset_last_update_timestamp,
+                now_seconds,
+                asset_release_per_second
+            )
+        }
+    }
+
     /// There is calculating from harvest index and global parameters without asset_total_weight
     public fun calculate_harvest_index_weight_zero(harvest_index: u128,
                                                    last_update_timestamp: u64,
@@ -35,7 +61,7 @@ module YieldFarmingLibrary {
                                        now_seconds: u64,
                                        release_per_second: u128): u128 {
         assert(asset_total_weight > 0, Errors::invalid_argument(ERR_FARMING_TOTAL_WEIGHT_IS_ZERO));
-        assert(last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
+        assert(last_update_timestamp < now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
         let time_period = now_seconds - last_update_timestamp;
         let numr = release_per_second * (time_period as u128);

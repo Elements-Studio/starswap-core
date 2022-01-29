@@ -32,7 +32,7 @@ module YieldFarmingV3 {
     const ERR_FARMING_ASSET_NOT_EXISTS: u64 = 115;
     const ERR_FARMING_STAKE_INDEX_ERROR: u64 = 116;
     const ERR_FARMING_MULTIPLIER_OVERFLOW: u64 = 117;
-    const ERR_FARMING_DEADLINE_INVALID: u64 = 118;
+    const ERR_FARMING_OPT_AFTER_DEADLINE: u64 = 118;
 
     /// The object of yield farming
     /// RewardTokenT meaning token of yield farming
@@ -113,7 +113,7 @@ module YieldFarmingV3 {
             start_time: now_seconds + delay,
             alive: true
         });
-        ParameterModifyCapability<PoolType, AssetT>{}
+        ParameterModifyCapability<PoolType, AssetT> {}
     }
 
     /// Remove asset for make this pool to the state of not alive
@@ -147,7 +147,8 @@ module YieldFarmingV3 {
 
         // if the pool is alive, then update index
         if (farming_asset.alive) {
-            farming_asset.harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
+            farming_asset.harvest_index =
+                calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
         };
 
         farming_asset.release_per_second = release_per_second;
@@ -178,17 +179,17 @@ module YieldFarmingV3 {
             });
         };
 
-        let time_period = now_seconds - farming_asset.last_update_timestamp;
         let (harvest_index, total_asset_weight, gain) = if (farming_asset.asset_total_weight <= 0) {
+            let time_period = now_seconds - farming_asset.last_update_timestamp;
             (
                 0,
-                asset_weight,
+                asset_weight * (asset_multiplier as u128),
                 farming_asset.release_per_second * (time_period as u128)
             )
         } else {
             (
                 calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds),
-                farming_asset.asset_total_weight + asset_weight,
+                farming_asset.asset_total_weight + (asset_weight * (asset_multiplier as u128)),
                 0
             )
         };
@@ -238,35 +239,35 @@ module YieldFarmingV3 {
 
         let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let now = Timestamp::now_seconds();
+        let now_seconds = Timestamp::now_seconds();
 
-        intra_pool_state_check<PoolType, AssetT>(now, farming_asset);
+        intra_pool_state_check<PoolType, AssetT>(now_seconds, farming_asset);
 
         let items = borrow_global_mut<StakeList<PoolType, AssetT>>(Signer::address_of(signer));
 
         let Stake<PoolType, AssetT>{
             id: out_stake_id,
-            asset: stake_asset,
-            asset_weight: stake_asset_weight,
-            last_harvest_index: stake_latest_harvest_index,
-            gain: stake_gain,
-            asset_multiplier: stake_asset_multiplier,
+            asset: staked_asset,
+            asset_weight: staked_asset_weight,
+            last_harvest_index: staked_latest_harvest_index,
+            gain: staked_gain,
+            asset_multiplier: staked_asset_multiplier,
         } = pop_stake<PoolType, AssetT>(&mut items.items, stake_id);
 
         assert(stake_id == out_stake_id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
 
-        let now_seconds = intra_query_maybe_deadline(now, deadline);
+        let now_seconds = intra_query_maybe_deadline(now_seconds, deadline, true);
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
-        let asset_weight = stake_asset_weight * (stake_asset_multiplier as u128);
+        let asset_weight = staked_asset_weight * (staked_asset_multiplier as u128);
         let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
-            stake_latest_harvest_index,
+            staked_latest_harvest_index,
             asset_weight,
         );
 
-        let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, stake_gain + period_gain);
+        let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, staked_gain + period_gain);
         assert(farming_asset.asset_total_weight >= asset_weight, Errors::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
 
         // Update farm asset
@@ -277,13 +278,13 @@ module YieldFarmingV3 {
         // because the latter has updated by others before this code execute.
         if (now_seconds > farming_asset.last_update_timestamp) {
             farming_asset.last_update_timestamp = now_seconds;
+
+            if (farming_asset.alive) {
+                farming_asset.harvest_index = new_harvest_index;
+            };
         };
 
-        if (farming_asset.alive) {
-            farming_asset.harvest_index = new_harvest_index;
-        };
-
-        (stake_asset, withdraw_token)
+        (staked_asset, withdraw_token)
     }
 
     /// Harvest yield farming token from stake
@@ -305,14 +306,15 @@ module YieldFarmingV3 {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, cap.stake_id);
 
-        now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline);
+        now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline, true);
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
+        let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
         let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
             stake.last_harvest_index,
-            stake.asset_weight
+            asset_weight,
         );
 
         let total_gain = stake.gain + period_gain;
@@ -325,19 +327,27 @@ module YieldFarmingV3 {
             amount
         };
 
+        Debug::print(&22222222);
+        Debug::print(farming_asset);
+        Debug::print(stake);
+        Debug::print(&new_harvest_index);
+        Debug::print(&period_gain);
+        Debug::print(&now_seconds);
+        Debug::print(&22222222);
+
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, withdraw_amount);
         stake.gain = total_gain - withdraw_amount;
         stake.last_harvest_index = new_harvest_index;
-
-        if (farming_asset.alive) {
-            farming_asset.harvest_index = new_harvest_index;
-        };
 
         // if `now_seconds` less than pool's `last_update_timestamp`, it's `deadline`, otherwise now timestamp
         // We don't update `last_update_timestamp` if `now_seconds` < `farming_asset.last_update_timestamp`
         // because the latter has updated by others before this code execute.
         if (now_seconds > farming_asset.last_update_timestamp) {
             farming_asset.last_update_timestamp = now_seconds;
+
+            if (farming_asset.alive) {
+                farming_asset.harvest_index = new_harvest_index;
+            };
         };
 
         withdraw_token
@@ -358,25 +368,27 @@ module YieldFarmingV3 {
         assert(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
 
         // Calculate new harvest index
-        let now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline);
+        let now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline, false);
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
             farming_asset,
             now_seconds
         );
 
         let stake = get_stake(&mut stake_list.items, cap.stake_id);
+        let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
         let new_gain = YieldFarmingLibrary::calculate_withdraw_amount(
             new_harvest_index,
             stake.last_harvest_index,
-            stake.asset_weight
+            asset_weight
         );
 
-        Debug::print(&88888888);
-        Debug::print(&new_harvest_index);
-        Debug::print(&stake.last_harvest_index);
-        Debug::print(&stake.asset_weight);
+        Debug::print(&11111111);
+        Debug::print(farming_asset);
+        Debug::print(stake);
         Debug::print(&now_seconds);
-        Debug::print(&88888888);
+        Debug::print(&new_harvest_index);
+        Debug::print(&new_gain);
+        Debug::print(&11111111);
 
         stake.gain + new_gain
     }
@@ -431,33 +443,26 @@ module YieldFarmingV3 {
         )
     }
 
-
     /// Update farming asset
-    fun calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset: &FarmingAsset<PoolType, AssetT>, now_seconds: u64): u128 {
-        // Recalculate harvest index
-        if (farming_asset.asset_total_weight <= 0) {
-            YieldFarmingLibrary::calculate_harvest_index_weight_zero(
-                farming_asset.harvest_index,
-                farming_asset.last_update_timestamp,
-                now_seconds,
-                farming_asset.release_per_second
-            )
-        } else {
-            YieldFarmingLibrary::calculate_harvest_index(
-                farming_asset.harvest_index,
-                farming_asset.asset_total_weight,
-                farming_asset.last_update_timestamp,
-                now_seconds,
-                farming_asset.release_per_second
-            )
-        }
+    fun calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset: &FarmingAsset<PoolType, AssetT>,
+                                                             now_seconds: u64): u128 {
+        YieldFarmingLibrary::calculate_harvest_index_with_asse_info(
+            farming_asset.asset_total_weight,
+            farming_asset.harvest_index,
+            farming_asset.last_update_timestamp,
+            farming_asset.release_per_second,
+            now_seconds
+        )
     }
 
     /// This function may return a deadline timestamp if the deadline before now
     /// if deadline is valid.
-    fun intra_query_maybe_deadline(now_seconds: u64, deadline: u64) : u64 {
+    fun intra_query_maybe_deadline(now_seconds: u64, deadline: u64, assert_check: bool) : u64 {
         // Calculate end time, if deadline is less than now then `deadline`, otherwise `now`.
-        if (deadline < now_seconds && deadline > 0) {
+        if (deadline > 0) {
+            if (assert_check) {
+                assert(now_seconds > deadline, Errors::invalid_state(ERR_FARMING_OPT_AFTER_DEADLINE));
+            };
             deadline
         } else {
             now_seconds

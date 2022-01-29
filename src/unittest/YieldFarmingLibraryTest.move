@@ -19,5 +19,19 @@ module YieldFarmingLibraryTest {
         Debug::print(&amount);
         assert(amount == 10, 10002);
     }
+
+    #[test] fun test_calc_harvest_index() {
+        let harvest_index = 1499999999999999999;
+        let asset_total_weight = 7000000000;
+        let last_update_timestamp = 86443;
+        let now_seconds = 86444;
+        let release_per_second = 1000000000;
+
+        let new_index = YieldFarmingLibrary::calculate_harvest_index(harvest_index,asset_total_weight, last_update_timestamp, now_seconds, release_per_second);
+        Debug::print(&new_index);
+
+        let amount = YieldFarmingLibrary::calculate_withdraw_amount(new_index, harvest_index, release_per_second * 2);
+        Debug::print(&amount);
+    }
 }
 }
