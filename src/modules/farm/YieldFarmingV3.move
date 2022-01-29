@@ -522,5 +522,17 @@ module YieldFarmingV3 {
     public fun exists_asset_at<PoolType: store, AssetT: store>(broker: address): bool {
         exists<FarmingAsset<PoolType, AssetT>>(broker)
     }
+
+    /// Check stake at address exists.
+    public fun exists_stake_at_address<PoolType: store, AssetT: store>(account: address): bool acquires StakeList{
+        if (exists<StakeList<PoolType, AssetT>>(account) ){
+            let stake_list = borrow_global<StakeList<PoolType, AssetT>>(account);
+            let len = Vector::length(&stake_list.items);
+            if (len > 0) {
+                return true
+            };
+        };
+        return false
+    }
 }
 }
