@@ -11,7 +11,6 @@ module TokenSwapSyrupScript {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
 
-
     public(script) fun add_pool<TokenT: store>(signer: signer,
                                                release_per_second: u128,
                                                delay: u64) {

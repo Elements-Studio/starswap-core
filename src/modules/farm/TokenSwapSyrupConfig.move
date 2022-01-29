@@ -7,4 +7,3 @@ module TokenSwapSyrupConfig {
     // use 0x1::Config;
 }
 }
-
