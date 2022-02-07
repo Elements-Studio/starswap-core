@@ -148,6 +148,19 @@ module TokenSwapGov {
         Token::value<STAR::STAR>(&treasury.treasury)
     }
 
+    /// Upgrade v2 to v3, only called in barnard net for compatibility
+    /// TODO(9191stc): to be remove it before deploy to main net
+    public(script) fun upgrade_v2_to_v3_for_syrup_on_testnet(signer: signer, amount: u128) acquires GovCapability {
+
+        let account = Signer::address_of(&signer);
+        STAR::assert_genesis_address(&signer);
+
+        let gov_cap = borrow_global<GovCapability>(account);
+        let mint_token = Token::mint_with_capability<STAR::STAR>(&gov_cap.mint_cap, amount);
+
+        TokenSwapSyrup::initialize(&signer, mint_token);
+    }
+
     fun calculate_amount_from_percent(percent: u64): u128 {
         let per: u128 = 100;
         ((GOV_TOTAL / per)) * (percent as u128)
