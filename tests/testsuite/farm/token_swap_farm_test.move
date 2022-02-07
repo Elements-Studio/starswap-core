@@ -97,6 +97,7 @@ script {
 address admin = {{admin}};
 script {
     use 0x1::Signer;
+    use 0x1::Debug;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
@@ -106,6 +107,7 @@ script {
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, liquidity_amount);
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
+        Debug::print(&stake_amount);
         assert(stake_amount == liquidity_amount, 1003);
 
         let total_stake_amount = TokenSwapFarmRouter::query_total_stake<WBTC, WETH>();
@@ -131,7 +133,7 @@ script {
     fun admin_harvest(signer: signer) {
         TokenSwapFarmRouter::harvest<WBTC, WETH>(&signer, 0);
         let rewards_amount = Account::balance<STAR::STAR>(Signer::address_of(&signer));
-        assert(rewards_amount > 0, 1004);
+        assert(rewards_amount > 0, 1005);
     }
 }
 // check: EXECUTED
@@ -152,10 +154,10 @@ script {
 
     fun admin_unstake(signer: signer) {
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
-        assert(stake_amount > 0, 1005);
+        assert(stake_amount > 0, 1006);
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, stake_amount);
         let after_amount = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert(after_amount > 0, 1006);
+        assert(after_amount > 0, 1007);
     }
 }
 // check: EXECUTED
@@ -190,10 +192,15 @@ script {
             amount_eth_min);
 
         let liquidity: u128 = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert(liquidity > amount_btc_min, 1007);
+        assert(liquidity > amount_btc_min, 1008);
     }
 }
 // check: EXECUTED
+
+//! block-prologue
+//! author: genesis
+//! block-number: 4
+//! block-time: 86431000
 
 //! new-transaction
 //! sender: alice
@@ -209,23 +216,23 @@ script {
     fun alice_stake(signer: signer) {
         let account = Signer::address_of(&signer);
         let liquidity_amount = TokenSwapRouter::liquidity<WBTC, WETH>(account);
-        assert(liquidity_amount > 0, 1008);
+        assert(liquidity_amount > 0, 1009);
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(stake_amount == 10000, 1009);
+        assert(stake_amount == 10000, 1010);
 
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount1);
-        assert(_stake_amount1 == 20000, 1010);
+        assert(_stake_amount1 == 20000, 1011);
     }
 }
 // check: EXECUTED
 
 //! block-prologue
 //! author: genesis
-//! block-number: 4
+//! block-number: 5
 //! block-time: 86440000
 
 //! new-transaction
@@ -239,18 +246,18 @@ script {
     fun alice_unstake(signer: signer) {
         let account = Signer::address_of(&signer);
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(stake_amount == 20000, 1011);
+        assert(stake_amount == 20000, 1020);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(_stake_amount1 == 10000, 1012);
+        assert(_stake_amount1 == 10000, 1021);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount2 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount2);
-        assert(_stake_amount2 == 0, 1013);
+        assert(_stake_amount2 == 0, 1022);
     }
 }
 // check: EXECUTED
@@ -268,12 +275,12 @@ script {
         // Set to 10x
         TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
         let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
-        assert(alive, 1014);
-        assert(release_per_sec == 1000000000, 1015); // Check relesase per second
+        assert(alive, 1030);
+        assert(release_per_sec == 1000000000, 1031); // Check relesase per second
 
         let mutipler = TokenSwapFarmRouter::get_farm_multipler<WBTC, WETH>();
         Debug::print(&mutipler);
-        assert(mutipler == 10, 1016);
+        assert(mutipler == 10, 1032);
     }
 }
 // check: EXECUTED

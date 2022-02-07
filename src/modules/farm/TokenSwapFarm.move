@@ -357,7 +357,7 @@ module TokenSwapFarm {
             STAR::token_address(),
             total_token,
             total_amount,
-            0,
+            1,
             0,
             &farm_cap.cap
         );

@@ -327,13 +327,13 @@ module YieldFarmingV3 {
             amount
         };
 
-        Debug::print(&22222222);
-        Debug::print(farming_asset);
-        Debug::print(stake);
-        Debug::print(&new_harvest_index);
-        Debug::print(&period_gain);
-        Debug::print(&now_seconds);
-        Debug::print(&22222222);
+//        Debug::print(&22222222);
+//        Debug::print(farming_asset);
+//        Debug::print(stake);
+//        Debug::print(&new_harvest_index);
+//        Debug::print(&period_gain);
+//        Debug::print(&now_seconds);
+//        Debug::print(&22222222);
 
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, withdraw_amount);
         stake.gain = total_gain - withdraw_amount;
@@ -382,13 +382,13 @@ module YieldFarmingV3 {
             asset_weight
         );
 
-        Debug::print(&11111111);
-        Debug::print(farming_asset);
-        Debug::print(stake);
-        Debug::print(&now_seconds);
-        Debug::print(&new_harvest_index);
-        Debug::print(&new_gain);
-        Debug::print(&11111111);
+//        Debug::print(&11111111);
+//        Debug::print(farming_asset);
+//        Debug::print(stake);
+//        Debug::print(&now_seconds);
+//        Debug::print(&new_harvest_index);
+//        Debug::print(&new_gain);
+//        Debug::print(&11111111);
 
         stake.gain + new_gain
     }
@@ -397,6 +397,7 @@ module YieldFarmingV3 {
     public fun query_total_stake<PoolType: store,
                                  AssetT: store>(broker: address): u128 acquires FarmingAsset {
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        Debug::print(farming_asset);
         farming_asset.asset_total_weight
     }
 

@@ -61,7 +61,7 @@ module YieldFarmingLibrary {
                                        now_seconds: u64,
                                        release_per_second: u128): u128 {
         assert(asset_total_weight > 0, Errors::invalid_argument(ERR_FARMING_TOTAL_WEIGHT_IS_ZERO));
-        assert(last_update_timestamp < now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
+        assert(last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
         let time_period = now_seconds - last_update_timestamp;
         let numr = release_per_second * (time_period as u128);
