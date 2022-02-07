@@ -125,9 +125,7 @@ script {
         Debug::print(&reward_token_amount);
 
         assert(unstake_token_amount == CommonHelper::pow_amount<TokenMock::WETH>(1000000), 10006);
-
-        // Check is half of amount from stakeing in two times
-        assert(reward_token_amount == CommonHelper::pow_amount<TokenMock::WETH>(50), 10007);
+        assert(reward_token_amount == CommonHelper::pow_amount<TokenMock::WETH>(100), 10007);
 
         let user_addr = Signer::address_of(&signer);
         Account::deposit<TokenMock::WETH>(user_addr, unstaked_token);

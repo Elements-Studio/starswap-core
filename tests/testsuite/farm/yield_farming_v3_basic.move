@@ -302,7 +302,7 @@ script {
 address alice = {{alice}};
 address bob = {{bob}};
 script {
-    //use 0x1::Debug;
+    use 0x1::Debug;
     use 0x1::Signer;
     use 0x1::Account;
 
@@ -312,6 +312,8 @@ script {
     /// bob harvest after 4 seconds, checking whether has rewards.
     fun bob_harvest_mul1x_deadline60_after4sec_check_abort(signer: signer) {
         let amount1 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
+        Debug::print(&99999999);
+        Debug::print(&amount1);
         assert(amount1 == CommonHelper::pow_amount<Usdx>(60), 10002);
 
         let token = YieldFarmingWarpper::harvest(&signer, 1);

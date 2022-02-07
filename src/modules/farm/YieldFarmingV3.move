@@ -255,8 +255,7 @@ module YieldFarmingV3 {
         } = pop_stake<PoolType, AssetT>(&mut items.items, stake_id);
 
         assert(stake_id == out_stake_id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
-
-        let now_seconds = intra_query_maybe_deadline(now_seconds, deadline, true);
+        assert_check_maybe_deadline(now_seconds, deadline);
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
@@ -306,7 +305,7 @@ module YieldFarmingV3 {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, cap.stake_id);
 
-        now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline, true);
+        assert_check_maybe_deadline(now_seconds, cap.deadline);
 
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
 
@@ -367,8 +366,14 @@ module YieldFarmingV3 {
         let now_seconds = Timestamp::now_seconds();
         assert(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
 
+        // Calculate from latest timestamp to deadline timestamp if deadline valid
+        now_seconds = if (now_seconds > cap.deadline) {
+            now_seconds
+        } else {
+            cap.deadline
+        };
+
         // Calculate new harvest index
-        let now_seconds = intra_query_maybe_deadline(now_seconds, cap.deadline, false);
         let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
             farming_asset,
             now_seconds
@@ -456,18 +461,12 @@ module YieldFarmingV3 {
         )
     }
 
-    /// This function may return a deadline timestamp if the deadline before now
-    /// if deadline is valid.
-    fun intra_query_maybe_deadline(now_seconds: u64, deadline: u64, assert_check: bool) : u64 {
+    /// Checking deadline time has arrived if deadline valid.
+    fun assert_check_maybe_deadline(now_seconds: u64, deadline: u64) {
         // Calculate end time, if deadline is less than now then `deadline`, otherwise `now`.
         if (deadline > 0) {
-            if (assert_check) {
-                assert(now_seconds > deadline, Errors::invalid_state(ERR_FARMING_OPT_AFTER_DEADLINE));
-            };
-            deadline
-        } else {
-            now_seconds
-        }
+            assert(now_seconds > deadline, Errors::invalid_state(ERR_FARMING_OPT_AFTER_DEADLINE));
+        };
     }
 
     /// Pool state check function
