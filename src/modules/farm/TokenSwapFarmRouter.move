@@ -138,5 +138,17 @@ module TokenSwapFarmRouter {
             TokenSwapFarm::get_farm_multiplier<Y, X>()
         }
     }
+
+    /// Get farm mutiple of second per releasing
+    public(script) fun init_for_upgrade<X: copy + drop + store,
+                                        Y: copy + drop + store>(signer: signer) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::init_for_upgrade<X, Y>(&signer)
+        } else {
+            TokenSwapFarm::init_for_upgrade<Y, X>(&signer)
+        };
+    }
 }
 }

@@ -31,7 +31,7 @@ module YieldFarmingV3 {
     const ERR_FARMING_ALIVE_STATE_INVALID: u64 = 114;
     const ERR_FARMING_ASSET_NOT_EXISTS: u64 = 115;
     const ERR_FARMING_STAKE_INDEX_ERROR: u64 = 116;
-    const ERR_FARMING_MULTIPLIER_OVERFLOW: u64 = 117;
+    const ERR_FARMING_MULTIPLIER_INVALID: u64 = 117;
     const ERR_FARMING_OPT_AFTER_DEADLINE: u64 = 118;
 
     /// The object of yield farming
@@ -166,6 +166,8 @@ module YieldFarmingV3 {
         _cap: &ParameterModifyCapability<PoolType, AssetT>) : (HarvestCapability<PoolType, AssetT>, u64)
     acquires StakeList, FarmingAsset {
         assert(exists_asset_at<PoolType, AssetT>(broker_addr), Errors::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS));
+        assert(asset_multiplier > 0, Errors::invalid_state(ERR_FARMING_MULTIPLIER_INVALID));
+
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
         let now_seconds = Timestamp::now_seconds();
 
