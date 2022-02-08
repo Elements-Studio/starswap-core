@@ -56,12 +56,12 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::query_release_per_second<X, Y>()
     }
 
-    public(script) fun set_farm_multiple<X: copy + drop + store, Y: copy + drop + store>(signer: signer, mutiple: u64) {
-        TokenSwapFarmRouter::set_farm_multiple<X, Y>(&signer, mutiple);
+    public(script) fun set_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(signer: signer, mutiple: u64) {
+        TokenSwapFarmRouter::set_farm_multiplier<X, Y>(&signer, mutiple);
     }
 
-    public fun get_farm_multipler<X: copy + drop + store, Y: copy + drop + store>(): u64 {
-        TokenSwapFarmRouter::get_farm_multipler<X, Y>()
+    public fun get_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(): u64 {
+        TokenSwapFarmRouter::get_farm_multiplier<X, Y>()
     }
 }
 }

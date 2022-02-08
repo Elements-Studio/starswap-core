@@ -273,12 +273,12 @@ script {
 
     fun admin_set_release_multi_basic(signer: signer) {
         // Set to 10x
-        TokenSwapFarmRouter::set_farm_multiple<WBTC, WETH>(&signer, 10);
+        TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 10);
         let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
         assert(alive, 1030);
         assert(release_per_sec == 1000000000, 1031); // Check relesase per second
 
-        let mutipler = TokenSwapFarmRouter::get_farm_multipler<WBTC, WETH>();
+        let mutipler = TokenSwapFarmRouter::get_farm_multiplier<WBTC, WETH>();
         Debug::print(&mutipler);
         assert(mutipler == 10, 1032);
     }
