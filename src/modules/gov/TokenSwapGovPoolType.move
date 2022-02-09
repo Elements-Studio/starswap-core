@@ -4,7 +4,10 @@
 // TODO: replace the address with admin address
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapGovPoolType {
-    struct PoolTypeLiquidityMint has key, store {}
+
+    struct PoolTypeLiquidityMint has key, store {} // Obsoleted in latest test version
+
+    struct PoolTypeFarmPool has key, store {}
 
     struct PoolTypeSyrup has key, store {}
 
