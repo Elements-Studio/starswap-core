@@ -12,11 +12,14 @@ module TokenSwap {
     use 0x1::BCS;
     use 0x1::Timestamp;
     use 0x1::Event;
+    use 0x1::Errors;
     use 0x1::U256::{Self, U256};
+
     use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
 
+    const EDEPRECATED_FUNCTION: u64 = 19;
 
     struct LiquidityToken<X, Y> has key, store, copy, drop {}
 
@@ -35,8 +38,7 @@ module TokenSwap {
         signer: address,
     }
 
-    /// Event emitted while add liquidity to x and y.
-    /// In order to distinguish `MintEvent` from mint.
+    /// Event emitted when add token liquidity.
     struct AddLiquidityEvent has drop, store {
         /// liquidity value by user X and Y type
         liquidity: u128,
@@ -44,33 +46,39 @@ module TokenSwap {
         x_token_code: Token::TokenCode,
         /// token code of X type
         y_token_code: Token::TokenCode,
-        /// Committer
+        /// signer of add liquidity
         signer: address,
-    }
-
-    /// Event emitted when add token liquidity.
-    struct MintEvent has drop, store {
-        /// token code of X type
-        x_token_code: Token::TokenCode,
-        /// token code of X type
-        y_token_code: Token::TokenCode,
-        x_value: u128,
-        y_value: u128,
-        /// liquidity value by user X and Y type
-        liquidity: u128,
+        amount_x_desired: u128,
+        amount_y_desired: u128,
+        amount_x_min: u128,
+        amount_y_min: u128,
     }
 
     /// Event emitted when remove token liquidity.
-    struct BurnEvent has drop, store {
+    struct RemoveLiquidityEvent has drop, store {
+        /// liquidity value by user X and Y type
+        liquidity: u128,
         /// token code of X type
         x_token_code: Token::TokenCode,
         /// token code of X type
         y_token_code: Token::TokenCode,
         /// signer of remove liquidity
-        x_value: u128,
-        y_value: u128,
-        /// burn value by user X and Y type
-        to_burn_value: u128,
+        signer: address,
+        amount_x_min: u128,
+        amount_y_min: u128,
+    }
+
+    /// Event emitted when token swap .
+    /// (Obsoleted field)
+    struct SwapFeeEvent has drop, store {
+        /// token code of X type
+        x_token_code: Token::TokenCode,
+        /// token code of X type
+        y_token_code: Token::TokenCode,
+        signer: address,
+        fee_addree: address,
+        swap_fee: u128,
+        fee_out: u128,
     }
 
     /// Event emitted when token swap.
@@ -81,9 +89,7 @@ module TokenSwap {
         y_token_code: Token::TokenCode,
         x_in: u128,
         y_out: u128,
-        y_in: u128,
-        x_out: u128,
-//        signer: address,
+        signer: address,
     }
 
     struct TokenPair<X, Y> has key, store {
@@ -94,11 +100,14 @@ module TokenSwap {
         last_price_y_cumulative: U256,
         last_k: U256,
         token_pair_register_event: Event::EventHandle<TokenPairRegisterEvent>,
-        add_liquidity_event: Event::EventHandle<AddLiquidityEvent>,
+
         // reserve0 * reserve1, as of immediately after the most recent liquidity event
-        mint_event: Event::EventHandle<MintEvent>,
-        burn_event: Event::EventHandle<BurnEvent>,
+        add_liquidity_event: Event::EventHandle<AddLiquidityEvent>,
+        remove_liquidity_event: Event::EventHandle<RemoveLiquidityEvent>,
         swap_event: Event::EventHandle<SwapEvent>,
+
+        /// Obsoleted field
+        swap_fee_event: Event::EventHandle<SwapFeeEvent>,
     }
 
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;
@@ -135,6 +144,7 @@ module TokenSwap {
         let token_pair = make_token_pair<X, Y>(signer);
         move_to(signer, token_pair);
         register_liquidity_token<X, Y>(signer);
+
         emit_token_pair_register_event<X, Y>(signer);
     }
 
@@ -156,9 +166,9 @@ module TokenSwap {
             last_k: U256::zero(),
             token_pair_register_event: Event::new_event_handle<TokenPairRegisterEvent>(signer),
             add_liquidity_event: Event::new_event_handle<AddLiquidityEvent>(signer),
-            mint_event: Event::new_event_handle<MintEvent>(signer),
-            burn_event: Event::new_event_handle<BurnEvent>(signer),
+            remove_liquidity_event: Event::new_event_handle<RemoveLiquidityEvent>(signer),
             swap_event: Event::new_event_handle<SwapEvent>(signer),
+            swap_fee_event: Event::new_event_handle<SwapFeeEvent>(signer),
         }
     }
 
@@ -194,9 +204,6 @@ module TokenSwap {
         let mint_token = Token::mint_with_capability(&liquidity_cap.mint, liquidity);
         update<X, Y>(x_reserve, y_reserve);
 
-        // Emit MintEvent
-        emit_mint_event<X, Y>(x_value, y_value, liquidity);
-
         mint_token
     }
 
@@ -212,11 +219,12 @@ module TokenSwap {
         let x = SafeMath::safe_mul_div_u128(to_burn_value, x_reserve, total_supply);
         let y = SafeMath::safe_mul_div_u128(to_burn_value, y_reserve, total_supply);
         assert(x > 0 && y > 0, ERROR_SWAP_BURN_CALC_INVALID);
-        burn_liquidity(to_burn);
+        burn_liquidity<X, Y>(to_burn);
+
         let x_token = Token::withdraw(&mut token_pair.token_x_reserve, x);
         let y_token = Token::withdraw(&mut token_pair.token_y_reserve, y);
         update<X, Y>(x_reserve, y_reserve);
-        emit_burn_event<X, Y>(x, y, to_burn_value);
+
         (x_token, y_token)
     }
     
@@ -290,7 +298,6 @@ module TokenSwap {
         };
 
         update<X, Y>(x_reserve, y_reserve);
-        emit_swap_event<X, Y>(x_in_value, y_out, y_in_value, x_out);
         (x_swapped, y_swapped, x_swap_fee, y_swap_fee)
     }
 
@@ -307,72 +314,64 @@ module TokenSwap {
         });
     }
 
-    public fun emit_add_liquidity_event<X: copy + drop + store,
-                                        Y: copy + drop + store>(
-        user_address: address,
-        liquidity_token: &Token::Token<LiquidityToken<X, Y>>
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
-            liquidity: Token::value<LiquidityToken<X, Y>>(liquidity_token),
-            x_token_code: Token::token_code<X>(),
-            y_token_code: Token::token_code<Y>(),
-            signer: user_address,
-        });
+    /// Emit add liquidity event
+    public fun emit_add_liquidity_event<X: copy + drop + store, Y: copy + drop + store>(
+        _signer: &signer,
+        _liquidity: u128,
+        _amount_x_desired: u128,
+        _amount_y_desired: u128,
+        _amount_x_min: u128,
+        _amount_y_min: u128,
+    ) {
+        abort Errors::deprecated(EDEPRECATED_FUNCTION)
+//        let token_pair = borrow_global_mut<TokenPair<X, Y>>(admin_address());
+//        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
+//            x_token_code: Token::token_code<X>(),
+//            y_token_code: Token::token_code<Y>(),
+//            signer: Signer::address_of(signer),
+//            liquidity,
+//            amount_x_desired,
+//            amount_y_desired,
+//            amount_x_min,
+//            amount_y_min,
+//        });
     }
 
-    /// Emit mint event
-    public fun emit_mint_event<X: copy + drop + store, Y: copy + drop + store>(
-        x_value: u128,
-        y_value: u128,
-        liquidity: u128,
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        Event::emit_event(&mut token_pair.mint_event, MintEvent{
-            x_token_code: Token::token_code<X>(),
-            y_token_code: Token::token_code<Y>(),
-            x_value,
-            y_value,
-            liquidity,
-        });
-    }
-
-    /// Emit burn event
-    fun emit_burn_event<X: copy + drop + store, Y: copy + drop + store>(
-        x_value: u128,
-        y_value: u128,
-        to_burn_value: u128,
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        Event::emit_event(&mut token_pair.burn_event, BurnEvent{
-            x_token_code: Token::token_code<X>(),
-            y_token_code: Token::token_code<Y>(),
-            x_value,
-            y_value,
-            to_burn_value,
-        });
+    /// Emit remove liquidity event
+    fun emit_remove_liquidity_event<X: copy + drop + store, Y: copy + drop + store>(
+        _signer: &signer,
+        _liquidity: u128,
+        _amount_x_min: u128,
+        _amount_y_min: u128,
+    ) {
+        abort Errors::deprecated(EDEPRECATED_FUNCTION)
+//        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+//        Event::emit_event(&mut token_pair.remove_liquidity_event, RemoveLiquidityEvent{
+//            x_token_code: Token::token_code<X>(),
+//            y_token_code: Token::token_code<Y>(),
+//            signer: Signer::address_of(signer),
+//            liquidity,
+//            amount_x_min,
+//            amount_y_min,
+//        });
     }
 
     /// Emit swap event
     fun emit_swap_event<X: copy + drop + store, Y: copy + drop + store>(
-        //        signer: &signer,
-        x_in: u128,
-        y_out: u128,
-        y_in: u128,
-        x_out: u128,
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        Event::emit_event(&mut token_pair.swap_event, SwapEvent{
-            x_token_code: Token::token_code<X>(),
-            y_token_code: Token::token_code<Y>(),
-            //            signer: Signer::address_of(signer),
-            x_in,
-            y_out,
-            y_in,
-            x_out,
-        });
+        _signer: &signer,
+        _x_in: u128,
+        _y_out: u128,
+    ) {
+        abort Errors::deprecated(EDEPRECATED_FUNCTION)
+//        let token_pair = borrow_global_mut<TokenPair<X, Y>>(admin_address());
+//        Event::emit_event(&mut token_pair.swap_event, SwapEvent{
+//            x_token_code: Token::token_code<X>(),
+//            y_token_code: Token::token_code<Y>(),
+//            signer: Signer::address_of(signer),
+//            x_in,
+//            y_out,
+//        });
     }
-
 
     /// Caller should call this function to determine the order of A, B
     public fun compare_token<X: copy + drop + store, Y: copy + drop + store>(): u8 {
@@ -428,6 +427,74 @@ module TokenSwap {
         let (fee_numerator, fee_denominator) = TokenSwapConfig::get_poundage_rate<X, Y>();
         let (operation_numerator, operation_denominator) = TokenSwapConfig::get_swap_fee_operation_rate();
         ((fee_numerator * operation_numerator as u128), (fee_denominator * operation_denominator as u128))
+    }
+
+    /// Do mint and emit `AddLiquidityEvent` event
+    public fun mint_and_emit_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        x_token: Token::Token<X>,
+        y_token: Token::Token<Y>,
+        amount_x_desired: u128,
+        amount_y_desired: u128,
+        amount_x_min: u128,
+        amount_y_min: u128): Token::Token<LiquidityToken<X, Y>> acquires TokenPair, LiquidityTokenCapability {
+
+        let liquidity_token = mint<X, Y>(x_token, y_token);
+
+        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: Signer::address_of(signer),
+            liquidity: Token::value<LiquidityToken<X, Y>>(&liquidity_token),
+            amount_x_desired,
+            amount_y_desired,
+            amount_x_min,
+            amount_y_min,
+        });
+        liquidity_token
+    }
+
+    /// Do burn and emit `RemoveLiquidityEvent` event
+    public fun burn_and_emit_event<X: copy + drop + store,
+                                   Y: copy + drop + store>(signer: &signer,
+                                                           to_burn: Token::Token<LiquidityToken<X, Y>>,
+                                                           amount_x_min: u128,
+                                                           amount_y_min: u128)
+    : (Token::Token<X>, Token::Token<Y>) acquires TokenPair, LiquidityTokenCapability {
+        let liquidity = Token::value<LiquidityToken<X, Y>>(&to_burn);
+        let (x_token, y_token) = burn<X, Y>(to_burn);
+
+        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+        Event::emit_event(&mut token_pair.remove_liquidity_event, RemoveLiquidityEvent{
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: Signer::address_of(signer),
+            liquidity,
+            amount_x_min,
+            amount_y_min,
+        });
+        (x_token, y_token)
+    }
+
+    /// Do swap and emit `SwapEvent` event
+    public fun swap_and_emit_event<X: copy + drop + store,
+                                   Y: copy + drop + store>(
+        signer: &signer,
+        x_in: Token::Token<X>,
+        y_out: u128,
+        y_in: Token::Token<Y>,
+        x_out: u128): (Token::Token<X>, Token::Token<Y>, Token::Token<X>, Token::Token<Y>) acquires TokenPair {
+        let (token_x_out, token_y_out, token_x_fee, token_y_fee) = swap<X, Y>(x_in, y_out, y_in, x_out);
+        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+        Event::emit_event(&mut token_pair.swap_event, SwapEvent{
+            x_token_code: Token::token_code<X>(),
+            y_token_code: Token::token_code<Y>(),
+            signer: Signer::address_of(signer),
+            x_in: Token::value<X>(&token_x_out),
+            y_out: Token::value<Y>(&token_y_out),
+        });
+        (token_x_out, token_y_out, token_x_fee, token_y_fee)
     }
 }
 }

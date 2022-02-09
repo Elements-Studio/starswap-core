@@ -8,6 +8,7 @@ module TokenSwapRouter {
     use 0x1::Signer;
     use 0x1::Token;
     use 0x1::U256::U256;
+
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
@@ -125,18 +126,16 @@ module TokenSwapRouter {
         let x_token = Account::withdraw<X>(signer, amount_x);
         let y_token = Account::withdraw<Y>(signer, amount_y);
 
-        let liquidity_token = TokenSwap::mint<X, Y>(x_token, y_token);
+        let liquidity_token = TokenSwap::mint_and_emit_event<X, Y>(
+            signer, x_token, y_token, amount_x_desired, amount_y_desired, amount_x_min, amount_y_min);
+
         if (!Account::is_accepts_token<LiquidityToken<X, Y>>(Signer::address_of(signer))) {
             Account::do_accept_token<LiquidityToken<X, Y>>(signer);
         };
 
         let liquidity: u128 = Token::value<LiquidityToken<X, Y>>(&liquidity_token);
         assert(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
-
-        let user_address = Signer::address_of(signer);
-
-        TokenSwap::emit_add_liquidity_event(user_address, &liquidity_token);
-        Account::deposit(user_address, liquidity_token);
+        Account::deposit(Signer::address_of(signer), liquidity_token);
     }
 
     fun intra_calculate_amount_for_liquidity<X: copy + drop + store, Y: copy + drop + store>(
@@ -184,11 +183,12 @@ module TokenSwapRouter {
         amount_y_min: u128,
     ) {
         let liquidity_token = Account::withdraw<LiquidityToken<X, Y>>(signer, liquidity);
-        let (token_x, token_y) = TokenSwap::burn(liquidity_token);
+        let (token_x, token_y) = TokenSwap::burn_and_emit_event(signer, liquidity_token, amount_x_min, amount_y_min);
         assert(Token::value(&token_x) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
         assert(Token::value(&token_y) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
         Account::deposit(Signer::address_of(signer), token_x);
         Account::deposit(Signer::address_of(signer), token_y);
+        // TokenSwap::emit_remove_liquidity_event<X, Y>(signer, liquidity, amount_x_min, amount_y_min);
     }
 
     public fun swap_exact_token_for_token<X: copy + drop + store, Y: copy + drop + store>(
@@ -212,10 +212,11 @@ module TokenSwapRouter {
         let (token_x_out, token_y_out);
         let (token_x_fee, token_y_fee);
         if (order == 1) {
-            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap<X, Y>(token_x, y_out, Token::zero(), 0);
+            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap_and_emit_event<X, Y>(signer, token_x, y_out, Token::zero(), 0);
         } else {
-            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap<Y, X>(Token::zero(), 0, token_x, y_out);
+            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap_and_emit_event<Y, X>(signer, Token::zero(), 0, token_x, y_out);
         };
+
         Token::destroy_zero(token_x_out);
         Account::deposit(Signer::address_of(signer), token_y_out);
         Token::destroy_zero(token_y_fee);
