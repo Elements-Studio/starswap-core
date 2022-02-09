@@ -13,6 +13,7 @@ script {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
+
         let precision: u8 = 9; //STC precision is also 9.
         TokenMock::register_token<WUSDT>(&signer, precision);
     }

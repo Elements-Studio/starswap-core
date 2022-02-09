@@ -342,6 +342,17 @@ module TokenSwapRouter {
         };
     }
 
+    public(script) fun upgrade_tokenpair_to_tokenswappair<X: copy + drop + store,
+                                                          Y: copy + drop + store>(signer: signer) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwap::upgrade_tokenpair_to_tokenswappair<X, Y>(&signer);
+        } else {
+            TokenSwap::upgrade_tokenpair_to_tokenswappair<Y, X>(&signer);
+        };
+    }
+
     /// Operation rate from all swap fee
     public fun set_swap_fee_operation_rate(signer: &signer,
                                            num: u64,
