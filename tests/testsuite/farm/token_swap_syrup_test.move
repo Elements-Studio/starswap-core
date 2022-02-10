@@ -116,7 +116,6 @@ script {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
 
     fun alice_unstake_after_1_second(signer: signer) {
-
         let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
         let unstake_token_amount = Token::value<TokenMock::WETH>(&unstaked_token);
         let reward_token_amount = Token::value<STAR::STAR>(&reward_token);
@@ -130,6 +129,41 @@ script {
         let user_addr = Signer::address_of(&signer);
         Account::deposit<TokenMock::WETH>(user_addr, unstaked_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);
+    }
+}
+// check: EXECUTED
+
+//! new-transaction
+//! sender: admin
+address admin = {{admin}};
+script {
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+
+    fun admin_stepwise_config(signer: signer) {
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 1000, 1);
+        let multiplier = TokenSwapConfig::get_stepwise_multiplier(1000);
+        assert(multiplier == 1, 10008);
+
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 2000, 2);
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(2000);
+        assert(multiplier == 2, 10009);
+
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 3000, 3);
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(3000);
+        assert(multiplier == 3, 10010);
+
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 1000, 5);
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(1000);
+        assert(multiplier == 5, 10011);
+
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(6000);
+        assert(multiplier == 1, 10012);
+
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(2000);
+        assert(multiplier == 2, 10013);
+
+        multiplier = TokenSwapConfig::get_stepwise_multiplier(3000);
+        assert(multiplier == 3, 10014);
     }
 }
 // check: EXECUTED

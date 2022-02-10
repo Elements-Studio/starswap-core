@@ -8,6 +8,8 @@ module TokenSwapConfig {
     use 0x1::Config;
     use 0x1::Signer;
     use 0x1::Errors;
+    use 0x1::Vector;
+    use 0x1::Option;
 
     // Numerator and denumerator default fixed value
     const DEFAULT_OPERATION_NUMERATOR: u64 = 10;
@@ -28,6 +30,15 @@ module TokenSwapConfig {
     struct SwapFeeOperationConfig has copy, drop, store {
         numerator: u64,
         denumerator: u64,
+    }
+
+    struct StepwiseMutiplier has copy, drop, store {
+        interval_sec: u64,
+        multiplier: u64,
+    }
+
+    struct SwapStepwiseMultiplierConfig has copy, drop, store {
+        list: vector<StepwiseMutiplier>,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -58,7 +69,7 @@ module TokenSwapConfig {
 
     /// Set fee rate for operation rate, only admin can call
     public fun set_swap_fee_operation_rate(signer: &signer, num: u64, denum: u64) {
-        assert(Signer::address_of(signer) == admin_address(), Errors::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
+        assert_admin(signer);
         let config = SwapFeeOperationConfig{
             numerator: num,
             denumerator: denum,
@@ -75,7 +86,8 @@ module TokenSwapConfig {
                                  Y: copy + drop + store>(signer: &signer,
                                                          num: u64,
                                                          denum: u64) {
-        assert(Signer::address_of(signer) == admin_address(), Errors::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
+        assert_admin(signer);
+
         let config = SwapFeePoundageConfig<X, Y>{
             numerator: num,
             denumerator: denum,
@@ -87,12 +99,83 @@ module TokenSwapConfig {
         }
     }
 
+    public fun put_stepwise_multiplier(
+        signer: &signer,
+        interval_sec: u64,
+        multiplier: u64) {
+        if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
+            let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
+            let idx = find_mulitplier_idx(&mut conf.list, interval_sec);
+
+            if (Option::is_some(&idx)) {
+                let step_mutiplier = Vector::borrow_mut<StepwiseMutiplier>(&mut conf.list, Option::destroy_some<u64>(idx));
+                step_mutiplier.multiplier = multiplier;
+            } else {
+                Vector::push_back(&mut conf.list, StepwiseMutiplier {
+                    interval_sec,
+                    multiplier,
+                });
+            };
+            // Reset to config
+            Config::set<SwapStepwiseMultiplierConfig>(signer, SwapStepwiseMultiplierConfig {
+                list: *&conf.list
+            });
+
+        } else {
+            let step_mutiplier = Vector::empty<StepwiseMutiplier>();
+            Vector::push_back(&mut step_mutiplier, StepwiseMutiplier {
+                interval_sec,
+                multiplier,
+            });
+            Config::publish_new_config<SwapStepwiseMultiplierConfig>(signer, SwapStepwiseMultiplierConfig {
+                list: step_mutiplier,
+            });
+        }
+    }
+
+    public fun get_stepwise_multiplier(interval_sec: u64): u64 {
+        if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
+            let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
+            let idx = find_mulitplier_idx(&conf.list, interval_sec);
+            if (Option::is_some(&idx)) {
+                let item = Vector::borrow<StepwiseMutiplier>(&conf.list, Option::destroy_some<u64>(idx));
+                return item.multiplier
+            } else {
+                1
+            }
+        } else {
+            1
+        }
+    }
+
+    fun find_mulitplier_idx(c: &vector<StepwiseMutiplier>, interval_sec: u64): Option::Option<u64> {
+        let len = Vector::length(c);
+        if (len == 0) {
+            return Option::none()
+        };
+        let idx = len - 1;
+        loop {
+            let el = Vector::borrow(c, idx);
+            if (el.interval_sec == interval_sec) {
+                return Option::some<u64>(idx)
+            };
+            if (idx == 0) {
+                return Option::none<u64>()
+            };
+            idx = idx - 1;
+        }
+    }
+
     public fun admin_address(): address {
         @0x4783d08fb16990bd35d83f3e23bf93b8
     }
 
     public fun fee_address(): address {
         @0x0a4183ac9335a9f5804014eab01c0abc
+    }
+
+    public fun assert_admin(signer: &signer) {
+        assert(Signer::address_of(signer) == admin_address(), Errors::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
     }
 
     public fun get_swap_fee_switch(): bool {

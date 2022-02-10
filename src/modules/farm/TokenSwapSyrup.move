@@ -16,6 +16,7 @@ module TokenSwapSyrup {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeSyrup};
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
@@ -298,9 +299,8 @@ module TokenSwapSyrup {
         syrup.release_per_second
     }
 
-    public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
-        // TODO(9191stc): Load from config
-        1
+    public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
+        TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
     }
 
     fun get_stake<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): &SyrupStake<TokenT> {
