@@ -139,27 +139,16 @@ module TokenSwapFarmRouter {
         }
     }
 
-    /// Admin operation from v2 to v3
+
+    /// User operation from v2 to v3
     public(script) fun upgrade_admin_from_v2_to_v3<X: copy + drop + store,
-                                        Y: copy + drop + store>(signer: signer) {
+                                                   Y: copy + drop + store>(signer: signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
             TokenSwapFarm::upgrade_admin_from_v2_to_v3<X, Y>(&signer)
         } else {
             TokenSwapFarm::upgrade_admin_from_v2_to_v3<Y, X>(&signer)
-        };
-    }
-
-    /// User operation from v2 to v3
-    public(script) fun upgrade_stake_from_v2_to_v3<X: copy + drop + store,
-                                                   Y: copy + drop + store>(signer: signer) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::upgrade_stake_from_v2_to_v3<X, Y>(&signer)
-        } else {
-            TokenSwapFarm::upgrade_stake_from_v2_to_v3<Y, X>(&signer)
         };
     }
 
