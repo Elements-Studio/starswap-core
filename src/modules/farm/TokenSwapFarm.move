@@ -15,7 +15,7 @@ module TokenSwapFarm {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::LiquidityToken;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeLiquidityMint};
+    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeLiquidityMint, PoolTypeFarmPool};
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
 
@@ -79,13 +79,13 @@ module TokenSwapFarm {
     }
 
     struct FarmCapability<X, Y> has key, store {
-        cap: YieldFarming::ParameterModifyCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
+        cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
         release_per_seconds: u128,
     }
 
     /// Obsoleted
     struct FarmHarvestCapability<X, Y> has key, store {
-        cap: YieldFarmingV2::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
+        cap: YieldFarmingV2::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
     }
 
     /// Obsoleted
@@ -100,13 +100,13 @@ module TokenSwapFarm {
     struct FarmStake<X, Y> has key, store {
         id: u64,
         /// Harvest capability for Farm
-        cap: YieldFarming::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
+        cap: YieldFarming::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
     }
 
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
         YieldFarming::initialize<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR>(account, token);
 
         move_to(account, FarmPoolEvent{
@@ -126,7 +126,7 @@ module TokenSwapFarm {
         STAR::assert_genesis_address(signer);
 
         // To determine how many amount release in every period
-        let cap = YieldFarming::add_asset<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(
+        let cap = YieldFarming::add_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(
             signer,
             release_per_seconds,
             0);
@@ -169,10 +169,10 @@ module TokenSwapFarm {
         let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(broker);
 
         let (alive, _, _, _, ) =
-            YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(broker);
+            YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(broker);
 
         let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
-        YieldFarming::modify_parameter<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
+        YieldFarming::modify_parameter<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
             &cap.cap,
             broker,
             relese_per_sec_mul,
@@ -197,7 +197,7 @@ module TokenSwapFarm {
         let cap = borrow_global_mut<FarmCapability<X, Y>>(admin_addr);
 
         YieldFarming::modify_parameter<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>
         >(
@@ -278,7 +278,7 @@ module TokenSwapFarm {
         let farm_harvest_cap = borrow_global_mut<FarmStake<X, Y>>(account_addr);
 
         let token = YieldFarming::harvest<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>>(
             account_addr,
@@ -292,33 +292,24 @@ module TokenSwapFarm {
     /// Return calculated APY
     public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmStake {
         let farm = borrow_global<FarmStake<X, Y>>(account);
-        YieldFarming::query_expect_gain<
-            PoolTypeLiquidityMint,
-            STAR::STAR,
-            Token::Token<LiquidityToken<X, Y>>
-        >(account, STAR::token_address(), &farm.cap)
+        YieldFarming::query_expect_gain<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
+            account, STAR::token_address(), &farm.cap)
     }
 
     /// Query all stake amount
     public fun query_info<X: copy + drop + store, Y: copy + drop + store>(): (bool, u128, u128, u128) {
-        YieldFarming::query_info<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
+        YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query all stake amount
     public fun query_total_stake<X: copy + drop + store, Y: copy + drop + store>(): u128 {
-        YieldFarming::query_total_stake<
-            PoolTypeLiquidityMint,
-            Token::Token<LiquidityToken<X, Y>>
-        >(STAR::token_address())
+        YieldFarming::query_total_stake<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query stake amount from user
     public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmStake {
         let farm = borrow_global<FarmStake<X, Y>>(account);
-        YieldFarming::query_stake<
-            PoolTypeLiquidityMint,
-            Token::Token<LiquidityToken<X, Y>>
-        >(account, farm.id)
+        YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account, farm.id)
     }
 
     /// Query release per second
@@ -335,7 +326,7 @@ module TokenSwapFarm {
     : FarmStake<X, Y> acquires FarmStake {
         let account_addr = Signer::address_of(account);
         // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
-        let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
+        let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
             let FarmStake<X, Y>{
                 id: _,
                 cap : unwrap_harvest_cap
@@ -343,7 +334,7 @@ module TokenSwapFarm {
 
             // Unstake all liquidity token and reward token
             let (own_token, reward_token) = YieldFarming::unstake<
-                PoolTypeLiquidityMint,
+                PoolTypeFarmPool,
                 STAR::STAR,
                 Token::Token<LiquidityToken<X, Y>>
             >(account, STAR::token_address(), unwrap_harvest_cap);
@@ -360,7 +351,7 @@ module TokenSwapFarm {
         let total_amount = Token::value<LiquidityToken<X, Y>>(&total_token);
 
         let (new_harvest_cap, stake_id) = YieldFarming::stake<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>>(
             account,
@@ -393,7 +384,7 @@ module TokenSwapFarm {
 
         // unstake all from pool
         let (own_asset_token, reward_token) = YieldFarming::unstake<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>
         >(account, STAR::token_address(), unwrap_harvest_cap);
@@ -409,7 +400,7 @@ module TokenSwapFarm {
 
         // Restake to pool
         let (new_harvest_cap, stake_id) = YieldFarming::stake<
-            PoolTypeLiquidityMint,
+            PoolTypeFarmPool,
             STAR::STAR,
             Token::Token<LiquidityToken<X, Y>>>(
             account,
@@ -450,7 +441,7 @@ module TokenSwapFarm {
         if (exists<FarmHarvestCapability<X, Y>>(user_addr)) {
             let FarmHarvestCapability<X, Y>{ cap } = move_from(user_addr);
             let (asset, reward_token) =
-                YieldFarmingV2::unstake<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(signer, user_addr, cap);
+                YieldFarmingV2::unstake<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(signer, user_addr, cap);
             Account::deposit<LiquidityToken<X, Y>>(user_addr, asset);
             Account::deposit<STAR::STAR>(user_addr, reward_token);
         }
