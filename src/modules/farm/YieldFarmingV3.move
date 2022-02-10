@@ -537,29 +537,33 @@ module YieldFarmingV3 {
         return false
     }
 
-    public fun upgrade_farming_asset_pool_to_pool<
-        FromPoolType: store,
-        ToPoolType: store,
-        AssetT: store>(signer: &signer) acquires FarmingAsset {
-        let broker = Signer::address_of(signer);
-        if (exists_at<FromPoolType, AssetT>(broker)) {
-            let FarmingAsset<FromPoolType, AssetT> {
-                asset_total_weight,
-                harvest_index,
-                last_update_timestamp,
-                release_per_second,
-                start_time,
-                alive,
-            } = move_from<FarmingAsset<FromPoolType, AssetT>>(broker);
-
-            let farming_asset = borrow_global_mut<FarmingAsset<ToPoolType, AssetT>>(broker);
-            farming_asset.asset_total_weight = asset_total_weight;
-            farming_asset.harvest_index = harvest_index;
-            farming_asset.last_update_timestamp = last_update_timestamp;
-            farming_asset.release_per_second = release_per_second;
-            farming_asset.start_time = start_time;
-            farming_asset.alive = alive;
-        };
-    }
+//    public fun upgrade_farming_asset_pool_to_pool<
+//        FromPoolType: store,
+//        ToPoolType: store,
+//        AssetT: store>(signer: &signer,
+//                       cap: ParameterModifyCapability<FromPoolType, AssetT>)
+//    : ParameterModifyCapability<ToPoolType, AssetT> acquires FarmingAsset {
+//        let ParameterModifyCapability<FromPoolType, AssetT> {} = cap;
+//        let broker = Signer::address_of(signer);
+//        if (exists_at<FromPoolType, AssetT>(broker)) {
+//            let FarmingAsset<FromPoolType, AssetT> {
+//                asset_total_weight,
+//                harvest_index,
+//                last_update_timestamp,
+//                release_per_second,
+//                start_time,
+//                alive,
+//            } = move_from<FarmingAsset<FromPoolType, AssetT>>(broker);
+//
+//            let farming_asset = borrow_global_mut<FarmingAsset<ToPoolType, AssetT>>(broker);
+//            farming_asset.asset_total_weight = asset_total_weight;
+//            farming_asset.harvest_index = harvest_index;
+//            farming_asset.last_update_timestamp = last_update_timestamp;
+//            farming_asset.release_per_second = release_per_second;
+//            farming_asset.start_time = start_time;
+//            farming_asset.alive = alive;
+//        };
+//        ParameterModifyCapability<ToPoolType, AssetT> {}
+//    }
 }
 }

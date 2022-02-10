@@ -425,42 +425,57 @@ module TokenSwapFarm {
         }
     }
 
-    /// Unstake old unharvest tokens
-    public fun upgrade_admin_from_v2_to_v3<X: copy + drop + store, Y: copy + drop + store>(signer: &signer)
-    acquires FarmHarvestCapability, FarmPoolCapability, FarmStake, FarmPoolStake, FarmPoolEvent {
-        let user_addr = Signer::address_of(signer);
-
-        // Unstake old
-        if (exists<FarmHarvestCapability<X, Y>>(user_addr)) {
-            let FarmHarvestCapability<X, Y>{ cap } = move_from(user_addr);
-            let (asset, reward_token) =
-                YieldFarmingV2::unstake<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(signer, user_addr, cap);
-            Account::deposit<LiquidityToken<X, Y>>(user_addr, asset);
-            Account::deposit<STAR::STAR>(user_addr, reward_token);
-        };
-
-        // Unstake from old pool
-        if (exists<FarmStake<X, Y>>(user_addr)) {
-            let FarmStake<X, Y>{
-                id: _,
-                cap : unwrap_harvest_cap
-            } = move_from<FarmStake<X, Y>>(user_addr);
-
-            // Unstake all liquidity token and reward token
-            let (own_token, reward_token) = YieldFarming::unstake<
-                PoolTypeLiquidityMint,
-                STAR::STAR,
-                Token::Token<LiquidityToken<X, Y>>>(signer, STAR::token_address(), unwrap_harvest_cap);
-            let own_token_amount = Token::value(&own_token);
-            TokenSwapRouter::deposit_liquidity_token<X, Y>(user_addr, own_token);
-            Account::deposit<STAR::STAR>(user_addr, reward_token);
-
-            // restake to new pool
-            stake<X, Y>(signer, own_token_amount);
-        };
-
-        YieldFarming::upgrade_farming_asset_pool_to_pool<
-            PoolTypeLiquidityMint, PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(signer);
-    }
+//    /// Unstake old unharvest tokens
+//    public fun upgrade_admin_from_v2_to_v3<X: copy + drop + store, Y: copy + drop + store>(signer: &signer)
+//    acquires FarmHarvestCapability, FarmCapability, FarmPoolCapability, FarmStake, FarmPoolStake, FarmPoolEvent {
+//        let user_addr = Signer::address_of(signer);
+//
+//        // Unstake old
+//        if (exists<FarmHarvestCapability<X, Y>>(user_addr)) {
+//            let FarmHarvestCapability<X, Y>{ cap } = move_from(user_addr);
+//            let (asset, reward_token) =
+//                YieldFarmingV2::unstake<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(signer, user_addr, cap);
+//            Account::deposit<LiquidityToken<X, Y>>(user_addr, asset);
+//            Account::deposit<STAR::STAR>(user_addr, reward_token);
+//        };
+//
+//        // Unstake from old pool
+//        if (exists<FarmStake<X, Y>>(user_addr)) {
+//            let FarmStake<X, Y>{
+//                id: _,
+//                cap : unwrap_harvest_cap
+//            } = move_from<FarmStake<X, Y>>(user_addr);
+//
+//            // Unstake all liquidity token and reward token
+//            let (own_token, reward_token) = YieldFarming::unstake<
+//                PoolTypeLiquidityMint,
+//                STAR::STAR,
+//                Token::Token<LiquidityToken<X, Y>>>(signer, STAR::token_address(), unwrap_harvest_cap);
+//            let own_token_amount = Token::value(&own_token);
+//            TokenSwapRouter::deposit_liquidity_token<X, Y>(user_addr, own_token);
+//            Account::deposit<STAR::STAR>(user_addr, reward_token);
+//
+//            // restake to new pool
+//            stake<X, Y>(signer, own_token_amount);
+//        };
+//
+//        if (exists<FarmCapability<X, Y>>(user_addr)) {
+//            let FarmCapability<X, Y>{
+//                cap,
+//                release_per_seconds,
+//            } = move_from<FarmCapability<X, Y>>(user_addr);
+//
+//            let new_cap = YieldFarming::upgrade_farming_asset_pool_to_pool<
+//                PoolTypeLiquidityMint,
+//                PoolTypeFarmPool,
+//                Token::Token<LiquidityToken<X, Y>>>(signer, cap);
+//
+//            move_to(signer, FarmPoolCapability<X, Y>{
+//                cap: new_cap,
+//                release_per_seconds,
+//            });
+//        }
+//
+//    }
 }
 }
