@@ -11,7 +11,6 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::add_farm_pool<X, Y>(&account, release_per_second);
     }
 
-
     public(script) fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: signer, active: bool) {
         TokenSwapFarmRouter::reset_farm_activation<X, Y>(&account, active);
     }
