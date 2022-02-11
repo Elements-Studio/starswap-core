@@ -16,5 +16,5 @@ dev call --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrupScript::qu
 ### 查看stake info
 dev call --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrupScript::get_stake_info -t 0x4783d08fb16990bd35d83f3e23bf93b8::STAR::STAR --arg 0x4783d08fb16990bd35d83f3e23bf93b8 --arg 1u64
 
-###  syrup unstake
+### syrup unstake
 account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrupScript::unstake -t 0x4783d08fb16990bd35d83f3e23bf93b8::STAR::STAR  --arg 1u64
