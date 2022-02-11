@@ -33,11 +33,8 @@ function exec_script() {
     then
       respo=$(starcoin --net ${net} --connect $ipc_file $sub_command)
 
-      if [[ 'dry run failed' == *"${respo}"* ]]; then
-        echo "Dry run failed, command: $sub_command, file: $script_file"
-        exit 1
-      elif [[ 'error' == *"${respo}"* ]]; then
-        echo "Execute generate error, command: $sub_command, file: $script_file"
+      if [ ${#respo} -ne 0 ] && [[ 'failed' == *"${respo}"* || 'error' == *"${respo}"* ]]; then
+        echo "Dry run failed, command: $sub_command, file: $script_file, respo: $respo"
         exit 1
       fi
     fi
