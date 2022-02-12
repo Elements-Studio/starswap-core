@@ -12,6 +12,7 @@ dev call --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmScript::que
 
 ### 质押流动性
 account execute-function -s 0x2d81a0427d64ff61b11ede9085efa5ad --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmScript::stake -t 0x1::STC::STC -t 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT -b --arg 30622u128
+account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmScript::stake -t 0x1::STC::STC -t 0xfe125d419811297dfab03c61efec0bc9::FAI::FAI -b --arg 10000u128
 
 ### 查询该用户质押的流动性
 dev call --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmScript::query_stake -t 0x1::STC::STC -t 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT --arg 0x2d81a0427d64ff61b11ede9085efa5ad
