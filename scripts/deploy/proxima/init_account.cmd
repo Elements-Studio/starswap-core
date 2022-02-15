@@ -6,9 +6,9 @@ dev get-coin 0x2d81a0427d64ff61b11ede9085efa5ad
 
 # Swap Fee admin账号
 account import -i 0x1f5bfa4af32fe7c0604efba5146e3341153ff8245cc39a1e4000d09727a58f03
-account default   0x0a4183ac9335a9f5804014eab01c0abc
-account unlock   0x0a4183ac9335a9f5804014eab01c0abc
-dev get-coin   0x0a4183ac9335a9f5804014eab01c0abc
+account default  0x0a4183ac9335a9f5804014eab01c0abc
+account unlock 0x0a4183ac9335a9f5804014eab01c0abc
+dev get-coin 0x0a4183ac9335a9f5804014eab01c0abc
 
 # Swap合约admin账号
 account import -i 0x7d50cc0b71d372299d5a3f8aeabc9aa6b911628b6865d9ed78985124633eea37
@@ -27,7 +27,7 @@ account execute-function  --function 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDTSc
 dev package -n swap -o build storage/0x4783d08fb16990bd35d83f3e23bf93b8/
 dev deploy -s 0x4783d08fb16990bd35d83f3e23bf93b8  build/swap.blob -b
 
-# 提交带时间设置的升级配置（10s）
+## 提交带时间设置的升级配置（10s）
 account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::UpgradeScripts::update_module_upgrade_strategy_with_min_time --arg 1u8 --arg 10000u64 -b
 
 ### Swap Fee admin账号 accept XUSDT
