@@ -152,6 +152,8 @@ module TokenSwap {
     const LESS_THAN: u8 = 1;
     const GREATER_THAN: u8 = 2;
 
+    const LIQUIDITY_TOKEN_SCALE: u8 = 9;
+
     public fun maybe_init_event_handle(signer: &signer) {
         assert_admin(signer);
         if (!exists<TokenSwapEventHandle>(Signer::address_of(signer))) {
@@ -196,7 +198,7 @@ module TokenSwap {
 
     fun register_liquidity_token<X: copy + drop + store, Y: copy + drop + store>(signer: &signer) {
         assert_admin(signer);
-        Token::register_token<LiquidityToken<X, Y>>(signer, 18);
+        Token::register_token<LiquidityToken<X, Y>>(signer, LIQUIDITY_TOKEN_SCALE);
         let mint_capability = Token::remove_mint_capability<LiquidityToken<X, Y>>(signer);
         let burn_capability = Token::remove_burn_capability<LiquidityToken<X, Y>>(signer);
         move_to(signer, LiquidityTokenCapability{ mint: mint_capability, burn: burn_capability });
