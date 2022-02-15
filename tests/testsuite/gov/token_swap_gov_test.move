@@ -18,20 +18,20 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
-script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGov;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
-
-    fun upgrade_v2_to_v3_for_syrup_on_testnet(signer: signer) {
-        let total_amount = CommonHelper::pow_amount<STAR::STAR>(1000000);
-        TokenSwapGov::upgrade_v2_to_v3_for_syrup_on_testnet(signer, total_amount);
-    }
-}
-// check: Keep(ABORTED { code: 25857
+////! new-transaction
+////! sender: admin
+//address admin = {{admin}};
+//script {
+//    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGov;
+//    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+//    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
+//
+//    fun upgrade_v2_to_v3_for_syrup_on_testnet(signer: signer) {
+//        let total_amount = CommonHelper::pow_amount<STAR::STAR>(1000000);
+//        TokenSwapGov::upgrade_v2_to_v3_for_syrup_on_testnet(signer, total_amount);
+//    }
+//}
+//// check: Keep(ABORTED { code: 25857
 
 
 //! block-prologue
@@ -60,24 +60,16 @@ script {
     use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGov;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{
-        PoolTypeTeam,
-        PoolTypeInvestor,
-        PoolTypeTechMaintenance,
-        PoolTypeMarket,
-        PoolTypeStockManagement,
-        PoolTypeDaoCrosshain,
+        PoolTypeInitialLiquidity,
+        PoolTypeCommunity,
     };
 
     fun main(signer: signer) {
-        TokenSwapGov::dispatch<PoolTypeTeam>(&signer, @alice, 100000000);
-        TokenSwapGov::dispatch<PoolTypeInvestor>(&signer, @alice, 100000000);
-        TokenSwapGov::dispatch<PoolTypeTechMaintenance>(&signer, @alice, 100000000);
-        TokenSwapGov::dispatch<PoolTypeMarket>(&signer, @alice, 100000000);
-        TokenSwapGov::dispatch<PoolTypeStockManagement>(&signer, @alice, 100000000);
-        TokenSwapGov::dispatch<PoolTypeDaoCrosshain>(&signer, @alice, 100000000);
+        TokenSwapGov::dispatch<PoolTypeInitialLiquidity>(&signer, @alice, 10000000);
+        TokenSwapGov::dispatch<PoolTypeCommunity>(&signer, @alice, 20000000);
 
         let balance = Account::balance<STAR::STAR>(@alice);
-        assert(balance == 600000000, 1003);
+        assert(balance == 30000000, 1003);
     }
 }
 // check: EXECUTED
