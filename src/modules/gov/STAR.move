@@ -20,22 +20,14 @@ module STAR {
         Account::do_accept_token<STAR>(account);
     }
 
-    // Mint function, block ability of mint and burn after execution
-    public fun mint(account: &signer, amount: u128): (Token::MintCapability<STAR>, Token::BurnCapability<STAR>) {
+    public fun mint(account: &signer, amount: u128) {
         let token = Token::mint<STAR>(account, amount);
         Account::deposit_to_self<STAR>(account, token);
-
-        let mint_cap = Token::remove_mint_capability(account);
-        let burn_cap = Token::remove_burn_capability(account);
-        (mint_cap, burn_cap)
     }
 
     /// Returns true if `TokenType` is `STAR::STAR`
     public fun is_star<TokenType: store>(): bool {
         Token::is_same_token<STAR, TokenType>()
-    }
-
-    spec is_abc {
     }
 
     public fun assert_genesis_address(account : &signer) {
@@ -47,15 +39,10 @@ module STAR {
         Token::token_address<STAR>()
     }
 
-    spec token_address {
-    }
 
     /// Return STAR precision.
     public fun precision(): u8 {
         PRECISION
-    }
-
-    spec precision {
     }
 }
 }

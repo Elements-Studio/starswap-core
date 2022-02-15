@@ -5,7 +5,10 @@
 address 0x4783d08fb16990bd35d83f3e23bf93b8 {
 module TokenSwapGovPoolType {
 
-    struct PoolTypeLiquidityMint has key, store {} // Obsoleted in latest test version
+    //TODO to be removed
+    struct PoolTypeLiquidityMint has key, store {}
+
+    struct PoolTypeInitialLiquidity has key, store {}
 
     struct PoolTypeFarmPool has key, store {}
 
@@ -13,14 +16,8 @@ module TokenSwapGovPoolType {
 
     struct PoolTypeTeam has key, store {}
 
-    struct PoolTypeInvestor has key, store {}
+    struct PoolTypeCommunity has key, store {}
 
-    struct PoolTypeTechMaintenance has key, store {}
-
-    struct PoolTypeMarket has key, store {}
-
-    struct PoolTypeStockManagement has key, store {}
-
-    struct PoolTypeDaoCrosshain has key, store {}
+    struct PoolTypeDaoTreasury has key, store {}
 }
 }

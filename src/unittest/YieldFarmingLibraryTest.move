@@ -13,11 +13,11 @@ module YieldFarmingLibraryTest {
 
         let new_index = YieldFarmingLibrary::calculate_harvest_index(harvest_index,asset_total_weight, last_update_timestamp, now_seconds, release_per_second);
         Debug::print(&new_index);
-        assert(new_index == 100001000000, 10001);
+        assert(new_index == 200001000000, 10001);
 
         let amount = YieldFarmingLibrary::calculate_withdraw_amount(new_index, harvest_index, asset_total_weight);
         Debug::print(&amount);
-        assert(amount == 10, 10002);
+        assert(amount == 20, 10002);
     }
 
     #[test] fun test_calc_harvest_index() {
