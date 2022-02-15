@@ -1,21 +1,21 @@
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module SwapTestHelper {
     use 0x1::Token;
     use 0x1::Account;
     use 0x1::STC::STC ;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI, WBTC};
 
 
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
     //    const GENESIS_ADDRESS : address = @0x4fe7BBbFcd97987b966415F01995a229;
-    const TOKEN_HOLDER_ADDRESS : address = @0x2b3d5bd6d0f8a957e6a4abe986056ba7;
-    const ADMIN_ADDRESS : address = @0x2b3d5bd6d0f8a957e6a4abe986056ba7;
-    const XUSDT_ADDRESS : address = @0x4c438026f963f52f01f612d1e8c41bc4;
-    const FEE_ADDRESS : address = @0x0a4183ac9335a9f5804014eab01c0abc;
+    const TOKEN_HOLDER_ADDRESS : address = @0x8c109349c6bd91411d6bc962e080c4a3;
+    const ADMIN_ADDRESS : address = @0x8c109349c6bd91411d6bc962e080c4a3;
+    const XUSDT_ADDRESS : address = @0xb6d69dd935edf7f2054acf12eb884df8;
+    const FEE_ADDRESS : address = @0x9572abb16f9d9e9b009cc1751727129e;
 
     public fun get_admin_address(): address {
         ADMIN_ADDRESS

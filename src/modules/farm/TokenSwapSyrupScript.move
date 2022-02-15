@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module TokenSwapSyrupScript {
 
     use 0x1::Signer;
     use 0x1::Account;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
 
     public(script) fun add_pool<TokenT: store>(signer: signer,
                                                release_per_second: u128,

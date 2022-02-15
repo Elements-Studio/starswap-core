@@ -1,4 +1,4 @@
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 //! account: alice, 0x49156896A605F092ba1862C50a9036c9, 10000000000000 0x1::STC::STC
 
 //! block-prologue
@@ -11,7 +11,7 @@
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::WETH;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::WETH;
 
     fun alice_accept_token(signer: signer) {
         Account::do_accept_token<WETH>(&signer);
@@ -26,10 +26,10 @@ address alice = {{alice}};
 script {
     use 0x1::Account;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
 
     fun admin_initialize(signer: signer) {
         TokenMock::register_token<STAR::STAR>(&signer, 9u8);
@@ -62,9 +62,9 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun alice_stake(signer: signer) {
         TokenSwapSyrup::stake<TokenMock::WETH>(&signer, 1u64, CommonHelper::pow_amount<TokenMock::WETH>(1000000));
@@ -84,9 +84,9 @@ script {
     use 0x1::Signer;
     use 0x1::Debug;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
 
     fun alice_unstake_early(signer: signer) {
         let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
@@ -115,10 +115,10 @@ script {
     use 0x1::Signer;
     use 0x1::Debug;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun alice_unstake_after_1_second(signer: signer) {
         let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
@@ -142,7 +142,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun admin_stepwise_config(signer: signer) {
         TokenSwapConfig::put_stepwise_multiplier(&signer, 1000, 1);

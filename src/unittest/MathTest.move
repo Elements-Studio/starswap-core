@@ -1,7 +1,7 @@
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module MathTest {
     #[test_only]
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath::{Self};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath::{Self};
     #[test_only]
     use 0x1::Debug::{Self};
     #[test_only]

@@ -1,13 +1,13 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 /// library with helper methods for oracles that are concerned with computing average prices
 module TokenSwapOracleLibrary {
     use 0x1::Timestamp;
     use 0x1::U256::{Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::FixedPoint128;
 
     /// helper function that returns the current block timestamp within the range of u64, i.e. [0, 2**32 - 1]
     public fun current_block_timestamp(): u64 {

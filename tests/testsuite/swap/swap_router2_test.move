@@ -1,6 +1,6 @@
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 200000 0x1::STC::STC
-//! account: feetokenholder, 0x4c438026f963f52f01f612d1e8c41bc4, 400000 0x1::STC::STC
-//! account: feeadmin, 0x0a4183ac9335a9f5804014eab01c0abc
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 200000 0x1::STC::STC
+//! account: feetokenholder, 0xb6d69dd935edf7f2054acf12eb884df8, 400000 0x1::STC::STC
+//! account: feeadmin, 0x9572abb16f9d9e9b009cc1751727129e
 //! account: exchanger, 100000 0x1::STC::STC
 //! account: alice, 500000 0x1::STC::STC
 
@@ -9,7 +9,7 @@
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
 
     fun init_token(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 18u8);
@@ -25,8 +25,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI, WBTC};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun init_account(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 600000u128);
@@ -40,7 +40,7 @@ script {
 //! new-transaction
 //! sender: admin
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFee;
 
     fun init_token_swap_fee(signer: signer) {
         TokenSwapFee::initialize_token_swap_fee(&signer);
@@ -53,7 +53,7 @@ script {
 //! sender: feetokenholder
 address alice = {{alice}};
 script {
-    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
+    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
     use 0x1::Token;
     use 0x1::Account;
 
@@ -71,7 +71,7 @@ script {
 //! sender: exchanger
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
     use 0x1::Account;
 
     fun accept_token(signer: signer) {
@@ -85,7 +85,7 @@ script {
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
+    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -99,8 +99,8 @@ script {
 address alice = {{alice}};
 address exchanger = {{exchanger}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun transfer(signer: signer) {
         CommonHelper::transfer<WETH>(&signer, @exchanger, 100000u128);
@@ -112,8 +112,8 @@ script {
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI, WBTC};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
     use 0x1::STC::STC;
 
     fun register_token_pair(signer: signer) {
@@ -142,9 +142,9 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
     use 0x1::STC::STC;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI, WBTC};
 
     fun add_liquidity(signer: signer) {
         // for the first add liquidity
@@ -163,8 +163,8 @@ script {
 //! sender: exchanger
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter2;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WDOT, WBTC};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter2;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WDOT, WBTC};
 
     fun swap_pair_not_exist(signer: signer) {
         let amount_x_in = 200;
@@ -182,14 +182,14 @@ script {
 address alice = {{alice}};
 script {
 
-    // use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    // use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    // use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    // use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter2;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter2;
     use 0x1::STC::STC;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use 0x1::Signer;
     use 0x1::Debug;
 
@@ -220,13 +220,13 @@ script {
 address alice = {{alice}};
 script {
 
-    // use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    // use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    // use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    // use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter2;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter2;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI};
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use 0x1::Signer;
     use 0x1::Debug;
 

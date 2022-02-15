@@ -10,7 +10,7 @@ module alice::YieldFarmingWarpper {
     use 0x1::Token;
     use 0x1::Account;
     use 0x1::Signer;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarming;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
 
     struct Usdx has copy, drop, store {}
 
@@ -74,7 +74,7 @@ module alice::YieldFarmingWarpper {
 //! new-transaction
 //! sender: alice
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarming;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
     use 0x1::Timestamp;
     use 0x1::Debug;
 
@@ -256,7 +256,7 @@ script {
 //! new-transaction
 //! sender: alice
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarming;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
     use 0x1::Timestamp;
     use 0x1::Debug;
 

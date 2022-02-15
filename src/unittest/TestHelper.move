@@ -1,4 +1,4 @@
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module TestHelper {
     use 0x1::Token;
     use 0x1::Account;
@@ -10,11 +10,11 @@ module TestHelper {
     use 0x1::Oracle;
     use 0x1::CoreAddresses;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SwapTestHelper;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
-    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::SwapTestHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
+    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFee;
 
     struct GenesisSignerCapability has key {
         cap: Account::SignerCapability,

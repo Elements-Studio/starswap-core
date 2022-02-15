@@ -1,6 +1,6 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: joe
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 //! account: exchanger
 //! account: tokenholder, 0x49156896A605F092ba1862C50a9036c9
@@ -10,7 +10,7 @@
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
 
@@ -25,8 +25,8 @@ script {
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
     use 0x1::STC::STC;
 
     fun register_token_pair(signer: signer) {
@@ -41,14 +41,14 @@ script {
 address alice = {{alice}};
 script {
     use 0x1::Debug;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::WUSDT;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::WUSDT;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use 0x1::STC::STC;
     use 0x1::Math;
-    //use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    //use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun main(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.

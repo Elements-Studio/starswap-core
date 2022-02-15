@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module TokenSwapSyrup {
     use 0x1::Signer;
     use 0x1::Token;
@@ -13,10 +13,10 @@ module TokenSwapSyrup {
     use 0x1::Vector;
     use 0x1::Option;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingV3 as YieldFarming;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{PoolTypeSyrup};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingV3 as YieldFarming;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{PoolTypeSyrup};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;

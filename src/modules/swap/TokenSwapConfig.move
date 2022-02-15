@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 
 module TokenSwapConfig {
     use 0x1::Config;
@@ -189,7 +189,7 @@ module TokenSwapConfig {
         assert_admin(signer);
         
         let config = SwapFeeSwitchConfig{
-            auto_convert_switch: auto_convert_switch,
+            auto_convert_switch,
         };
         if (Config::config_exist_by_address<SwapFeeSwitchConfig>(admin_address())) {
             Config::set<SwapFeeSwitchConfig>(signer, config);
@@ -199,11 +199,11 @@ module TokenSwapConfig {
     }
 
     public fun admin_address(): address {
-        @0x2b3d5bd6d0f8a957e6a4abe986056ba7
+        @0x8c109349c6bd91411d6bc962e080c4a3
     }
 
     public fun fee_address(): address {
-        @0x0a4183ac9335a9f5804014eab01c0abc
+        @0x9572abb16f9d9e9b009cc1751727129e
     }
 
     public fun assert_admin(signer: &signer) {
