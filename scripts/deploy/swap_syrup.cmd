@@ -1,5 +1,5 @@
 ### 提取 STAR
-account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovScript::dispatch   -t 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::PoolTypeDaoCrosshain --arg  0x4783d08fb16990bd35d83f3e23bf93b8  --arg 210000000000000u128  -b
+account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovScript::dispatch -t 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::PoolTypeDaoCrosshain --arg  0x4783d08fb16990bd35d83f3e23bf93b8  --arg 210000000000000u128  -b
 
 ### 管理员创建Syrup
 account execute-function -s 0x4783d08fb16990bd35d83f3e23bf93b8 --function 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrupScript::add_pool -t 0x4783d08fb16990bd35d83f3e23bf93b8::STAR::STAR --arg 1000000000u128 --arg 0u64 -b

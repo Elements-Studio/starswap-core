@@ -82,6 +82,7 @@ address alice = {{alice}};
 script {
     use 0x1::Account;
     use 0x1::Signer;
+    use 0x1::Debug;
 
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
     use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
@@ -90,8 +91,12 @@ script {
     fun alice_unstake_early(signer: signer) {
         let (unstaked_token, reward_token) = TokenSwapSyrup::unstake<TokenMock::WETH>(&signer, 1);
 
-        Account::deposit<TokenMock::WETH>(Signer::address_of(&signer), unstaked_token);
-        Account::deposit<STAR::STAR>(Signer::address_of(&signer), reward_token);
+        let user_addr = Signer::address_of(&signer);
+        Account::deposit<TokenMock::WETH>(user_addr, unstaked_token);
+        Account::deposit<STAR::STAR>(user_addr, reward_token);
+
+        let except_gain = TokenSwapSyrup::query_expect_gain<TokenMock::WETH>(user_addr, 1);
+        Debug::print(&except_gain);
     }
 }
 // check: "Keep(ABORTED { code: 26625"

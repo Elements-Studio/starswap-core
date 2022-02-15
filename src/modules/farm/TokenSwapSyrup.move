@@ -278,11 +278,11 @@ module TokenSwapSyrup {
         YieldFarming::query_total_stake<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
     }
 
-    public fun query_expect_gain<TokenT: store>(signer: &signer, id: u64): u128 acquires SyrupStakeList  {
-        let stake_list = borrow_global<SyrupStakeList<TokenT>>(Signer::address_of(signer));
+    public fun query_expect_gain<TokenT: store>(user_addr: address, id: u64): u128 acquires SyrupStakeList  {
+        let stake_list = borrow_global<SyrupStakeList<TokenT>>(user_addr);
         let stake = get_stake(&stake_list.items, id);
         YieldFarming::query_expect_gain<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
-            Signer::address_of(signer),
+            user_addr,
             STAR::token_address(),
             &stake.harvest_cap
         )
