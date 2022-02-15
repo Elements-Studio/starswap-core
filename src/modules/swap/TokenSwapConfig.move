@@ -17,6 +17,7 @@ module TokenSwapConfig {
     const DEFAULT_POUNDAGE_NUMERATOR: u64 = 3;
     const DEFAULT_POUNDAGE_DENUMERATOR: u64 = 1000;
 
+    const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
@@ -39,6 +40,10 @@ module TokenSwapConfig {
 
     struct SwapStepwiseMultiplierConfig has copy, drop, store {
         list: vector<StepwiseMutiplier>,
+    }
+    
+    struct SwapFeeSwitchConfig has copy, drop, store {
+        auto_convert_switch: bool,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -64,6 +69,16 @@ module TokenSwapConfig {
             (numerator, denumerator)
         } else {
             (DEFAULT_POUNDAGE_NUMERATOR, DEFAULT_POUNDAGE_DENUMERATOR)
+        }
+    }
+
+    /// Get fee auto convert switch config
+    public fun get_fee_auto_convert_switch(): (bool) {
+        if (Config::config_exist_by_address<SwapFeeSwitchConfig>(admin_address())) {
+            let conf = Config::get_by_address<SwapFeeSwitchConfig>(admin_address());
+            conf.auto_convert_switch
+        } else {
+            DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH
         }
     }
 
@@ -103,6 +118,9 @@ module TokenSwapConfig {
         signer: &signer,
         interval_sec: u64,
         multiplier: u64) {
+        
+        assert_admin(signer);
+        
         if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
             let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
             let idx = find_mulitplier_idx(&mut conf.list, interval_sec);
@@ -163,6 +181,20 @@ module TokenSwapConfig {
                 return Option::none<u64>()
             };
             idx = idx - 1;
+        }
+    }
+    
+    /// Set fee auto convert switch config, only admin can call
+    public fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
+        assert_admin(signer);
+        
+        let config = SwapFeeSwitchConfig{
+            auto_convert_switch: auto_convert_switch,
+        };
+        if (Config::config_exist_by_address<SwapFeeSwitchConfig>(admin_address())) {
+            Config::set<SwapFeeSwitchConfig>(signer, config);
+        } else {
+            Config::publish_new_config<SwapFeeSwitchConfig>(signer, config);
         }
     }
 

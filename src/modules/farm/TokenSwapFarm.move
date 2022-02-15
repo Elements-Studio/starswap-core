@@ -93,11 +93,6 @@ module TokenSwapFarm {
         cap: YieldFarmingV2::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
     }
 
-    /// Obsoleted
-    struct FarmMultipler<X, Y> has key, store {
-        multipler: u64,
-    }
-
     struct FarmMultiplier<X, Y> has key, store {
         multiplier: u64,
     }
@@ -149,7 +144,7 @@ module TokenSwapFarm {
             multiplier: 1
         });
 
-        //// TODO (9191stc): Add to DAO
+        // TODO (9191stc): Add to DAO
         // GovernanceDaoProposal::plugin<
         //    PoolTypeProposal<X, Y, GovTokenT>,
         //    GovTokenT>(account, modify_cap);
@@ -166,10 +161,10 @@ module TokenSwapFarm {
             });
     }
 
-    /// Set farm mutiple of second per releasing
+    /// Set farm mutiplier of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(signer: &signer, multiplier: u64)
-    acquires FarmPoolCapability, FarmMultiplier {
+    acquires FarmCapability, FarmMultiplier {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
