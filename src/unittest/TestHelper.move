@@ -13,7 +13,7 @@ module TestHelper {
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SwapTestHelper;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
 
     struct GenesisSignerCapability has key {

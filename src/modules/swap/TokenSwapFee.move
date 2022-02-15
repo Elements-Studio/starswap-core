@@ -10,7 +10,7 @@ module TokenSwapFee {
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::{Self};
 
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;
