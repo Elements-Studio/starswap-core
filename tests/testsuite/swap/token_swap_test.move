@@ -1,6 +1,6 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: joe
-//! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 10000000000000 0x1::STC::STC
+//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 //! account: exchanger
 
@@ -9,7 +9,7 @@
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -23,8 +23,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WUSDT};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
     use 0x1::Math;
 
     fun init_account(signer: signer) {
@@ -40,8 +40,8 @@ script {
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WUSDT};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
     use 0x1::STC::STC;
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
@@ -57,9 +57,9 @@ script {
 address alice = {{alice}};
 script{
     use 0x1::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::LiquidityToken;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::LiquidityToken;
     use 0x1::Account;
 
     fun main(signer: signer) {
@@ -84,10 +84,10 @@ script{
 address alice = {{alice}};
 script {
     use 0x1::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
     use 0x1::Account;
     use 0x1::Token;
     fun main(signer: signer) {
@@ -114,9 +114,9 @@ script{
     use 0x1::STC;
     use 0x1::Account;
     use 0x1::Signer;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::LiquidityToken;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::LiquidityToken;
     // use 0x1::Debug;
 
     fun main(signer: signer) {

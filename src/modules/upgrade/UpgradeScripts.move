@@ -1,4 +1,4 @@
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module UpgradeScripts {
     use 0x1::PackageTxnManager;
     use 0x1::Config;
@@ -6,8 +6,8 @@ module UpgradeScripts {
     use 0x1::Version;
     use 0x1::Option;
     use 0x1::Errors;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapFarmRouter {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarm;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarm;
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 
 /// Token Swap
 module TokenSwap {
@@ -15,9 +15,9 @@ module TokenSwap {
     use 0x1::Errors;
     use 0x1::U256::{Self, U256};
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
 
     const EDEPRECATED_FUNCTION: u64 = 19;
 

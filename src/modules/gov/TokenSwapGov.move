@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapGov {
     use 0x1::Token;
     use 0x1::Account;
@@ -10,10 +10,10 @@ module TokenSwapGov {
     use 0x1::Signer;
     use 0x1::Timestamp;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarm;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapSyrup;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarm;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapSyrup;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{
         PoolTypeInitialLiquidity,
         PoolTypeCommunity,
     };

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapFarm {
     use 0x1::Signer;
     use 0x1::Token;
@@ -10,12 +10,12 @@ module TokenSwapFarm {
     use 0x1::Event;
     use 0x1::Errors;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarmingV3 as YieldFarming;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::YieldFarming as YieldFarmingV2;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::LiquidityToken;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGovPoolType::{PoolTypeLiquidityMint, PoolTypeFarmPool};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingV3 as YieldFarming;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarming as YieldFarmingV2;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::LiquidityToken;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{PoolTypeLiquidityMint, PoolTypeFarmPool};
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
 

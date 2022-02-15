@@ -1,7 +1,7 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 
 module YieldFarming {
     use 0x1::Token;
@@ -11,7 +11,7 @@ module YieldFarming {
     use 0x1::Math;
     use 0x1::U256;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::BigExponential;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::BigExponential;
 
     const ERR_FARMING_INIT_REPEATE: u64 = 101;
     const ERR_FARMING_NOT_STILL_FREEZE: u64 = 102;

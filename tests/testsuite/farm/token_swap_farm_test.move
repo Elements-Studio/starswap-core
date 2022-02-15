@@ -1,4 +1,4 @@
-//! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 10000000000000 0x1::STC::STC
+//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
 //! account: alice, 0x49156896A605F092ba1862C50a9036c9, 10000000000000 0x1::STC::STC
 
 //! block-prologue
@@ -10,7 +10,7 @@
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WETH, WBTC};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WBTC};
 
     fun admin_init_token(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 9u8);
@@ -24,7 +24,7 @@ script {
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WBTC};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WBTC};
 
     fun alice_accept_token(signer: signer) {
         Account::do_accept_token<WBTC>(&signer);
@@ -40,9 +40,9 @@ address admin = {{admin}};
 script {
     use 0x1::Account;
     use 0x1::Math;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
 
     fun admin_register_token_pair_and_mint(signer: signer) {
         //token pair register must be swap admin account
@@ -81,9 +81,9 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGov;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGov;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
@@ -98,9 +98,9 @@ address admin = {{admin}};
 script {
     use 0x1::Signer;
     use 0x1::Debug;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun admin_stake(signer: signer) {
         let liquidity_amount = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
@@ -126,9 +126,9 @@ address admin = {{admin}};
 script {
     use 0x1::Signer;
     use 0x1::Account;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::STAR;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun admin_harvest(signer: signer) {
         TokenSwapFarmRouter::harvest<WBTC, WETH>(&signer, 0);
@@ -148,9 +148,9 @@ script {
 address admin = {{admin}};
 script {
     use 0x1::Signer;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun admin_unstake(signer: signer) {
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
@@ -172,8 +172,8 @@ script {
     //use 0x1::Token;
     use 0x1::Math;
     use 0x1::Signer;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
 
     fun alice_add_liquidity(signer: signer) {
         let precision: u8 = 9;
@@ -209,9 +209,9 @@ address alice = {{alice}};
 script {
     use 0x1::Signer;
     use 0x1::Debug;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun alice_stake(signer: signer) {
         let account = Signer::address_of(&signer);
@@ -240,8 +240,8 @@ script {
 script {
     use 0x1::Signer;
     use 0x1::Debug;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun alice_unstake(signer: signer) {
         let account = Signer::address_of(&signer);
@@ -268,8 +268,8 @@ script {
 address admin = {{admin}};
 script {
     use 0x1::Debug;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarmRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WBTC, WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarmRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WBTC, WETH};
 
     fun admin_set_release_multi_basic(signer: signer) {
         // Set to 10x

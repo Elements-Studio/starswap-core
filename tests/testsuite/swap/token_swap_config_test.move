@@ -1,6 +1,6 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: joe
-//! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 10000000000000 0x1::STC::STC
+//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 //! account: exchanger
 
@@ -9,7 +9,7 @@
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     fun init_token_config(_: signer) {
         let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
@@ -23,7 +23,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     fun set_token_config(signer: signer) {
         TokenSwapConfig::set_swap_fee_operation_rate(&signer, 20, 100);

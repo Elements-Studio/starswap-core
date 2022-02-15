@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 
 module TokenSwapConfig {
     use 0x1::Config;
@@ -167,7 +167,7 @@ module TokenSwapConfig {
     }
 
     public fun admin_address(): address {
-        @0x4783d08fb16990bd35d83f3e23bf93b8
+        @0x2b3d5bd6d0f8a957e6a4abe986056ba7
     }
 
     public fun fee_address(): address {
