@@ -1,5 +1,5 @@
-//! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 200000 0x1::STC::STC
-//! account: feetokenholder, 0x2d81a0427d64ff61b11ede9085efa5ad, 400000 0x1::STC::STC
+//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 200000 0x1::STC::STC
+//! account: feetokenholder, 0x4c438026f963f52f01f612d1e8c41bc4, 400000 0x1::STC::STC
 //! account: feeadmin, 0x0a4183ac9335a9f5804014eab01c0abc
 //! account: exchanger, 100000 0x1::STC::STC
 //! account: lp_provider, 500000 0x1::STC::STC
@@ -10,7 +10,7 @@
 address admin = {{admin}};
 module admin::SwapOracleWrapper {
     use 0x1::U256::{Self, U256};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
 
     struct SwapOralce<X, Y> has key, store {
         last_block_timestamp: u64,
@@ -55,7 +55,7 @@ module admin::SwapOracleWrapper {
 //! new-transaction
 //! sender: admin
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WUSDT};
 
     fun token_init(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 18u8);
@@ -68,8 +68,8 @@ script {
 //! new-transaction
 //! sender: lp_provider
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
 
     fun init_account(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 60000000000000000000000000u128); //e25
@@ -82,7 +82,7 @@ script {
 //! new-transaction
 //! sender: feetokenholder
 script {
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
     use 0x1::Token;
     use 0x1::Account;
 
@@ -101,7 +101,7 @@ script {
 //! sender: feeadmin
 script {
     use 0x1::Account;
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -114,8 +114,8 @@ script {
 //! new-transaction
 //! sender: exchanger
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
 
     fun mint(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 3900000000000000000000u128); //e21
@@ -128,8 +128,8 @@ script {
 //! new-transaction
 //! sender: admin
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
 
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
@@ -145,7 +145,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use admin::SwapOracleWrapper;
 
     fun initialize_oralce(signer: signer) {
@@ -164,7 +164,7 @@ script {
 //! new-transaction
 //! sender: alice
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
     use 0x1::Debug;
 
     fun oralce_info(_: signer) {
@@ -177,8 +177,8 @@ script {
 //! new-transaction
 //! sender: alice
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
 
     fun oralce_info(_: signer) {
@@ -198,9 +198,9 @@ script {
 //! new-transaction
 //! sender: lp_provider
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
 
     // block time has not change, does not trigger to update oracle
@@ -229,9 +229,9 @@ script {
 //! sender: exchanger
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
     use 0x1::Timestamp;
     use admin::SwapOracleWrapper;
@@ -260,9 +260,9 @@ script {
 //! new-transaction
 //! sender: exchanger
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
     use 0x1::Timestamp;
 
@@ -293,10 +293,11 @@ script {
 //! sender: exchanger
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    
     use 0x1::Debug;
     use admin::SwapOracleWrapper;
 
@@ -352,9 +353,9 @@ script {
 //! sender: exchanger
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
     use admin::SwapOracleWrapper;
 
@@ -403,8 +404,8 @@ script {
 //! new-transaction
 //! sender: exchanger
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapOracleLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapOracleLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use 0x1::Debug;
 
     /// reverse token pair swap

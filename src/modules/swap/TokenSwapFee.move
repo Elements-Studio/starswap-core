@@ -1,16 +1,16 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapFee {
     use 0x1::Account;
     use 0x1::Token;
     use 0x1::Event;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap::{Self};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::{Self};
 
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;

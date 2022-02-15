@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO: replace the address with admin address
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapFarmRouter {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFarm;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFarm;
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
@@ -117,19 +117,19 @@ module TokenSwapFarmRouter {
 
     /// Set farm mutiple of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer, multiple: u64) {
+                                   Y: copy + drop + store>(signer: &signer, multiplier: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            TokenSwapFarm::set_farm_multiplier<X, Y>(signer, multiple);
+            TokenSwapFarm::set_farm_multiplier<X, Y>(signer, multiplier);
         } else {
-            TokenSwapFarm::set_farm_multiplier<Y, X>(signer, multiple);
+            TokenSwapFarm::set_farm_multiplier<Y, X>(signer, multiplier);
         }
     }
 
     /// Get farm mutiple of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
-                                 Y: copy + drop + store>(): u64 {
+                                   Y: copy + drop + store>(): u64 {
         let order = TokenSwap::compare_token<X, Y>();
         assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -138,6 +138,20 @@ module TokenSwapFarmRouter {
             TokenSwapFarm::get_farm_multiplier<Y, X>()
         }
     }
+
+
+//    /// User operation from v2 to v3
+//    public(script) fun upgrade_admin_from_v2_to_v3<X: copy + drop + store,
+//                                                   Y: copy + drop + store>(signer: signer) {
+//        let order = TokenSwap::compare_token<X, Y>();
+//        assert(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+//        if (order == 1) {
+//            TokenSwapFarm::upgrade_admin_from_v2_to_v3<X, Y>(&signer)
+//        } else {
+//            TokenSwapFarm::upgrade_admin_from_v2_to_v3<Y, X>(&signer)
+//        };
+//    }
+
 
 }
 }

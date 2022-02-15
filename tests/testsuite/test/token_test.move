@@ -7,9 +7,9 @@
 address alice = {{alice}};
 script {
     use 0x1::Debug;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::WUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::WUSDT;
     use 0x1::STC::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
 
     fun main(_signer: signer) {
         let ret = TokenSwap::compare_token<STC, WUSDT>();

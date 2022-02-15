@@ -1,11 +1,11 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address 0x4783d08fb16990bd35d83f3e23bf93b8 {
+address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
 module TokenSwapGovScript {
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapGov;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGov;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
 
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public(script) fun genesis_initialize(account: signer) {

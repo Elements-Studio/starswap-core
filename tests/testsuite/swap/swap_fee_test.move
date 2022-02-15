@@ -1,5 +1,5 @@
-//! account: admin, 0x4783d08fb16990bd35d83f3e23bf93b8, 200000 0x1::STC::STC
-//! account: feetokenholder, 0x2d81a0427d64ff61b11ede9085efa5ad, 400000 0x1::STC::STC
+//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 200000 0x1::STC::STC
+//! account: feetokenholder, 0x4c438026f963f52f01f612d1e8c41bc4, 400000 0x1::STC::STC
 //! account: feeadmin, 0x0a4183ac9335a9f5804014eab01c0abc
 //! account: exchanger, 100000 0x1::STC::STC
 //! account: alice, 500000 0x1::STC::STC
@@ -9,7 +9,7 @@
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{Self, WETH, WUSDT, WDAI};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WETH, WUSDT, WDAI};
 
     fun token_init(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 18u8);
@@ -25,8 +25,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT, WDAI};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
 
     fun init_account(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 600000u128);
@@ -40,7 +40,7 @@ script {
 //! new-transaction
 //! sender: admin
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapFee;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapFee;
 
     fun init_token_swap_fee(signer: signer) {
         TokenSwapFee::initialize_token_swap_fee(&signer);
@@ -53,7 +53,7 @@ script {
 //! sender: feetokenholder
 address alice = {{alice}};
 script {
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
     use 0x1::Token;
     use 0x1::Account;
 
@@ -72,7 +72,7 @@ script {
 //! sender: exchanger
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
     use 0x1::Account;
 
     fun accept_token(signer: signer) {
@@ -87,7 +87,7 @@ script {
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -101,7 +101,7 @@ script {
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -115,8 +115,8 @@ script {
 address alice = {{alice}};
 address exchanger = {{exchanger}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
 
     fun transfer(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 100000u128);
@@ -131,8 +131,8 @@ script {
 address alice = {{alice}};
 address exchanger = {{exchanger}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun transfer(signer: signer) {
         CommonHelper::transfer<XUSDT>(&signer, @alice, 300000u128);
@@ -146,10 +146,10 @@ script {
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
     use 0x1::STC::STC;
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
@@ -171,7 +171,7 @@ script {
 //! new-transaction
 //! sender: admin
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
 
     fun open_swap_fee_auto_convert_switch(signer: signer) {
         TokenSwapRouter::set_fee_auto_convert_switch(&signer, true);
@@ -184,10 +184,10 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
     use 0x1::STC::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
     fun add_liquidity(signer: signer) {
         // for the first add liquidity
@@ -206,16 +206,16 @@ script {
 address alice = {{alice}};
 address feeadmin = {{feeadmin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
     use 0x1::STC::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
     use 0x1::Debug;
 
     fun swap_exact_token_for_token_swap(signer: signer) {
@@ -251,17 +251,17 @@ script {
 address alice = {{alice}};
 address feeadmin = {{feeadmin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     use 0x1::STC::STC;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
     use 0x1::Debug;
 
     fun swap_token_for_exact_token_swap(signer: signer) {
@@ -305,15 +305,15 @@ address feeadmin = {{feeadmin}};
 script {
     use 0x1::Debug;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwap;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
-    use 0x2d81a0427d64ff61b11ede9085efa5ad::XUSDT::XUSDT;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
+    use 0x4c438026f963f52f01f612d1e8c41bc4::XUSDT::XUSDT;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::CommonHelper;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
 
     fun pay_for_token_and_fee_token_pair_not_exist(signer: signer) {
         let amount_x_in = 10000;
@@ -350,12 +350,12 @@ address feeadmin = {{feeadmin}};
 script {
     use 0x1::STC::STC;
     
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
     use 0x1::Debug;
 
     /// two way to calculate swap fee and compare
@@ -389,11 +389,11 @@ script {
     use 0x1::Debug;
     use 0x1::STC::STC;
 
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapRouter;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapLibrary;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::SafeMath;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapLibrary;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
 
     fun swap_token_for_exact_token_swap_fee_calculate(_: signer) {
 //        let amount_x_in_max = 8000;
