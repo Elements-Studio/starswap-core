@@ -10,7 +10,7 @@
 address admin = {{admin}};
 module admin::SwapOracleWrapper {
     use 0x1::U256::{Self, U256};
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::FixedPoint128;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
 
     struct SwapOralce<X, Y> has key, store {
         last_block_timestamp: u64,
@@ -145,7 +145,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenMock::{WETH, WUSDT};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT};
     use admin::SwapOracleWrapper;
 
     fun initialize_oralce(signer: signer) {

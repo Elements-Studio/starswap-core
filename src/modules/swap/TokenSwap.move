@@ -12,14 +12,11 @@ module TokenSwap {
     use 0x1::BCS;
     use 0x1::Timestamp;
     use 0x1::Event;
-    use 0x1::Errors;
     use 0x1::U256::{Self, U256};
 
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::SafeMath;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::FixedPoint128;
-
-    const EDEPRECATED_FUNCTION: u64 = 19;
 
     struct LiquidityToken<X, Y> has key, store, copy, drop {}
 
@@ -364,7 +361,6 @@ module TokenSwap {
         (x_swapped, y_swapped, x_swap_fee, y_swap_fee)
     }
 
-
     /// Emit token pair register event
     fun emit_token_pair_register_event<X: copy + drop + store, Y: copy + drop + store>(
         signer: &signer,
@@ -377,64 +373,6 @@ module TokenSwap {
         });
     }
 
-    /// Emit add liquidity event
-    public fun emit_add_liquidity_event<X: copy + drop + store, Y: copy + drop + store>(
-        _signer: &signer,
-        _liquidity: u128,
-        _amount_x_desired: u128,
-        _amount_y_desired: u128,
-        _amount_x_min: u128,
-        _amount_y_min: u128,
-    ) {
-        abort Errors::deprecated(EDEPRECATED_FUNCTION)
-        //        let token_pair = borrow_global_mut<TokenPair<X, Y>>(admin_address());
-        //        Event::emit_event(&mut token_pair.add_liquidity_event, AddLiquidityEvent{
-        //            x_token_code: Token::token_code<X>(),
-        //            y_token_code: Token::token_code<Y>(),
-        //            signer: Signer::address_of(signer),
-        //            liquidity,
-        //            amount_x_desired,
-        //            amount_y_desired,
-        //            amount_x_min,
-        //            amount_y_min,
-        //        });
-    }
-
-    /// Emit remove liquidity event
-    fun emit_remove_liquidity_event<X: copy + drop + store, Y: copy + drop + store>(
-        _signer: &signer,
-        _liquidity: u128,
-        _amount_x_min: u128,
-        _amount_y_min: u128,
-    ) {
-        abort Errors::deprecated(EDEPRECATED_FUNCTION)
-        //        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
-        //        Event::emit_event(&mut token_pair.remove_liquidity_event, RemoveLiquidityEvent{
-        //            x_token_code: Token::token_code<X>(),
-        //            y_token_code: Token::token_code<Y>(),
-        //            signer: Signer::address_of(signer),
-        //            liquidity,
-        //            amount_x_min,
-        //            amount_y_min,
-        //        });
-    }
-
-    /// Emit swap event
-    fun emit_swap_event<X: copy + drop + store, Y: copy + drop + store>(
-        _signer: &signer,
-        _x_in: u128,
-        _y_out: u128,
-    ) {
-        abort Errors::deprecated(EDEPRECATED_FUNCTION)
-        //        let token_pair = borrow_global_mut<TokenPair<X, Y>>(admin_address());
-        //        Event::emit_event(&mut token_pair.swap_event, SwapEvent{
-        //            x_token_code: Token::token_code<X>(),
-        //            y_token_code: Token::token_code<Y>(),
-        //            signer: Signer::address_of(signer),
-        //            x_in,
-        //            y_out,
-        //        });
-    }
 
     /// Caller should call this function to determine the order of A, B
     public fun compare_token<X: copy + drop + store, Y: copy + drop + store>(): u8 {
@@ -453,12 +391,11 @@ module TokenSwap {
         true
     }
 
-
     fun update_oracle<X: copy + drop + store, Y: copy + drop + store>(
         x_reserve: u128,
         y_reserve: u128,
-    ) acquires TokenPair {
-        let token_pair = borrow_global_mut<TokenPair<X, Y>>(TokenSwapConfig::admin_address());
+    ) acquires TokenSwapPair {
+        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         
         let last_block_timestamp = token_pair.last_block_timestamp;
         let block_timestamp = Timestamp::now_seconds() % (1u64 << 32);

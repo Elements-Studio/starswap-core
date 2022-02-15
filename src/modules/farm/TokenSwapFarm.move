@@ -164,7 +164,7 @@ module TokenSwapFarm {
     /// Set farm mutiplier of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(signer: &signer, multiplier: u64)
-    acquires FarmCapability, FarmMultiplier {
+    acquires FarmPoolCapability, FarmMultiplier {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 

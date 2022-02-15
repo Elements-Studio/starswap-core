@@ -39,7 +39,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     fun init_swap_fee_switch_config(_: signer) {
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
@@ -52,7 +52,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x4783d08fb16990bd35d83f3e23bf93b8::TokenSwapConfig;
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
 
     fun set_swap_fee_switch_config(signer: signer) {
         TokenSwapConfig::set_fee_auto_convert_switch(&signer, true);
