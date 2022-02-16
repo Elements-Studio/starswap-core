@@ -1,8 +1,8 @@
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module YieldFarmingLibraryTest {
 
     #[test] use 0x1::Debug;
-    #[test] use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingLibrary;
+    #[test] use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingLibrary;
 
     #[test] fun test_withdraw_amount() {
         let harvest_index = 1000000;

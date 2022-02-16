@@ -1,6 +1,6 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: joe
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 //! account: exchanger
 
@@ -9,7 +9,7 @@
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun init_token_config(_: signer) {
         let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
@@ -23,7 +23,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun set_token_config(signer: signer) {
         TokenSwapConfig::set_swap_fee_operation_rate(&signer, 20, 100);
@@ -39,7 +39,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun init_swap_fee_switch_config(_: signer) {
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
@@ -52,7 +52,7 @@ script {
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapConfig;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     fun set_swap_fee_switch_config(signer: signer) {
         TokenSwapConfig::set_fee_auto_convert_switch(&signer, true);

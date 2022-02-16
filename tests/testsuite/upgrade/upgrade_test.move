@@ -1,5 +1,5 @@
 //! account: alice, 10000000000000 0x1::STC::STC
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 
 
 //! new-transaction
@@ -8,7 +8,7 @@ address alice = {{alice}};
 script {
     use 0x1::PackageTxnManager::{Self};
     use 0x1::Signer;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::UpgradeScripts;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::UpgradeScripts;
 
     fun update_module_upgrade_strategy_with_min_time(signer: signer) {
         let signer_address = Signer::address_of(&signer);

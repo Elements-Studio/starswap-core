@@ -1,13 +1,13 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: joe
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 
 //! new-transaction
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{Self, WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -21,8 +21,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use 0x1::Math;
 
     fun init_account(signer: signer) {
@@ -38,7 +38,7 @@ script {
 ////! sender: liquidier
 //address alice = {{alice}};
 //script {
-//    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
+//    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
 //    use 0x1::Account;
 //    use 0x1::Token;
 //    use 0x1::Math;
@@ -59,8 +59,8 @@ script {
 //! sender: admin
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
     use 0x1::STC::STC;
 
     fun register_token_pair(signer: signer) {
@@ -75,8 +75,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WUSDT};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
     use 0x1::Account;
     use 0x1::Signer;
     use 0x1::Math;

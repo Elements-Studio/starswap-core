@@ -1,6 +1,6 @@
 //! account: alice, 10000000000000 0x1::STC::STC
 //! account: bob, 10000000000000 0x1::STC::STC
-//! account: admin, 0x2b3d5bd6d0f8a957e6a4abe986056ba7, 10000000000000 0x1::STC::STC
+//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
 //! account: liquidier, 10000000000000 0x1::STC::STC
 //! account: exchanger
 
@@ -9,7 +9,7 @@
 //! sender: admin
 address admin = {{admin}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGov;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGov;
 
     fun main(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
@@ -22,9 +22,9 @@ script {
 ////! sender: admin
 //address admin = {{admin}};
 //script {
-//    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGov;
-//    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
-//    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+//    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGov;
+//    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+//    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
 //
 //    fun upgrade_v2_to_v3_for_syrup_on_testnet(signer: signer) {
 //        let total_amount = CommonHelper::pow_amount<STAR::STAR>(1000000);
@@ -43,7 +43,7 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x1::Account;
 
     fun main(signer: signer) {
@@ -57,9 +57,9 @@ address admin = {{admin}};
 address alice = {{alice}};
 script {
     use 0x1::Account;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGov;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{
+    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGov;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{
         PoolTypeInitialLiquidity,
         PoolTypeCommunity,
     };

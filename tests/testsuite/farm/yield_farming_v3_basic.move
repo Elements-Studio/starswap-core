@@ -14,8 +14,8 @@ module alice::YieldFarmingWarpper {
     use 0x1::Vector;
     use 0x1::Debug;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingV3 as YieldFarming;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingV3 as YieldFarming;
 
     struct Usdx has copy, drop, store {}
 
@@ -120,7 +120,7 @@ module alice::YieldFarmingWarpper {
 //! new-transaction
 //! sender: alice
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingLibrary;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingLibrary;
     use 0x1::Timestamp;
     use 0x1::Debug;
 
@@ -159,7 +159,7 @@ script {
     use 0x1::Token;
 
     use alice::YieldFarmingWarpper::{Usdx};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// Initial reward token, registered and mint it
     fun alice_accept_and_deposit(signer: signer) {
@@ -179,7 +179,7 @@ address alice = {{alice}};
 script {
     use 0x1::Account;
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// Inital token into yield farming treasury
     fun alice_init_token_into_treasury(account: signer) {
@@ -201,7 +201,7 @@ script {
     //use 0x1::Timestamp;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// Cindy joined and staking some asset
     fun cindy_stake_1x_token_to_pool(signer: signer) {
@@ -230,7 +230,7 @@ script {
     //use 0x1::Timestamp;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// Cindy harvest after 20 seconds, checking whether has rewards.
     fun cindy_query_token_amount(signer: signer) {
@@ -258,7 +258,7 @@ script {
     use 0x1::Debug;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// Cindy harvest after 40 seconds, checking whether has rewards.
     fun cindy_unstake_afeter_40_seconds(signer: signer) {
@@ -285,7 +285,7 @@ script {
     use 0x1::Account;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun bob_stake_1(signer: signer) {
         Account::do_accept_token<Usdx>(&signer);
@@ -307,7 +307,7 @@ script {
     use 0x1::Account;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     /// bob harvest after 4 seconds, checking whether has rewards.
     fun bob_harvest_mul1x_deadline60_after4sec_check_abort(signer: signer) {
@@ -333,7 +333,7 @@ address alice = {{alice}};
 address bob = {{bob}};
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
 
     fun bob_stake_2(signer: signer) {
         // Second stake operation, 2x
@@ -353,7 +353,7 @@ script {
 address alice = {{alice}};
 address bob = {{bob}};
 script {
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use alice::YieldFarmingWarpper::{Usdx, Self};
 
     fun bob_stake_3(signer: signer) {
@@ -378,7 +378,7 @@ script {
     use 0x1::Vector;
     use 0x1::Debug;
 
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use alice::YieldFarmingWarpper::{Usdx, Self};
 
     fun bob_stake_4(signer: signer) {
@@ -478,7 +478,7 @@ script {
 ////! new-transaction
 ////! sender: alice
 //script {
-//    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingLibrary;
+//    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingLibrary;
 //    use 0x1::Timestamp;
 //    use 0x1::Debug;
 //

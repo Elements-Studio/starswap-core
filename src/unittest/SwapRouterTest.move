@@ -1,17 +1,17 @@
-address 0x2b3d5bd6d0f8a957e6a4abe986056ba7 {
+address 0x8c109349c6bd91411d6bc962e080c4a3 {
 module SwapRouterTest {
     #[test_only]
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter3;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter3;
     //    #[test_only]
-    //    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
+    //    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
     #[test_only]
     use 0x1::STC::STC;
     #[test_only]
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenMock::{WETH, WUSDT, WDAI};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI};
     #[test_only]
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TestHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TestHelper;
     #[test_only]
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::CommonHelper;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     #[test_only]
     use 0x1::Signer;
     #[test_only] use 0x1::Debug;
