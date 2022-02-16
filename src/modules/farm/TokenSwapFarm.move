@@ -11,11 +11,10 @@ module TokenSwapFarm {
     use 0x1::Errors;
 
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarmingV3 as YieldFarming;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::YieldFarming as YieldFarmingV2;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::STAR;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwap::LiquidityToken;
     use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapRouter;
-    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{PoolTypeLiquidityMint, PoolTypeFarmPool};
+    use 0x2b3d5bd6d0f8a957e6a4abe986056ba7::TokenSwapGovPoolType::{PoolTypeFarmPool};
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
 
@@ -78,29 +77,13 @@ module TokenSwapFarm {
         unstake_event_handler: Event::EventHandle<UnstakeEvent>,
     }
 
-    struct FarmCapability<X, Y> has key, store {
-        cap: YieldFarming::ParameterModifyCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
-        release_per_seconds: u128,
-    }
-
     struct FarmPoolCapability<X, Y> has key, store {
         cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
         release_per_seconds: u128,
     }
 
-    /// Obsoleted
-    struct FarmHarvestCapability<X, Y> has key, store {
-        cap: YieldFarmingV2::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
-    }
-
     struct FarmMultiplier<X, Y> has key, store {
         multiplier: u64,
-    }
-
-    struct FarmStake<X, Y> has key, store {
-        id: u64,
-        /// Harvest capability for Farm
-        cap: YieldFarming::HarvestCapability<PoolTypeLiquidityMint, Token::Token<LiquidityToken<X, Y>>>,
     }
 
     struct FarmPoolStake<X, Y> has key, store {
@@ -419,58 +402,5 @@ module TokenSwapFarm {
             id: stake_id,
         }
     }
-
-//    /// Unstake old unharvest tokens
-//    public fun upgrade_admin_from_v2_to_v3<X: copy + drop + store, Y: copy + drop + store>(signer: &signer)
-//    acquires FarmHarvestCapability, FarmCapability, FarmPoolCapability, FarmStake, FarmPoolStake, FarmPoolEvent {
-//        let user_addr = Signer::address_of(signer);
-//
-//        // Unstake old
-//        if (exists<FarmHarvestCapability<X, Y>>(user_addr)) {
-//            let FarmHarvestCapability<X, Y>{ cap } = move_from(user_addr);
-//            let (asset, reward_token) =
-//                YieldFarmingV2::unstake<PoolTypeLiquidityMint, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(signer, user_addr, cap);
-//            Account::deposit<LiquidityToken<X, Y>>(user_addr, asset);
-//            Account::deposit<STAR::STAR>(user_addr, reward_token);
-//        };
-//
-//        // Unstake from old pool
-//        if (exists<FarmStake<X, Y>>(user_addr)) {
-//            let FarmStake<X, Y>{
-//                id: _,
-//                cap : unwrap_harvest_cap
-//            } = move_from<FarmStake<X, Y>>(user_addr);
-//
-//            // Unstake all liquidity token and reward token
-//            let (own_token, reward_token) = YieldFarming::unstake<
-//                PoolTypeLiquidityMint,
-//                STAR::STAR,
-//                Token::Token<LiquidityToken<X, Y>>>(signer, STAR::token_address(), unwrap_harvest_cap);
-//            let own_token_amount = Token::value(&own_token);
-//            TokenSwapRouter::deposit_liquidity_token<X, Y>(user_addr, own_token);
-//            Account::deposit<STAR::STAR>(user_addr, reward_token);
-//
-//            // restake to new pool
-//            stake<X, Y>(signer, own_token_amount);
-//        };
-//
-//        if (exists<FarmCapability<X, Y>>(user_addr)) {
-//            let FarmCapability<X, Y>{
-//                cap,
-//                release_per_seconds,
-//            } = move_from<FarmCapability<X, Y>>(user_addr);
-//
-//            let new_cap = YieldFarming::upgrade_farming_asset_pool_to_pool<
-//                PoolTypeLiquidityMint,
-//                PoolTypeFarmPool,
-//                Token::Token<LiquidityToken<X, Y>>>(signer, cap);
-//
-//            move_to(signer, FarmPoolCapability<X, Y>{
-//                cap: new_cap,
-//                release_per_seconds,
-//            });
-//        }
-//
-//    }
 }
 }
