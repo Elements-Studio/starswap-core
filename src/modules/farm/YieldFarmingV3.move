@@ -328,14 +328,6 @@ module YieldFarmingV3 {
             amount
         };
 
-//        Debug::print(&22222222);
-//        Debug::print(farming_asset);
-//        Debug::print(stake);
-//        Debug::print(&new_harvest_index);
-//        Debug::print(&period_gain);
-//        Debug::print(&now_seconds);
-//        Debug::print(&22222222);
-
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, withdraw_amount);
         stake.gain = total_gain - withdraw_amount;
         stake.last_harvest_index = new_harvest_index;
@@ -388,14 +380,6 @@ module YieldFarmingV3 {
             stake.last_harvest_index,
             asset_weight
         );
-
-//        Debug::print(&11111111);
-//        Debug::print(farming_asset);
-//        Debug::print(stake);
-//        Debug::print(&now_seconds);
-//        Debug::print(&new_harvest_index);
-//        Debug::print(&new_gain);
-//        Debug::print(&11111111);
 
         stake.gain + new_gain
     }
@@ -536,34 +520,5 @@ module YieldFarmingV3 {
         };
         return false
     }
-
-//    public fun upgrade_farming_asset_pool_to_pool<
-//        FromPoolType: store,
-//        ToPoolType: store,
-//        AssetT: store>(signer: &signer,
-//                       cap: ParameterModifyCapability<FromPoolType, AssetT>)
-//    : ParameterModifyCapability<ToPoolType, AssetT> acquires FarmingAsset {
-//        let ParameterModifyCapability<FromPoolType, AssetT> {} = cap;
-//        let broker = Signer::address_of(signer);
-//        if (exists_at<FromPoolType, AssetT>(broker)) {
-//            let FarmingAsset<FromPoolType, AssetT> {
-//                asset_total_weight,
-//                harvest_index,
-//                last_update_timestamp,
-//                release_per_second,
-//                start_time,
-//                alive,
-//            } = move_from<FarmingAsset<FromPoolType, AssetT>>(broker);
-//
-//            let farming_asset = borrow_global_mut<FarmingAsset<ToPoolType, AssetT>>(broker);
-//            farming_asset.asset_total_weight = asset_total_weight;
-//            farming_asset.harvest_index = harvest_index;
-//            farming_asset.last_update_timestamp = last_update_timestamp;
-//            farming_asset.release_per_second = release_per_second;
-//            farming_asset.start_time = start_time;
-//            farming_asset.alive = alive;
-//        };
-//        ParameterModifyCapability<ToPoolType, AssetT> {}
-//    }
 }
 }
