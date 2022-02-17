@@ -11,11 +11,10 @@ module TokenSwapFarm {
     use 0x1::Errors;
 
     use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingV3 as YieldFarming;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming as YieldFarmingV2;
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap::LiquidityToken;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{PoolTypeLiquidityMint, PoolTypeFarmPool};
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{PoolTypeFarmPool};
 
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
