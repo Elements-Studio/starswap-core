@@ -10,6 +10,7 @@ module TokenSwapSyrupScript {
 
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
 
     public(script) fun add_pool<TokenT: store>(signer: signer,
                                                release_per_second: u128,
@@ -35,6 +36,12 @@ module TokenSwapSyrupScript {
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
         Account::deposit<TokenT>(user_addr, asset_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);
+    }
+
+    public(script) fun put_stepwise_multiplier(signer: signer,
+                                               interval_sec: u64,
+                                               multiplier: u64) {
+        TokenSwapConfig::put_stepwise_multiplier(&signer, interval_sec, multiplier);
     }
 
     public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {
