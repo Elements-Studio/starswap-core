@@ -166,6 +166,17 @@ module TokenSwapConfig {
         }
     }
 
+    /// Check is the time second has in stepwise multiplier list
+    public fun has_in_stepwise(time_sec: u64) : bool {
+        if (!Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
+            return false
+        };
+
+        let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
+        let idx = find_mulitplier_idx(&conf.list, time_sec);
+        Option::is_some<u64>(&idx)
+    }
+
     fun find_mulitplier_idx(c: &vector<StepwiseMutiplier>, interval_sec: u64): Option::Option<u64> {
         let len = Vector::length(c);
         if (len == 0) {

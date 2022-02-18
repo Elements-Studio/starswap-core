@@ -23,6 +23,7 @@ module TokenSwapSyrup {
     const ERROR_STAKE_ID_INVALID: u64 = 103;
     const ERROR_HARVEST_STILL_LOCKING: u64 = 104;
     const ERROR_FARMING_STAKE_NOT_EXISTS: u64 = 105;
+    const ERROR_FARMING_STAKE_TIME_NOT_EXISTS: u64 = 106;
 
     /// Syrup pool of token type
     struct Syrup<TokenT> has key, store {
@@ -300,6 +301,11 @@ module TokenSwapSyrup {
     }
 
     public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
+        // 1. Check the time has in config
+        assert(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
+            Errors::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+
+        // 2. return multiplier of time
         TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
     }
 
