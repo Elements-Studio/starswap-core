@@ -29,6 +29,7 @@ script {
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
     use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
 
     fun admin_initialize(signer: signer) {
@@ -53,10 +54,13 @@ script {
         CommonHelper::safe_mint<TokenMock::WETH>(&signer, powed_mint_aount);
         Account::deposit<TokenMock::WETH>(@alice, TokenMock::mint_token<TokenMock::WETH>(powed_mint_aount));
         assert(Account::balance<TokenMock::WETH>(@alice) == powed_mint_aount, 10003);
+
+
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 1u64, 1u64);
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 2u64, 1u64);
     }
 }
 // check: EXECUTED
-
 
 //! new-transaction
 //! sender: alice
@@ -75,7 +79,7 @@ script {
     }
 }
 // check: EXECUTED
-
+//
 //! new-transaction
 //! sender: alice
 address alice = {{alice}};
