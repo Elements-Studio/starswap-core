@@ -3,6 +3,5 @@ build/
 storage/
 .idea
 .vscode/
-package/
 .vs
 data/
