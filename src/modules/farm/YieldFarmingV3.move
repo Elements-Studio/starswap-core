@@ -137,10 +137,8 @@ module YieldFarmingV3 {
         broker: address,
         release_per_second: u128,
         alive: bool) acquires FarmingAsset {
-        // Not support to shuttingdown alive state.
-        assert(alive, Errors::invalid_state(ERR_FARMING_ALIVE_STATE_INVALID));
+
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        // assert(farming_asset.alive != alive, Errors::invalid_state(ERR_FARMING_ALIVE_STATE_INVALID));
 
         let now_seconds = Timestamp::now_seconds();
         farming_asset.last_update_timestamp = now_seconds;
@@ -243,7 +241,8 @@ module YieldFarmingV3 {
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
         let now_seconds = Timestamp::now_seconds();
 
-        intra_pool_state_check<PoolType, AssetT>(now_seconds, farming_asset);
+        //intra_pool_state_check<PoolType, AssetT>(now_seconds, farming_asset);
+        assert(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
 
         let items = borrow_global_mut<StakeList<PoolType, AssetT>>(Signer::address_of(signer));
 
@@ -259,7 +258,11 @@ module YieldFarmingV3 {
         assert(stake_id == out_stake_id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
         assert_check_maybe_deadline(now_seconds, deadline);
 
-        let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
+        let new_harvest_index = if (farming_asset.alive) {
+            calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds)
+        } else {
+            farming_asset.harvest_index
+        };
 
         let asset_weight = staked_asset_weight * (staked_asset_multiplier as u128);
         let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
@@ -272,6 +275,7 @@ module YieldFarmingV3 {
         assert(farming_asset.asset_total_weight >= asset_weight, Errors::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
 
         // Update farm asset
+        farming_asset.harvest_index = new_harvest_index;
         farming_asset.asset_total_weight = farming_asset.asset_total_weight - asset_weight;
 
         // if `now_seconds` less than pool's `last_update_timestamp`, it's `deadline`, otherwise now timestamp
@@ -279,11 +283,8 @@ module YieldFarmingV3 {
         // because the latter has updated by others before this code execute.
         if (now_seconds > farming_asset.last_update_timestamp) {
             farming_asset.last_update_timestamp = now_seconds;
-
-            if (farming_asset.alive) {
-                farming_asset.harvest_index = new_harvest_index;
-            };
         };
+
 
         (staked_asset, withdraw_token)
     }
@@ -301,7 +302,8 @@ module YieldFarmingV3 {
 
         // Start check
         let now_seconds = Timestamp::now_seconds();
-        intra_pool_state_check<PoolType, AssetT>(now_seconds, farming_asset);
+        // intra_pool_state_check<PoolType, AssetT>(now_seconds, farming_asset);
+        assert(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
 
         // Get stake from stake list
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
@@ -309,7 +311,11 @@ module YieldFarmingV3 {
 
         assert_check_maybe_deadline(now_seconds, cap.deadline);
 
-        let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
+        let new_harvest_index = if (farming_asset.alive) {
+            calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds)
+        } else {
+            farming_asset.harvest_index
+        };
 
         let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
         let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
@@ -337,11 +343,8 @@ module YieldFarmingV3 {
         // because the latter has updated by others before this code execute.
         if (now_seconds > farming_asset.last_update_timestamp) {
             farming_asset.last_update_timestamp = now_seconds;
-
-            if (farming_asset.alive) {
-                farming_asset.harvest_index = new_harvest_index;
-            };
         };
+        farming_asset.harvest_index = new_harvest_index;
 
         withdraw_token
     }
