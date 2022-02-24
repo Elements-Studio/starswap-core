@@ -138,10 +138,8 @@ module YieldFarmingV3 {
         release_per_second: u128,
         alive: bool) acquires FarmingAsset {
 
-        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-
         let now_seconds = Timestamp::now_seconds();
-        farming_asset.last_update_timestamp = now_seconds;
+        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
 
         // if the pool is alive, then update index
         if (farming_asset.alive) {
@@ -149,6 +147,7 @@ module YieldFarmingV3 {
                 calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds);
         };
 
+        farming_asset.last_update_timestamp = now_seconds;
         farming_asset.release_per_second = release_per_second;
         farming_asset.alive = alive;
     }
