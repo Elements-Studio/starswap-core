@@ -18,7 +18,6 @@ script {
     }
 }
 // check: EXECUTED
-
 //! new-transaction
 //! sender: admin
 address admin = {{admin}};
@@ -45,6 +44,7 @@ script {
 
         // Release 100 amount for one second
         TokenSwapSyrup::add_pool<TokenMock::WETH>(&signer, release_per_second_amount, 0);
+        TokenSwapSyrup::set_alive<TokenMock::WETH>(&signer, true);
 
         let release_per_second = TokenSwapSyrup::query_release_per_second<TokenMock::WETH>();
         assert(release_per_second == release_per_second_amount, 10001);
@@ -55,11 +55,11 @@ script {
         Account::deposit<TokenMock::WETH>(@alice, TokenMock::mint_token<TokenMock::WETH>(powed_mint_aount));
         assert(Account::balance<TokenMock::WETH>(@alice) == powed_mint_aount, 10003);
 
-
         TokenSwapConfig::put_stepwise_multiplier(&signer, 1u64, 1u64);
         TokenSwapConfig::put_stepwise_multiplier(&signer, 2u64, 1u64);
     }
 }
+
 // check: EXECUTED
 
 //! new-transaction

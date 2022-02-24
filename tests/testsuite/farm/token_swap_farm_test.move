@@ -88,6 +88,7 @@ script {
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
         TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
+        TokenSwapFarmRouter::reset_farm_activation<WBTC, WETH>(&signer, true);
     }
 }
 // check: EXECUTED
