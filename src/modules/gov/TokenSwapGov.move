@@ -16,6 +16,7 @@ module TokenSwapGov {
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{
         PoolTypeInitialLiquidity,
         PoolTypeCommunity,
+        PoolTypeDaoTreasury,
     };
 
     // 1e8
@@ -23,22 +24,26 @@ module TokenSwapGov {
 
     // 10%
     const GOV_PERCENT_TEAM: u64 = 10;
-    // 10%
-    const GOV_PERCENT_COMMUNITY: u64 = 2;
-    // 15%
-    const GOV_PERCENT_FARM: u64 = 40;
-    // 15%
-    const GOV_PERCENT_SYRUP: u64 = 20;
-    // 2%
-    const GOV_PERCENT_INITIAL_LIQUIDITY: u64 = 1;
     // 5%
-    const GOV_PERCENT_DAO_TREASURY: u64 = 27;
+    const GOV_PERCENT_COMMUNITY: u64 = 5;
+    // 40%
+    const GOV_PERCENT_FARM: u64 = 40;
+    // 20%
+    const GOV_PERCENT_SYRUP: u64 = 20;
+    // 1%
+    const GOV_PERCENT_INITIAL_LIQUIDITY: u64 = 1;
+    // 22%
+    const GOV_PERCENT_DAO_TREASURY: u64 = 24;
 
 
     // 5%
     const GOV_PERCENT_FARM_GENESIS: u64 = 5;
     // 5%
     const GOV_PERCENT_SYRUP_GENESIS: u64 = 5;
+    // 2%
+    const GOV_PERCENT_COMMUNITY_GENESIS: u64 = 2;
+    // 2%
+    const GOV_PERCENT_DAO_TREASURY_GENESIS: u64 = 2;
 
 
     #[test] use 0x1::Debug;
@@ -55,11 +60,11 @@ module TokenSwapGov {
         assert(total == 100, 1001);
 
         assert(calculate_amount_from_percent(GOV_PERCENT_TEAM) == 10000000, 1002);
-        assert(calculate_amount_from_percent(GOV_PERCENT_COMMUNITY) == 2000000, 1002);
+        assert(calculate_amount_from_percent(GOV_PERCENT_COMMUNITY) == 5000000, 1002);
         assert(calculate_amount_from_percent(GOV_PERCENT_FARM) == 40000000, 1002);
         assert(calculate_amount_from_percent(GOV_PERCENT_SYRUP) == 20000000, 1003);
         assert(calculate_amount_from_percent(GOV_PERCENT_INITIAL_LIQUIDITY) == 1000000, 1004);
-        assert(calculate_amount_from_percent(GOV_PERCENT_DAO_TREASURY) == 27000000, 1005);
+        assert(calculate_amount_from_percent(GOV_PERCENT_DAO_TREASURY) == 24000000, 1005);
     }
 
 
@@ -97,8 +102,8 @@ module TokenSwapGov {
         TokenSwapSyrup::initialize(account, syrup_genesis_token);
 
 
-        //  Release 2% for community
-        let community_total = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY) * (scaling_factor as u128);
+        //Release 5% for community. genesis release 2%.
+        let community_total = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, community_total);
         move_to(account, GovTreasury<PoolTypeCommunity>{
             treasury: Account::withdraw<STAR::STAR>(account, community_total),
@@ -132,22 +137,30 @@ module TokenSwapGov {
         Token::value<STAR::STAR>(&treasury.treasury)
     }
 
-    /// Upgrade v2 to v3, only called in barnard net for compatibility
-    /// TODO(9191stc): to be remove it before deploy to main net
-    public(script) fun upgrade_v2_to_v3_for_syrup_on_testnet(signer: signer, amount: u128) acquires GovCapability {
-
-        let account = Signer::address_of(&signer);
-        STAR::assert_genesis_address(&signer);
-
-        let gov_cap = borrow_global<GovCapability>(account);
-        let mint_token = Token::mint_with_capability<STAR::STAR>(&gov_cap.mint_cap, amount);
-
-        TokenSwapSyrup::initialize(&signer, mint_token);
-    }
 
     fun calculate_amount_from_percent(percent: u64): u128 {
         let per: u128 = 100;
         ((GOV_TOTAL / per)) * (percent as u128)
+    }
+
+    /// Upgrade v2 to v3, only called in barnard net for compatibility
+    public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
+        STAR::assert_genesis_address(&signer);
+        //upgrade dao treasury genesis can only be execute once
+        if(! exists<GovTreasury<PoolTypeDaoTreasury>>(Signer::address_of(&signer))){
+            let precision = STAR::precision();
+            let scaling_factor = Math::pow(10, (precision as u64));
+            let now_timestamp = Timestamp::now_seconds();
+
+            //  Release 24% for dao treasury. genesis release 2%.
+            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_DAO_TREASURY_GENESIS) * (scaling_factor as u128);
+            STAR::mint(&signer, dao_treasury_genesis);
+            move_to(&signer, GovTreasury<PoolTypeDaoTreasury>{
+                treasury: Account::withdraw<STAR::STAR>(&signer, dao_treasury_genesis),
+                locked_start_timestamp : now_timestamp,
+                locked_total_timestamp : 0,
+            });
+        };
     }
 }
 }
