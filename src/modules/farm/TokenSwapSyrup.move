@@ -164,6 +164,22 @@ module TokenSwapSyrup {
         syrup.release_per_second = release_per_second;
     }
 
+    /// Set alivestate for token type pool
+    public fun set_alive<TokenT: copy + drop + store>(signer: &signer, alive: bool) acquires Syrup {
+        // Only called by the genesis
+        STAR::assert_genesis_address(signer);
+
+        let broker_addr = Signer::address_of(signer);
+        let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr);
+
+        YieldFarming::modify_parameter<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr,
+            syrup.release_per_second,
+            alive,
+        );
+    }
+
     /// Stake token type to syrup
     /// @param: pledege_time per second
     public fun stake<TokenT: store>(signer: &signer,

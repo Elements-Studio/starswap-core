@@ -25,6 +25,12 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
     }
 
+    /// Set alivestate for token type pool
+    public(script) fun set_alive<
+        TokenT: copy + drop + store>(signer: signer, alive: bool) {
+        TokenSwapSyrup::set_alive<TokenT>(&signer, alive);
+    }
+
     public(script) fun stake<TokenT: store>(signer: signer,
                                             pledge_time_sec: u64,
                                             amount: u128) {

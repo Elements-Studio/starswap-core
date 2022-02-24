@@ -40,6 +40,16 @@ module alice::YieldFarmingWarpper {
         });
     }
 
+    public fun set_alive(signer: &signer, alive: bool) acquires GovModfiyParamCapability {
+        let user_addr = Signer::address_of(signer);
+        let cap = borrow_global<GovModfiyParamCapability>(user_addr);
+        YieldFarming::modify_parameter<PoolType_A, Usdx, AssetType_A>(
+            &cap.cap,
+            Signer::address_of(signer),
+            CommonHelper::pow_amount<Usdx>(1),
+            alive);
+    }
+
     public fun stake(signer: &signer, value: u128, multiplier: u64, deadline: u64): u64
     acquires GovModfiyParamCapability, StakeCapbabilityList {
         let cap = borrow_global_mut<GovModfiyParamCapability>(@alice);
@@ -448,12 +458,14 @@ script {
     }
 }
 // check: EXECUTED
-//
+
+
 //! block-prologue
 //! author: genesis
 //! block-number: 9
 //! block-time: 86446000
-//
+
+
 //! new-transaction
 //! sender: bob
 address alice = {{alice}};
@@ -474,6 +486,115 @@ script {
     }
 }
 // check: EXECUTED
+
+//! new-transaction
+//! sender: alice
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use alice::YieldFarmingWarpper;
+
+    fun admin_set_pool_to_not_activation(signer: signer) {
+        YieldFarmingWarpper::set_alive(&signer, false);
+    }
+}
+// check: EXECUTED
+
+
+//! new-transaction
+//! sender: bob
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use 0x1::Debug;
+    use 0x1::Signer;
+    use 0x1::Account;
+    use 0x1::Token;
+
+    use alice::YieldFarmingWarpper;
+
+    fun bob_harvest_after_not_activation_1(signer: signer) {
+        let token = YieldFarmingWarpper::harvest(&signer, 4);
+        let amount = Token::value(&token);
+        Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
+        Debug::print(&11111111);
+        Debug::print(&amount);
+        assert(amount == 0, 10010);
+    }
+}
+// check: EXECUTED
+
+
+//! block-prologue
+//! author: genesis
+//! block-number: 10
+//! block-time: 86448000
+
+//! new-transaction
+//! sender: bob
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use 0x1::Debug;
+    use 0x1::Signer;
+    use 0x1::Account;
+    use 0x1::Token;
+
+    use alice::YieldFarmingWarpper;
+
+    fun bob_harvest_after_not_activation_2(signer: signer) {
+        let token = YieldFarmingWarpper::harvest(&signer, 4);
+        let amount = Token::value(&token);
+        Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
+
+        Debug::print(&amount);
+        assert(amount == 0, 10011);
+    }
+}
+// check: EXECUTED
+
+
+//! new-transaction
+//! sender: alice
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use alice::YieldFarmingWarpper;
+
+    fun admin_set_pool_to_activation(signer: signer) {
+        YieldFarmingWarpper::set_alive(&signer, true);
+    }
+}
+// check: EXECUTED
+
+//! block-prologue
+//! author: genesis
+//! block-number: 11
+//! block-time: 86458000
+
+//! new-transaction
+//! sender: bob
+address alice = {{alice}};
+address bob = {{bob}};
+script {
+    use 0x1::Debug;
+    use 0x1::Signer;
+    use 0x1::Account;
+    use 0x1::Token;
+
+    use alice::YieldFarmingWarpper;
+
+    fun bob_harvest_after_activation_1(signer: signer) {
+        let token = YieldFarmingWarpper::harvest(&signer, 4);
+        let amount = Token::value(&token);
+        Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
+
+        Debug::print(&amount);
+        assert(amount > 0, 10012);
+    }
+}
+// check: EXECUTED
+
 
 ////! new-transaction
 ////! sender: alice
