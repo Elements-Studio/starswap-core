@@ -111,7 +111,7 @@ module YieldFarmingV3 {
             last_update_timestamp: now_seconds,
             release_per_second,
             start_time: now_seconds + delay,
-            alive: true
+            alive: false
         });
         ParameterModifyCapability<PoolType, AssetT> {}
     }
