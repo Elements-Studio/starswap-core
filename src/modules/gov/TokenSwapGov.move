@@ -13,6 +13,7 @@ module TokenSwapGov {
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarm;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrup;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{
         PoolTypeInitialLiquidity,
         PoolTypeCommunity,
@@ -123,6 +124,8 @@ module TokenSwapGov {
 
     /// dispatch to acceptor from governance treasury pool
     public fun dispatch<PoolType: store>(account: &signer, acceptor: address, amount: u128) acquires GovTreasury {
+        TokenSwapConfig::assert_global_freeze();
+
         let now_timestamp = Timestamp::now_seconds();
         let treasury = borrow_global_mut<GovTreasury<PoolType>>(Signer::address_of(account));
         if((treasury.locked_start_timestamp + treasury.locked_total_timestamp) <= now_timestamp ) {

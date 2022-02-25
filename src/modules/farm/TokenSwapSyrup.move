@@ -185,6 +185,7 @@ module TokenSwapSyrup {
     public fun stake<TokenT: store>(signer: &signer,
                                     pledge_time_sec: u64,
                                     amount: u128) acquires Syrup, SyrupStakeList, SyrupEvent {
+        TokenSwapConfig::assert_global_freeze();
         assert(pledge_time_sec > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
 
         let user_addr = Signer::address_of(signer);
@@ -245,6 +246,8 @@ module TokenSwapSyrup {
         Token::Token<TokenT>,
         Token::Token<STAR::STAR>
     ) acquires SyrupStakeList, SyrupEvent {
+        TokenSwapConfig::assert_global_freeze();
+
         let user_addr = Signer::address_of(signer);
         let broker_addr = STAR::token_address();
         assert(id > 0, Errors::invalid_state(ERROR_STAKE_ID_INVALID));
