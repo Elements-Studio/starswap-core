@@ -285,3 +285,28 @@ script {
     }
 }
 // check: EXECUTED
+
+//! new-transaction
+//! sender: admin
+address admin = {{admin}};
+script {
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+
+    fun switch_open_to_global_freeze(signer: signer) {
+        TokenSwapConfig::set_global_freeze_switch(&signer, true);
+    }
+}
+// check: EXECUTED
+
+//! new-transaction
+//! sender: alice
+script {
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
+    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+
+    fun expect_failed_after_global_freeze_lock(signer: signer) {
+        TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
+
+    }
+}
+// check: "Keep(ABORTED { code: 26113"

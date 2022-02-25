@@ -237,6 +237,8 @@ module TokenSwap {
         x: Token::Token<X>,
         y: Token::Token<Y>,
     ): Token::Token<LiquidityToken<X, Y>> acquires TokenSwapPair, LiquidityTokenCapability {
+        TokenSwapConfig::assert_global_freeze();
+
         let total_supply: u128 = Token::market_cap<LiquidityToken<X, Y>>();
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
         let x_value = Token::value<X>(&x);
@@ -271,6 +273,8 @@ module TokenSwap {
     public fun burn<X: copy + drop + store, Y: copy + drop + store>(
         to_burn: Token::Token<LiquidityToken<X, Y>>,
     ): (Token::Token<X>, Token::Token<Y>) acquires TokenSwapPair, LiquidityTokenCapability {
+        TokenSwapConfig::assert_global_freeze();
+
         let to_burn_value = (Token::value(&to_burn) as u128);
         let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         let x_reserve = (Token::value(&token_pair.token_x_reserve) as u128);
@@ -323,6 +327,8 @@ module TokenSwap {
         y_in: Token::Token<Y>,
         x_out: u128,
     ): (Token::Token<X>, Token::Token<Y>, Token::Token<X>, Token::Token<Y>) acquires TokenSwapPair {
+        TokenSwapConfig::assert_global_freeze();
+
         let x_in_value = Token::value(&x_in);
         let y_in_value = Token::value(&y_in);
         assert(x_in_value > 0 || y_in_value > 0, ERROR_SWAP_TOKEN_INSUFFICIENT);

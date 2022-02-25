@@ -18,10 +18,12 @@ module TokenSwapConfig {
     const DEFAULT_POUNDAGE_DENUMERATOR: u64 = 1000;
 
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
+    const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
     const ERROR_NOT_HAS_PRIVILEGE: u64 = 101;
+    const ERROR_GLOBAL_FREEZE: u64 = 102;
 
     struct SwapFeePoundageConfig<X, Y> has copy, drop, store {
         numerator: u64,
@@ -44,6 +46,10 @@ module TokenSwapConfig {
     
     struct SwapFeeSwitchConfig has copy, drop, store {
         auto_convert_switch: bool,
+    }
+
+    struct SwapGlobalFreezeSwitch has copy, drop, store {
+        freeze_switch: bool,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -209,6 +215,30 @@ module TokenSwapConfig {
         }
     }
 
+    /// Global freeze
+    public fun set_global_freeze_switch(signer: &signer, freeze_switch: bool) {
+        assert_admin(signer);
+
+        let config = SwapGlobalFreezeSwitch{
+            freeze_switch,
+        };
+        if (Config::config_exist_by_address<SwapGlobalFreezeSwitch>(admin_address())) {
+            Config::set<SwapGlobalFreezeSwitch>(signer, config);
+        } else {
+            Config::publish_new_config<SwapGlobalFreezeSwitch>(signer, config);
+        }
+    }
+
+    /// Global freeze
+    public fun get_global_freeze_switch(): bool {
+        if (Config::config_exist_by_address<SwapGlobalFreezeSwitch>(admin_address())) {
+            let conf = Config::get_by_address<SwapGlobalFreezeSwitch>(admin_address());
+            conf.freeze_switch
+        } else {
+            DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH
+        }
+    }
+
     public fun admin_address(): address {
         @0x8c109349c6bd91411d6bc962e080c4a3
     }
@@ -221,8 +251,14 @@ module TokenSwapConfig {
         assert(Signer::address_of(signer) == admin_address(), Errors::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
     }
 
+    public fun assert_global_freeze() {
+        assert(!get_global_freeze_switch(), Errors::invalid_state(ERROR_GLOBAL_FREEZE));
+    }
+
     public fun get_swap_fee_switch(): bool {
         SWAP_FEE_SWITCH_ON
     }
+
+
 }
 }
