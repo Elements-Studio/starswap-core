@@ -112,8 +112,6 @@ module TokenSwapFarm {
         signer: &signer,
         release_per_seconds: u128) acquires FarmPoolEvent {
 
-        TokenSwapConfig::assert_global_freeze();
-
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -153,7 +151,6 @@ module TokenSwapFarm {
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(signer: &signer, multiplier: u64)
     acquires FarmPoolCapability, FarmMultiplier {
-        TokenSwapConfig::assert_global_freeze();
 
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
@@ -186,8 +183,6 @@ module TokenSwapFarm {
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(
         account: &signer,
         active: bool) acquires FarmPoolEvent, FarmPoolCapability {
-
-        TokenSwapConfig::assert_global_freeze();
 
         STAR::assert_genesis_address(account);
         let admin_addr = Signer::address_of(account);
@@ -250,6 +245,8 @@ module TokenSwapFarm {
     public fun unstake<X: copy + drop + store,
                        Y: copy + drop + store>(account: &signer, amount: u128)
     acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
+        TokenSwapConfig::assert_global_freeze();
+
         let account_addr = Signer::address_of(account);
         // Actual stake
         let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
