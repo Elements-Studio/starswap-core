@@ -9,6 +9,7 @@ module TokenSwapGov {
     use 0x1::Math;
     use 0x1::Signer;
     use 0x1::Timestamp;
+    use 0x1::Errors;
 
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarm;
@@ -45,6 +46,9 @@ module TokenSwapGov {
     const GOV_PERCENT_COMMUNITY_GENESIS: u64 = 2;
     // 2%
     const GOV_PERCENT_DAO_TREASURY_GENESIS: u64 = 2;
+
+
+    const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
 
 
     #[test] use 0x1::Debug;
@@ -147,6 +151,12 @@ module TokenSwapGov {
     }
 
     /// Upgrade v2 to v3, only called in barnard net for compatibility
+    /// TODO(9191stc): to be remove it before deploy to main net
+    public(script) fun upgrade_v2_to_v3_for_syrup_on_testnet(_signer: signer, _amount: u128)  {
+        abort Errors::deprecated(ERR_DEPRECATED_UPGRADE_ERROR)
+    }
+
+    /// only called in barnard net for compatibility
     public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
         //upgrade dao treasury genesis can only be execute once
