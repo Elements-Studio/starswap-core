@@ -365,5 +365,10 @@ module TokenSwapRouter {
         TokenSwapConfig::set_fee_auto_convert_switch(signer, auto_convert_switch);
     }
 
+    /// Set global freeze switch
+    public fun set_global_freeze_switch(signer: &signer, freeze: bool) {
+        TokenSwapConfig::set_global_freeze_switch(signer, freeze);
+    }
+
 }
 }
