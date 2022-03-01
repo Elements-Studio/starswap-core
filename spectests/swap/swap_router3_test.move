@@ -119,19 +119,19 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwapRouter::register_swap_pair<WETH, WUSDT>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
+        assert!(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
 
         TokenSwapRouter::register_swap_pair<WUSDT, WDAI>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WUSDT, WDAI>(), 112);
+        assert!(TokenSwapRouter::swap_pair_exists<WUSDT, WDAI>(), 112);
 
         TokenSwapRouter::register_swap_pair<WDAI, WBTC>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WDAI, WBTC>(), 113);
+        assert!(TokenSwapRouter::swap_pair_exists<WDAI, WBTC>(), 113);
 
         TokenSwapRouter::register_swap_pair<STC, WETH>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<STC, WETH>(), 114);
+        assert!(TokenSwapRouter::swap_pair_exists<STC, WETH>(), 114);
 
         TokenSwapRouter::register_swap_pair<WBTC, WETH>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WBTC, WETH>(), 115);
+        assert!(TokenSwapRouter::swap_pair_exists<WBTC, WETH>(), 115);
     }
 }
 
@@ -193,7 +193,7 @@ script {
         let amount_x_in = 15000;
         let amount_y_out_min = 10;
         let token_balance = CommonHelper::get_safe_balance<WDAI>(Signer::address_of(&signer));
-        assert(token_balance == 0, 201);
+        assert!(token_balance == 0, 201);
 
         let (r_out, t_out, expected_token_balance) = TokenSwapRouter3::get_amount_out<STC, WETH, WUSDT, WDAI>(amount_x_in);
         TokenSwapRouter3::swap_exact_token_for_token<STC, WETH, WUSDT, WDAI>(&signer, amount_x_in, amount_y_out_min);
@@ -209,8 +209,8 @@ script {
 
         Debug::print<u128>(&amount_y_out_min);
         Debug::print<u128>(&expected_token_balance);
-        assert(token_balance == expected_token_balance, (token_balance as u64));
-        assert(token_balance >= amount_y_out_min, (token_balance as u64));
+        assert!(token_balance == expected_token_balance, (token_balance as u64));
+        assert!(token_balance >= amount_y_out_min, (token_balance as u64));
     }
 }
 
@@ -234,7 +234,7 @@ script {
         let amount_x_in_max = 30000;
         let amount_y_out = 200;
         let token_balance = CommonHelper::get_safe_balance<WBTC>(Signer::address_of(&signer));
-        assert(token_balance == 0, 201);
+        assert!(token_balance == 0, 201);
 
         let (t_in, r_in, x_in) = TokenSwapRouter3::get_amount_in<WETH, WUSDT, WDAI, WBTC>(amount_y_out);
         TokenSwapRouter3::swap_token_for_exact_token<WETH, WUSDT, WDAI, WBTC>(&signer, amount_x_in_max, amount_y_out);
@@ -249,8 +249,8 @@ script {
         Debug::print<u128>(&t_in);
         Debug::print<u128>(&token_balance);
         Debug::print<u128>(&amount_x_in_max);
-        assert(token_balance == amount_y_out, (token_balance as u64));
-        assert(x_in <= amount_x_in_max, (token_balance as u64));
+        assert!(token_balance == amount_y_out, (token_balance as u64));
+        assert!(x_in <= amount_x_in_max, (token_balance as u64));
     }
 }
 

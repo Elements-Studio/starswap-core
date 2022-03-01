@@ -86,7 +86,7 @@ module TestHelper {
         if (amount > 0) {
             deposit_stc_to(account, amount);
             let stc_balance = Account::balance<STC>(account_address);
-            assert(stc_balance == amount, 999);
+            assert!(stc_balance == amount, 999);
         };
     }
 

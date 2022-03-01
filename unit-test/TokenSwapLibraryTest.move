@@ -16,8 +16,8 @@ module TokenSwapLibraryTest {
         let amount_y_k3_fee = TokenSwapLibrary::get_amount_out(amount_x, reserve_x, reserve_y, 3, 1000);
         Debug::print(&amount_y);
         Debug::print(&amount_y_k3_fee);
-        assert(amount_y == 9999999000, 10001);
-        assert(amount_y_k3_fee == 9969999005, 10002);
+        assert!(amount_y == 9999999000, 10001);
+        assert!(amount_y_k3_fee == 9969999005, 10002);
     }
 
 }

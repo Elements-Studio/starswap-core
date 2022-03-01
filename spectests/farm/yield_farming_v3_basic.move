@@ -127,7 +127,6 @@ module alice::YieldFarmingWarpper {
 //# block --author 0x1 --timestamp 10001000
 
 //# run --signers alice
-
 script {
     use SwapAdmin::YieldFarmingLibrary;
     use StarcoinFramework::Timestamp;
@@ -136,7 +135,7 @@ script {
     /// Index test
     fun yield_farming_library_test(_account: signer) {
         let harvest_index = 100;
-        let last_update_timestamp: u64 = 86395;
+        let last_update_timestamp: u64 = Timestamp::now_seconds() - 5;
         let _asset_total_weight = 1000000000;
 
         let index_1 = YieldFarmingLibrary::calculate_harvest_index(
@@ -148,7 +147,9 @@ script {
         assert!((2000000000 * 5) == withdraw_1, 1001);
 
         // Denominator bigger than numberator
-        let index_2 = YieldFarmingLibrary::calculate_harvest_index(0, 100000000000000, 0, 5, 10000000);
+
+        let index_2 = YieldFarmingLibrary::calculate_harvest_index(
+            0, 100000000000000, 0, Timestamp::now_seconds() + 5, 10000000);
         let amount_2 = YieldFarmingLibrary::calculate_withdraw_amount(index_2, 0, 40000000000);
         Debug::print(&index_2);
         Debug::print(&amount_2);
@@ -162,7 +163,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Account;
     use StarcoinFramework::Token;
@@ -250,7 +250,6 @@ script {
 //# block --author 0x1 --timestamp 10004000
 
 //# run --signers cindy
-
 script {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
@@ -351,7 +350,6 @@ script {
 //# block --author 0x1 --timestamp 10007000
 
 //# run --signers bob
-
 script {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Vector;
@@ -400,7 +398,6 @@ script {
 //# block --author 0x1 --timestamp 10009000
 
 //# run --signers bob
-
 script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::Signer;
@@ -421,7 +418,6 @@ script {
 //# block --author 0x1 --timestamp 10010000
 
 //# run --signers bob
-
 script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::Signer;

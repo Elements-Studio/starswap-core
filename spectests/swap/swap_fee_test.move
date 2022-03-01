@@ -155,13 +155,13 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwapRouter::register_swap_pair<WETH, WUSDT>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
+        assert!(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
 
         TokenSwapRouter::register_swap_pair<STC, WETH>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<STC, WETH>(), 112);
+        assert!(TokenSwapRouter::swap_pair_exists<STC, WETH>(), 112);
 
         TokenSwapRouter::register_swap_pair<STC, XUSDT>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<STC, XUSDT>(), 113);
+        assert!(TokenSwapRouter::swap_pair_exists<STC, XUSDT>(), 113);
     }
 }
 
@@ -235,8 +235,8 @@ script {
         Debug::print<u128>(&swap_fee);
         Debug::print<u128>(&fee_out);
         Debug::print<u128>(&fee_balance_change);
-        assert(fee_balance_change == fee_out, 201);
-        assert(fee_balance_change >= 0, 202);
+        assert!(fee_balance_change == fee_out, 201);
+        assert!(fee_balance_change >= 0, 202);
     }
 }
 //the case: token pay for fee and fee token pair exist
@@ -286,8 +286,8 @@ script {
         Debug::print<u128>(&reserve_fee);
         Debug::print<u128>(&fee_out);
         Debug::print<u128>(&fee_balance_change);
-        assert(fee_balance_change == fee_out, 205);
-        assert(fee_balance_change >= 0, 206);
+        assert!(fee_balance_change == fee_out, 205);
+        assert!(fee_balance_change >= 0, 206);
     }
 }
 //the case: token pay for fee and fee token pair exist
@@ -332,7 +332,7 @@ script {
         Debug::print<u128>(&y_out);
         Debug::print<u128>(&swap_fee);
         Debug::print<u128>(&fee_balance_change);
-        assert(fee_balance_change == 0, 210);
+        assert!(fee_balance_change == 0, 210);
     }
 }
 //the case: token pay for fee and fee token pair not exist
@@ -369,7 +369,7 @@ script {
         Debug::print<u128>(&swap_fee);
         Debug::print<u128>(&y_out);
         Debug::print<u128>(&y_out_2);
-        assert(y_out == y_out_2, 215);
+        assert!(y_out == y_out_2, 215);
     }
 }
 //the case: token pay for fee and fee token pair exist
@@ -403,7 +403,7 @@ script {
         Debug::print<u128>(&110400);
         Debug::print<u128>(&swap_fee);
         Debug::print<u128>(&swap_fee_2);
-        assert(swap_fee == swap_fee_2, 221);
+        assert!(swap_fee == swap_fee_2, 221);
     }
 }
 //the case: token pay for fee and fee token pair exist

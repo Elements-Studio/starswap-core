@@ -15,7 +15,7 @@ script {
     fun update_module_upgrade_strategy_with_min_time(signer: signer) {
         let signer_address = Signer::address_of(&signer);
         UpgradeScripts::update_module_upgrade_strategy_with_min_time(signer, PackageTxnManager::get_strategy_two_phase(), 600000);
-        assert(PackageTxnManager::get_strategy_two_phase() == PackageTxnManager::get_module_upgrade_strategy(signer_address), 2001);
+        assert!(PackageTxnManager::get_strategy_two_phase() == PackageTxnManager::get_module_upgrade_strategy(signer_address), 2001);
     }
 }
 // check: EXECUTED
@@ -42,9 +42,9 @@ script {
             Debug::print(&100100);
             let plan = Option::borrow(&plan_opt);
             Debug::print<UpgradePlanV2>(plan);
-//            assert(plan.active_after_time <= min_time_limit, 2002);
+//            assert!(plan.active_after_time <= min_time_limit, 2002);
         } else {
-            assert(false, 2003);
+            assert!(false, 2003);
         };
     }
 }

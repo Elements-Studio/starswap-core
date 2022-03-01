@@ -33,8 +33,8 @@ script {
         let amount_y_2 = SafeMath::safe_mul_div_u128(amount_x, reserve_x, reserve_y);
         Debug::print<u128>(&amount_y_1);
         Debug::print<u128>(&amount_y_2);
-        assert(amount_y_1 == 440000 * scaling_factor, 3003);
-        assert(amount_y_2 == 27500 * scaling_factor, 3004);
+        assert!(amount_y_1 == 440000 * scaling_factor, 3003);
+        assert!(amount_y_2 == 27500 * scaling_factor, 3004);
     }
 }
 // check: EXECUTED
@@ -61,8 +61,8 @@ script {
         let amount_y_2 = SafeMath::safe_mul_div_u128(amount_x, reserve_x, reserve_y);
         Debug::print<u128>(&amount_y_1);
         Debug::print<u128>(&amount_y_2);
-        assert(amount_y_1 == 0 * scaling_factor_9, 3006);
-        assert(amount_y_2 == 275000000 * scaling_factor_9, 3007);
+        assert!(amount_y_1 == 0 * scaling_factor_9, 3006);
+        assert!(amount_y_2 == 275000000 * scaling_factor_9, 3007);
     }
 }
 // check: EXECUTED
@@ -93,9 +93,9 @@ script {
         Debug::print<u128>(&amount_y_1);
         Debug::print<u128>(&amount_y_2);
         Debug::print<u128>(&amount_y_2_loss_precesion);
-        assert(amount_y_1 == 73, 3008);
-        assert(amount_y_2 == 73, 3009);
-        assert(amount_y_2_loss_precesion < amount_y_2, 3010);
+        assert!(amount_y_1 == 73, 3008);
+        assert!(amount_y_2 == 73, 3009);
+        assert!(amount_y_2_loss_precesion < amount_y_2, 3010);
     }
 }
 // check: EXECUTED

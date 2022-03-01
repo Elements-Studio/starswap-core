@@ -22,10 +22,10 @@ script {
         let amount_y_2 = SafeMath::safe_mul_div_u128(amount_x, reserve_x, reserve_y);
         Debug::print<u128>(&amount_y_1);
         Debug::print<u128>(&amount_y_2);
-        assert(amount_y_1 <= 0, 3003);
-        assert(amount_y_2 > 0, 3004);
-//        assert(amount_y_1 == 440000 * scaling_factor, 3003);
-//        assert(amount_y_2 == 27500 * scaling_factor, 3004);
+        assert!(amount_y_1 <= 0, 3003);
+        assert!(amount_y_2 > 0, 3004);
+//        assert!(amount_y_1 == 440000 * scaling_factor, 3003);
+//        assert!(amount_y_2 == 27500 * scaling_factor, 3004);
     }
 }
 

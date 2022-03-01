@@ -50,7 +50,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 // check: EXECUTED
@@ -76,8 +76,8 @@ script{
         Account::deposit_to_self( &signer, liquidity_token);
 
         let (x, y) = TokenSwap::get_reserves<STC::STC, TokenMock::WUSDT>();
-        assert(x == stc_amount, 111);
-        assert(y == usdt_amount, 112);
+        assert!(x == stc_amount, 111);
+        assert!(y == usdt_amount, 112);
     }
 }
 // check: EXECUTED
@@ -128,8 +128,8 @@ script{
         Account::deposit_to_self(&signer, usdx);
 
         let (x, y) = TokenSwap::get_reserves<STC::STC, TokenMock::WUSDT>();
-        assert(x == 0, 111);
-        assert(y == 0, 112);
+        assert!(x == 0, 111);
+        assert!(y == 0, 112);
     }
 }
 // check: EXECUTED

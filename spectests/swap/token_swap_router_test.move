@@ -62,7 +62,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 // check: EXECUTED
@@ -79,13 +79,13 @@ script {
         Token::register_token<WETH>(&signer, 6);
         Account::do_accept_token<WETH>(&signer);
         let old_market_cap = Token::market_cap<WETH>();
-        assert(old_market_cap == 0, 8001);
+        assert!(old_market_cap == 0, 8001);
         let token = Token::mint<WETH>(&signer, 10000);
-        assert(Token::value<WETH>(&token) == 10000, 8000);
-        assert(Token::market_cap<WETH>() == old_market_cap + 10000, 8001);
+        assert!(Token::value<WETH>(&token) == 10000, 8000);
+        assert!(Token::market_cap<WETH>() == old_market_cap + 10000, 8001);
         let sender_address = Signer::address_of(&signer);
         Account::deposit(sender_address, token);
-        assert(Account::balance<WETH>(sender_address) == 10000, 8003);
+        assert!(Account::balance<WETH>(sender_address) == 10000, 8003);
     }
 }
 
@@ -103,10 +103,10 @@ script {
         // for the first add liquidity
         TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10000, 10000 * 10000, 10, 10);
         let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
-        assert(total_liquidity == 1000000 - 1000, (total_liquidity as u64));
+        assert!(total_liquidity == 1000000 - 1000, (total_liquidity as u64));
         TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10000, 10000 * 10000, 10, 10);
         let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
-        assert(total_liquidity == (1000000 - 1000) * 2, (total_liquidity as u64));
+        assert!(total_liquidity == (1000000 - 1000) * 2, (total_liquidity as u64));
     }
 }
 // check: EXECUTED
@@ -124,12 +124,12 @@ script {
         TokenSwapRouter::remove_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10000, 10, 10);
         let _token_balance = Account::balance<TokenMock::WUSDT>(Signer::address_of(&signer));
         let expected = (10000 * 10000) * 2 * 10000 / ((1000000 - 1000) * 2);
-        //assert(token_balance == expected, (token_balance as u64));
+        //assert!(token_balance == expected, (token_balance as u64));
 
         //let y = to_burn_value * y_reserve / total_supply;
         let (stc_reserve, usdt_reserve) = TokenSwapRouter::get_reserves<STC::STC, TokenMock::WUSDT>();
-        assert(stc_reserve == 10000 * 2 - 10000 * 2 * 10000 / ((1000000 - 1000) * 2), (stc_reserve as u64));
-        assert(usdt_reserve == 10000 * 10000 * 2 - expected, (usdt_reserve as u64));
+        assert!(stc_reserve == 10000 * 2 - 10000 * 2 * 10000 / ((1000000 - 1000) * 2), (stc_reserve as u64));
+        assert!(usdt_reserve == 10000 * 10000 * 2 - expected, (usdt_reserve as u64));
     }
 }
 // check: EXECUTED
@@ -156,7 +156,7 @@ script {
         let token_balance = Account::balance<TokenMock::WUSDT>(Signer::address_of(&signer));
         let expected_token_balance = TokenSwapLibrary::get_amount_out(1000, stc_reserve, token_reserve, fee_numberator, fee_denumerator);
         Debug::print<u128>(&token_balance);
-        assert(token_balance == expected_token_balance, (token_balance as u64));
+        assert!(token_balance == expected_token_balance, (token_balance as u64));
     }
 }
 // check: EXECUTED
@@ -180,7 +180,7 @@ script {
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC::STC, TokenMock::WUSDT>();
         let expected_balance_change = TokenSwapLibrary::get_amount_in(100000, stc_reserve, token_reserve, fee_numberator, fee_denumerator);
-        assert(stc_balance_before - stc_balance_after == expected_balance_change, (expected_balance_change as u64));
+        assert!(stc_balance_before - stc_balance_after == expected_balance_change, (expected_balance_change as u64));
     }
 }
 // check: EXECUTED
@@ -202,8 +202,8 @@ script {
         let (token_reserve_2, stc_reserve_2) = TokenSwapRouter::get_reserves<TokenMock::WUSDT, STC::STC>();
         Debug::print(&token_reserve_2);
         Debug::print(&stc_reserve_2);
-        assert(stc_reserve == stc_reserve_2, 1112);
-        assert(token_reserve == token_reserve_2, 1112);
+        assert!(stc_reserve == stc_reserve_2, 1112);
+        assert!(token_reserve == token_reserve_2, 1112);
     }
 }
 // check: EXECUTED

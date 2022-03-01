@@ -15,7 +15,7 @@ script {
     fun main(_signer: signer) {
         let ret = TokenSwap::compare_token<STC, WUSDT>();
         Debug::print<u8>(&ret);
-        assert(ret == 1, 10000);
+        assert!(ret == 1, 10000);
     }
 }
 // check: EXECUTED

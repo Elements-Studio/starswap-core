@@ -263,7 +263,6 @@ script {
 
     fun expect_failed_after_global_freeze_lock(signer: signer) {
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
-
     }
 }
 // check: "Keep(ABORTED { code: 26113"

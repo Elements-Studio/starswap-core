@@ -12,7 +12,7 @@
 
 
 
-//# run --signers SwapAdmin
+//# run --signers feeadmin
 script {
     use SwapAdmin::TokenSwapFee;
 
@@ -22,8 +22,7 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers feetokenholder
-
+//# run --signers SwapAdmin
 script {
     use Bridge::XUSDT::XUSDT;
     use StarcoinFramework::Token;
@@ -52,7 +51,6 @@ script {
 
 
 //# run --signers feeadmin
-
 script {
     use StarcoinFramework::Account;
     use Bridge::XUSDT::XUSDT;
@@ -89,7 +87,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, XUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, XUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, XUSDT>(), 111);
     }
 }
 // check: EXECUTED
@@ -106,7 +104,7 @@ script {
         // for the first add liquidity
         TokenSwapRouter::add_liquidity<STC, XUSDT>(&signer, 200000, 50000, 10, 10);
         let total_liquidity = TokenSwapRouter::total_liquidity<STC, XUSDT>();
-        assert(total_liquidity > 0, (total_liquidity as u64));
+        assert!(total_liquidity > 0, (total_liquidity as u64));
     }
 }
 // check: EXECUTED
@@ -137,7 +135,7 @@ script {
         Debug::print<u128>(&token_balance_start);
         Debug::print<u128>(&token_balance_end);
         let token_balance_change = token_balance_end - token_balance_start;
-        assert(token_balance_change == expected_token_balance, (token_balance_change as u64));
+        assert!(token_balance_change == expected_token_balance, (token_balance_change as u64));
     }
 }
 // check: EXECUTED

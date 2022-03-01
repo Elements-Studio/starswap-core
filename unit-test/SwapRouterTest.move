@@ -24,7 +24,7 @@ module SwapRouterTest {
         let amount_x_in = 50000;
         let amount_y_out_min = 10;
         let token_balance_before = CommonHelper::get_safe_balance<WDAI>(Signer::address_of(&sender));
-        assert(token_balance_before == 0, 201);
+        assert!(token_balance_before == 0, 201);
 
         let (r_out, t_out, expected_token_balance) = TokenSwapRouter3::get_amount_out<STC, WETH, WUSDT, WDAI>(amount_x_in);
         TokenSwapRouter3::swap_exact_token_for_token<STC, WETH, WUSDT, WDAI>(&sender, amount_x_in, amount_y_out_min);
@@ -41,8 +41,8 @@ module SwapRouterTest {
 
         Debug::print<u128>(&amount_y_out_min);
         Debug::print<u128>(&expected_token_balance);
-        //        assert(token_balance == expected_token_balance, (token_balance as u64));
-        //        assert(token_balance >= amount_y_out_min, (token_balance as u64));
+        //        assert!(token_balance == expected_token_balance, (token_balance as u64));
+        //        assert!(token_balance >= amount_y_out_min, (token_balance as u64));
     }
 
 

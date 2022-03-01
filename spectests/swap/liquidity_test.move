@@ -67,7 +67,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 // check: EXECUTE
@@ -99,11 +99,11 @@ script {
         TokenSwapRouter::add_liquidity<STC, WUSDT>(&signer,
             amount_stc_desired, amount_usdt_desired, amount_stc_min, amount_usdt_min);
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<STC, WUSDT>();
-        assert(total_liquidity > amount_stc_min, 10000);
+        assert!(total_liquidity > amount_stc_min, 10000);
         // Balance verify
-        assert(Account::balance<STC>(Signer::address_of(&signer)) ==
+        assert!(Account::balance<STC>(Signer::address_of(&signer)) ==
                (stc_amount - amount_stc_desired), 10001);
-        assert(Account::balance<WUSDT>(Signer::address_of(&signer)) ==
+        assert!(Account::balance<WUSDT>(Signer::address_of(&signer)) ==
                (usdt_amount - amount_usdt_desired), 10002);
 
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,10 +112,10 @@ script {
         let pledge_usdt_amount: u128 = 5 * scaling_factor;
         TokenSwapRouter::swap_exact_token_for_token<STC, WUSDT>(
             &signer, pledge_stc_amount, pledge_stc_amount);
-        assert(Account::balance<STC>(Signer::address_of(&signer)) ==
+        assert!(Account::balance<STC>(Signer::address_of(&signer)) ==
                (stc_amount - amount_stc_desired - pledge_stc_amount), 10004);
         // TODO: To verify why swap out less than ratio swap out
-        assert(Account::balance<WUSDT>(Signer::address_of(&signer)) <=
+        assert!(Account::balance<WUSDT>(Signer::address_of(&signer)) <=
                (usdt_amount - amount_usdt_desired + pledge_usdt_amount), 10005);
     }
 }

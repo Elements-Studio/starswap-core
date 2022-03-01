@@ -10,7 +10,6 @@
 
 //# faucet --addr SwapAdmin
 
-
 //# run --signers SwapAdmin
 
 module SwapAdmin::SwapOracleWrapper {
@@ -56,7 +55,6 @@ module SwapAdmin::SwapOracleWrapper {
 // check: EXECUTED
 
 
-
 //# run --signers SwapAdmin
 script {
     use SwapAdmin::TokenMock::{Self, WETH, WUSDT};
@@ -66,7 +64,6 @@ script {
         TokenMock::register_token<WUSDT>(&signer, 18u8);
     }
 }
-
 // check: EXECUTED
 
 //# run --signers lp_provider
@@ -80,7 +77,6 @@ script {
     }
 }
 // check: EXECUTED
-
 
 //# run --signers feetokenholder
 script {
@@ -121,7 +117,6 @@ script {
         CommonHelper::safe_mint<WETH>(&signer, 3900000000000000000000u128); //e21
     }
 }
-
 // check: EXECUTED
 
 
@@ -133,15 +128,13 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap SwapAdmin account
         TokenSwapRouter::register_swap_pair<WETH, WUSDT>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
+        assert!(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
     }
 }
-
 // check: EXECUTED
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WETH, WUSDT};
     use SwapAdmin::SwapOracleWrapper;
@@ -181,8 +174,8 @@ script {
         Debug::print(&block_timestamp);
         Debug::print<u128>(&price_x_cumulative);
         Debug::print<u128>(&price_y_cumulative);
-        assert(price_x_cumulative == 0, 1301);
-        assert(price_y_cumulative == 0, 1302);
+        assert!(price_x_cumulative == 0, 1301);
+        assert!(price_y_cumulative == 0, 1302);
     }
 }
 // check: EXECUTED
@@ -205,8 +198,8 @@ script {
         Debug::print(&block_timestamp);
         Debug::print<u128>(&price_x_cumulative);
         Debug::print<u128>(&price_y_cumulative);
-        assert(price_x_cumulative == 0, 1303);
-        assert(price_y_cumulative == 0, 1304);
+        assert!(price_x_cumulative == 0, 1303);
+        assert!(price_y_cumulative == 0, 1304);
     }
 }
 
@@ -215,7 +208,6 @@ script {
 //# block --author 0x1 --timestamp 1638415320000
 
 //# run --signers exchanger
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapOracleLibrary;
@@ -238,8 +230,8 @@ script {
         Debug::print<u128>(&price_y_cumulative);
         let current_block_timestamp = Timestamp::now_seconds() % (1u64 << 32);
         Debug::print<u64>(&current_block_timestamp);
-        assert(price_x_cumulative >= 0, 1305);
-        assert(price_y_cumulative >= 0, 1306);
+        assert!(price_x_cumulative >= 0, 1305);
+        assert!(price_y_cumulative >= 0, 1306);
     }
 }
 // check: EXECUTED
@@ -318,10 +310,10 @@ script {
         Debug::print<u128>(&price_x_cumulative_base_b);
         Debug::print<u128>(&price_y_cumulative_base_b);
 
-        assert(price_x_cumulative == price_x_cumulative0, 1307);
-        assert(price_y_cumulative == price_y_cumulative0, 1308);
-        assert(price_x_cumulative_base_b >= price_x_cumulative_base_a, 1309);
-        assert(price_y_cumulative_base_b >= price_y_cumulative_base_a, 1310);
+        assert!(price_x_cumulative == price_x_cumulative0, 1307);
+        assert!(price_y_cumulative == price_y_cumulative0, 1308);
+        assert!(price_x_cumulative_base_b >= price_x_cumulative_base_a, 1309);
+        assert!(price_y_cumulative_base_b >= price_y_cumulative_base_a, 1310);
     }
 }
 // check: EXECUTED
@@ -363,17 +355,16 @@ script {
         Debug::print<u128>(&reserve_x);
         Debug::print<u128>(&reserve_y);
 
-        assert(price_x_cumulative == price_x_cumulative0, 1311);
-        assert(price_y_cumulative == price_y_cumulative0, 1312);
+        assert!(price_x_cumulative == price_x_cumulative0, 1311);
+        assert!(price_y_cumulative == price_y_cumulative0, 1312);
 
         // assert price cumulative
         let (last_block_price_x_cumulative, last_block_price_y_cumulative, _) = SwapOracleWrapper::get_last_oracle<WETH, WUSDT>();
-        assert(price_x_cumulative >= last_block_price_x_cumulative, 1311);
-        assert(price_y_cumulative >= last_block_price_y_cumulative, 1312);
+        assert!(price_x_cumulative >= last_block_price_x_cumulative, 1311);
+        assert!(price_y_cumulative >= last_block_price_y_cumulative, 1312);
     }
 }
 // check: EXECUTED
-
 
 //# block --author 0x1 --timestamp 1638418320000
 

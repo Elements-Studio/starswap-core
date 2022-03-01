@@ -11,7 +11,7 @@ module YieldFarmingV3 {
     use StarcoinFramework::Math;
     use StarcoinFramework::Option;
     use StarcoinFramework::Vector;
-    use StarcoinFramework::Debug;
+    // use StarcoinFramework::Debug;
 
     use SwapAdmin::BigExponential;
     use SwapAdmin::YieldFarmingLibrary;
@@ -434,8 +434,8 @@ module YieldFarmingV3 {
     fun calculate_harvest_index_with_asset<PoolType: store, AssetT: store>(
         farming_asset: &FarmingAsset<PoolType, AssetT>,
         now_seconds: u64): u128 {
-        Debug::print(farming_asset);
-        Debug::print(&now_seconds);
+        // Debug::print(farming_asset);
+        // Debug::print(&now_seconds);
         YieldFarmingLibrary::calculate_harvest_index_with_asse_info(
             farming_asset.asset_total_weight,
             farming_asset.harvest_index,

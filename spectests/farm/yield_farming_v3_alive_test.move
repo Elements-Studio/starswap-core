@@ -1,4 +1,4 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+//# init -n test
 
 //# faucet --addr alice
 
@@ -203,7 +203,7 @@ script {
         assert!(stake_id == 1, 100001);
     }
 }
-// check: Keep(ABORTED { code: 28929
+// check: "Keep(ABORTED { code: 28929"
 
 //# block --author 0x1 --timestamp 10002000
 

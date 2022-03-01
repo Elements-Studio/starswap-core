@@ -18,8 +18,8 @@ script {
 
     fun init_token_config(_: signer) {
         let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
-        assert(num == 10, 1001);
-        assert(denum == 60, 1002);
+        assert!(num == 10, 1001);
+        assert!(denum == 60, 1002);
     }
 }
 // check: EXECUTED
@@ -32,8 +32,8 @@ script {
     fun set_token_config(signer: signer) {
         TokenSwapConfig::set_swap_fee_operation_rate(&signer, 20, 100);
         let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
-        assert(num == 20, 1003);
-        assert(denum == 100, 1003);
+        assert!(num == 20, 1003);
+        assert!(denum == 100, 1003);
     }
 }
 // check: EXECUTED
@@ -46,7 +46,7 @@ script {
 
     fun init_swap_fee_switch_config(_: signer) {
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
-        assert(auto_convert_switch == false, 1006);
+        assert!(auto_convert_switch == false, 1006);
     }
 }
 // check: EXECUTED
@@ -59,7 +59,7 @@ script {
     fun set_swap_fee_switch_config(signer: signer) {
         TokenSwapConfig::set_fee_auto_convert_switch(&signer, true);
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
-        assert(auto_convert_switch == true, 1007);
+        assert!(auto_convert_switch == true, 1007);
     }
 }
 // check: EXECUTED
@@ -71,7 +71,7 @@ script {
 
     fun test_set_global_freeze_switch(signer: signer) {
         TokenSwapConfig::set_global_freeze_switch(&signer, true);
-        assert(TokenSwapConfig::get_global_freeze_switch() == true, 1008);
+        assert!(TokenSwapConfig::get_global_freeze_switch() == true, 1008);
     }
 }
 // check: EXECUTED

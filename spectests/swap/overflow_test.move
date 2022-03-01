@@ -56,7 +56,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 // check: EXECUTED
@@ -73,10 +73,10 @@ script {
         // for the first add liquidity
         TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10, 4000, 10, 10);
         let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
-        assert(total_liquidity == 200 - 1000, 3001);
+        assert!(total_liquidity == 200 - 1000, 3001);
         TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10, 4000, 10, 10);
         let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
-        assert(total_liquidity == (200 - 1000) * 2, 3002);
+        assert!(total_liquidity == (200 - 1000) * 2, 3002);
     }
 }
 // check: ARITHMETIC_ERROR
@@ -99,11 +99,11 @@ script {
         let reserve_x: u128 = 2000000 * scaling_factor;
 
 //        let amount_y = TokenSwapLibrary::quote(amount_x, reserve_x, reserve_y);
-//        assert(amount_y == 400000, 3003);
+//        assert!(amount_y == 400000, 3003);
 
         let amount_y_new = Math::mul_div(amount_x, reserve_y, reserve_x);
         Debug::print<u128>(&amount_y_new);
-        assert(amount_y_new == 440000 * scaling_factor, 3003);
+        assert!(amount_y_new == 440000 * scaling_factor, 3003);
     }
 }
 // check: EXECUTED

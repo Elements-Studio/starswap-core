@@ -28,7 +28,7 @@ script {
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
-        assert(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 
@@ -64,12 +64,12 @@ script {
 
         // check liquidity
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<STC, WUSDT>();
-        assert(total_liquidity > 0, 10000);
+        assert!(total_liquidity > 0, 10000);
 
         // check reverse
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<STC, WUSDT>();
-        assert(reserve_x >= amount_stc_desired, 10001);
-        assert(reserve_y >= amount_usdt_desired, 10001);
+        assert!(reserve_x >= amount_stc_desired, 10001);
+        assert!(reserve_y >= amount_usdt_desired, 10001);
    }
 }
 
@@ -94,11 +94,11 @@ script {
         Debug::print<u128>(&reserve_y);
         TokenSwapRouter::swap_exact_token_for_token<STC, WUSDT>(&signer, 100, 0);
         let balance = Account::balance<WUSDT>(Signer::address_of(&signer));
-        assert(balance > 0, 10002);
+        assert!(balance > 0, 10002);
 
         TokenSwapRouter::swap_token_for_exact_token<STC, WUSDT>(&signer, 10000000, 10000);
         let balance = Account::balance<STC>(Signer::address_of(&signer));
-        assert(balance > 0, 10003);
+        assert!(balance > 0, 10003);
     }
 }
 
