@@ -34,9 +34,7 @@ script {
 
 //# block --author 0x1 --timestamp 10001000
 
-//# run --signers SwapAdmin
-
-
+//# run --signers alice
 script {
     use SwapAdmin::STAR;
     use StarcoinFramework::Account;
@@ -47,8 +45,6 @@ script {
 }
 
 //# run --signers SwapAdmin
-
-
 script {
     use StarcoinFramework::Account;
     use SwapAdmin::STAR;
