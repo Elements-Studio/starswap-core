@@ -1,16 +1,14 @@
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
-//! account: alice, 0x49156896A605F092ba1862C50a9036c9, 10000000000000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 86410000
+//# faucet --addr alice
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# faucet --addr SwapAdmin
+
+//# block --author 0x1 --timestamp 10000000
+
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WBTC};
+    use SwapAdmin::TokenMock::{Self, WETH, WBTC};
 
     fun admin_init_token(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 9u8);
@@ -19,12 +17,10 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
-    use 0x1::Account;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WBTC};
+    use StarcoinFramework::Account;
+    use SwapAdmin::TokenMock::{WETH, WBTC};
 
     fun alice_accept_token(signer: signer) {
         Account::do_accept_token<WBTC>(&signer);
@@ -33,21 +29,18 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x1::Account;
-    use 0x1::Math;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Math;
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenSwapRouter;
 
     fun admin_register_token_pair_and_mint(signer: signer) {
-        //token pair register must be swap admin account
+        //token pair register must be swap SwapAdmin account
         TokenSwapRouter::register_swap_pair<TokenMock::WBTC, TokenMock::WETH>(&signer);
-        assert(TokenSwapRouter::swap_pair_exists<TokenMock::WBTC, TokenMock::WETH>(), 1001);
+        assert!(TokenSwapRouter::swap_pair_exists<TokenMock::WBTC, TokenMock::WETH>(), 1001);
 
         let precision: u8 = 9;
         let scaling_factor = Math::pow(10, (precision as u64));
@@ -71,19 +64,16 @@ script {
             amount_btc_min,
             amount_eth_min);
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<TokenMock::WBTC, TokenMock::WETH>();
-        assert(total_liquidity > amount_btc_min, 1002);
+        assert!(total_liquidity > amount_btc_min, 1002);
     }
 }
 // check: EXECUTED
 
-
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGov;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
@@ -93,15 +83,13 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x1::Signer;
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_stake(signer: signer) {
         let liquidity_amount = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
@@ -109,72 +97,57 @@ script {
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
         Debug::print(&stake_amount);
-        assert(stake_amount == liquidity_amount, 1003);
+        assert!(stake_amount == liquidity_amount, 1003);
 
         let total_stake_amount = TokenSwapFarmRouter::query_total_stake<WBTC, WETH>();
-        assert(total_stake_amount == liquidity_amount, 1004);
+        assert!(total_stake_amount == liquidity_amount, 1004);
     }
 }
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 86420000
+//# block --author 0x1 --timestamp 10001000
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x1::Signer;
-    use 0x1::Account;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Account;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::STAR;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_harvest(signer: signer) {
         TokenSwapFarmRouter::harvest<WBTC, WETH>(&signer, 0);
         let rewards_amount = Account::balance<STAR::STAR>(Signer::address_of(&signer));
-        assert(rewards_amount > 0, 1005);
+        assert!(rewards_amount > 0, 1005);
     }
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 3
-//! block-time: 86430000
+//# block --author 0x1 --timestamp 10002000
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x1::Signer;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Signer;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_unstake(signer: signer) {
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
-        assert(stake_amount > 0, 1006);
+        assert!(stake_amount > 0, 1006);
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, stake_amount);
         let after_amount = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert(after_amount > 0, 1007);
+        assert!(after_amount > 0, 1007);
     }
 }
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address admin = {{admin}};
-address alice = {{alice}};
+//# run --signers alice
 script {
-    //use 0x1::Account;
-    //use 0x1::Token;
-    use 0x1::Math;
-    use 0x1::Signer;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use StarcoinFramework::Math;
+    use StarcoinFramework::Signer;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
+    use SwapAdmin::TokenSwapRouter;
 
     fun alice_add_liquidity(signer: signer) {
         let precision: u8 = 9;
@@ -193,104 +166,89 @@ script {
             amount_eth_min);
 
         let liquidity: u128 = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert(liquidity > amount_btc_min, 1008);
+        assert!(liquidity > amount_btc_min, 1008);
     }
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 4
-//! block-time: 86431000
+//# block --author 0x1 --timestamp 10003000
 
-//! new-transaction
-//! sender: alice
-address admin = {{admin}};
-address alice = {{alice}};
+//# run --signers alice
 script {
-    use 0x1::Signer;
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun alice_stake(signer: signer) {
         let account = Signer::address_of(&signer);
         let liquidity_amount = TokenSwapRouter::liquidity<WBTC, WETH>(account);
-        assert(liquidity_amount > 0, 1009);
+        assert!(liquidity_amount > 0, 1009);
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(stake_amount == 10000, 1010);
+        assert!(stake_amount == 10000, 1010);
 
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount1);
-        assert(_stake_amount1 == 20000, 1011);
+        assert!(_stake_amount1 == 20000, 1011);
     }
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 5
-//! block-time: 86440000
+//# block --author 0x1 --timestamp 10004000
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x1::Signer;
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun alice_unstake(signer: signer) {
         let account = Signer::address_of(&signer);
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(stake_amount == 20000, 1020);
+        assert!(stake_amount == 20000, 1020);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert(_stake_amount1 == 10000, 1021);
+        assert!(_stake_amount1 == 10000, 1021);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount2 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount2);
-        assert(_stake_amount2 == 0, 1022);
+        assert!(_stake_amount2 == 0, 1022);
     }
 }
 // check: EXECUTED
 
-
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_set_release_multi_basic(signer: signer) {
         // Set to 10x
         TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 10);
         let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
-        assert(alive, 1030);
-        assert(release_per_sec == 1000000000, 1031); // Check relesase per second
+        assert!(alive, 1030);
+        assert!(release_per_sec == 1000000000, 1031); // Check relesase per second
 
         let mutipler = TokenSwapFarmRouter::get_farm_multiplier<WBTC, WETH>();
         Debug::print(&mutipler);
-        assert(mutipler == 10, 1032);
+        assert!(mutipler == 10, 1032);
     }
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun switch_open_to_global_freeze(signer: signer) {
         TokenSwapConfig::set_global_freeze_switch(&signer, true);
@@ -298,11 +256,10 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WBTC, WETH};
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun expect_failed_after_global_freeze_lock(signer: signer) {
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);

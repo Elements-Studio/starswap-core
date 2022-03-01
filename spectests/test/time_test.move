@@ -1,15 +1,15 @@
-//! account: alice, 500000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 1639010000000
+//# faucet --addr alice
 
-//! new-transaction
-//! sender: alice
+
+//# block --author 0x1 --timestamp 1639010000000
+
+//# run --signers alice
+
 script {
-    use 0x1::Debug;
-    use 0x1::Timestamp;
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Timestamp;
 
     fun oralce_info(_: signer) {
         let timestamp = Timestamp::now_seconds();
@@ -23,16 +23,12 @@ script {
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 1639020000000
+//# block --author 0x1 --timestamp 1639020000000
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x1::Debug;
-    use 0x1::Timestamp;
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Timestamp;
 
     fun oralce_info(_: signer) {
         let timestamp = Timestamp::now_seconds();

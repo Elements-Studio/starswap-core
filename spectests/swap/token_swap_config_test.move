@@ -1,15 +1,20 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: joe
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
-//! account: liquidier, 10000000000000 0x1::STC::STC
-//! account: exchanger
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr joe
+
+//# faucet --addr liquidier
+
+//# faucet --addr exchanger
+
+//# faucet --addr SwapAdmin
 
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun init_token_config(_: signer) {
         let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
@@ -19,11 +24,10 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun set_token_config(signer: signer) {
         TokenSwapConfig::set_swap_fee_operation_rate(&signer, 20, 100);
@@ -35,11 +39,10 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun init_swap_fee_switch_config(_: signer) {
         let auto_convert_switch = TokenSwapConfig::get_fee_auto_convert_switch();
@@ -48,11 +51,10 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun set_swap_fee_switch_config(signer: signer) {
         TokenSwapConfig::set_fee_auto_convert_switch(&signer, true);
@@ -62,11 +64,10 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwapConfig;
 
     fun test_set_global_freeze_switch(signer: signer) {
         TokenSwapConfig::set_global_freeze_switch(&signer, true);

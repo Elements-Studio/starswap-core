@@ -1,14 +1,16 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr SwapAdmin
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x1::PackageTxnManager::{Self};
-    use 0x1::Signer;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::UpgradeScripts;
+    use StarcoinFramework::PackageTxnManager::{Self};
+    use StarcoinFramework::Signer;
+    use SwapAdmin::UpgradeScripts;
 
     fun update_module_upgrade_strategy_with_min_time(signer: signer) {
         let signer_address = Signer::address_of(&signer);
@@ -19,15 +21,14 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x1::PackageTxnManager::{Self, UpgradePlanV2};
-    use 0x1::ModuleUpgradeScripts;
-    use 0x1::Signer;
-    use 0x1::Option;
-    use 0x1::Debug;
+    use StarcoinFramework::PackageTxnManager::{Self, UpgradePlanV2};
+    use StarcoinFramework::ModuleUpgradeScripts;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Option;
+    use StarcoinFramework::Debug;
 
     /// can't get Struct field value outside UpgradePlanV2 and TwoPhaseUpgradeConfig
     fun submit_upgrade_plan(signer: signer) {

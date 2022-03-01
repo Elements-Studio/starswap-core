@@ -1,12 +1,14 @@
-//! account: alice, 10000000000000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# faucet --addr alice
+
+
+//# run --signers alice
+
 script {
-    use 0x1::Math;
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
+    use StarcoinFramework::Math;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::SafeMath;
 
     // case : x*y/z overflow
     fun math_overflow(_: signer) {

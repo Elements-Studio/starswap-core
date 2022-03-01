@@ -1,15 +1,21 @@
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 200000 0x1::STC::STC
-//! account: feetokenholder, 0xb6d69dd935edf7f2054acf12eb884df8, 400000 0x1::STC::STC
-//! account: feeadmin, 0x9572abb16f9d9e9b009cc1751727129e
-//! account: exchanger, 100000 0x1::STC::STC
-//! account: alice, 500000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr exchanger
+
+//# faucet --addr feeadmin
+
+//# faucet --addr feetokenholder
+
+//# faucet --addr SwapAdmin
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WUSDT, WDAI};
+    use SwapAdmin::TokenMock::{Self, WETH, WUSDT, WDAI};
 
     fun token_init(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 18u8);
@@ -20,13 +26,11 @@ script {
 
 // check: EXECUTED
 
+//# run --signers alice
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::TokenMock::{WETH, WUSDT, WDAI};
+    use SwapAdmin::CommonHelper;
 
     fun init_account(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 600000u128);
@@ -37,10 +41,11 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
+//# run --signers SwapAdmin
+
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFee;
+    use SwapAdmin::TokenSwapFee;
 
     fun init_token_swap_fee(signer: signer) {
         TokenSwapFee::initialize_token_swap_fee(&signer);
@@ -49,13 +54,13 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: feetokenholder
-address alice = {{alice}};
+//# run --signers feetokenholder
+
+
 script {
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
-    use 0x1::Token;
-    use 0x1::Account;
+    use Bridge::XUSDT::XUSDT;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
 
     fun fee_token_init(signer: signer) {
         Token::register_token<XUSDT>(&signer, 9);
@@ -68,12 +73,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
+//# run --signers exchanger
+
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0x1::Account;
+    use SwapAdmin::TokenMock::{WETH};
+    use StarcoinFramework::Account;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<WETH>(&signer);
@@ -82,12 +87,11 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script {
-    use 0x1::Account;
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use StarcoinFramework::Account;
+    use Bridge::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -96,12 +100,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: feeadmin
-address alice = {{alice}};
+//# run --signers feeadmin
+
+
 script {
-    use 0x1::Account;
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use StarcoinFramework::Account;
+    use Bridge::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -110,13 +114,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address exchanger = {{exchanger}};
+//# run --signers exchanger
+
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::TokenMock::{WETH};
+    use SwapAdmin::CommonHelper;
 
     fun transfer(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 100000u128);
@@ -126,13 +129,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: feetokenholder
-address alice = {{alice}};
-address exchanger = {{exchanger}};
+//# run --signers feetokenholder
+
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use SwapAdmin::CommonHelper;
+    use Bridge::XUSDT::XUSDT;
 
     fun transfer(signer: signer) {
         CommonHelper::transfer<XUSDT>(&signer, @alice, 300000u128);
@@ -142,14 +144,13 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x1::STC::STC;
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::TokenSwapRouter;
+    use StarcoinFramework::STC::STC;
+    use Bridge::XUSDT::XUSDT;
 
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
@@ -168,10 +169,9 @@ script {
 
 
 
-//! new-transaction
-//! sender: admin
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use SwapAdmin::TokenSwapRouter;
 
     fun open_swap_fee_auto_convert_switch(signer: signer) {
         TokenSwapRouter::set_fee_auto_convert_switch(&signer, true);
@@ -180,14 +180,13 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x1::STC::STC;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use SwapAdmin::TokenSwapRouter;
+    use StarcoinFramework::STC::STC;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use Bridge::XUSDT::XUSDT;
 
     fun add_liquidity(signer: signer) {
         // for the first add liquidity
@@ -201,22 +200,21 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address feeadmin = {{feeadmin}};
-script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
-    use 0x1::STC::STC;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+//# run --signers exchanger
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
-    use 0x1::Debug;
+
+script {
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
+    use StarcoinFramework::STC::STC;
+    use SwapAdmin::TokenMock::{WETH};
+    use Bridge::XUSDT::XUSDT;
+
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::SafeMath;
+    use StarcoinFramework::Debug;
 
     fun swap_exact_token_for_token_swap(signer: signer) {
         let amount_x_in = 20000;
@@ -246,23 +244,22 @@ script {
 
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address feeadmin = {{feeadmin}};
+//# run --signers exchanger
+
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
 
-    use 0x1::STC::STC;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use StarcoinFramework::STC::STC;
+    use SwapAdmin::TokenMock::{WETH};
+    use Bridge::XUSDT::XUSDT;
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
-    use 0x1::Debug;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::SafeMath;
+    use StarcoinFramework::Debug;
 
     fun swap_token_for_exact_token_swap(signer: signer) {
         let amount_x_in_max = 30000;
@@ -298,22 +295,21 @@ script {
 
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address feeadmin = {{feeadmin}};
+//# run --signers exchanger
+
+
 script {
-    use 0x1::Debug;
+    use StarcoinFramework::Debug;
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use Bridge::XUSDT::XUSDT;
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::SafeMath;
 
     fun pay_for_token_and_fee_token_pair_not_exist(signer: signer) {
         let amount_x_in = 10000;
@@ -343,20 +339,19 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address feeadmin = {{feeadmin}};
-script {
-    use 0x1::STC::STC;
-    
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
+//# run --signers exchanger
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
-    use 0x1::Debug;
+
+script {
+    use StarcoinFramework::STC::STC;
+    
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenMock::{WETH};
+
+    use SwapAdmin::SafeMath;
+    use StarcoinFramework::Debug;
 
     /// two way to calculate swap fee and compare
     fun swap_exact_token_for_token_swap_fee_calculate(_: signer) {
@@ -381,19 +376,18 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
-address alice = {{alice}};
-address feeadmin = {{feeadmin}};
-script {
-    use 0x1::Debug;
-    use 0x1::STC::STC;
+//# run --signers exchanger
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath;
+
+script {
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::STC::STC;
+
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenMock::{WETH};
+    use SwapAdmin::SafeMath;
 
     fun swap_token_for_exact_token_swap_fee_calculate(_: signer) {
 //        let amount_x_in_max = 8000;

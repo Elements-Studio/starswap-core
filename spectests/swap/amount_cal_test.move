@@ -1,33 +1,26 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: joe
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
-//! account: liquidier, 10000000000000 0x1::STC::STC
-//! account: exchanger
-//! account: tokenholder, 0x49156896A605F092ba1862C50a9036c9
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
+//# faucet --addr alice
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# faucet --addr SwapAdmin
+
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WUSDT};
+    use SwapAdmin::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
-
         let precision: u8 = 9; //STC precision is also 9.
         TokenMock::register_token<WUSDT>(&signer, precision);
     }
 }
 // check: EXECUTED
 
+//# run --signers SwapAdmin
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x1::STC::STC;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::TokenSwap;
+    use StarcoinFramework::STC::STC;
 
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
@@ -36,19 +29,19 @@ script {
     }
 }
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script {
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::WUSDT;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x1::STC::STC;
-    use 0x1::Math;
-    //use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Math;
+
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenMock::WUSDT;
+    //use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
 
     fun main(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.

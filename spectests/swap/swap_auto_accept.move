@@ -1,15 +1,16 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: bob, 10000000000000 0x1::STC::STC
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
-//! account: liquidier, 10000000000000 0x1::STC::STC
-//! account: exchanger
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr bob
+
+//# faucet --addr SwapAdmin
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WUSDT};
+    use SwapAdmin::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -18,13 +19,12 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x1::STC::STC;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::TokenSwap;
+    use StarcoinFramework::STC::STC;
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
@@ -35,16 +35,14 @@ script {
 // check: EXECUTED
 
 
+//# run --signers alice
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x1::Math;
-    use 0x1::STC::STC;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenSwapRouter;
+    use StarcoinFramework::Math;
+    use StarcoinFramework::STC::STC;
 
     // Deposit to swap pool
     fun main(signer: signer) {
@@ -79,18 +77,16 @@ script {
 
 
 
-//! new-transaction
-//! sender: bob
-address bob = {{bob}};
-address alice = {{alice}};
+//# run --signers bob
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::WUSDT;
-    use 0x1::STC::STC;
-    use 0x1::Account;
-    use 0x1::Signer;
-    use 0x1::Debug;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
+    use SwapAdmin::TokenMock::WUSDT;
+    use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwap;
 
     fun main(signer: signer) {
         let (reserve_x, reserve_y) = TokenSwap::get_reserves<STC, WUSDT>();

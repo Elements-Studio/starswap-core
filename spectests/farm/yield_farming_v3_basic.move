@@ -1,10 +1,12 @@
-//# init -n dev
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//# faucet --addr alice --amount 100000000
+//# faucet --addr alice
 
-//# faucet --addr bob --amount 100000000
+//# faucet --addr bob
 
-//# faucet --addr cindy --amount 100000000
+//# faucet --addr cindy
+
+//# block --author 0x1 --timestamp 10000000
 
 //# publish
 module alice::YieldFarmingWarpper {
@@ -122,10 +124,7 @@ module alice::YieldFarmingWarpper {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 1000
+//# block --author 0x1 --timestamp 10001000
 
 //# run --signers alice
 
@@ -224,10 +223,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 2000
+//# block --author 0x1 --timestamp 10002000
 
 //# run --signers cindy
 
@@ -251,10 +247,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 3
-//! block-time: 4000
+//# block --author 0x1 --timestamp 10004000
 
 //# run --signers cindy
 
@@ -323,10 +316,7 @@ script {
 }
 // check: "Keep(ABORTED { code: 30209"
 
-//! block-prologue
-//! author: genesis
-//! block-number: 4
-//! block-time: 5000
+//# block --author 0x1 --timestamp 10005000
 
 //# run --signers bob
 
@@ -342,10 +332,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 5
-//! block-time: 6000
+//# block --author 0x1 --timestamp 10006000
 
 //# run --signers bob
 
@@ -361,10 +348,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 6
-//! block-time: 7000
+//# block --author 0x1 --timestamp 10007000
 
 //# run --signers bob
 
@@ -388,10 +372,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 7
-//! block-time: 8000
+//# block --author 0x1 --timestamp 10008000
 
 //# run --signers bob
 
@@ -416,10 +397,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 8
-//! block-time: 9000
+//# block --author 0x1 --timestamp 10009000
 
 //# run --signers bob
 
@@ -440,10 +418,7 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 9
-//! block-time: 10000
+//# block --author 0x1 --timestamp 10010000
 
 //# run --signers bob
 

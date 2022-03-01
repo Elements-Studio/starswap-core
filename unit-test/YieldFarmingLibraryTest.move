@@ -1,8 +1,8 @@
-address 0x8c109349c6bd91411d6bc962e080c4a3 {
+address SwapAdmin {
 module YieldFarmingLibraryTest {
 
-    #[test] use 0x1::Debug;
-    #[test] use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingLibrary;
+    #[test] use StarcoinFramework::Debug;
+    #[test] use SwapAdmin::YieldFarmingLibrary;
 
     #[test] fun test_withdraw_amount() {
         let harvest_index = 1000000;

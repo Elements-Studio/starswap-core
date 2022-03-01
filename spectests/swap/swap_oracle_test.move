@@ -1,16 +1,21 @@
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 200000 0x1::STC::STC
-//! account: feetokenholder, 0xb6d69dd935edf7f2054acf12eb884df8, 400000 0x1::STC::STC
-//! account: feeadmin, 0x9572abb16f9d9e9b009cc1751727129e
-//! account: exchanger, 100000 0x1::STC::STC
-//! account: lp_provider, 500000 0x1::STC::STC
-//! account: alice, 500000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr feetokenholder
+
+//# faucet --addr exchanger
+
+//# faucet --addr lp_provider
+
+//# faucet --addr SwapAdmin
 
 
-//! sender: admin
-address admin = {{admin}};
-module admin::SwapOracleWrapper {
-    use 0x1::U256::{Self, U256};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::FixedPoint128;
+//# run --signers SwapAdmin
+
+module SwapAdmin::SwapOracleWrapper {
+    use StarcoinFramework::U256::{Self, U256};
+    use SwapAdmin::FixedPoint128;
 
     struct SwapOralce<X, Y> has key, store {
         last_block_timestamp: u64,
@@ -33,14 +38,14 @@ module admin::SwapOracleWrapper {
         price_y_cumulative: u128,
         block_timestamp: u64,
     ) acquires SwapOralce {
-        let price_oracle = borrow_global_mut<SwapOralce<X, Y>>(@admin);
+        let price_oracle = borrow_global_mut<SwapOralce<X, Y>>(@SwapAdmin);
         price_oracle.last_price_x_cumulative = FixedPoint128::to_u256(FixedPoint128::encode(price_x_cumulative));
         price_oracle.last_price_y_cumulative = FixedPoint128::to_u256(FixedPoint128::encode(price_y_cumulative));
         price_oracle.last_block_timestamp = block_timestamp;
     }
 
     public fun get_last_oracle<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u64) acquires SwapOralce {
-        let price_oracle = borrow_global<SwapOralce<X, Y>>(@admin);
+        let price_oracle = borrow_global<SwapOralce<X, Y>>(@SwapAdmin);
         let last_block_timestamp = price_oracle.last_block_timestamp;
         let last_price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(*&price_oracle.last_price_x_cumulative, false));
         let last_price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(*&price_oracle.last_price_y_cumulative, false));
@@ -52,10 +57,9 @@ module admin::SwapOracleWrapper {
 
 
 
-//! new-transaction
-//! sender: admin
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WUSDT};
+    use SwapAdmin::TokenMock::{Self, WETH, WUSDT};
 
     fun token_init(signer: signer) {
         TokenMock::register_token<WETH>(&signer, 18u8);
@@ -65,11 +69,10 @@ script {
 
 // check: EXECUTED
 
-//! new-transaction
-//! sender: lp_provider
+//# run --signers lp_provider
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::CommonHelper;
 
     fun init_account(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 60000000000000000000000000u128); //e25
@@ -79,12 +82,11 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: feetokenholder
+//# run --signers feetokenholder
 script {
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
-    use 0x1::Token;
-    use 0x1::Account;
+    use Bridge::XUSDT::XUSDT;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
 
     fun fee_token_init(signer: signer) {
         Token::register_token<XUSDT>(&signer, 9);
@@ -97,11 +99,10 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: feeadmin
+//# run --signers feeadmin
 script {
-    use 0x1::Account;
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
+    use StarcoinFramework::Account;
+    use Bridge::XUSDT::XUSDT;
 
     fun accept_token(signer: signer) {
         Account::do_accept_token<XUSDT>(&signer);
@@ -111,11 +112,10 @@ script {
 
 
 
-//! new-transaction
-//! sender: exchanger
+//# run --signers exchanger
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::TokenMock::{WETH};
+    use SwapAdmin::CommonHelper;
 
     fun mint(signer: signer) {
         CommonHelper::safe_mint<WETH>(&signer, 3900000000000000000000u128); //e21
@@ -125,14 +125,13 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
+//# run --signers SwapAdmin
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::TokenSwapRouter;
 
     fun register_token_pair(signer: signer) {
-        //token pair register must be swap admin account
+        //token pair register must be swap SwapAdmin account
         TokenSwapRouter::register_swap_pair<WETH, WUSDT>(&signer);
         assert(TokenSwapRouter::swap_pair_exists<WETH, WUSDT>(), 111);
     }
@@ -141,12 +140,11 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: admin
-address admin = {{admin}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use admin::SwapOracleWrapper;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::SwapOracleWrapper;
 
     fun initialize_oralce(signer: signer) {
         SwapOracleWrapper::initialize_oralce<WETH, WUSDT>(&signer);
@@ -156,16 +154,12 @@ script {
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 1638415260000
+//# block --author 0x1 --timestamp 1638415260000
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x1::Debug;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use StarcoinFramework::Debug;
 
     fun oralce_info(_: signer) {
         let block_timestamp = TokenSwapOracleLibrary::current_block_timestamp();
@@ -174,12 +168,11 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
 
     fun oralce_info(_: signer) {
         let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
@@ -195,13 +188,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: lp_provider
+//# run --signers lp_provider
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
 
     // block time has not change, does not trigger to update oracle
     fun add_liquidity(signer: signer) {
@@ -220,21 +212,17 @@ script {
 
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 1638415320000
+//# block --author 0x1 --timestamp 1638415320000
 
-//! new-transaction
-//! sender: exchanger
-address admin = {{admin}};
+//# run --signers exchanger
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
-    use 0x1::Timestamp;
-    use admin::SwapOracleWrapper;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Timestamp;
+    use SwapAdmin::SwapOracleWrapper;
 
     // block time changed, trigger to update oracle
     fun swap_exact_token_for_token(signer: signer) {
@@ -257,14 +245,13 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: exchanger
+//# run --signers exchanger
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
-    use 0x1::Timestamp;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Timestamp;
 
     fun swap_token_for_exact_token(signer: signer) {
         let amount_x_in_max = 500000000000000000000u128;
@@ -284,22 +271,18 @@ script {
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 3
-//! block-time: 1638415380000
+//# block --author 0x1 --timestamp 1638415380000
 
-//! new-transaction
-//! sender: exchanger
-address admin = {{admin}};
+//# run --signers exchanger
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::FixedPoint128;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::FixedPoint128;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
     
-    use 0x1::Debug;
-    use admin::SwapOracleWrapper;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::SwapOracleWrapper;
 
     /// forward token pair swap
     fun swap_token_for_exact_token(signer: signer) {
@@ -344,20 +327,16 @@ script {
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 4
-//! block-time: 1638417000000
+//# block --author 0x1 --timestamp 1638417000000
 
-//! new-transaction
-//! sender: exchanger
-address admin = {{admin}};
+//# run --signers exchanger
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
-    use admin::SwapOracleWrapper;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
+    use SwapAdmin::SwapOracleWrapper;
 
     /// reverse token pair swap
     fun swap_token_for_exact_token(signer: signer) {
@@ -396,17 +375,13 @@ script {
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 5
-//! block-time: 1638418320000
+//# block --author 0x1 --timestamp 1638418320000
 
-//! new-transaction
-//! sender: exchanger
+//# run --signers exchanger
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapOracleLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT};
-    use 0x1::Debug;
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use StarcoinFramework::Debug;
 
     /// reverse token pair swap
     fun swap_token_for_exact_token(_: signer) {

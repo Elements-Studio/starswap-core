@@ -1,22 +1,25 @@
-//! account: alice, 100000000000000000 0x1::STC::STC
-//! account: bob, 100000000000000000 0x1::STC::STC
-//! account: cindy, 100000000000000000 0x1::STC::STC
-//! account: davied, 100000000000000000 0x1::STC::STC
-//! account: joe, 100000000000000000 0x1::STC::STC
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
+//# faucet --addr alice
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# faucet --addr bob
+
+//# faucet --addr cindy
+
+//# faucet --addr davied
+
+//# block --author 0x1 --timestamp 10000000
+
+//# publish
 module alice::YieldFarmingWarpper {
-    use 0x1::Token;
-    use 0x1::Account;
-    use 0x1::Signer;
-    use 0x1::Vector;
-    use 0x1::Debug;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Vector;
+    use StarcoinFramework::Debug;
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingV3 as YieldFarming;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::YieldFarmingV3 as YieldFarming;
 
     struct Usdx has copy, drop, store {}
 
@@ -76,7 +79,7 @@ module alice::YieldFarmingWarpper {
     }
 
     public fun unstake(signer: &signer, id: u64): (u128, u128) acquires StakeCapbabilityList {
-        assert(id > 0, 10000);
+        assert!(id > 0, 10000);
         let cap_list = borrow_global_mut<StakeCapbabilityList>(Signer::address_of(signer));
         let cap = Vector::remove(&mut cap_list.items, id - 1);
         let (asset, token) = YieldFarming::unstake<PoolType_A, Usdx, AssetType_A>(signer, @alice, cap);
@@ -86,7 +89,7 @@ module alice::YieldFarmingWarpper {
     }
 
     public fun harvest(signer: &signer, id: u64): Token::Token<Usdx> acquires StakeCapbabilityList {
-        assert(id > 0, 10000);
+        assert!(id > 0, 10000);
         let cap_list = borrow_global_mut<StakeCapbabilityList>(Signer::address_of(signer));
         let cap = Vector::borrow(&cap_list.items, id - 1);
         YieldFarming::harvest<PoolType_A, Usdx, AssetType_A>(Signer::address_of(signer), @alice, 0, cap)
@@ -123,17 +126,11 @@ module alice::YieldFarmingWarpper {
 }
 // check: EXECUTED
 
+//# block --author 0x1 --timestamp 10001000
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 1000
-
-//! new-transaction
-//! sender: bob
-address bob = {{bob}};
+//# run --signers bob
 script {
-    use 0x1::Account;
+    use StarcoinFramework::Account;
     use alice::YieldFarmingWarpper::{Usdx};
 
     /// Inital token into yield farming treasury
@@ -141,12 +138,11 @@ script {
         Account::do_accept_token<Usdx>(&signer);
     }
 }
+// check: EXECUTED
 
-//! new-transaction
-//! sender: cindy
-address cindy = {{cindy}};
+//# run --signers cindy
 script {
-    use 0x1::Account;
+    use StarcoinFramework::Account;
     use alice::YieldFarmingWarpper::{Usdx};
 
     /// Inital token into yield farming treasury
@@ -154,12 +150,11 @@ script {
         Account::do_accept_token<Usdx>(&signer);
     }
 }
+// check: EXECUTED
 
-//! new-transaction
-//! sender: davied
-address davied = {{davied}};
+//# run --signers davied
 script {
-    use 0x1::Account;
+    use StarcoinFramework::Account;
     use alice::YieldFarmingWarpper::{Usdx};
 
     /// Inital token into yield farming treasury
@@ -167,18 +162,14 @@ script {
         Account::do_accept_token<Usdx>(&signer);
     }
 }
+// check: EXECUTED
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
-address bob = {{bob}};
-address cindy = {{cindy}};
-address davied = {{davied}};
+//# run --signers alice
 script {
-    use 0x1::Account;
-    use 0x1::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Token;
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     /// Inital token into yield farming treasury
     fun alice_init_token_into_treasury(signer: signer) {
@@ -202,42 +193,33 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: bob
-address alice = {{alice}};
+//# run --signers bob
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     fun bob_stake_1x_token_to_pool_failed(signer: signer) {
         let stake_id = YieldFarmingWarpper::stake(&signer, CommonHelper::pow_amount<Usdx>(1), 1, 0);
-        assert(stake_id == 1, 100001);
+        assert!(stake_id == 1, 100001);
     }
 }
 // check: Keep(ABORTED { code: 28929
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 2000
+//# block --author 0x1 --timestamp 10002000
 
-//! new-transaction
-//! sender: bob
-address alice = {{alice}};
+//# run --signers bob
 script {
     use alice::YieldFarmingWarpper;
 
     // Except harvest_index is 0 because of pool not aliving.
     fun after_10_second_check_harvest_index(_signer: signer) {
         let (_, _, _, harvest_index) = YieldFarmingWarpper::query_info();
-        assert(harvest_index == 0, 100002);
+        assert!(harvest_index == 0, 100002);
     }
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
     use alice::YieldFarmingWarpper;
 
@@ -247,29 +229,28 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 3
-//! block-time: 3000
+//# block --author 0x1 --timestamp 10003000
 
-//! new-transaction
-//! sender: bob
-address alice = {{alice}};
+//# run --signers bob
 script {
-    use 0x1::Token;
-    use 0x1::Account;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Debug;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     fun bob_stake_1x_token_to_pool(signer: signer) {
         let stake_id = YieldFarmingWarpper::stake(&signer, CommonHelper::pow_amount<Usdx>(1), 1, 0);
-        assert(stake_id == 1, 10004);
+        assert!(stake_id == 1, 10004);
 
         // get header rewards
         let header_rewards = YieldFarmingWarpper::harvest(&signer, 1);
         let amount = Token::value<Usdx>(&header_rewards);
-        assert(amount == CommonHelper::pow_amount<Usdx>(1), 10005);
+
+        Debug::print(&amount);
+        Debug::print(&CommonHelper::pow_amount<Usdx>(1));
+        assert!(amount == CommonHelper::pow_amount<Usdx>(1), 10005);
         Account::deposit_to_self(&signer, header_rewards);
 
         let (
@@ -279,20 +260,15 @@ script {
             harvest_index
         ) = YieldFarmingWarpper::query_info();
 
-        assert(asset_total_weight == CommonHelper::pow_amount<Usdx>(1), 10005);
-        assert(harvest_index == 0, 10006); // Bob get first gain
+        assert!(asset_total_weight == CommonHelper::pow_amount<Usdx>(1), 10006);
+        assert!(harvest_index == 0, 10006); // Bob get first gain
     }
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 4
-//! block-time: 4000
+//# block --author 0x1 --timestamp 10004000
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
     use alice::YieldFarmingWarpper;
 
@@ -302,14 +278,9 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 5
-//! block-time: 5000
+//# block --author 0x1 --timestamp 10005000
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
     use alice::YieldFarmingWarpper;
 
@@ -319,60 +290,50 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 6
-//! block-time: 6000
+//# block --author 0x1 --timestamp 10006000
 
-//! new-transaction
-//! sender: bob
-address alice = {{alice}};
+//# run --signers bob
 script {
-    use 0x1::Token;
-    use 0x1::Account;
-    use 0x1::Debug;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Debug;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     fun bob_harvest(signer: signer) {
         let harvest_token = YieldFarmingWarpper::harvest(&signer, 1);
         let amount = Token::value<Usdx>(&harvest_token);
 
         Debug::print(&amount);
-        assert(amount == CommonHelper::pow_amount<Usdx>(2), 10011);
+        assert!(amount == CommonHelper::pow_amount<Usdx>(2), 10011);
 
         Account::deposit_to_self(&signer, harvest_token);
 
         // Unstake from pool
         let (asset_val, token_val) =  YieldFarmingWarpper::unstake(&signer, 1);
-        assert(asset_val == CommonHelper::pow_amount<Usdx>(1), 10012);
-        assert(token_val == 0, 10013);
+        assert!(asset_val == CommonHelper::pow_amount<Usdx>(1), 10012);
+        assert!(token_val == 0, 10013);
     }
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: cindy
-address alice = {{alice}};
+//# block --author 0x1 --timestamp 10007000
+
+//# run --signers cindy
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     fun cindy_stake_1x_token_to_pool(signer: signer) {
         let stake_id = YieldFarmingWarpper::stake(&signer, CommonHelper::pow_amount<Usdx>(1), 1, 0);
-        assert(stake_id == 1, 10014);
+        assert!(stake_id == 1, 10014);
     }
 }
+// check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 7
-//! block-time: 7000
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
     use alice::YieldFarmingWarpper;
 
@@ -382,28 +343,22 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 8
-//! block-time: 8000
 
-//! new-transaction
-//! sender: cindy
-address alice = {{alice}};
+//# run --signers cindy
 script {
-    use 0x1::Token;
-    use 0x1::Account;
-    use 0x1::Debug;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Debug;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
 
     fun cindy_harvest(signer: signer) {
         let harvest_token = YieldFarmingWarpper::harvest(&signer, 1);
         let amount = Token::value<Usdx>(&harvest_token);
 
         Debug::print(&amount);
-        assert(amount == CommonHelper::pow_amount<Usdx>(1), 10011);
+        assert!(amount == CommonHelper::pow_amount<Usdx>(1), 10011);
 
         Account::deposit_to_self(&signer, harvest_token);
     }

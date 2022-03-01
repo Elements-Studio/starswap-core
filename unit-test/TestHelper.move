@@ -1,20 +1,20 @@
-address 0x8c109349c6bd91411d6bc962e080c4a3 {
+address SwapAdmin {
 module TestHelper {
-    use 0x1::Token;
-    use 0x1::Account;
-    use 0x1::Signer;
-    use 0x1::STC::STC ;
-    use 0x1::Timestamp;
-    use 0x1::NFT;
-    use 0x1::ChainId;
-    use 0x1::Oracle;
-    use 0x1::CoreAddresses;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::STC::STC ;
+    use StarcoinFramework::Timestamp;
+    use StarcoinFramework::NFT;
+    use StarcoinFramework::ChainId;
+    use StarcoinFramework::Oracle;
+    use StarcoinFramework::CoreAddresses;
 
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SwapTestHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
-    use 0xb6d69dd935edf7f2054acf12eb884df8::XUSDT::XUSDT;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFee;
+    use SwapAdmin::SwapTestHelper;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
+    use Bridge::XUSDT::XUSDT;
+    use SwapAdmin::TokenSwapFee;
 
     struct GenesisSignerCapability has key {
         cap: Account::SignerCapability,

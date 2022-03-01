@@ -1,15 +1,21 @@
-//! account: alice, 10000000000000 0x1::STC::STC
-//! account: joe
-//! account: admin, 0x8c109349c6bd91411d6bc962e080c4a3, 10000000000000 0x1::STC::STC
-//! account: liquidier, 10000000000000 0x1::STC::STC
-//! account: exchanger
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr alice
+
+//# faucet --addr joe
+
+//# faucet --addr SwapAdmin
+
+//# faucet --addr liquidier
+
+//# faucet --addr exchanger
 
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{Self, WUSDT};
+    use SwapAdmin::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -19,13 +25,12 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
-    use 0x1::Math;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::CommonHelper;
+    use StarcoinFramework::Math;
 
     fun init_account(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -36,13 +41,12 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: admin
-address alice = {{alice}};
+//# run --signers SwapAdmin
+
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WUSDT};
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x1::STC::STC;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::TokenSwap;
+    use StarcoinFramework::STC::STC;
     fun register_token_pair(signer: signer) {
         //token pair register must be swap admin account
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
@@ -52,15 +56,14 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script{
-    use 0x1::STC;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap::LiquidityToken;
-    use 0x1::Account;
+    use StarcoinFramework::STC;
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwap::LiquidityToken;
+    use StarcoinFramework::Account;
 
     fun main(signer: signer) {
         Account::do_accept_token<LiquidityToken<STC::STC, TokenMock::WUSDT>>(&signer);
@@ -79,17 +82,16 @@ script{
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script {
-    use 0x1::STC;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapConfig;
-    use 0x1::Account;
-    use 0x1::Token;
+    use StarcoinFramework::STC;
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapConfig;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Token;
     fun main(signer: signer) {
         let stc_amount = 100000;
         let stc = Account::withdraw<STC::STC>( &signer, stc_amount);
@@ -107,17 +109,16 @@ script {
 
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
+
 script{
-    use 0x1::STC;
-    use 0x1::Account;
-    use 0x1::Signer;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwap::LiquidityToken;
-    // use 0x1::Debug;
+    use StarcoinFramework::STC;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwap::LiquidityToken;
+    // use StarcoinFramework::Debug;
 
     fun main(signer: signer) {
         let liquidity_balance = Account::balance<LiquidityToken<STC::STC, TokenMock::WUSDT>>(Signer::address_of( &signer));

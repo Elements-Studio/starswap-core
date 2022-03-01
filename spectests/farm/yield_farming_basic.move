@@ -1,16 +1,21 @@
-//! account: alice, 100000000000000000 0x1::STC::STC
-//! account: bob
-//! account: cindy
-//! account: davied
-//! account: joe
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//! sender: alice
-address alice = {{alice}};
+//# faucet --addr alice
+
+//# faucet --addr bob
+
+//# faucet --addr cindy
+
+//# faucet --addr davied
+
+//# block --author 0x1 --timestamp 10000000
+
+//# publish
 module alice::YieldFarmingWarpper {
-    use 0x1::Token;
-    use 0x1::Account;
-    use 0x1::Signer;
-    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use SwapAdmin::YieldFarming;
 
     struct Usdx has copy, drop, store {}
 
@@ -66,17 +71,12 @@ module alice::YieldFarmingWarpper {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 1
-//! block-time: 86400000
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
-    use 0x1::Timestamp;
-    use 0x1::Debug;
+    use SwapAdmin::YieldFarming;
+    use StarcoinFramework::Timestamp;
+    use StarcoinFramework::Debug;
 
     /// Index test
     fun main(_account: signer) {
@@ -90,15 +90,15 @@ script {
             last_update_timestamp,
             Timestamp::now_seconds(), 2000000000);
         let withdraw_1 = YieldFarming::calculate_withdraw_amount(index_1, harvest_index, _asset_total_weight);
-        assert((2000000000 * 5) == withdraw_1, 1001);
+        assert!((2000000000 * 5) == withdraw_1, 1001);
 
         // Denominator bigger than numberator
         let index_2 = YieldFarming::calculate_harvest_index(0, 100000000000000, 0, 5, 10000000);
         let amount_2 = YieldFarming::calculate_withdraw_amount(index_2, 0, 40000000000);
         Debug::print(&index_2);
         Debug::print(&amount_2);
-        assert(index_2 > 0, 1002);
-        assert(amount_2 > 0, 1003);
+        assert!(index_2 > 0, 1002);
+        assert!(amount_2 > 0, 1003);
         //let withdraw_1 = YieldFarming::calculate_withdraw_amount(index_1, harvest_index, _asset_total_weight);
         //assert((2000000000 * 5) == withdraw_1, 10001);
     }
@@ -106,13 +106,11 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
-    use 0x1::Account;
-    use 0x1::Token;
-    use 0x1::Math;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Math;
     use alice::YieldFarmingWarpper::{Usdx};
 
     /// Initial reward token, registered and mint it
@@ -131,12 +129,10 @@ script {
 // check: EXECUTED
 
 
-//! new-transaction
-//! sender: alice
-address alice = {{alice}};
+//# run --signers alice
 script {
-    use 0x1::Account;
-    use 0x1::Math;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Math;
     use alice::YieldFarmingWarpper;
 
     /// Inital a treasury into yield farming
@@ -151,16 +147,13 @@ script {
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: bob
-address alice = {{alice}};
-address bob = {{bob}};
+//# run --signers bob
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x1::Account;
-    use 0x1::Token;
-    use 0x1::Signer;
-    use 0x1::Debug;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
 
     /// 1. First stake, check whether first rewards has been executed.
     fun main(account: signer) {
@@ -170,25 +163,19 @@ script {
         let token = YieldFarmingWarpper::harvest(&account);
         let _amount = Token::value<Usdx>(&token);
         Debug::print(&_amount);
-        // assert(amount == 10000000000, 10002);
+        // assert!(amount == 10000000000, 10002);
         Account::deposit<Usdx>(Signer::address_of(&account), token);
     }
 }
 // check: EXECUTED
 
 
-//! block-prologue
-//! author: genesis
-//! block-number: 2
-//! block-time: 86420000
+//# block --author 0x1 --timestamp 10002000
 
-//! new-transaction
-//! sender: cindy
-address alice = {{alice}};
-address bob = {{bob}};
+//# run --signers cindy
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x1::Account;
+    use StarcoinFramework::Account;
 
     /// 2. Cindy joined and staking some asset
     fun init(account: signer) {
@@ -198,45 +185,33 @@ script {
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 3
-//! block-time: 86430000
+//# block --author 0x1 --timestamp 10003000
 
-//! new-transaction
-//! sender: cindy
-address alice = {{alice}};
-address bob = {{bob}};
+//# run --signers cindy
 script {
     use alice::YieldFarmingWarpper;
-    use 0x1::Debug;
-    use 0x1::Signer;
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Signer;
 
     /// 3. Cindy harvest after 20 seconds, checking whether has rewards.
     fun init(account: signer) {
         let amount00 = YieldFarmingWarpper::query_gov_token_amount(Signer::address_of(&account));
         Debug::print(&amount00);
-        // assert(amount00 == 0, 10004);
-        assert(amount00 > 0, 10004);
+        // assert!(amount00 == 0, 10004);
+        assert!(amount00 > 0, 10004);
     }
 }
 // check: EXECUTED
 
-//! block-prologue
-//! author: genesis
-//! block-number: 4
-//! block-time: 86440000
+//# block --author 0x1 --timestamp 10004000
 
-//! new-transaction
-//! sender: cindy
-address alice = {{alice}};
-address bob = {{bob}};
+//# run --signers cindy
 script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
-    use 0x1::Account;
-    use 0x1::Token;
-    use 0x1::Signer;
-    use 0x1::Debug;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
 
     /// 4. Cindy harvest after 40 seconds, checking whether has rewards.
     fun init(account: signer) {
@@ -246,19 +221,18 @@ script {
         let token = YieldFarmingWarpper::harvest(&account);
         let amount1 = Token::value<Usdx>(&token);
         Debug::print(&amount1);
-        assert(amount1 > 0, 10005);
-        // assert(amount1 == 20000000000, 10004);
+        assert!(amount1 > 0, 10005);
+        // assert!(amount1 == 20000000000, 10004);
         Account::deposit<Usdx>(Signer::address_of(&account), token);
     }
 }
 // check: EXECUTED
 
-//! new-transaction
-//! sender: alice
+//# run --signers alice
 script {
-    use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarming;
-    use 0x1::Timestamp;
-    use 0x1::Debug;
+    use SwapAdmin::YieldFarming;
+    use StarcoinFramework::Timestamp;
+    use StarcoinFramework::Debug;
 
     /// big number cacl test
     fun main(_account: signer) {
@@ -281,8 +255,8 @@ script {
         let amount_2 = YieldFarming::calculate_withdraw_amount(index_2, 0, 40000000000);
         Debug::print(&index_2);
         Debug::print(&amount_2);
-        assert(index_2 > 0, 1002);
-        assert(amount_2 >= 0, 1003);
+        assert!(index_2 > 0, 1002);
+        assert!(amount_2 >= 0, 1003);
     }
 }
 // check: EXECUTED

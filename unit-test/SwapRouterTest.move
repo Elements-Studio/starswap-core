@@ -1,20 +1,20 @@
-address 0x8c109349c6bd91411d6bc962e080c4a3 {
+address SwapAdmin {
 module SwapRouterTest {
     #[test_only]
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter3;
+    use SwapAdmin::TokenSwapRouter3;
     //    #[test_only]
-    //    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapRouter;
+    //    use SwapAdmin::TokenSwapRouter;
     #[test_only]
-    use 0x1::STC::STC;
+    use StarcoinFramework::STC::STC;
     #[test_only]
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TokenMock::{WETH, WUSDT, WDAI};
+    use SwapAdmin::TokenMock::{WETH, WUSDT, WDAI};
     #[test_only]
-    use 0x8c109349c6bd91411d6bc962e080c4a3::TestHelper;
+    use SwapAdmin::TestHelper;
     #[test_only]
-    use 0x8c109349c6bd91411d6bc962e080c4a3::CommonHelper;
+    use SwapAdmin::CommonHelper;
     #[test_only]
-    use 0x1::Signer;
-    #[test_only] use 0x1::Debug;
+    use StarcoinFramework::Signer;
+    #[test_only] use StarcoinFramework::Debug;
 
     #[test(sender = @0x5f1288f6687eb8ba746081641bc4342e)]
     public fun test_swap_exact_token_for_token_router3(sender: signer) {

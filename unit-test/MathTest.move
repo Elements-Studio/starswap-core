@@ -1,11 +1,11 @@
-address 0x8c109349c6bd91411d6bc962e080c4a3 {
+address SwapAdmin {
 module MathTest {
     #[test_only]
-    use 0x8c109349c6bd91411d6bc962e080c4a3::SafeMath::{Self};
+    use SwapAdmin::SafeMath::{Self};
     #[test_only]
-    use 0x1::Debug::{Self};
+    use StarcoinFramework::Debug::{Self};
     #[test_only]
-    use 0x1::Math;
+    use StarcoinFramework::Math;
 
     #[test]
     public fun test_loss_precision() {

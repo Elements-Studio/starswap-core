@@ -1,8 +1,8 @@
-address 0x8c109349c6bd91411d6bc962e080c4a3 {
+address SwapAdmin {
 module TokenSwapLibraryTest {
-    #[test_only] use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapLibrary;
-    #[test_only] use 0x1::Debug;
-    #[test_only] use 0x1::Math;
+    #[test_only] use SwapAdmin::TokenSwapLibrary;
+    #[test_only] use StarcoinFramework::Debug;
+    #[test_only] use StarcoinFramework::Math;
 
     #[test]
     public fun test_get_amount_out_without_fee() {
