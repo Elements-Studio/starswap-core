@@ -60,12 +60,12 @@ script {
     use 0x8c109349c6bd91411d6bc962e080c4a3::STAR;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGov;
     use 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovPoolType::{
-        PoolTypeInitialLiquidity,
+        PoolTypeIDO,
         PoolTypeCommunity,
     };
 
     fun main(signer: signer) {
-        TokenSwapGov::dispatch<PoolTypeInitialLiquidity>(&signer, @alice, 10000000);
+        TokenSwapGov::dispatch<PoolTypeIDO>(&signer, @alice, 10000000);
         TokenSwapGov::dispatch<PoolTypeCommunity>(&signer, @alice, 20000000);
 
         let balance = Account::balance<STAR::STAR>(@alice);

@@ -18,10 +18,6 @@ module TokenSwapGov {
         PoolTypeCommunity,
         PoolTypeIDO,
         PoolTypeProtocolTreasury,
-        // Deprecated TODO to be removed
-        PoolTypeInitialLiquidity,
-        // Deprecated TODO to be removed
-        PoolTypeDaoTreasury,
     };
 
     // 1e8
@@ -39,10 +35,6 @@ module TokenSwapGov {
     const GOV_PERCENT_IDO: u64 = 1;
     // 14%
     const GOV_PERCENT_PROTOCOL_TREASURY: u64 = 14;
-    // 1%  Deprecated TODO to be removed
-    const GOV_PERCENT_INITIAL_LIQUIDITY: u64 = 1;
-    // 14%  Deprecated TODO to be removed
-    const GOV_PERCENT_DAO_TREASURY: u64 = 14;
 
 
     // 5%
@@ -53,8 +45,6 @@ module TokenSwapGov {
     const GOV_PERCENT_COMMUNITY_GENESIS: u64 = 2;
     // 2%
     const GOV_PERCENT_PROTOCOL_TREASURY_GENESIS: u64 = 2;
-    // 2%  Deprecated TODO to be removed
-    const GOV_PERCENT_DAO_TREASURY_GENESIS: u64 = 2;
 
 
     const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
@@ -124,10 +114,10 @@ module TokenSwapGov {
             locked_total_timestamp : 0,
         });
 
-        //  Release 1% for initial liquidity
-        let initial_liquidity_total = calculate_amount_from_percent(GOV_PERCENT_INITIAL_LIQUIDITY) * (scaling_factor as u128);
+        //  Release 1% for IDO
+        let initial_liquidity_total = calculate_amount_from_percent(GOV_PERCENT_IDO) * (scaling_factor as u128);
         STAR::mint(account, initial_liquidity_total);
-        move_to(account, GovTreasury<PoolTypeInitialLiquidity>{
+        move_to(account, GovTreasury<PoolTypeIDO>{
             treasury: Account::withdraw<STAR::STAR>(account, initial_liquidity_total),
             locked_start_timestamp : now_timestamp,
             locked_total_timestamp : 0,
@@ -167,15 +157,15 @@ module TokenSwapGov {
     public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
         //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeDaoTreasury>>(Signer::address_of(&signer))){
+        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(&signer))){
             let precision = STAR::precision();
             let scaling_factor = Math::pow(10, (precision as u64));
             let now_timestamp = Timestamp::now_seconds();
 
             //  Release 24% for dao treasury. genesis release 2%.
-            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_DAO_TREASURY_GENESIS) * (scaling_factor as u128);
+            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
             STAR::mint(&signer, dao_treasury_genesis);
-            move_to(&signer, GovTreasury<PoolTypeDaoTreasury>{
+            move_to(&signer, GovTreasury<PoolTypeProtocolTreasury>{
                 treasury: Account::withdraw<STAR::STAR>(&signer, dao_treasury_genesis),
                 locked_start_timestamp : now_timestamp,
                 locked_total_timestamp : 0,
@@ -199,10 +189,8 @@ module TokenSwapGov {
         });
     }
 
-    public(script) fun upgrade_pool_type_genesis(signer: signer) acquires GovTreasury {
+    public(script) fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
-        upgrade_pool_type<PoolTypeInitialLiquidity, PoolTypeIDO>(&signer);
-        upgrade_pool_type<PoolTypeDaoTreasury, PoolTypeProtocolTreasury>(&signer);
     }
 }
 }

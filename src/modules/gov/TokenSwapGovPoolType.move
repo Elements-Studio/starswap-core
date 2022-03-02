@@ -14,12 +14,5 @@ module TokenSwapGovPoolType {
     struct PoolTypeDeveloperFund has key, store {}
 
     struct PoolTypeProtocolTreasury has key, store {}
-
-    // Deprecated TODO to be removed
-    struct PoolTypeInitialLiquidity has key, store {}
-    // Deprecated TODO to be removed
-    struct PoolTypeTeam has key, store {}
-    // Deprecated TODO to be removed
-    struct PoolTypeDaoTreasury has key, store {}
 }
 }
