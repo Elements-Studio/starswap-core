@@ -4,7 +4,6 @@
 
 //# faucet --addr SwapAdmin
 
-
 //# publish
 module alice::TokenMock {
     // mock MyToken token
@@ -18,7 +17,6 @@ module alice::TokenMock {
 }
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{Self, WUSDT};
 
@@ -31,7 +29,6 @@ script {
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::CommonHelper;
@@ -47,7 +44,6 @@ script {
 // check: EXECUTED
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::TokenSwap;

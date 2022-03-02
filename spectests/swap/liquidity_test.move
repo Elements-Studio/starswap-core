@@ -8,20 +8,17 @@
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{Self, WUSDT};
 
     fun init_token(signer: signer) {
-        let precision: u8 = 9; //STC precision is also 9.
-        TokenMock::register_token<WUSDT>(&signer, precision);
+        TokenMock::register_token<WUSDT>(&signer, 9u8);
     }
 }
 // check: EXECUTED
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::CommonHelper;
@@ -58,7 +55,6 @@ script {
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::TokenSwap;
@@ -70,18 +66,19 @@ script {
         assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
-// check: EXECUTE
+// check: EXECUTED
 
 
 //# run --signers alice
-
 script {
-    use SwapAdmin::TokenMock::{WUSDT};
-    use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
     use StarcoinFramework::Math;
     use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Debug;
+
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::TokenSwapRouter;
 
     fun add_liquidity_and_swap(signer: signer) {
         let precision: u8 = 9; //STC precision is also 9.
@@ -100,11 +97,19 @@ script {
             amount_stc_desired, amount_usdt_desired, amount_stc_min, amount_usdt_min);
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<STC, WUSDT>();
         assert!(total_liquidity > amount_stc_min, 10000);
+
         // Balance verify
-        assert!(Account::balance<STC>(Signer::address_of(&signer)) ==
-               (stc_amount - amount_stc_desired), 10001);
-        assert!(Account::balance<WUSDT>(Signer::address_of(&signer)) ==
-               (usdt_amount - amount_usdt_desired), 10002);
+        Debug::print(&stc_amount);
+        Debug::print(&amount_stc_desired);
+        let stc_balance = Account::balance<STC>(Signer::address_of(&signer));
+        Debug::print(&stc_balance);
+        assert!(stc_balance == (stc_amount - amount_stc_desired), 10001);
+
+        let usdt_balance = Account::balance<WUSDT>(Signer::address_of(&signer));
+        Debug::print(&usdt_amount);
+        Debug::print(&amount_usdt_desired);
+        Debug::print(&usdt_balance);
+        assert!(usdt_balance == (usdt_amount - amount_usdt_desired), 10002);
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Swap token pair, put 1 STC, got 5 WUSDT
@@ -113,11 +118,10 @@ script {
         TokenSwapRouter::swap_exact_token_for_token<STC, WUSDT>(
             &signer, pledge_stc_amount, pledge_stc_amount);
         assert!(Account::balance<STC>(Signer::address_of(&signer)) ==
-               (stc_amount - amount_stc_desired - pledge_stc_amount), 10004);
+                (stc_amount - amount_stc_desired - pledge_stc_amount), 10004);
         // TODO: To verify why swap out less than ratio swap out
         assert!(Account::balance<WUSDT>(Signer::address_of(&signer)) <=
-               (usdt_amount - amount_usdt_desired + pledge_usdt_amount), 10005);
+                (usdt_amount - amount_usdt_desired + pledge_usdt_amount), 10005);
     }
 }
-
 // check: EXECUTED

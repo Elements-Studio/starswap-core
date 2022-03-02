@@ -1,0 +1,134 @@
+processed 15 tasks
+
+task 6 'run'. lines 14-22:
+{
+  "gas_used": 27644,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapConfig"
+          }
+        },
+        25857
+      ]
+    }
+  }
+}
+
+task 7 'run'. lines 24-37:
+{
+  "gas_used": 27790,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        25858
+      ]
+    }
+  }
+}
+
+task 8 'run'. lines 39-49:
+{
+  "gas_used": 34084,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 9 'run'. lines 52-61:
+{
+  "gas_used": 34084,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 10 'run'. lines 64-76:
+{
+  "gas_used": 14549,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Account"
+          }
+        },
+        "function": 54,
+        "code_offset": 4
+      }
+    }
+  }
+}
+
+task 11 'run'. lines 79-92:
+{
+  "gas_used": 514404,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 12 'run'. lines 95-108:
+{
+  "gas_used": 236784,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        26120
+      ]
+    }
+  }
+}
+
+task 13 'run'. lines 111-138:
+{
+  "gas_used": 258296,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapLibrary"
+          }
+        },
+        1001
+      ]
+    }
+  }
+}
+
+task 14 'run'. lines 141-171:
+{
+  "gas_used": 258552,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapLibrary"
+          }
+        },
+        1001
+      ]
+    }
+  }
+}

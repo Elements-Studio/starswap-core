@@ -1,0 +1,122 @@
+processed 14 tasks
+
+task 5 'run'. lines 12-24:
+{
+  "gas_used": 504891,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 6 'run'. lines 26-41:
+{
+  "gas_used": 529515,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 7 'run'. lines 43-52:
+{
+  "gas_used": 117449,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 8 'run'. lines 55-69:
+{
+  "gas_used": 27790,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        25858
+      ]
+    }
+  }
+}
+
+task 9 'run'. lines 72-88:
+{
+  "gas_used": 1480701,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 10 'run'. lines 90-118:
+{
+  "gas_used": 2023744,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        26120
+      ]
+    }
+  }
+}
+
+task 11 'run'. lines 121-150:
+{
+  "gas_used": 1824310,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        26120
+      ]
+    }
+  }
+}
+
+task 12 'run'. lines 153-180:
+{
+  "gas_used": 3539007,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 13 'run'. lines 183-211:
+warning[W00001]: DEPRECATED. will be removed
+    ┌─ /var/folders/yl/1jwdcrx91p96yh8c0yw03x280000gn/T/.tmpjBvTHE:203:9
+    │
+203 │         assert((btc_balance_2 - btc_balance) == 1123456789987654321, 2002);
+    │         ^^^^^^
+    │         │
+    │         'assert' function syntax has been deprecated and will be removed
+    │         Replace with 'assert!'. 'assert' has been replaced with a 'assert!' built-in macro so that arguments are no longer eagerly evaluated
+
+{
+  "gas_used": 288501,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        26120
+      ]
+    }
+  }
+}

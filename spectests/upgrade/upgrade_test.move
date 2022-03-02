@@ -6,7 +6,6 @@
 
 
 //# run --signers SwapAdmin
-
 script {
     use StarcoinFramework::PackageTxnManager::{Self};
     use StarcoinFramework::Signer;
@@ -22,7 +21,6 @@ script {
 
 
 //# run --signers SwapAdmin
-
 script {
     use StarcoinFramework::PackageTxnManager::{Self, UpgradePlanV2};
     use StarcoinFramework::ModuleUpgradeScripts;

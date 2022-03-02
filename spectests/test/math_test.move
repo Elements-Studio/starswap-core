@@ -3,8 +3,7 @@
 //# faucet --addr alice
 
 
-//! sender: alice
-
+//# publish
 module alice::TestHelper {
     const EXP_SCALE: u128 = 10000000000;// e10
 
@@ -15,7 +14,6 @@ module alice::TestHelper {
 
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Math;
     use StarcoinFramework::Debug;
@@ -41,7 +39,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Math;
     use StarcoinFramework::Debug;
@@ -69,7 +66,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Math;
     use StarcoinFramework::Debug;
@@ -129,7 +125,6 @@ script {
 // check: EXECUTED
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Math;
     use StarcoinFramework::Debug;

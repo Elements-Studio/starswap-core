@@ -42,8 +42,6 @@ script {
 
 
 //# run --signers SwapAdmin
-
-
 script {
     use SwapAdmin::TokenSwapFee;
 
@@ -55,8 +53,6 @@ script {
 
 
 //# run --signers feetokenholder
-
-
 script {
     use Bridge::XUSDT::XUSDT;
     use StarcoinFramework::Token;
@@ -201,8 +197,6 @@ script {
 
 
 //# run --signers exchanger
-
-
 script {
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapRouter;
@@ -240,13 +234,10 @@ script {
     }
 }
 //the case: token pay for fee and fee token pair exist
-// check: EXECUTED
-
+//check: EXECUTED
 
 
 //# run --signers exchanger
-
-
 script {
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapRouter;

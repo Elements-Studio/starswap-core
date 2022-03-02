@@ -1,0 +1,52 @@
+processed 9 tasks
+
+task 4 'run'. lines 19-28:
+{
+  "gas_used": 132384,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 5 'run'. lines 31-44:
+{
+  "gas_used": 104862,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 6 'run'. lines 46-58:
+{
+  "gas_used": 516208,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 7 'run'. lines 61-78:
+{
+  "gas_used": 197173,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Account"
+          }
+        },
+        "function": 54,
+        "code_offset": 4
+      }
+    }
+  }
+}
+
+task 8 'run'. lines 81-105:
+{
+  "gas_used": 22914,
+  "status": {
+    "Keep": "Executed"
+  }
+}

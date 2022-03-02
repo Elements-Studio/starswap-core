@@ -16,7 +16,6 @@ script {
 // check: EXECUTED
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::TokenSwap;
@@ -30,7 +29,6 @@ script {
 }
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::STC::STC;

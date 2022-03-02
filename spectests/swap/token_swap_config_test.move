@@ -12,7 +12,6 @@
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenSwapConfig;
 

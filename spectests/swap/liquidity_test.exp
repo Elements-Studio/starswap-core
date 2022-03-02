@@ -1,0 +1,38 @@
+processed 8 tasks
+
+task 4 'run'. lines 10-18:
+{
+  "gas_used": 132384,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 5 'run'. lines 21-54:
+{
+  "gas_used": 147177,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 6 'run'. lines 57-69:
+{
+  "gas_used": 516208,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 7 'run'. lines 72-127:
+{
+  "gas_used": 721393,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        "Script",
+        10001
+      ]
+    }
+  }
+}

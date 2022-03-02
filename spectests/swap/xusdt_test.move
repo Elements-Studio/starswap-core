@@ -11,7 +11,6 @@
 //# faucet --addr feeadmin
 
 
-
 //# run --signers feeadmin
 script {
     use SwapAdmin::TokenSwapFee;
@@ -94,7 +93,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::STC::STC;
@@ -111,7 +109,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::STC::STC;

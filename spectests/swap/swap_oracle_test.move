@@ -8,15 +8,16 @@
 
 //# faucet --addr lp_provider
 
+//# faucet --addr feeadmin
+
 //# faucet --addr SwapAdmin
 
-//# run --signers SwapAdmin
-
+//# publish
 module SwapAdmin::SwapOracleWrapper {
     use StarcoinFramework::U256::{Self, U256};
     use SwapAdmin::FixedPoint128;
 
-    struct SwapOralce<X, Y> has key, store {
+    struct SwapOralce<phantom X, phantom Y> has key, store {
         last_block_timestamp: u64,
         last_price_x_cumulative: U256,
         last_price_y_cumulative: U256,
@@ -53,7 +54,6 @@ module SwapAdmin::SwapOracleWrapper {
     }
 }
 // check: EXECUTED
-
 
 //# run --signers SwapAdmin
 script {
@@ -132,7 +132,6 @@ script {
     }
 }
 // check: EXECUTED
-
 
 //# run --signers SwapAdmin
 script {
@@ -266,13 +265,12 @@ script {
 //# block --author 0x1 --timestamp 1638415380000
 
 //# run --signers exchanger
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::FixedPoint128;
     use SwapAdmin::TokenSwapOracleLibrary;
     use SwapAdmin::TokenMock::{WETH, WUSDT};
-    
+
     use StarcoinFramework::Debug;
     use SwapAdmin::SwapOracleWrapper;
 
@@ -322,7 +320,6 @@ script {
 //# block --author 0x1 --timestamp 1638417000000
 
 //# run --signers exchanger
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapOracleLibrary;
