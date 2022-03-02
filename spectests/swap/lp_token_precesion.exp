@@ -1,6 +1,6 @@
 processed 14 tasks
 
-task 5 'run'. lines 12-24:
+task 5 'run'. lines 12-23:
 {
   "gas_used": 504891,
   "status": {
@@ -8,7 +8,7 @@ task 5 'run'. lines 12-24:
   }
 }
 
-task 6 'run'. lines 26-41:
+task 6 'run'. lines 25-40:
 {
   "gas_used": 529515,
   "status": {
@@ -16,7 +16,7 @@ task 6 'run'. lines 26-41:
   }
 }
 
-task 7 'run'. lines 43-52:
+task 7 'run'. lines 42-50:
 {
   "gas_used": 117449,
   "status": {
@@ -24,25 +24,15 @@ task 7 'run'. lines 43-52:
   }
 }
 
-task 8 'run'. lines 55-69:
+task 8 'run'. lines 53-66:
 {
-  "gas_used": 27790,
+  "gas_used": 195679,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        25858
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 9 'run'. lines 72-88:
+task 9 'run'. lines 68-83:
 {
   "gas_used": 1480701,
   "status": {
@@ -50,43 +40,23 @@ task 9 'run'. lines 72-88:
   }
 }
 
-task 10 'run'. lines 90-118:
+task 10 'run'. lines 85-114:
 {
-  "gas_used": 2023744,
+  "gas_used": 3488497,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        26120
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 11 'run'. lines 121-150:
+task 11 'run'. lines 116-144:
 {
-  "gas_used": 1824310,
+  "gas_used": 3185966,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        26120
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 12 'run'. lines 153-180:
+task 12 'run'. lines 147-173:
 {
   "gas_used": 3539007,
   "status": {
@@ -94,29 +64,10 @@ task 12 'run'. lines 153-180:
   }
 }
 
-task 13 'run'. lines 183-211:
-warning[W00001]: DEPRECATED. will be removed
-    ┌─ /var/folders/yl/1jwdcrx91p96yh8c0yw03x280000gn/T/.tmpjBvTHE:203:9
-    │
-203 │         assert((btc_balance_2 - btc_balance) == 1123456789987654321, 2002);
-    │         ^^^^^^
-    │         │
-    │         'assert' function syntax has been deprecated and will be removed
-    │         Replace with 'assert!'. 'assert' has been replaced with a 'assert!' built-in macro so that arguments are no longer eagerly evaluated
-
+task 13 'run'. lines 176-204:
 {
-  "gas_used": 288501,
+  "gas_used": 1540738,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        26120
-      ]
-    }
+    "Keep": "Executed"
   }
 }

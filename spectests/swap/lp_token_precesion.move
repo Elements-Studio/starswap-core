@@ -1,16 +1,15 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# faucet --addr liquidier
+//# faucet --addr liquidier --amount 10000000000000000
 
-//# faucet --addr feetokenholder
+//# faucet --addr Bridge --amount 10000000000000000
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{Self, WETH, WDAI, WDOT, WBTC};
 
@@ -24,7 +23,6 @@ script {
 // check: EXECUTED
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenMock::{WETH, WDAI, WDOT, WBTC};
     use SwapAdmin::CommonHelper;
@@ -39,9 +37,9 @@ script {
         CommonHelper::safe_mint<WBTC>(&signer, 60000 * scaling_factor_18);
     }
 }
+// check: EXECUTED
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenSwapFee;
 
@@ -52,8 +50,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feetokenholder
-
+//# run --signers Bridge
 script {
     use Bridge::XUSDT::XUSDT;
     use StarcoinFramework::Token;
@@ -68,9 +65,7 @@ script {
 }
 // check: EXECUTED
 
-
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{WETH, WDAI, WDOT, WBTC};
     use SwapAdmin::TokenSwap;
@@ -88,14 +83,13 @@ script {
 // check: EXECUTED
 
 //# run --signers alice
-
 script {
-    use SwapAdmin::TokenSwapRouter;
-    use StarcoinFramework::STC::STC;
-    use SwapAdmin::TokenMock::{WDOT};
     use StarcoinFramework::Signer;
-    use StarcoinFramework::Debug;
     use StarcoinFramework::Math;
+    use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::TokenMock::{WDOT};
 
     fun add_liquidity_precision_9(signer: signer) {
         let scaling_factor_9 = Math::pow(10, 9);
@@ -105,21 +99,21 @@ script {
         let liquidity = TokenSwapRouter::liquidity<STC, WDOT>(Signer::address_of(&signer));
         Debug::print(&liquidity);
         TokenSwapRouter::add_liquidity<STC, WDOT>(&signer, 20 * scaling_factor_9, 5 * scaling_factor_9, 10, 10);
+
         let liquidity = TokenSwapRouter::liquidity<STC, WDOT>(Signer::address_of(&signer));
         Debug::print(&liquidity);
         TokenSwapRouter::add_liquidity<STC, WDOT>(&signer, 20000 * scaling_factor_9, 5000 * scaling_factor_9, 10, 10);
         let liquidity = TokenSwapRouter::liquidity<STC, WDOT>(Signer::address_of(&signer));
         Debug::print(&liquidity);
         TokenSwapRouter::add_liquidity<STC, WDOT>(&signer, 600000 * scaling_factor_9, 8000 * scaling_factor_9, 10, 10);
+
         let liquidity = TokenSwapRouter::liquidity<STC, WDOT>(Signer::address_of(&signer));
         Debug::print(&liquidity);
     }
 }
 // check: EXECUTED
 
-
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::STC::STC;
@@ -151,7 +145,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenMock::{WETH, WDAI};
@@ -205,7 +198,7 @@ script {
         let btc_balance_2 = Account::balance<WBTC>(Signer::address_of(&signer));
 
         Debug::print(&(btc_balance_2 - btc_balance));
-        assert((btc_balance_2 - btc_balance) == 1123456789987654321, 2002);
+        assert!((btc_balance_2 - btc_balance) == 1123456789987654321, 2002);
     }
 }
 // check: EXECUTED

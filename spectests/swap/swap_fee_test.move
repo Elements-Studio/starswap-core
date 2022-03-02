@@ -1,19 +1,17 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr exchanger
+//# faucet --addr exchanger --amount 10000000000000000
 
-//# faucet --addr feeadmin
+//# faucet --addr feeadmin --amount 10000000000000000
 
-//# faucet --addr feetokenholder
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
-
+//# faucet --addr Bridge --amount 10000000000000000
 
 
 //# run --signers SwapAdmin
-
 script {
     use SwapAdmin::TokenMock::{Self, WETH, WUSDT, WDAI};
 
@@ -52,7 +50,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feetokenholder
+//# run --signers Bridge
 script {
     use Bridge::XUSDT::XUSDT;
     use StarcoinFramework::Token;
@@ -70,8 +68,6 @@ script {
 
 
 //# run --signers exchanger
-
-
 script {
     use SwapAdmin::TokenMock::{WETH};
     use StarcoinFramework::Account;
@@ -97,8 +93,6 @@ script {
 
 
 //# run --signers feeadmin
-
-
 script {
     use StarcoinFramework::Account;
     use Bridge::XUSDT::XUSDT;
@@ -111,8 +105,6 @@ script {
 
 
 //# run --signers exchanger
-
-
 script {
     use SwapAdmin::TokenMock::{WETH};
     use SwapAdmin::CommonHelper;
@@ -125,9 +117,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feetokenholder
-
-
+//# run --signers Bridge
 script {
     use SwapAdmin::CommonHelper;
     use Bridge::XUSDT::XUSDT;
@@ -177,7 +167,6 @@ script {
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::STC::STC;
@@ -306,7 +295,6 @@ script {
         let amount_x_in = 10000;
         let amount_y_out_min = 10;
         let fee_balance_start = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
-
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<WUSDT, WETH>();
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<WUSDT, WETH>();

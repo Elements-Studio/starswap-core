@@ -1,12 +1,12 @@
 //# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr bob
+//# faucet --addr bob --amount 10000000000000000
 
-//# faucet --addr cindy
+//# faucet --addr cindy --amount 10000000000000000
 
-//# faucet --addr davied
+//# faucet --addr davied --amount 10000000000000000
 
 //# block --author 0x1 --timestamp 10000000
 

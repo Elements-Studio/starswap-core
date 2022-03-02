@@ -1,14 +1,14 @@
 //# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr joe
+//# faucet --addr joe --amount 10000000000000000
 
-//# faucet --addr liquidier
+//# faucet --addr liquidier --amount 10000000000000000
 
-//# faucet --addr exchanger
+//# faucet --addr exchanger --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
 
 //# run --signers SwapAdmin

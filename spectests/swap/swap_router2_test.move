@@ -2,15 +2,15 @@
 
 
 
-//# faucet --addr feetokenholder
+//# faucet --addr feetokenholder --amount 10000000000000000
 
-//# faucet --addr feeadmin
+//# faucet --addr feeadmin --amount 10000000000000000
 
-//# faucet --addr exchanger
+//# faucet --addr exchanger --amount 10000000000000000
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
 
 

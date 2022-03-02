@@ -1,12 +1,12 @@
 //# init -n test
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr bob
+//# faucet --addr bob --amount 10000000000000000
 
-//# faucet --addr cindy
+//# faucet --addr cindy --amount 10000000000000000
 
-//# faucet --addr davied
+//# faucet --addr davied --amount 10000000000000000
 
 //# block --author 0x1 --timestamp 10000000
 

@@ -1,8 +1,8 @@
 //# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
 //# publish
 module alice::TokenMock {
@@ -28,7 +28,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers SwapAdmin
+//# run --signers alice
 script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::CommonHelper;
@@ -59,19 +59,19 @@ script {
 
 
 //# run --signers alice
-
 script {
     use SwapAdmin::TokenSwapRouter;
-    use StarcoinFramework::STC;
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WUSDT};
+    use StarcoinFramework::STC::STC;
 
     fun add_liquidity_overflow(signer: signer) {
         // for the first add liquidity
-        TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10, 4000, 10, 10);
-        let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
+        TokenSwapRouter::add_liquidity<STC, WUSDT>(&signer, 10, 4000, 10, 10);
+        let total_liquidity = TokenSwapRouter::total_liquidity<STC, WUSDT>();
         assert!(total_liquidity == 200 - 1000, 3001);
-        TokenSwapRouter::add_liquidity<STC::STC, TokenMock::WUSDT>(&signer, 10, 4000, 10, 10);
-        let total_liquidity = TokenSwapRouter::total_liquidity<STC::STC, TokenMock::WUSDT>();
+
+        TokenSwapRouter::add_liquidity<STC, WUSDT>(&signer, 10, 4000, 10, 10);
+        let total_liquidity = TokenSwapRouter::total_liquidity<STC, WUSDT>();
         assert!(total_liquidity == (200 - 1000) * 2, 3002);
     }
 }
@@ -79,8 +79,6 @@ script {
 
 
 //# run --signers alice
-
-
 script {
 //    use SwapAdmin::TokenSwapLibrary;
     use StarcoinFramework::Math;

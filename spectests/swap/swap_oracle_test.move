@@ -1,16 +1,16 @@
 //# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
-//# faucet --addr alice
+//# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr feetokenholder
+//# faucet --addr feetokenholder --amount 10000000000000000
 
-//# faucet --addr exchanger
+//# faucet --addr exchanger --amount 10000000000000000
 
-//# faucet --addr lp_provider
+//# faucet --addr lp_provider --amount 10000000000000000
 
-//# faucet --addr feeadmin
+//# faucet --addr feeadmin --amount 10000000000000000
 
-//# faucet --addr SwapAdmin
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
 //# publish
 module SwapAdmin::SwapOracleWrapper {
