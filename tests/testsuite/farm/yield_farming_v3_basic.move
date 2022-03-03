@@ -326,7 +326,7 @@ script {
         let amount1 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
         Debug::print(&99999999);
         Debug::print(&amount1);
-        assert(amount1 == CommonHelper::pow_amount<Usdx>(60), 10002);
+        assert(amount1 == CommonHelper::pow_amount<Usdx>(0), 10002);
 
         let token = YieldFarmingWarpper::harvest(&signer, 1);
         Account::deposit<YieldFarmingWarpper::Usdx>(Signer::address_of(&signer), token);
