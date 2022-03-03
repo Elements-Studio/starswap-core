@@ -142,7 +142,7 @@ module YieldFarming {
         asset: AssetT,
         asset_weight: u128,
         _cap: &ParameterModifyCapability<PoolType, AssetT>): HarvestCapability<PoolType, AssetT> acquires FarmingAsset {
-        // Debug::print(account);
+
         let account_address = Signer::address_of(account);
         assert(!exists_stake_at_address<PoolType, AssetT>(account_address), Errors::invalid_state(ERR_FARMING_STAKE_EXISTS));
 
