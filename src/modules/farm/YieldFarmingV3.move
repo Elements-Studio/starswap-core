@@ -356,18 +356,12 @@ module YieldFarmingV3 {
         let now_seconds = Timestamp::now_seconds();
         assert(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
 
-        // Calculate from latest timestamp to deadline timestamp if deadline valid
-        now_seconds = if (now_seconds > cap.deadline) {
-            now_seconds
-        } else {
-            cap.deadline
-        };
-
         // Calculate new harvest index
-        let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
-            farming_asset,
-            now_seconds
-        );
+        let (new_harvest_index, now_seconds) = if (farming_asset.alive) {
+            (calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds), now_seconds)
+        } else {
+            (farming_asset.harvest_index, farming_asset.last_update_timestamp)
+        };
 
         let stake = get_stake(&mut stake_list.items, cap.stake_id);
         let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
