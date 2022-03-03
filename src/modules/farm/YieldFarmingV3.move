@@ -11,7 +11,6 @@ module YieldFarmingV3 {
     use 0x1::Math;
     use 0x1::Option;
     use 0x1::Vector;
-    //use 0x1::Debug;
 
     use 0x8c109349c6bd91411d6bc962e080c4a3::BigExponential;
     use 0x8c109349c6bd91411d6bc962e080c4a3::YieldFarmingLibrary;
@@ -150,9 +149,6 @@ module YieldFarmingV3 {
         farming_asset.last_update_timestamp = now_seconds;
         farming_asset.release_per_second = release_per_second;
         farming_asset.alive = alive;
-
-        // Debug::print(farming_asset);
-        // Debug::print(&now_seconds);
     }
 
     /// Call by stake user, staking amount of asset in order to get yield farming token
@@ -393,8 +389,6 @@ module YieldFarmingV3 {
     fun calculate_harvest_index_with_asset<PoolType: store, AssetT: store>(
         farming_asset: &FarmingAsset<PoolType, AssetT>,
         now_seconds: u64): u128 {
-        // Debug::print(farming_asset);
-        // Debug::print(&now_seconds);
         YieldFarmingLibrary::calculate_harvest_index_with_asse_info(
             farming_asset.asset_total_weight,
             farming_asset.harvest_index,
@@ -427,10 +421,6 @@ module YieldFarmingV3 {
     fun intra_calculate_gain<PoolType: store, AssetT: store>(stake: &Stake<PoolType, AssetT>,
                                                              farming_asset: &FarmingAsset<PoolType, AssetT>,
                                                              now_seconds: u64): (u128, u128, u64) {
-//        Debug::print(stake);
-//        Debug::print(farming_asset);
-//        Debug::print(&now_seconds);
-
         // Calculate new harvest index
         let (new_harvest_index, now_seconds) = if (farming_asset.alive) {
             (calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds), now_seconds)
