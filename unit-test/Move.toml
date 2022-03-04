@@ -1,0 +1,6 @@
+[package]
+name = "UnitTest"
+version = "0.1.0"
+
+[addresses]
+StarcoinFramework="0x1"
