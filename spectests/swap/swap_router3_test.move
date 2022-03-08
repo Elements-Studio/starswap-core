@@ -1,8 +1,6 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35  --addresses feeadmin=0x9572abb16f9d9e9b009cc1751727129e  --public-keys feeadmin=0xbf76b7fc68b3344e63512fd6b4ded611e6910fc9df1b9f858cb6bf571e201e2d
 
-
-
-//# faucet --addr feetokenholder --amount 10000000000000000
+//# faucet --addr Bridge --amount 10000000000000000
 
 //# faucet --addr feeadmin --amount 10000000000000000
 
@@ -55,7 +53,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feetokenholder
+//# run --signers Bridge
 
 script {
     use Bridge::XUSDT::XUSDT;

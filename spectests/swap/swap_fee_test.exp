@@ -96,41 +96,31 @@ task 17 'run'. lines 169-185:
   }
 }
 
-task 18 'run'. lines 188-226:
+task 18 'run'. lines 188-228:
 {
-  "gas_used": 1444417,
-  "status": {
-    "Keep": {
-      "MoveAbort": [
-        "Script",
-        201
-      ]
-    }
-  }
-}
-
-task 19 'run'. lines 229-274:
-{
-  "gas_used": 1589982,
-  "status": {
-    "Keep": {
-      "MoveAbort": [
-        "Script",
-        205
-      ]
-    }
-  }
-}
-
-task 20 'run'. lines 278-318:
-{
-  "gas_used": 1508870,
+  "gas_used": 2189207,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 21 'run'. lines 321-355:
+task 19 'run'. lines 231-276:
+{
+  "gas_used": 2331644,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 20 'run'. lines 280-320:
+{
+  "gas_used": 1598143,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 21 'run'. lines 323-357:
 {
   "gas_used": 402765,
   "status": {
@@ -138,15 +128,10 @@ task 21 'run'. lines 321-355:
   }
 }
 
-task 22 'run'. lines 358-389:
+task 22 'run'. lines 360-391:
 {
-  "gas_used": 393122,
+  "gas_used": 400957,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        "Script",
-        221
-      ]
-    }
+    "Keep": "Executed"
   }
 }

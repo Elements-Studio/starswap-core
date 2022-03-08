@@ -2,41 +2,21 @@ processed 15 tasks
 
 task 6 'run'. lines 14-22:
 {
-  "gas_used": 27644,
+  "gas_used": 117449,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwapConfig"
-          }
-        },
-        25857
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
 task 7 'run'. lines 24-37:
 {
-  "gas_used": 27790,
+  "gas_used": 195679,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        25858
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 8 'run'. lines 39-49:
+task 8 'run'. lines 39-48:
 {
   "gas_used": 34084,
   "status": {
@@ -44,7 +24,7 @@ task 8 'run'. lines 39-49:
   }
 }
 
-task 9 'run'. lines 52-61:
+task 9 'run'. lines 51-60:
 {
   "gas_used": 34084,
   "status": {
@@ -52,26 +32,15 @@ task 9 'run'. lines 52-61:
   }
 }
 
-task 10 'run'. lines 64-76:
+task 10 'run'. lines 63-73:
 {
-  "gas_used": 14549,
+  "gas_used": 104563,
   "status": {
-    "Keep": {
-      "ExecutionFailure": {
-        "location": {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Account"
-          }
-        },
-        "function": 54,
-        "code_offset": 4
-      }
-    }
+    "Keep": "Executed"
   }
 }
 
-task 11 'run'. lines 79-92:
+task 11 'run'. lines 76-88:
 {
   "gas_used": 514404,
   "status": {
@@ -79,56 +48,26 @@ task 11 'run'. lines 79-92:
   }
 }
 
-task 12 'run'. lines 95-108:
+task 12 'run'. lines 91-104:
 {
-  "gas_used": 236784,
+  "gas_used": 700927,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        26120
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 13 'run'. lines 111-138:
+task 13 'run'. lines 107-134:
 {
-  "gas_used": 258296,
+  "gas_used": 1280911,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwapLibrary"
-          }
-        },
-        1001
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
-task 14 'run'. lines 141-171:
+task 14 'run'. lines 137-166:
 {
-  "gas_used": 258552,
+  "gas_used": 1284835,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwapLibrary"
-          }
-        },
-        1001
-      ]
-    }
+    "Keep": "Executed"
   }
 }

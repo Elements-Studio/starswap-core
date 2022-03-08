@@ -18,19 +18,9 @@ task 9 'run'. lines 69-79:
 
 task 10 'run'. lines 81-95:
 {
-  "gas_used": 27790,
+  "gas_used": 195679,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x00000000000000000000000000000001",
-            "name": "Token"
-          }
-        },
-        25858
-      ]
-    }
+    "Keep": "Executed"
   }
 }
 
