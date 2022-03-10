@@ -8,7 +8,7 @@
 
 //# faucet --addr lp_provider --amount 10000000000000000
 
-//# faucet --addr feeadmin --amount 10000000000000000
+//# faucet --addr SwapFee --amount 10000000000000000
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
@@ -95,7 +95,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feeadmin
+//# run --signers SwapFee
 script {
     use StarcoinFramework::Account;
     use Bridge::XUSDT::XUSDT;

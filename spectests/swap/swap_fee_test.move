@@ -1,10 +1,10 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35  --addresses feeadmin=0x9572abb16f9d9e9b009cc1751727129e  --public-keys feeadmin=0xbf76b7fc68b3344e63512fd6b4ded611e6910fc9df1b9f858cb6bf571e201e2d
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35 SwapFeeAdmin=0xbf76b7fc68b3344e63512fd6b4ded611e6910fc9df1b9f858cb6bf571e201e2d --addresses SwapFeeAdmin=0x9572abb16f9d9e9b009cc1751727129e
 
 //# faucet --addr alice --amount 10000000000000000
 
 //# faucet --addr exchanger --amount 10000000000000000
 
-//# faucet --addr feeadmin --amount 10000000000000000
+//# faucet --addr SwapFeeAdmin --amount 10000000000000000
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
@@ -92,7 +92,7 @@ script {
 // check: EXECUTED
 
 
-//# run --signers feeadmin
+//# run --signers SwapFeeAdmin
 script {
     use StarcoinFramework::Account;
     use Bridge::XUSDT::XUSDT;
@@ -202,7 +202,7 @@ script {
     fun swap_exact_token_for_token_swap(signer: signer) {
         let amount_x_in = 20000;
         let amount_y_out_min = 10;
-        let fee_balance_before = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_before = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
 
         TokenSwapRouter::swap_exact_token_for_token<STC, WETH>(&signer, amount_x_in, amount_y_out_min);
         let (actual_fee_operation_numerator, actual_fee_operation_denominator) = TokenSwap::cacl_actual_swap_fee_operation_rate<STC, WETH>();
@@ -211,7 +211,7 @@ script {
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC, XUSDT>();
         let (reserve_x, reserve_fee) = TokenSwapRouter::get_reserves<STC, XUSDT>();
         let fee_out = TokenSwapLibrary::get_amount_out(swap_fee, reserve_x, reserve_fee, fee_numberator, fee_denumerator);
-        let fee_balance_after = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_after = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
 
         let fee_balance_change = fee_balance_after - fee_balance_before;
         Debug::print<u128>(&110100);
@@ -219,7 +219,7 @@ script {
         Debug::print<u128>(&fee_out);
         Debug::print<u128>(&fee_balance_change);
         Debug::print<u128>(&fee_balance_after);
-        Debug::print(&@feeadmin);
+        Debug::print(&@SwapFeeAdmin);
 //        assert!(fee_balance_change == fee_out, 201);
 //        assert!(fee_balance_change >= 0, 202);
     }
@@ -246,7 +246,7 @@ script {
     fun swap_token_for_exact_token_swap(signer: signer) {
         let amount_x_in_max = 30000;
         let amount_y_out = 3200;
-        let fee_balance_start = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_start = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
 
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<STC, WETH>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC, WETH>();
@@ -259,7 +259,7 @@ script {
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC, XUSDT>();
         let (reserve_x, reserve_fee) = TokenSwapRouter::get_reserves<STC, XUSDT>();
         let fee_out = TokenSwapLibrary::get_amount_out(swap_fee, reserve_x, reserve_fee, fee_numberator, fee_denumerator);
-        let fee_balance_end = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_end = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
         let fee_balance_change = fee_balance_end - fee_balance_start;
 
         Debug::print<u128>(&110200);
@@ -296,7 +296,7 @@ script {
     fun pay_for_token_and_fee_token_pair_not_exist(signer: signer) {
         let amount_x_in = 10000;
         let amount_y_out_min = 10;
-        let fee_balance_start = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_start = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<WUSDT, WETH>();
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<WUSDT, WETH>();
@@ -305,7 +305,7 @@ script {
         let (actual_fee_operation_numerator, actual_fee_operation_denominator) = TokenSwap::cacl_actual_swap_fee_operation_rate<WETH, WUSDT>();
         let swap_fee = SafeMath::safe_mul_div_u128(amount_x_in, actual_fee_operation_numerator, actual_fee_operation_denominator);
 
-        let fee_balance_end = CommonHelper::get_safe_balance<XUSDT>(@feeadmin);
+        let fee_balance_end = CommonHelper::get_safe_balance<XUSDT>(@SwapFeeAdmin);
         let fee_balance_change = fee_balance_end - fee_balance_start;
 
         Debug::print<u128>(&110300);
