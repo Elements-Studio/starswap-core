@@ -1,7 +1,6 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: replace the address with admin address
 address SwapAdmin {
 module TokenSwapRouter3 {
     use SwapAdmin::TokenSwapRouter;

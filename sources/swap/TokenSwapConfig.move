@@ -1,7 +1,6 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: replace the address with admin address
 address SwapAdmin {
 
 module TokenSwapConfig {
@@ -244,7 +243,7 @@ module TokenSwapConfig {
     }
 
     public fun fee_address(): address {
-        @0x9572abb16f9d9e9b009cc1751727129e
+        @SwapFeeAdmin
     }
 
     public fun assert_admin(signer: &signer) {
