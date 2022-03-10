@@ -15,6 +15,12 @@ mpm package build
 mpm spectest 
 ```
 
+### Run Unit Tests
+
+```commandline
+mpm package test
+```
+
 ---
 ## Move CLI (Old version)
 ### Compile Contracts

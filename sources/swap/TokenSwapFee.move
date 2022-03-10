@@ -6,6 +6,8 @@ module TokenSwapFee {
     use StarcoinFramework::Account;
     use StarcoinFramework::Token;
     use StarcoinFramework::Event;
+    #[test]
+    use StarcoinFramework::Math;
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwap::{Self};
@@ -150,6 +152,20 @@ module TokenSwapFee {
         Token::destroy_zero(token_fee_fee);
         swap_fee_direct_deposit<X, FeeToken>(token_x_fee);
         (true, x_value, fee_out)
+    }
+
+    #[test]
+    fun test_get_amount_out_without_fee() {
+        let precision_9: u8 = 9;
+        let scaling_factor_9 = Math::pow(10, (precision_9 as u64));
+        let amount_x: u128 = 1 * scaling_factor_9;
+        let reserve_x: u128 = 10000000 * scaling_factor_9;
+        let reserve_y: u128 = 100000000 * scaling_factor_9;
+
+        let amount_y = TokenSwapLibrary::get_amount_out_without_fee(amount_x, reserve_x, reserve_y);
+        let amount_y_k3_fee = TokenSwapLibrary::get_amount_out(amount_x, reserve_x, reserve_y, 3, 1000);
+        assert!(amount_y == 9999999000, 10001);
+        assert!(amount_y_k3_fee == 9969999005, 10002);
     }
 }
 }

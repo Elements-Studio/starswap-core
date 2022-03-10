@@ -220,8 +220,8 @@ script {
         Debug::print<u128>(&fee_balance_change);
         Debug::print<u128>(&fee_balance_after);
         Debug::print(&@SwapFeeAdmin);
-//        assert!(fee_balance_change == fee_out, 201);
-//        assert!(fee_balance_change >= 0, 202);
+        assert!(fee_balance_change == fee_out, 201);
+        assert!(fee_balance_change >= 0, 202);
     }
 }
 //the case: token pay for fee and fee token pair exist

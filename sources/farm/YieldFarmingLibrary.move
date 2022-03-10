@@ -82,6 +82,36 @@ module YieldFarmingLibrary {
         BigExponential::truncate(BigExponential::exp_from_u256(amount_u256))
     }
 
+    #[test]
+    fun test_withdraw_amount() {
+        let harvest_index = 1000000;
+        let asset_total_weight = 100000000;
+        let last_update_timestamp = 1;
+        let now_seconds = 11;
+        let release_per_second = 2;
+
+        let new_index = Self::calculate_harvest_index(harvest_index,asset_total_weight, last_update_timestamp, now_seconds, release_per_second);
+        assert!(new_index == 200001000000, 10001);
+
+        let amount = Self::calculate_withdraw_amount(new_index, harvest_index, asset_total_weight);
+        assert!(amount == 20, 10002);
+    }
+
+    #[test]
+    fun test_calc_harvest_index() {
+        let harvest_index = 1499999999999999999;
+        let asset_total_weight = 7000000000;
+        let last_update_timestamp = 86443;
+        let now_seconds = 86444;
+        let release_per_second = 1000000000;
+
+        let new_index = Self::calculate_harvest_index(harvest_index,asset_total_weight, last_update_timestamp, now_seconds, release_per_second);
+        assert!(new_index == 1642857142857142856, 10003);
+
+        let amount = Self::calculate_withdraw_amount(new_index, harvest_index, release_per_second * 2);
+        assert!(amount == 285714285, 10004);
+    }
+
 }
 
 }

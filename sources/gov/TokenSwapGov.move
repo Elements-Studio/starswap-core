@@ -50,8 +50,6 @@ module TokenSwapGov {
     const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
 
 
-    #[test] use StarcoinFramework::Debug;
-
     #[test] public fun test_all_issued_amount() {
         let total = GOV_PERCENT_TEAM +
                     GOV_PERCENT_COMMUNITY +
@@ -60,7 +58,6 @@ module TokenSwapGov {
                     GOV_PERCENT_INITIAL_LIQUIDITY +
                     GOV_PERCENT_DAO_TREASURY;
 
-        Debug::print(&total);
         assert!(total == 100, 1001);
 
         assert!(calculate_amount_from_percent(GOV_PERCENT_TEAM) == 10000000, 1002);
