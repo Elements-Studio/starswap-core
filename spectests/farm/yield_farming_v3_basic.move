@@ -226,23 +226,19 @@ script {
 //# block --author 0x1 --timestamp 10002000
 
 //# run --signers cindy
-
 script {
-    //    use StarcoinFramework::Debug;
+    use StarcoinFramework::Debug;
     use StarcoinFramework::Signer;
     //use StarcoinFramework::Timestamp;
 
     use alice::YieldFarmingWarpper::{Usdx, Self};
     use SwapAdmin::CommonHelper;
 
-    /// Cindy harvest after 20 seconds, checking whether has rewards.
+    /// Cindy harvest after 1 seconds, checking whether has rewards.
     fun cindy_query_token_amount(signer: signer) {
         let expect_amount = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
-        //        Debug::print(&111111);
-        //        Debug::print(&expect_amount);
-        //        Debug::print(&Timestamp::now_seconds());
-        // assert!(amount00 == 0, 10004);
-        assert!(expect_amount == CommonHelper::pow_amount<Usdx>(20), 1009);
+        Debug::print(&expect_amount);
+        assert!(expect_amount == CommonHelper::pow_amount<Usdx>(1), 1009);
     }
 }
 // check: EXECUTED
@@ -257,16 +253,16 @@ script {
     use alice::YieldFarmingWarpper::{Usdx, Self};
     use SwapAdmin::CommonHelper;
 
-    /// Cindy harvest after 40 seconds, checking whether has rewards.
-    fun cindy_unstake_afeter_40_seconds(signer: signer) {
+    /// Cindy harvest after 3 seconds, checking whether has rewards.
+    fun cindy_unstake_afeter_3_seconds(signer: signer) {
         let amount00 = YieldFarmingWarpper::query_expect_gain(Signer::address_of(&signer), 1);
         Debug::print(&amount00);
 
         // Unstake
         let (asset_val, token_val) = YieldFarmingWarpper::unstake(&signer, 1);
         Debug::print(&token_val);
-        assert!(asset_val == CommonHelper::pow_amount<Usdx>(1), 1011);
-        assert!(token_val == CommonHelper::pow_amount<Usdx>(40), 1010);
+        assert!(asset_val == CommonHelper::pow_amount<Usdx>(1), 1010);
+        assert!(token_val == CommonHelper::pow_amount<Usdx>(3), 1011);
 
         let (_, _, asset_total_weight, _) = YieldFarmingWarpper::query_info();
         assert!(asset_total_weight == 0, 1012);
