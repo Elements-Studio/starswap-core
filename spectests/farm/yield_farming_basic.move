@@ -71,6 +71,7 @@ module alice::YieldFarmingWarpper {
 }
 // check: EXECUTED
 
+//# block --author 0x1 --timestamp 10001000
 
 //# run --signers alice
 script {
@@ -80,15 +81,12 @@ script {
 
     /// Index test
     fun main(_account: signer) {
+        let now_seconds = Timestamp::now_seconds();
         let harvest_index = 100;
-        let last_update_timestamp: u64 = 86395;
         let _asset_total_weight = 1000000000;
 
         let index_1 = YieldFarming::calculate_harvest_index(
-            harvest_index,
-            _asset_total_weight,
-            last_update_timestamp,
-            Timestamp::now_seconds(), 2000000000);
+            harvest_index, _asset_total_weight, now_seconds - 5, now_seconds, 2000000000);
         let withdraw_1 = YieldFarming::calculate_withdraw_amount(index_1, harvest_index, _asset_total_weight);
         assert!((2000000000 * 5) == withdraw_1, 1001);
 
@@ -228,6 +226,8 @@ script {
 }
 // check: EXECUTED
 
+//# block --author 0x1 --timestamp 10005000
+
 //# run --signers alice
 script {
     use SwapAdmin::YieldFarming;
@@ -236,14 +236,14 @@ script {
 
     /// big number cacl test
     fun main(_account: signer) {
+        let now_seconds = Timestamp::now_seconds();
         let harvest_index = 1000000000; //e9
-        let last_update_timestamp: u64 = 86395;
         let _asset_total_weight = 10000000000000000000; //e19
 
         let index_1 = YieldFarming::calculate_harvest_index(
             harvest_index,
             _asset_total_weight,
-            last_update_timestamp,
+            now_seconds - 5,
             Timestamp::now_seconds(), 2000000000);
         let withdraw_1 = YieldFarming::calculate_withdraw_amount(index_1, harvest_index, _asset_total_weight);
         Debug::print(&index_1);
