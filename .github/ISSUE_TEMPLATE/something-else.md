@@ -1,6 +1,6 @@
 ---
 name: Something else
-about: Tell us something else. If this doesn’t look right, choose a different type.
+about: 'Tell us something else. '
 title: ''
 labels: ''
 assignees: ''
