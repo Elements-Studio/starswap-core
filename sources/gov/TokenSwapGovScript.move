@@ -18,5 +18,29 @@ module TokenSwapGovScript {
         TokenSwapGov::dispatch<PoolType>(&account, acceptor, amount);
     }
 
+    ///Initialize the linear treasury by Starswap Ecnomic Model list
+    public(script) fun linear_initialize(account: signer) {
+        TokenSwapGov::linear_initialize(&account);
+    }
+
+    /// Linear extraction of Farm treasury
+    public(script) fun linear_withdraw_farm(account: signer ,to:address,amount :u128) {
+        TokenSwapGov::linear_withdraw_farm(&account, to, amount);
+    }
+
+    /// Linear extraction of Syrup treasury
+    public(script) fun linear_withdraw_syrup(account: signer ,to:address,amount :u128) {
+        TokenSwapGov::linear_withdraw_syrup(&account, to, amount);
+    }
+
+    /// Linear extraction of Community treasury
+    public(script) fun linear_withdraw_community(account: signer ,to:address,amount :u128) {
+        TokenSwapGov::linear_withdraw_community(&account, to, amount);
+    }
+    
+    /// Linear extraction of developerfund treasury
+    public(script) fun linear_withdraw_developerfund(account: signer ,to:address,amount :u128) {
+        TokenSwapGov::linear_withdraw_developerfund(&account, to, amount);
+    }
 }
 }

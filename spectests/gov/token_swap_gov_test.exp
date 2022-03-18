@@ -1,6 +1,6 @@
-processed 8 tasks
+processed 17 tasks
 
-task 4 'run'. lines 9-32:
+task 5 'run'. lines 11-34:
 {
   "gas_used": 1001004,
   "status": {
@@ -8,7 +8,7 @@ task 4 'run'. lines 9-32:
   }
 }
 
-task 6 'run'. lines 37-45:
+task 7 'run'. lines 39-47:
 {
   "gas_used": 33946,
   "status": {
@@ -16,9 +16,59 @@ task 6 'run'. lines 37-45:
   }
 }
 
-task 7 'run'. lines 47-65:
+task 8 'run'. lines 49-67:
 {
   "gas_used": 171379,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 9 'run'. lines 71-80:
+{
+  "gas_used": 608354,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 11 'run'. lines 84-100:
+{
+  "gas_used": 248402,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 13 'run'. lines 105-113:
+{
+  "gas_used": 142316,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapGov"
+          }
+        },
+        51719
+      ]
+    }
+  }
+}
+
+task 14 'run'. lines 115-131:
+{
+  "gas_used": 213701,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 16 'run'. lines 136-148:
+{
+  "gas_used": 95777,
   "status": {
     "Keep": "Executed"
   }
