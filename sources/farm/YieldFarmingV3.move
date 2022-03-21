@@ -132,6 +132,13 @@ module YieldFarmingV3 {
     //        } = move_from<FarmingAsset<PoolType, AssetT>>(broker);
     //    }
 
+    public fun deposit<PoolType: store, RewardTokenT: store>(
+        account: &signer, 
+        treasury_token: Token::Token<RewardTokenT>)acquires Farming{
+            let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(Signer::address_of(account));
+            Token::deposit<RewardTokenT>(&mut farming.treasury_token,treasury_token);
+    }
+
     public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,

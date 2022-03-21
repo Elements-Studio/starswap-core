@@ -83,66 +83,129 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use StarcoinFramework::Account;
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapGovPoolType::{
         PoolTypeFarmPool
     };
-
+    //Attempt to extract at first hour
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,@farm_test,3139269404400);
-        let balance = Account::balance<STAR::STAR>(@farm_test);
-        assert!(balance == 3139269404400,1004);
-        assert!(TokenSwapGov::get_balance_of_treasury<PoolTypeFarmPool>() == 54996860730595600,1005);
+
+        let can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeFarmPool>();
+        assert!( can_withdraw == 3139269404400, 1008);
+        let second_release = TokenSwapGov::get_total_of_linear_treasury<PoolTypeFarmPool>() / 
+                                ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeFarmPool>() as u128);
+        
+        let hour_release = (1646449200 - 1646445600) * second_release;
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&signer,hour_release);
+        
+        let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
+
+        assert!( second_release  == 872019279                        ,1004);
+        assert!( hour_release    == 3139269404400                    ,1005);
+        assert!( balance         == 55000000000000000 - hour_release ,1006); 
     }
-}
-// check: EXECUTED
-
-//# block --author 0x1 --timestamp 1646460000000 
-
-
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapGov;
-
-    fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,@farm_test,3139269404400 * 4);
-        }
 }
 // check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
-    use StarcoinFramework::Account;
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapGovPoolType::{
         PoolTypeFarmPool
     };
-
+    //Try extracting again
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,@farm_test,3139269404400 * 3);
-        let balance = Account::balance<STAR::STAR>(@farm_test);
-        assert!(balance == 3139269404400 * 4,1006);
-        assert!(TokenSwapGov::get_balance_of_treasury<PoolTypeFarmPool>() == (54996860730595600 - (3139269404400 * 3)),1007);
+        let second_release = TokenSwapGov::get_total_of_linear_treasury<PoolTypeFarmPool>() / 
+                                ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeFarmPool>() as u128);
+        
+        let hour_release = (1646449200 - 1646445600) * second_release;
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&signer,hour_release);
     }
 }
 // check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeFarmPool
+    };
+    //try to extract 0
+    fun linear_withdraw_farm(signer: signer) {
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&signer,0);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeFarmPool
+    };
+    //Determine whether the amount that can be extracted is 0
+    fun linear_withdraw_farm(_signer: signer) {
+        let can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeFarmPool>();
+        assert!( can_withdraw == 0, 1009);
+    }
+}
+// check: EXECUTED
+
+//# block --author 0x1 --timestamp 1709517600000
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeFarmPool
+    };
+    //When the time happens to be the end of the lock
+    //See how much you can withdraw
+    fun linear_withdraw_farm(_signer: signer) {
+        let can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeFarmPool>();
+        assert!( can_withdraw == 55000000000000000 -  3139269404400 , 1010);
+    }
+}
+// check: EXECUTED
+
+
+
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeFarmPool
+    };
+    //when the maximum time is exceeded
+    fun linear_withdraw_farm(signer: signer) {
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&signer,3139269404400 * 2);
+        let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
+        assert!(balance == 55000000000000000 -  3139269404400 * 3 ,1011 );
+    }
+}
+// check: EXECUTED
+
+
 
 
 //# block --author 0x1 --timestamp 1709521200000 
 
 //# run --signers SwapAdmin
 script {
-    use StarcoinFramework::Account;
+    // use StarcoinFramework::Account;
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::STAR;
-
+    // use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeFarmPool
+    };
+    //When the maximum time is exceeded, all are taken out
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,@farm_test,54987442922382400);
-        let balance = Account::balance<STAR::STAR>(@farm_test);
-        assert!(balance == 55000000000000000,1008);
+        let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
+        let can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeFarmPool>();
+        assert!(can_withdraw == balance, 1012);
+        assert!(can_withdraw == (55000000000000000 - (3139269404400 * 3)), 1012);
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&signer,can_withdraw);
     }
 }
 // check: EXECUTED
