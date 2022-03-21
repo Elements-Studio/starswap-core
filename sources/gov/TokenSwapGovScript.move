@@ -6,7 +6,12 @@ module TokenSwapGovScript {
 
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFee;
-
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeCommunity,
+        PoolTypeFarmPool ,
+        PoolTypeSyrup ,
+        PoolTypeDeveloperFund,
+    };
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public(script) fun genesis_initialize(account: signer) {
         TokenSwapGov::genesis_initialize(&account);
@@ -24,23 +29,23 @@ module TokenSwapGovScript {
     }
 
     /// Linear extraction of Farm treasury
-    public(script) fun linear_withdraw_farm(account: signer ,to:address,amount :u128) {
-        TokenSwapGov::linear_withdraw_farm(&account, to, amount);
+    public(script) fun linear_withdraw_farm(account: signer ,amount :u128) {
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&account, amount);
     }
 
     /// Linear extraction of Syrup treasury
-    public(script) fun linear_withdraw_syrup(account: signer ,to:address,amount :u128) {
-        TokenSwapGov::linear_withdraw_syrup(&account, to, amount);
+    public(script) fun linear_withdraw_syrup(account: signer ,amount :u128) {
+        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeSyrup>(&account, amount);
     }
 
     /// Linear extraction of Community treasury
     public(script) fun linear_withdraw_community(account: signer ,to:address,amount :u128) {
-        TokenSwapGov::linear_withdraw_community(&account, to, amount);
+        TokenSwapGov::linear_withdraw<PoolTypeCommunity>(&account, to, amount);
     }
     
     /// Linear extraction of developerfund treasury
     public(script) fun linear_withdraw_developerfund(account: signer ,to:address,amount :u128) {
-        TokenSwapGov::linear_withdraw_developerfund(&account, to, amount);
+        TokenSwapGov::linear_withdraw<PoolTypeDeveloperFund>(&account, to, amount);
     }
 }
 }

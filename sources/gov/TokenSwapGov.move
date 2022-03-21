@@ -8,9 +8,10 @@ module TokenSwapGov {
     use StarcoinFramework::Math;
     use StarcoinFramework::Signer;
     use StarcoinFramework::Timestamp;
+    use StarcoinFramework::Event;
     use StarcoinFramework::Errors;
     use SwapAdmin::STAR;
-    use SwapAdmin::SafeMath;
+    use SwapAdmin::YieldFarming;
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapConfig;
@@ -167,6 +168,22 @@ module TokenSwapGov {
         locked_total_timestamp: u64,    // locked total time
     }
 
+    struct LinearGovTreasury<phantom PoolType> has key,store{
+        total:u128,                         //LinearGovTreasury total amount 
+        treasury:Token::Token<STAR::STAR>,
+        locked_start_timestamp:u64,         // locked start time
+        locked_total_timestamp:u64,         // locked total time
+    }
+
+    struct LinearGovTreasuryWithdrawEvent <phantom PoolType> has drop, store{
+        withdraw_amount:u128,
+        remainder:u128,
+        signer:address,
+        receiver:address,
+    }
+    struct LinearGovTreasuryEvent<phantom PoolType> has key, store{ 
+        withdraw_linearGovTreasury_event_handler:Event::EventHandle<LinearGovTreasuryWithdrawEvent<PoolType>>,
+    }
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public fun genesis_initialize(account: &signer) {
         STAR::assert_genesis_address(account);
@@ -222,7 +239,7 @@ module TokenSwapGov {
     }
 
     //Initialize the economic model of linear release
-     public fun linear_initialize(account: &signer) acquires GovTreasury{
+     public fun linear_initialize(account: &signer) {
         STAR::assert_genesis_address(account);
 
         let precision = STAR::precision();
@@ -232,152 +249,119 @@ module TokenSwapGov {
         // linear 60% - 5 % for farm. 
         let farm_linear = calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128);
         STAR::mint(account, farm_linear);
-        move_to(account, GovTreasury<PoolTypeFarmPool>{
+        move_to(account, LinearGovTreasury<PoolTypeFarmPool>{
+            total: farm_linear,
             treasury: Account::withdraw<STAR::STAR>(account, farm_linear),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_FARM_LOCK_TIME,
         });
 
+        move_to(account, LinearGovTreasuryEvent{
+            withdraw_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeFarmPool>>(account),
+        });
+
         // linear 10% - 5 % for syrup. 
         let syrup_linear = calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) * (scaling_factor as u128);
         STAR::mint(account, syrup_linear);
-        move_to(account, GovTreasury<PoolTypeSyrup>{
+        move_to(account, LinearGovTreasury<PoolTypeSyrup>{
+            total:syrup_linear,
             treasury: Account::withdraw<STAR::STAR>(account, syrup_linear),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_SYRUP_LOCK_TIME,
         });
 
-
+        move_to(account, LinearGovTreasuryEvent{
+            withdraw_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeSyrup>>(account),
+        });
 
         // linear 5% - 2 % for community. 
         let community_linear = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) * (scaling_factor as u128);
         STAR::mint(account, community_linear);
-        let community_linear_token = Account::withdraw<STAR::STAR>(account, community_linear);
-        let treasury = borrow_global_mut<GovTreasury<PoolTypeCommunity>>(Signer::address_of(account));
-        Token::deposit(&mut treasury.treasury,community_linear_token) ;
-        treasury.locked_start_timestamp = GENESIS_TIMESTAMP;
-        treasury.locked_total_timestamp = GOV_PERCENT_COMMUNITY_LOCK_TIME;
+        move_to(account, LinearGovTreasury<PoolTypeCommunity>{
+            total:community_linear,
+            treasury: Account::withdraw<STAR::STAR>(account, community_linear),
+            locked_start_timestamp : GENESIS_TIMESTAMP,
+            locked_total_timestamp : GOV_PERCENT_SYRUP_LOCK_TIME,
+        });
 
-
+        move_to(account, LinearGovTreasuryEvent{
+            withdraw_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeCommunity>>(account),
+        });
 
         // linear 10%  for developerfund. 
         let developerfund_linear = calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND) * (scaling_factor as u128);
         STAR::mint(account, developerfund_linear);
-        move_to(account, GovTreasury<PoolTypeDeveloperFund>{
+        move_to(account, LinearGovTreasury<PoolTypeDeveloperFund>{
+            total:developerfund_linear,
             treasury: Account::withdraw<STAR::STAR>(account, developerfund_linear),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_DEVELOPER_FUND_LOCK_TIME,
         });
+
+        move_to(account, LinearGovTreasuryEvent{
+            withdraw_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeDeveloperFund>>(account),
+        });
     }
 
-
-    //Extract the treasury linear release of the farm pool
-    public fun  linear_withdraw_farm (account: &signer ,to:address,amount :u128 ) acquires GovTreasury{
-        
-        //TokenSwapConfig::assert_global_freeze();
-
-        let now_timestamp = Timestamp::now_seconds();
-        let precision = STAR::precision();
-        let scaling_factor = Math::pow(10, (precision as u64));
-
-        let treasury = borrow_global_mut<GovTreasury<PoolTypeFarmPool>>(Signer::address_of(account));
-        let elapsed_time = now_timestamp - treasury.locked_start_timestamp;
-        let can_withdraw_amount = if (elapsed_time >= treasury.locked_total_timestamp) {
-            
-            Token::value<STAR::STAR>(&treasury.treasury)
-        }else {
-            let second_release = SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) , (scaling_factor as u128) , (treasury.locked_total_timestamp as u128));
-            let withdraw_amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-            Token::value<STAR::STAR>(&treasury.treasury) - (calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128) - withdraw_amount)
-        };
-        
-        assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
-
-        let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.treasury, amount);
-        Account::deposit<STAR::STAR>(to, disp_token); 
-    }
-
-    //Extract the treasury linear release of the syrup
-    public fun  linear_withdraw_syrup (account: &signer ,to:address,amount :u128)acquires GovTreasury{
-        
+    public fun linear_withdraw<PoolType: store>(account:&signer,to:address,amount:u128) acquires LinearGovTreasury,LinearGovTreasuryEvent{
         TokenSwapConfig::assert_global_freeze();
-
-        let now_timestamp = Timestamp::now_seconds();
-        let precision = STAR::precision();
-        let scaling_factor = Math::pow(10, (precision as u64));
-
-        let treasury = borrow_global_mut<GovTreasury<PoolTypeSyrup>>(Signer::address_of(account));
-
-        let elapsed_time = now_timestamp - treasury.locked_start_timestamp;
-
-        let can_withdraw_amount = if (elapsed_time >= treasury.locked_total_timestamp) {
-            Token::value<STAR::STAR>(&treasury.treasury)
-        }else {
-            let second_release = SafeMath::safe_mul_div_u128(  calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) , (scaling_factor as u128) , (treasury.locked_total_timestamp as u128));
-            let withdraw_amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-            Token::value<STAR::STAR>(&treasury.treasury) - (calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) * (scaling_factor as u128) - withdraw_amount)
- 
-        };
+        let can_withdraw_amount = get_can_withdraw_of_linear_treasury<PoolType>();
         assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
 
-        let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.treasury, amount);
-        Account::deposit<STAR::STAR>(to, disp_token); 
-    }
-
-    //Extract the treasury linear release of the community
-    public fun  linear_withdraw_community (account: &signer ,to:address,amount :u128)acquires GovTreasury{
+        let treasury = borrow_global_mut<LinearGovTreasury<PoolType>>(Signer::address_of(account));        
         
-        TokenSwapConfig::assert_global_freeze();
-
-        let now_timestamp = Timestamp::now_seconds();
-        let precision = STAR::precision();
-        let scaling_factor = Math::pow(10, (precision as u64));
-
-        let treasury = borrow_global_mut<GovTreasury<PoolTypeCommunity>>(Signer::address_of(account));
-
-        let elapsed_time = now_timestamp - treasury.locked_start_timestamp;
-
-        let can_withdraw_amount = if (elapsed_time >= treasury.locked_total_timestamp) {
-            Token::value<STAR::STAR>(&treasury.treasury)
-        }else {
-            let second_release =  SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) , (scaling_factor as u128) ,(treasury.locked_total_timestamp as u128));
-            let withdraw_amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-            Token::value<STAR::STAR>(&treasury.treasury) - (calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) * (scaling_factor as u128) - withdraw_amount)
-
-        };
-        assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
-
         let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.treasury, amount);
         Account::deposit<STAR::STAR>(to, disp_token); 
+
+        let treasury_event = borrow_global_mut<LinearGovTreasuryEvent<PoolType>>(Signer::address_of(account));
+        Event::emit_event(&mut treasury_event.withdraw_linearGovTreasury_event_handler, LinearGovTreasuryWithdrawEvent<PoolType> {
+            withdraw_amount:treasury.total,
+            remainder:Token::value<STAR::STAR>(&treasury.treasury),
+            signer:Signer::address_of(account),
+            receiver:to,
+        });
     }
 
-    //Extract the treasury linear release of the developerfund
-    public fun  linear_withdraw_developerfund (account: &signer ,to:address,amount :u128)acquires GovTreasury{
+    public fun linear_withdraw_farm_syrup<PoolType: store>(account:&signer,amount:u128) acquires LinearGovTreasury,LinearGovTreasuryEvent{
+        TokenSwapConfig::assert_global_freeze();
+        let can_withdraw_amount = get_can_withdraw_of_linear_treasury<PoolType>();
+        assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
+
+        let treasury = borrow_global_mut<LinearGovTreasury<PoolType>>(Signer::address_of(account));        
         
-        TokenSwapConfig::assert_global_freeze();
-
-        let now_timestamp = Timestamp::now_seconds();
-        let precision = STAR::precision();
-        let scaling_factor = Math::pow(10, (precision as u64));
-
-        let treasury = borrow_global_mut<GovTreasury<PoolTypeDeveloperFund>>(Signer::address_of(account));
-
-        let elapsed_time = now_timestamp - treasury.locked_start_timestamp;
-
-        let can_withdraw_amount = if (elapsed_time >= treasury.locked_total_timestamp) {
-            Token::value<STAR::STAR>(&treasury.treasury)
-        }else {
-            let second_release =  SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND ) , (scaling_factor as u128) ,(treasury.locked_total_timestamp as u128));
-            let withdraw_amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-            Token::value<STAR::STAR>(&treasury.treasury) - (calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND  ) * (scaling_factor as u128) - withdraw_amount)
-
-        };
-        assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
-
         let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.treasury, amount);
-        Account::deposit<STAR::STAR>(to, disp_token); 
+        
+        YieldFarming::deposit<PoolType,STAR::STAR>(account,disp_token);
+
+        let treasury_event = borrow_global_mut<LinearGovTreasuryEvent<PoolType>>(Signer::address_of(account));
+        Event::emit_event(&mut treasury_event.withdraw_linearGovTreasury_event_handler, LinearGovTreasuryWithdrawEvent<PoolType> {
+            withdraw_amount:treasury.total,
+            remainder:Token::value<STAR::STAR>(&treasury.treasury),
+            signer:Signer::address_of(account),
+            receiver:Signer::address_of(account),
+        });
     }
 
+    public fun get_balance_of_linear_treasury<PoolType: store>():u128 acquires LinearGovTreasury{
+        let treasury = borrow_global<LinearGovTreasury<PoolType>>(STAR::token_address());    
+        Token::value<STAR::STAR>(&treasury.treasury)
+    }
+
+    public fun get_total_of_linear_treasury<PoolType: store>():u128 acquires LinearGovTreasury{
+        let treasury = borrow_global<LinearGovTreasury<PoolType>>(STAR::token_address());    
+        treasury.total
+    }
+
+    public fun get_can_withdraw_of_linear_treasury<PoolType: store>():u128 acquires LinearGovTreasury{
+        let treasury = borrow_global<LinearGovTreasury<PoolType>>(STAR::token_address());
+        let now_timestamp = Timestamp::now_seconds();
+
+        let second_release =  treasury.total / (treasury.locked_total_timestamp as u128);
+
+        let amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
+        
+        Token::value<STAR::STAR>(&treasury.treasury) - (treasury.total - amount)
+    }
 
     /// Get balance of treasury
     public fun get_balance_of_treasury<PoolType: store>(): u128 acquires GovTreasury {
