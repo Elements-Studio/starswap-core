@@ -128,28 +128,28 @@ module TokenSwapGov {
         let farm_can_withdraw_amount = if (elapsed_time >= farm_total_timestamp) {
             calculate_amount_from_percent(  GOV_PERCENT_FARM      -  GOV_PERCENT_FARM_GENESIS      )
         }else {
-            let second_release = SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) , (scaling_factor as u128) , (farm_total_timestamp as u128));
+            let second_release = Math::mul_div( calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) , (scaling_factor as u128) , (farm_total_timestamp as u128));
             (( now_timestamp - start_timestamp  ) as u128) * second_release
         };
 
         let syrup_can_withdraw_amount = if (elapsed_time >= syrup_total_timestamp) {
             calculate_amount_from_percent(  GOV_PERCENT_SYRUP      -  GOV_PERCENT_SYRUP_GENESIS     ) 
         }else {
-            let second_release = SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) , (scaling_factor as u128) , (syrup_total_timestamp as u128));
+            let second_release = Math::mul_div( calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) , (scaling_factor as u128) , (syrup_total_timestamp as u128));
             (( now_timestamp - start_timestamp  ) as u128) * second_release
         };
 
         let community_can_withdraw_amount = if (elapsed_time >= community_total_timestamp) {
             calculate_amount_from_percent(  GOV_PERCENT_COMMUNITY      -  GOV_PERCENT_COMMUNITY_GENESIS     ) 
         }else {
-            let second_release = SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) , (scaling_factor as u128) , (community_total_timestamp as u128));
+            let second_release = Math::mul_div( calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) , (scaling_factor as u128) , (community_total_timestamp as u128));
             (( now_timestamp - start_timestamp  ) as u128) * second_release
         };
 
         let developer_fund_can_withdraw_amount = if (elapsed_time >= developer_fund_total_timestamp) {
             calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND    ) 
         }else {
-            let second_release = SafeMath::safe_mul_div_u128( calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND ) , (scaling_factor as u128) , (developer_fund_total_timestamp as u128));
+            let second_release = Math::mul_div( calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND ) , (scaling_factor as u128) , (developer_fund_total_timestamp as u128));
             (( now_timestamp - start_timestamp  ) as u128) * second_release
         };
 
@@ -282,7 +282,7 @@ module TokenSwapGov {
             total:community_linear,
             treasury: Account::withdraw<STAR::STAR>(account, community_linear),
             locked_start_timestamp : GENESIS_TIMESTAMP,
-            locked_total_timestamp : GOV_PERCENT_SYRUP_LOCK_TIME,
+            locked_total_timestamp : GOV_PERCENT_COMMUNITY_LOCK_TIME,
         });
 
         move_to(account, LinearGovTreasuryEvent{
