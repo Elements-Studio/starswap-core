@@ -208,6 +208,13 @@ module TokenSwapFarm {
                 activation_state: active,
             });
     }
+    
+    //Deposit Token into the pool
+    public fun deposit<PoolType: store,TokenT: copy + drop + store>(
+        account: &signer, 
+        token: Token::Token<TokenT>){
+            YieldFarming::deposit<PoolType,TokenT>(account,token);
+    }
 
     /// Stake liquidity Token pair
     public fun stake<X: copy + drop + store,

@@ -6,10 +6,6 @@ module TokenSwapGovScript {
 
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFee;
-    use SwapAdmin::TokenSwapGovPoolType::{
-        PoolTypeFarmPool ,
-        PoolTypeSyrup ,
-    };
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public(script) fun genesis_initialize(account: signer) {
         TokenSwapGov::genesis_initialize(&account);
@@ -28,12 +24,12 @@ module TokenSwapGovScript {
 
     /// Linear extraction of Farm treasury
     public(script) fun linear_withdraw_farm(account: signer ,amount :u128) {
-        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeFarmPool>(&account, amount);
+        TokenSwapGov::linear_withdraw_farm(&account, amount);
     }
 
     /// Linear extraction of Syrup treasury
     public(script) fun linear_withdraw_syrup(account: signer ,amount :u128) {
-        TokenSwapGov::linear_withdraw_farm_syrup<PoolTypeSyrup>(&account, amount);
+        TokenSwapGov::linear_withdraw_syrup(&account, amount);
     }
 
     /// Linear extraction of Community treasury

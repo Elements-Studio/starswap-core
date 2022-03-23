@@ -179,6 +179,13 @@ module TokenSwapSyrup {
         );
     }
 
+    //Deposit Token into the pool
+    public fun deposit<PoolType: store,TokenT: copy + drop + store>(
+        account: &signer, 
+        token: Token::Token<TokenT>){
+            YieldFarming::deposit<PoolType,TokenT>(account,token);
+    }
+
     /// Stake token type to syrup
     /// @param: pledege_time per second
     public fun stake<TokenT: store>(signer: &signer,
