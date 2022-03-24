@@ -25,6 +25,18 @@ script {
 }
 // check: EXECUTED
 
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun upgrade_dao_treasury_genesis(signer: signer) {
+        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+    }
+}
+// check: EXECUTED
+
+
 
 ////# run --signers admin
 //script {
@@ -54,6 +66,17 @@ script {
 
 //# run --signers SwapAdmin
 script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun linear_initialize(signer: signer) {
+        TokenSwapGov::linear_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
     use StarcoinFramework::Account;
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapGov;
@@ -74,16 +97,7 @@ script {
 
 
 
-//# run --signers SwapAdmin
-script {
 
-    use SwapAdmin::TokenSwapGov;
-
-    fun linear_initialize(signer: signer) {
-        TokenSwapGov::linear_initialize(&signer);
-    }
-}
-// check: EXECUTED
 
 //# block --author 0x1 --timestamp 1646449200000 
 
