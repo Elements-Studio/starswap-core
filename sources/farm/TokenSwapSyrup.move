@@ -186,6 +186,10 @@ module TokenSwapSyrup {
             YieldFarming::deposit<PoolType,TokenT>(account,token);
     }
 
+    //View Treasury Remaining
+    public fun get_treasury_balance<PoolType: store,TokenT: copy + drop + store>():u128{
+        YieldFarming::get_treasury_balance<PoolType,TokenT>(STAR::token_address())
+    }
     /// Stake token type to syrup
     /// @param: pledege_time per second
     public fun stake<TokenT: store>(signer: &signer,

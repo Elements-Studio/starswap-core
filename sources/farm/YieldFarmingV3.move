@@ -504,6 +504,12 @@ module YieldFarmingV3 {
         Vector::remove<Stake<PoolType, AssetType>>(c, Option::destroy_some<u64>(idx))
     }
 
+    //View Treasury Remaining
+    public fun get_treasury_balance<PoolType: store, RewardTokenT: store>(broker: address):u128 acquires Farming{
+        let farming = borrow_global<Farming<PoolType, RewardTokenT>>(broker);
+        Token::value<RewardTokenT>( &farming.treasury_token )
+    }
+
     /// Check the Farming of TokenT is exists.
     public fun exists_at<PoolType: store, RewardTokenT: store>(broker: address): bool {
         exists<Farming<PoolType, RewardTokenT>>(broker)

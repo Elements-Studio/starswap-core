@@ -487,6 +487,22 @@ module TokenSwapGov {
         ((GOV_TOTAL / per)) * (percent as u128)
     }
 
+    public fun get_circulating_supply():u128 acquires GovTreasuryV2{
+        let total = Token::market_cap<STAR::STAR>();
+
+        total - get_balance_of_linear_treasury<PoolTypeCommunity>()
+              - get_balance_of_treasury<PoolTypeCommunity>()
+              - get_balance_of_linear_treasury<PoolTypeFarmPool>()
+              - get_balance_of_linear_treasury<PoolTypeSyrup>()
+              - TokenSwapFarm::get_treasury_balance<PoolTypeFarmPool,STAR::STAR>()
+              - TokenSwapSyrup::get_treasury_balance<PoolTypeSyrup,STAR::STAR>()
+              - get_balance_of_treasury<PoolTypeIDO>()
+              - get_balance_of_linear_treasury<PoolTypeProtocolTreasury>()
+              - get_balance_of_treasury<PoolTypeProtocolTreasury>()
+              - get_balance_of_linear_treasury<PoolTypeDeveloperFund>()
+              - get_balance_of_treasury<PoolTypeDeveloperFund>()
+    }
+
     /// Upgrade v2 to v3, only called in barnard net for compatibility
     /// TODO(9191stc): to be remove it before deploy to main net
     public(script) fun upgrade_v2_to_v3_for_syrup_on_testnet(_signer: signer, _amount: u128)  {
