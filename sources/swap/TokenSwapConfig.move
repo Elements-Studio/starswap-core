@@ -108,15 +108,6 @@ module TokenSwapConfig {
     /// Set fee rate for operation rate, only admin can call
     public fun set_swap_fee_operation_rate(signer: &signer, num: u64, denum: u64) {
         assert_admin(signer);
-        let config = SwapFeeOperationConfig{
-            numerator: num,
-            denumerator: denum,
-        };
-        if (Config::config_exist_by_address<SwapFeeOperationConfig>(admin_address())) {
-            Config::set<SwapFeeOperationConfig>(signer, config);
-        } else {
-            Config::publish_new_config<SwapFeeOperationConfig>(signer, config);
-        }
     }
 
     /// Set fee rate for operation V2 rate, only admin can call

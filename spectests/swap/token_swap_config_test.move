@@ -11,18 +11,6 @@
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
 
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapConfig;
-
-    fun init_token_config(_: signer) {
-        let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
-        assert!(num == 10, 1001);
-        assert!(denum == 60, 1002);
-    }
-}
-// check: EXECUTED
-
 
 //# run --signers SwapAdmin
 
