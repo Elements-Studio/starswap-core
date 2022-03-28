@@ -106,7 +106,7 @@ module TokenSwapConfig {
     }
 
     /// Set fee rate for operation rate, only admin can call
-    public fun set_swap_fee_operation_rate(signer: &signer, num: u64, denum: u64) {
+    public fun set_swap_fee_operation_rate(signer: &signer, _num: u64, _denum: u64) {
         assert_admin(signer);
     }
 
