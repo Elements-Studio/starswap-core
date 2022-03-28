@@ -115,8 +115,9 @@ module TokenSwapScripts {
     }
 
     /// Operation rate from all swap fee
-    public(script) fun set_swap_fee_operation_rate(signer: signer, num: u64, denum: u64) {
-        TokenSwapRouter::set_swap_fee_operation_rate(&signer, num, denum);
+    public(script) fun set_swap_fee_operation_rate<X: copy + drop + store,
+                                                   Y: copy + drop + store>(signer: signer, num: u64, denum: u64) {
+        TokenSwapRouter::set_swap_fee_operation_rate<X, Y>(&signer, num, denum);
     }
 
     /// Set fee auto convert switch config

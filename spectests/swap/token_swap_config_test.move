@@ -23,20 +23,6 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers SwapAdmin
-
-script {
-    use SwapAdmin::TokenSwapConfig;
-
-    fun set_token_config(signer: signer) {
-        TokenSwapConfig::set_swap_fee_operation_rate(&signer, 20, 100);
-        let (num, denum) = TokenSwapConfig::get_swap_fee_operation_rate();
-        assert!(num == 20, 1003);
-        assert!(denum == 100, 1003);
-    }
-}
-// check: EXECUTED
-
 
 //# run --signers SwapAdmin
 

@@ -35,7 +35,6 @@ module TokenSwapFee {
 
     /// Initialize token swap fee
     public fun initialize_token_swap_fee(signer: &signer) {
-        init_swap_oper_fee_config(signer);
 
         move_to(signer, TokenSwapFeeEvent{
             swap_fee_event: Event::new_event_handle<SwapFeeEvent>(signer),
@@ -44,7 +43,7 @@ module TokenSwapFee {
 
     /// init default operation fee config
     public fun init_swap_oper_fee_config(signer: &signer) {
-        TokenSwapConfig::set_swap_fee_operation_rate(signer, 10, 60);
+        TokenSwapConfig::assert_admin(signer);
     }
 
     public fun handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store>(signer_address: address, token_x: Token::Token<X>

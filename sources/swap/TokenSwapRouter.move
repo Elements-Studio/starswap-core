@@ -354,10 +354,15 @@ module TokenSwapRouter {
     }
 
     /// Operation rate from all swap fee
-    public fun set_swap_fee_operation_rate(signer: &signer,
-                                           num: u64,
-                                           denum: u64) {
-        TokenSwapConfig::set_swap_fee_operation_rate(signer, num, denum);
+    public fun set_swap_fee_operation_rate<X: copy + drop + store,
+                                           Y: copy + drop + store>(signer: &signer,num: u64,denum: u64) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapConfig::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
+        } else {
+            TokenSwapConfig::set_swap_fee_operation_rate_v2<Y, X>(signer, num, denum);
+        };
     }
 
     /// Set fee auto convert switch config
