@@ -431,7 +431,7 @@ module TokenSwap {
     public fun cacl_actual_swap_fee_operation_rate<X: copy + drop + store,
                                                    Y: copy + drop + store>(): (u128, u128) {
         let (fee_numerator, fee_denominator) = TokenSwapConfig::get_poundage_rate<X, Y>();
-        let (operation_numerator, operation_denominator) = TokenSwapConfig::get_swap_fee_operation_rate();
+        let (operation_numerator, operation_denominator) = TokenSwapConfig::get_swap_fee_operation_rate_v2<X, Y>();
         ((fee_numerator * operation_numerator as u128), (fee_denominator * operation_denominator as u128))
     }
 
