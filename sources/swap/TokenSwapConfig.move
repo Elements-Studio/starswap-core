@@ -33,7 +33,7 @@ module TokenSwapConfig {
         numerator: u64,
         denumerator: u64,
     }
-    struct SwapFeeOperationConfig_v2<phantom X, phantom Y> has copy, drop, store {
+    struct SwapFeeOperationConfigV2<phantom X, phantom Y> has copy, drop, store {
         numerator: u64,
         denumerator: u64,
     }
@@ -65,11 +65,13 @@ module TokenSwapConfig {
             (DEFAULT_OPERATION_NUMERATOR, DEFAULT_OPERATION_DENUMERATOR)
         }
     }
-
+    
+    /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
                                               Y: copy + drop + store>(): (u64, u64) {
-        if (Config::config_exist_by_address<SwapFeeOperationConfig_v2<X, Y>>(admin_address())) {
-            let conf = Config::get_by_address<SwapFeeOperationConfig_v2<X, Y>>(admin_address());
+
+        if (Config::config_exist_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address())) {
+            let conf = Config::get_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address());
             let numerator: u64 = conf.numerator;
             let denumerator: u64 = conf.denumerator;
             (numerator, denumerator)
@@ -77,6 +79,7 @@ module TokenSwapConfig {
             (DEFAULT_OPERATION_NUMERATOR, DEFAULT_OPERATION_DENUMERATOR)
         }
     }
+
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     /// Poundage number of liquidity token pair
     public fun get_poundage_rate<X: copy + drop + store,
@@ -123,14 +126,14 @@ module TokenSwapConfig {
                                                                       denum: u64) {
         assert_admin(signer);
 
-        let config = SwapFeeOperationConfig_v2<X, Y>{
+        let config = SwapFeeOperationConfigV2<X, Y>{
             numerator: num,
             denumerator: denum,
         };
-        if (Config::config_exist_by_address<SwapFeeOperationConfig_v2<X, Y>>(admin_address())) {
-            Config::set<SwapFeeOperationConfig_v2<X, Y>>(signer, config);
+        if (Config::config_exist_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address())) {
+            Config::set<SwapFeeOperationConfigV2<X, Y>>(signer, config);
         } else {
-            Config::publish_new_config<SwapFeeOperationConfig_v2<X, Y>>(signer, config);
+            Config::publish_new_config<SwapFeeOperationConfigV2<X, Y>>(signer, config);
         }
     }
 
