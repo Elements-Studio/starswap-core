@@ -10,6 +10,7 @@ module TokenSwapFarm {
     use StarcoinFramework::Errors;
 
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
+    use SwapAdmin::YieldFarmingV4 as YieldFarmingNew;
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwap::LiquidityToken;
     use SwapAdmin::TokenSwapRouter;
@@ -83,8 +84,17 @@ module TokenSwapFarm {
         release_per_seconds: u128,
     }
 
+    struct FarmPoolCapabilityV2<phantom X, phantom Y> has key, store {
+        cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
+//        release_per_seconds: u128,
+    }
+
     struct FarmMultiplier<phantom X, phantom Y> has key, store {
         multiplier: u64,
+    }
+
+    struct FarmPoolInfo<phantom X, phantom Y> has key, store {
+        alloc_point: u128
     }
 
     struct FarmPoolStake<phantom X, phantom Y> has key, store {
@@ -93,9 +103,16 @@ module TokenSwapFarm {
         cap: YieldFarming::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
     }
 
+
+    struct UserInfo<phantom X, phantom Y> has key, store {
+        user_amount: u128,
+        boost_factor: u64,
+        vestar_balance: u128,
+    }
+
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
-        YieldFarming::initialize<PoolTypeFarmPool, STAR::STAR>(account, token);
+        YieldFarmingNew::initialize<PoolTypeFarmPool, STAR::STAR>(account, token);
 
         move_to(account, FarmPoolEvent{
             add_farm_event_handler: Event::new_event_handle<AddFarmEvent>(account),
@@ -105,34 +122,80 @@ module TokenSwapFarm {
         });
     }
 
+    /// Called by admin
+    /// this will config yield farming global pool info
+    public fun initialize_global_pool_info<
+        PoolType: store>(account: &signer, pool_release_per_second: u128) {
+        // Only called by the genesis
+        STAR::assert_genesis_address(signer);
+        YieldFarmingNew::initialize_global_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
+    }
+
+//    /// Initialize Liquidity pair gov pool, only called by token issuer
+//    public fun add_farm<X: copy + drop + store,
+//                        Y: copy + drop + store>(
+//        signer: &signer,
+//        release_per_seconds: u128) acquires FarmPoolEvent {
+//
+//        // Only called by the genesis
+//        STAR::assert_genesis_address(signer);
+//
+//        // To determine how many amount release in every period
+//        let cap = YieldFarming::add_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(
+//            signer,
+//            release_per_seconds,
+//            0);
+//
+//        move_to(signer, FarmPoolCapability<X, Y>{
+//            cap,
+//            release_per_seconds,
+//        });
+//
+//        move_to(signer, FarmMultiplier<X, Y>{
+//            multiplier: 1
+//        });
+//
+//        // TODO (9191stc): Add to DAO
+//        // GovernanceDaoProposal::plugin<
+//        //    PoolTypeProposal<X, Y, GovTokenT>,
+//        //    GovTokenT>(account, modify_cap);
+//
+//        // Emit add farm event
+//        let admin = Signer::address_of(signer);
+//        let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin);
+//        Event::emit_event(&mut farm_pool_event.add_farm_event_handler,
+//            AddFarmEvent{
+//                y_token_code: Token::token_code<X>(),
+//                x_token_code: Token::token_code<Y>(),
+//                signer: Signer::address_of(signer),
+//                admin,
+//            });
+//    }
+
+
     /// Initialize Liquidity pair gov pool, only called by token issuer
     public fun add_farm<X: copy + drop + store,
                         Y: copy + drop + store>(
         signer: &signer,
-        release_per_seconds: u128) acquires FarmPoolEvent {
+        alloc_point: u128) acquires FarmPoolEvent {
 
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         // To determine how many amount release in every period
-        let cap = YieldFarming::add_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(
+        let cap = YieldFarmingNew::add_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(
             signer,
-            release_per_seconds,
+            alloc_point,
             0);
 
-        move_to(signer, FarmPoolCapability<X, Y>{
+        move_to(signer, FarmPoolCapabilityV2<X, Y>{
             cap,
-            release_per_seconds,
+//            release_per_seconds,
         });
 
-        move_to(signer, FarmMultiplier<X, Y>{
-            multiplier: 1
+        move_to(signer, FarmPoolInfo<X, Y>{
+            alloc_point: alloc_point
         });
-
-        // TODO (9191stc): Add to DAO
-        // GovernanceDaoProposal::plugin<
-        //    PoolTypeProposal<X, Y, GovTokenT>,
-        //    GovTokenT>(account, modify_cap);
 
         // Emit add farm event
         let admin = Signer::address_of(signer);
@@ -146,6 +209,7 @@ module TokenSwapFarm {
             });
     }
 
+    /// Deprecated call
     /// Set farm mutiplier of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(signer: &signer, multiplier: u64)
@@ -171,6 +235,7 @@ module TokenSwapFarm {
         farm_mult.multiplier = multiplier;
     }
 
+    /// Deprecated call
     /// Get farm mutiple of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(): u64 acquires FarmMultiplier {
@@ -178,6 +243,39 @@ module TokenSwapFarm {
         farm_mult.multiplier
     }
 
+
+    public fun set_farm_alloc_point<X: copy + drop + store,
+                                   Y: copy + drop + store>(signer: &signer, alloc_point: u128)
+    acquires FarmPoolCapability, FarmPoolInfo {
+        // Only called by the genesis
+        STAR::assert_genesis_address(signer);
+
+        let broker = Signer::address_of(signer);
+        let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
+        let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
+
+//        let (alive, _, _, _, ) =
+//            YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(broker);
+//
+//        let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
+        YieldFarmingNew::update_pool<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
+            &cap.cap,
+            broker,
+            alloc_point,
+            farm_pool_info.alloc_point,
+        );
+        farm_pool_info.alloc_point = alloc_point;
+    }
+
+    /// Get farm mutiplier, equals to pool alloc_point
+    public fun get_farm_multiplier_v2<X: copy + drop + store,
+                                   Y: copy + drop + store>(): u64 acquires FarmPoolInfo {
+        let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(STAR::token_address());
+        (farm_pool_info.alloc_point as u64)
+    }
+
+
+    /// Deprecated call
     /// Reset activation of farm from token type X and Y
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(
         account: &signer,
@@ -239,6 +337,72 @@ module TokenSwapFarm {
                 amount,
             });
     }
+
+
+
+//    fun inner_stake<X: copy + drop + store,
+//                    Y: copy + drop + store>(account: &signer,
+//                                            amount: u128,
+//                                            farm_cap: &FarmPoolCapability<X, Y>)
+//    : FarmPoolStake<X, Y> acquires FarmPoolStake {
+
+
+    fun migrate_farm_stake<X: copy + drop + store,
+                           Y: copy + drop + store>(account: &signer,
+                                                   amount: u128)
+    acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
+//        TokenSwapConfig::assert_global_freeze();
+
+
+        let account_addr = Signer::address_of(account);
+        // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
+        let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
+            let FarmPoolStake<X, Y>{
+                id: _,
+                cap : unwrap_harvest_cap
+            } = move_from<FarmPoolStake<X, Y>>(account_addr);
+
+            // Unstake all liquidity token and reward token
+            let (own_token, reward_token) = YieldFarming::unstake<
+                PoolTypeFarmPool,
+                STAR::STAR,
+                Token::Token<LiquidityToken<X, Y>>
+            >(account, STAR::token_address(), unwrap_harvest_cap);
+            Account::deposit<STAR::STAR>(account_addr, reward_token);
+            own_token
+        } else {
+            Token::zero<LiquidityToken<X, Y>>()
+        };
+
+
+        // Withdraw addtion token. Addtionally, combine addtion token and own token.
+        let addition_token = TokenSwapRouter::withdraw_liquidity_token<X, Y>(account, amount);
+        let total_token = Token::join<LiquidityToken<X, Y>>(own_token, addition_token);
+        let total_amount = Token::value<LiquidityToken<X, Y>>(&total_token);
+
+        let (new_harvest_cap, stake_id) = YieldFarming::stake<
+            PoolTypeFarmPool,
+            STAR::STAR,
+            Token::Token<LiquidityToken<X, Y>>>(
+            account,
+            STAR::token_address(),
+            total_token,
+            total_amount,
+            1,
+            0,
+            &farm_cap.cap
+        );
+        FarmPoolStake<X, Y>{
+            cap: new_harvest_cap,
+            id: stake_id,
+        }
+
+    }
+
+
+
+
+
 
     /// Unstake liquidity Token pair
     public fun unstake<X: copy + drop + store,
