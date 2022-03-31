@@ -133,10 +133,10 @@ module YieldFarmingV3 {
     //    }
 
     public fun deposit<PoolType: store, RewardTokenT: store>(
-        account: &signer, 
-        treasury_token: Token::Token<RewardTokenT>)acquires Farming{
-            let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(Signer::address_of(account));
-            Token::deposit<RewardTokenT>(&mut farming.treasury_token,treasury_token);
+        account: &signer,
+        treasury_token: Token::Token<RewardTokenT>) acquires Farming {
+        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(Signer::address_of(account));
+        Token::deposit<RewardTokenT>(&mut farming.treasury_token, treasury_token);
     }
 
     public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
@@ -504,7 +504,7 @@ module YieldFarmingV3 {
         Vector::remove<Stake<PoolType, AssetType>>(c, Option::destroy_some<u64>(idx))
     }
 
-    //View Treasury Remaining
+    /// View Treasury Remaining
     public fun get_treasury_balance<PoolType: store, RewardTokenT: store>(broker: address):u128 acquires Farming{
         let farming = borrow_global<Farming<PoolType, RewardTokenT>>(broker);
         Token::value<RewardTokenT>( &farming.treasury_token )
