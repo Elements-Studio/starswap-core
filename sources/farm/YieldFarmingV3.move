@@ -11,10 +11,11 @@ module YieldFarmingV3 {
     use StarcoinFramework::Math;
     use StarcoinFramework::Option;
     use StarcoinFramework::Vector;
-    // use StarcoinFramework::Debug;
+
 
     use SwapAdmin::BigExponential;
     use SwapAdmin::YieldFarmingLibrary;
+    use SwapAdmin::TokenSwapConfig;
 
     const ERR_FARMING_INIT_REPEATE: u64 = 101;
     const ERR_FARMING_NOT_READY: u64 = 102;
@@ -93,6 +94,7 @@ module YieldFarmingV3 {
         });
     }
 
+
     /// Add asset pools
     public fun add_asset<PoolType: store, AssetT: store>(
         account: &signer,
@@ -115,6 +117,43 @@ module YieldFarmingV3 {
         });
         ParameterModifyCapability<PoolType, AssetT> {}
     }
+
+
+
+    public fun migrate_from_farming<
+        PoolType: store,
+        RewardTokenT: store>(account: &signer): Token::Token<RewardTokenT> acquires Farming {
+        TokenSwapConfig::assert_admin(account);
+        let broker = Signer::address_of(account);
+        let Farming<PoolType, RewardTokenT>{
+            treasury_token,
+            //            treasury_token: treasury_token,
+        } = move_from<Farming<PoolType, RewardTokenT>>(broker);
+        //        let farming = move_from<Farming<PoolType, RewardTokenT>(broker);
+        treasury_token
+    }
+
+    public fun migrate_from_farming_asset<
+        PoolType: store,
+        AssetT: store>(account: &signer): (u128, u128, u64, u64) acquires FarmingAsset {
+
+//        TokenSwapConfig::assert_admin(account);
+        let broker = Signer::address_of(account);
+        let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
+        (farming_asset.asset_total_weight, farming_asset.harvest_index, farming_asset.last_update_timestamp, farming_asset.start_time)
+    }
+
+//    struct FarmingAsset<phantom PoolType, phantom AssetT> has key, store {
+//        asset_total_weight: u128,
+//        harvest_index: u128,
+//        last_update_timestamp: u64,
+//        // Release count per seconds
+//        release_per_second: u128,
+//        // Start time, by seconds, user can operate stake only after this timestamp
+//        start_time: u64,
+//        // Representing the pool is alive, false: not alive, true: alive.
+//        alive: bool,
+//    }
 
     /// Remove asset for make this pool to the state of not alive
     /// Please make sure all user unstaking from this pool
@@ -229,6 +268,60 @@ module YieldFarmingV3 {
             stake_id,
         )
     }
+
+
+
+
+    public fun migrate_from_stake<
+        PoolType: store,
+        AssetT: store>(account: &signer, stake_id: u64, _cap: &ParameterModifyCapability<PoolType, AssetT>): (
+        u64, AssetT, u128, u128, u128, u64) acquires StakeList {
+
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(Signer::address_of(account));
+        let Stake<PoolType, AssetT>{
+            id,
+            asset,
+            asset_weight,
+            last_harvest_index,
+            gain,
+            asset_multiplier,
+        } = pop_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
+
+        (id, asset, asset_weight, last_harvest_index, gain, asset_multiplier)
+    }
+
+
+    public fun migrate_from_stake_list<
+        PoolType: store,
+        AssetT: store>(account: &signer, _cap: &ParameterModifyCapability<PoolType, AssetT>): (u64,
+            vector<Stake<PoolType, AssetT>>) acquires StakeList {
+
+        let address = Signer::address_of(account);
+        let StakeList<PoolType, AssetT>{
+            next_id,
+            items: items,
+            //            treasury_token: treasury_token,
+        } = move_from<StakeList<PoolType, AssetT>>(address);
+        //        let farming = move_from<Farming<PoolType, RewardTokenT>(broker);
+        (next_id, items)
+    }
+
+//    struct Stake<phantom PoolType, AssetT> has store, copy, drop {
+//        id: u64,
+//        asset: AssetT,
+//        asset_weight: u128,
+//        last_harvest_index: u128,
+//        gain: u128,
+//        asset_multiplier: u64,
+//    }
+
+//    if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
+//    move_to(signer, StakeList<PoolType, AssetT>{
+//    next_id: 0,
+//    items: Vector::empty<Stake<PoolType, AssetT>>(),
+//    });
+//    };
+
 
     /// Unstake asset from farming pool
     public fun unstake<PoolType: store, RewardTokenT: store, AssetT: store>(
@@ -517,6 +610,19 @@ module YieldFarmingV3 {
             };
         };
         return false
+    }
+
+    /// Check stake list at address exists.
+    public fun exists_stake_list<PoolType: store, AssetT: store>(account: address): bool acquires StakeList{
+        return exists<StakeList<PoolType, AssetT>>(account)
+    }
+
+    public fun destory_harvest_capability<PoolType: store, AssetT: store>(
+        _signer: &signer,
+        cap: &HarvestCapability<PoolType, AssetT>) : (u64, u64){
+        // Destroy capability
+        let HarvestCapability<PoolType, AssetT>{ stake_id, deadline } = cap;
+        (stake_id, deadline)
     }
 }
 }

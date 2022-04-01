@@ -88,7 +88,7 @@ module YieldFarmingV4 {
         asset_weight: u128,
         asset_amount: u128,
         //weight factor, if farm: weight_factor = user boost factor * 100; if stake: weight_factor = stepwise multiplier
-        weight_factor: u128,
+        weight_factor: u64,
         last_harvest_index: u128,
         gain: u128,
     }
@@ -107,8 +107,8 @@ module YieldFarmingV4 {
 
 
 
-    /// Capability to modify parameter such as period and alloc point
-    struct ParameterModifyCapability<phantom PoolType, phantom AssetT> has key, store {}
+    /// Capability to modify pool such as alloc point
+    struct PoolModifyCapability<phantom PoolType, phantom AssetT> has key, store {}
 
     /// Harvest ability to harvest
     struct HarvestCapability<phantom PoolType, phantom AssetT> has key, store {
@@ -200,7 +200,7 @@ module YieldFarmingV4 {
     public fun add_asset<PoolType: store, AssetT: store>(
         account: &signer,
         alloc_point: u128,  //pool alloc point
-        delay: u64): ParameterModifyCapability<PoolType, AssetT> acquires YieldFarmingGlobalPoolInfo {
+        delay: u64): PoolModifyCapability<PoolType, AssetT> acquires YieldFarmingGlobalPoolInfo {
         TokenSwapConfig::assert_admin(account);
         let address = Signer::address_of(account);
         assert!(!exists_asset_at<PoolType, AssetT>(address), Errors::invalid_state(ERR_FARMING_INIT_REPEATE));
@@ -218,13 +218,88 @@ module YieldFarmingV4 {
             last_update_timestamp: now_seconds,
             start_time: now_seconds + delay,
         });
-        ParameterModifyCapability<PoolType, AssetT> {}
+        PoolModifyCapability<PoolType, AssetT> {}
     }
 
 //    fun update_golbal_pool_info<PoolType: store>(account: &signer,) acquires YieldFarmingGlobalPoolInfo {
 //        TokenSwapConfig::assert_admin(account);
 //    }
 
+    /// call only for migrate, can call reentrance
+    /// once start farm boost, can't not by call any more
+    public fun migrate_to_farming_asset<
+        PoolType: store,
+        AssetT: store>(account: &signer, asset_total_weight: u128, asset_total_amount: u128,
+                       harvest_index: u128, last_update_timestamp: u64, start_time: u64) acquires YieldFarmingAsset {
+
+        TokenSwapConfig::assert_admin(account);
+        let broker = Signer::address_of(account);
+        let farming_asset = borrow_global_mul<YieldFarmingAsset<PoolType, AssetT>>(broker);
+        farming_asset.asset_total_weight = asset_total_weight;
+        farming_asset.asset_total_amount = asset_total_amount;
+        farming_asset.harvest_index = harvest_index;
+        farming_asset.last_update_timestamp = last_update_timestamp;
+        farming_asset.start_time = start_time;
+    }
+
+    // PoolModifyCapability Access control
+    public fun migrate_to_stake<
+        PoolType: store,
+        AssetT: store>(account: &signer,
+                       stake_id: u64,
+                       asset: AssetT,
+                       asset_weight: u128,
+                       asset_amount: u128,
+                       weight_factor: u64,
+                       last_harvest_index: u128,
+                       gain: u128,
+                       _cap: &PoolModifyCapability<PoolType, AssetT>) acquires StakeList {
+
+        let user_addr = Signer::address_of(account);
+        if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
+            move_to(account, StakeList<PoolType, AssetT>{
+                next_id: 0,
+                items: Vector::empty<Stake<PoolType, AssetT>>(),
+            });
+        };
+
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+//        let stake_id = stake_list.next_id + 1;
+        Vector::push_back<Stake<PoolType, AssetT>>(&mut stake_list.items, Stake<PoolType, AssetT>{
+            id: stake_id,
+            asset,
+            asset_weight,
+            asset_amount,
+            weight_factor,
+            last_harvest_index,
+            gain,
+        });
+        stake_list.next_id = stake_id;
+    }
+
+    // PoolModifyCapability Access control
+    public fun migrate_to_stake_list<
+        PoolType: store,
+        AssetT: store>(account: &signer,
+           stake_id: u64, deadline: u64,
+           _cap: &PoolModifyCapability<PoolType, AssetT>): HarvestCapability<PoolType, AssetT> acquires StakeList {
+
+        let user_addr = Signer::address_of(account);
+        if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
+            move_to(account, StakeList<PoolType, AssetT>{
+                next_id: 0,
+                items: Vector::empty<Stake<PoolType, AssetT>>(),
+            });
+        };
+
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        stake_list.next_id = stake_id;
+
+        HarvestCapability<PoolType, AssetT>{
+            stake_id,
+            deadline,
+        }
+    }
 
 
     //    // Update reward variables of the given pool to be up-to-date.
@@ -284,7 +359,7 @@ module YieldFarmingV4 {
     /// gain = (current_index - last_index) * user_amount * boost_factor;
     /// asset_total_weight = ∑ (per user lp_amount *  user boost_factor)
     public fun update_pool<PoolType: store, RewardTokenT: store, AssetT: store>(
-        _cap: &ParameterModifyCapability<PoolType, AssetT>,
+        _cap: &PoolModifyCapability<PoolType, AssetT>,
         broker: address,
         alloc_point: u128, //new pool alloc point
         last_alloc_point: u128, //last pool alloc point
@@ -383,7 +458,7 @@ module YieldFarmingV4 {
 //        asset_weight: u128,
 //        asset_amount: u128,
 //        ///weight factor, if farm: weight_factor = user boost factor; if stake: weight_factor = stepwise multiplier
-//        weight_factor: u128,
+//        weight_factor: u64,
 //        //        asset_weight: u128,
 //        last_harvest_index: u128,
 //        gain: u128,
@@ -400,6 +475,7 @@ module YieldFarmingV4 {
 //        //        alive: bool  // alive不再需要，将alloc_point调整为0，达到关闭的目的
 //    }
 
+
     /// Call by stake user, staking amount of asset in order to get yield farming token
     public fun stake<PoolType: store, RewardTokenT: store, AssetT: store>(
         signer: &signer,
@@ -409,7 +485,7 @@ module YieldFarmingV4 {
         asset_amount: u128,
         weight_factor: u64, //if farm: weight_factor = user boost factor * 100; if stake: weight_factor = stepwise multiplier
         deadline: u64,
-        _cap: &ParameterModifyCapability<PoolType, AssetT>) : (HarvestCapability<PoolType, AssetT>, u64)
+        _cap: &PoolModifyCapability<PoolType, AssetT>) : (HarvestCapability<PoolType, AssetT>, u64)
     acquires StakeList, YieldFarmingAsset, YieldFarmingGlobalPoolInfo {
         assert!(exists_asset_at<YieldFarmingAsset<PoolType, AssetT>>(broker_addr), Errors::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS));
 //        assert!(asset_multiplier > 0, Errors::invalid_state(ERR_FARMING_MULTIPLIER_INVALID));
@@ -463,7 +539,7 @@ module YieldFarmingV4 {
         //        asset_weight: u128,
         //        asset_amount: u128,
         //        ///weight factor, if farm: weight_factor = user boost factor; if stake: weight_factor = stepwise multiplier
-        //        weight_factor: u128,
+        //        weight_factor: u64,
         //        last_harvest_index: u128,
         //        gain: u128,
         //    }
@@ -569,7 +645,7 @@ module YieldFarmingV4 {
     //        asset_weight: u128,
     //        asset_amount: u128,
     //        ///weight factor, if farm: weight_factor = user boost factor; if stake: weight_factor = stepwise multiplier
-    //        weight_factor: u128,
+    //        weight_factor: u64,
     //        last_harvest_index: u128,
     //        gain: u128,
     //    }
