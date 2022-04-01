@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [addresses]
 StarcoinFramework="0x1"
-Bridge = "0x416b32009fe49fcab1d5f2ba0153838f"
+Bridge = "0xb6d69dd935edf7f2054acf12eb884df8"
 
 [dependencies]
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
