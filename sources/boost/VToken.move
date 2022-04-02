@@ -2,6 +2,8 @@ address SwapAdmin {
 
 module VToken {
     use StarcoinFramework::Token;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
 
     struct VToken<phantom TokenT> has key, store {
         token: Token::Token<TokenT>
@@ -14,7 +16,7 @@ module VToken {
 
     public fun register_token<TokenT: store>(signer: &signer, precision: u8) {
         Token::register_token<TokenT>(signer, precision);
-        Account::do_accept_token<TokenT>(account);
+        Account::do_accept_token<TokenT>(signer);
         move_to(signer, OwnerCapability<TokenT>{
             mint_cap: Token::remove_mint_capability<TokenT>(signer),
             burn_cap: Token::remove_burn_capability<TokenT>(signer),
@@ -33,13 +35,13 @@ module VToken {
     }
 
     public fun mint_with_cap<TokenT: store>(cap: &OwnerCapability<TokenT>, amount: u128): VToken<TokenT> {
-        let bear_token = Token::mint_with_capability<TokenT>(&cap.mint_cap, amount);
+        let bared_token = Token::mint_with_capability<TokenT>(&cap.mint_cap, amount);
         VToken<TokenT>{
-            token: bear_token
+            token: bared_token
         }
     }
 
-    public fun burn<TokenT>(vt: VToken<TokenT>) acquires OwnerCapability {
+    public fun burn<TokenT: store>(signer: &signer, vt: VToken<TokenT>) acquires OwnerCapability {
         let cap = borrow_global<OwnerCapability<TokenT>>(Signer::address_of(signer));
         burn_with_cap(cap, vt)
     }
@@ -47,8 +49,8 @@ module VToken {
     public fun burn_with_cap<TokenT: store>(cap: &OwnerCapability<TokenT>, vt: VToken<TokenT>) {
         let VToken<TokenT>{
             token
-        };
-        burn_with_cap<TokenT>(cap, vt);
+        } = vt;
+        Token::burn_with_capability<TokenT>(&cap.burn_cap, token);
     }
 
     public fun value<TokenT: store>(vt: &VToken<TokenT>): u128 {

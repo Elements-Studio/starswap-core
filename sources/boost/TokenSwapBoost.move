@@ -1,8 +1,6 @@
 address SwapAdmin {
 
 module TokenSwapBoost {
-    use StarcoinFramework::Token;
-
     use SwapAdmin::VToken;
     use SwapAdmin::VESTAR;
 

@@ -2,7 +2,6 @@ address SwapAdmin {
 
 module VESTAR {
     use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
 
     /// VESTAR token marker.
@@ -12,12 +11,6 @@ module VESTAR {
     const PRECISION: u8 = 9;
 
     const ERROR_NOT_GENESIS_ACCOUNT: u64 = 10001;
-
-    /// VESTAR initialization.
-    public fun init(account: &signer) {
-        Token::register_token<VESTAR>(account, PRECISION);
-        Account::do_accept_token<VESTAR>(account);
-    }
 
     /// Returns true if `TokenType` is `VESTAR::VESTAR`
     public fun is_vestar<TokenType: store>(): bool {
