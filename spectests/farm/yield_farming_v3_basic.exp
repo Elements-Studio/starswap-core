@@ -34,7 +34,7 @@ task 10 'run'. lines 205-224:
 
 task 12 'run'. lines 228-244:
 {
-  "gas_used": 455930,
+  "gas_used": 467896,
   "status": {
     "Keep": "Executed"
   }
@@ -42,7 +42,7 @@ task 12 'run'. lines 228-244:
 
 task 14 'run'. lines 248-271:
 {
-  "gas_used": 985500,
+  "gas_used": 1021798,
   "status": {
     "Keep": "Executed"
   }
@@ -58,7 +58,7 @@ task 15 'run'. lines 273-289:
 
 task 16 'run'. lines 291-312:
 {
-  "gas_used": 540688,
+  "gas_used": 552654,
   "status": {
     "Keep": {
       "MoveAbort": [
@@ -100,7 +100,7 @@ task 22 'run'. lines 348-367:
 
 task 24 'run'. lines 371-392:
 {
-  "gas_used": 520835,
+  "gas_used": 533075,
   "status": {
     "Keep": "Executed"
   }
@@ -108,7 +108,7 @@ task 24 'run'. lines 371-392:
 
 task 26 'run'. lines 396-412:
 {
-  "gas_used": 516718,
+  "gas_used": 528958,
   "status": {
     "Keep": "Executed"
   }
@@ -116,7 +116,7 @@ task 26 'run'. lines 396-412:
 
 task 28 'run'. lines 416-432:
 {
-  "gas_used": 512665,
+  "gas_used": 524905,
   "status": {
     "Keep": "Executed"
   }
