@@ -129,6 +129,11 @@ module TokenSwapScripts {
         TokenSwapRouter::set_global_freeze_switch(&signer, freeze);
     }
 
+    /// Set alloc mode upgrade switch
+    public(script) fun set_alloc_mode_upgrade_switch(signer: signer, upgrade_switch: bool) {
+        TokenSwapRouter::set_alloc_mode_upgrade_switch(&signer, upgrade_switch);
+    }
+
     /// Get amount in with token pair pondage rate
     public fun get_amount_in<X: copy + drop + store,
                              Y: copy + drop + store>(x_value: u128): u128 {

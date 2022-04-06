@@ -18,6 +18,7 @@ module TokenSwapConfig {
 
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
+    const DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH: bool = false;
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
@@ -49,6 +50,10 @@ module TokenSwapConfig {
 
     struct SwapGlobalFreezeSwitch has copy, drop, store {
         freeze_switch: bool,
+    }
+
+    struct AllocModeUpgradeSwitch has copy, drop, store {
+        upgrade_switch: bool,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -235,6 +240,30 @@ module TokenSwapConfig {
             conf.freeze_switch
         } else {
             DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH
+        }
+    }
+
+    /// Pool alloc mode upgrade switch
+    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
+        assert_admin(signer);
+
+        let config = AllocModeUpgradeSwitch{
+            upgrade_switch,
+        };
+        if (Config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
+            Config::set<AllocModeUpgradeSwitch>(signer, config);
+        } else {
+            Config::publish_new_config<AllocModeUpgradeSwitch>(signer, config);
+        }
+    }
+
+    ///  Pool alloc mode upgrade switch
+    public fun get_alloc_mode_upgrade_switch(): bool {
+        if (Config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
+            let conf = Config::get_by_address<AllocModeUpgradeSwitch>(admin_address());
+            conf.upgrade_switch
+        } else {
+            DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH
         }
     }
 
