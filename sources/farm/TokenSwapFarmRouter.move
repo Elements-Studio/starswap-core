@@ -18,6 +18,17 @@ module TokenSwapFarmRouter {
         };
     }
 
+    public fun add_farm_pool_v2<X: copy + drop + store, Y: copy + drop + store>(account: &signer, alloc_point: u128) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::add_farm_v2<X, Y>(account, alloc_point);
+        } else {
+            TokenSwapFarm::add_farm_v2<Y, X>(account, alloc_point);
+        };
+    }
+
+
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: &signer,
                                                                                      active: bool) {
         let order = TokenSwap::compare_token<X, Y>();
@@ -103,6 +114,18 @@ module TokenSwapFarmRouter {
         }
     }
 
+    /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
+    public fun query_info_v2<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u128, u128) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::query_info_v2<X, Y>()
+        } else {
+            TokenSwapFarm::query_info_v2<Y, X>()
+        }
+    }
+
+
     /// Query release per second
     public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 {
         let order = TokenSwap::compare_token<X, Y>();
@@ -126,6 +149,18 @@ module TokenSwapFarmRouter {
         }
     }
 
+    /// Set farm alloc point
+    public fun set_farm_alloc_point<X: copy + drop + store,
+                                   Y: copy + drop + store>(signer: &signer, alloc_point: u128) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::set_farm_alloc_point<X, Y>(signer, alloc_point);
+        } else {
+            TokenSwapFarm::set_farm_alloc_point<Y, X>(signer, alloc_point);
+        }
+    }
+
     /// Get farm mutiple of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(): u64 {
@@ -138,19 +173,10 @@ module TokenSwapFarmRouter {
         }
     }
 
-
-//    /// User operation from v2 to v3
-//    public(script) fun upgrade_admin_from_v2_to_v3<X: copy + drop + store,
-//                                                   Y: copy + drop + store>(signer: signer) {
-//        let order = TokenSwap::compare_token<X, Y>();
-//        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-//        if (order == 1) {
-//            TokenSwapFarm::upgrade_admin_from_v2_to_v3<X, Y>(&signer)
-//        } else {
-//            TokenSwapFarm::upgrade_admin_from_v2_to_v3<Y, X>(&signer)
-//        };
-//    }
-
+    /// Query farm golbal pool info
+    public fun query_global_pool_info(): (u128, u128) {
+        TokenSwapFarm::query_global_pool_info()
+    }
 
 }
 }

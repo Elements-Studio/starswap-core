@@ -10,6 +10,11 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::add_farm_pool<X, Y>(&account, release_per_second);
     }
 
+    /// Called by admin account
+    public(script) fun add_farm_pool_v2<X: copy + drop + store, Y: copy + drop + store>(account: signer, alloc_point: u128) {
+        TokenSwapFarmRouter::add_farm_pool_v2<X, Y>(&account, alloc_point);
+    }
+
     public(script) fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: signer, active: bool) {
         TokenSwapFarmRouter::reset_farm_activation<X, Y>(&account, active);
     }
@@ -56,6 +61,10 @@ module TokenSwapFarmScript {
 
     public(script) fun set_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(signer: signer, mutiple: u64) {
         TokenSwapFarmRouter::set_farm_multiplier<X, Y>(&signer, mutiple);
+    }
+
+    public(script) fun set_farm_alloc_point<X: copy + drop + store, Y: copy + drop + store>(signer: signer, alloc_point: u128) {
+        TokenSwapFarmRouter::set_farm_alloc_point<X, Y>(&signer, alloc_point);
     }
 
     public fun get_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(): u64 {

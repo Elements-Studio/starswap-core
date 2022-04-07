@@ -742,7 +742,7 @@ module YieldFarmingV3 {
         )
     }
 
-    /// Queyry pool info from pool type v2
+    /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
     public fun query_pool_info_v2<PoolType: store, AssetT: store>(broker: address): (u128, u128, u128, u128)
         acquires FarmingAsset, FarmingAssetExtend {
