@@ -6,6 +6,18 @@ address SwapAdmin {
 
 module TokenSwapFarmBoost {
 
+    use SwapAdmin::TokenSwapVestarIssuer;
+
+    struct IssuerTreasuryCapabilityWrapper has key, store {
+        cap: TokenSwapVestarIssuer::TreasuryCapability
+    }
+
+    public fun set_treasury_cap(signer: &signer, issuer_treasury_cap: TokenSwapVestarIssuer::TreasuryCapability) {
+        move_to(signer, IssuerTreasuryCapabilityWrapper{
+            cap: issuer_treasury_cap
+        });
+    }
+
     /// Boost to farm pool
     // TODO(ElementX):
     public fun boost_to_farm_pool<X: store, Y: store>(_signer: &signer, _amount: u128) {
@@ -21,7 +33,5 @@ module TokenSwapFarmBoost {
 
         // 2. Deposit to TokenSwapSyrupBoost
     }
-
 }
-
 }
