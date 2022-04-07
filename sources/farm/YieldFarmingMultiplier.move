@@ -13,8 +13,6 @@ module YieldFarmingMultiplier {
 
     struct MultiplierPoolsGlobalInfo<phantom PoolType, phantom AssetT> has key, store {
         vec: vector<MultiplierPool<PoolType, AssetT>>,
-        asset_weight: u128,
-        asset_amount: u128,
     }
 
     struct MultiplierPool<phantom PoolType, phantom AssetT> has key, store {
@@ -27,14 +25,10 @@ module YieldFarmingMultiplier {
     struct PoolCapability<phantom PoolType, phantom AssetT> has key, store {}
 
     /// Initialize from total asset weight and amount
-    public fun init<PoolType: store, AssetT: store>(signer: &signer,
-                                                    asset_amount: u128,
-                                                    asset_weight: u128): PoolCapability<PoolType, AssetT> {
+    public fun init<PoolType: store, AssetT: store>(signer: &signer): PoolCapability<PoolType, AssetT> {
         require_admin(signer);
         move_to(signer, MultiplierPoolsGlobalInfo<PoolType, AssetT>{
             vec: Vector::empty<MultiplierPool<PoolType, AssetT>>(),
-            asset_amount,
-            asset_weight
         });
         PoolCapability<PoolType, AssetT>{}
     }

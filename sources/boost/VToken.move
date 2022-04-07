@@ -63,6 +63,13 @@ module VToken {
         } = rhs;
         Token::deposit(&mut lhs.token, token);
     }
+
+    /// Withdraw from a token
+    public fun withdraw<TokenT: store>(src_token: &mut VToken<TokenT>, amount: u128): VToken<TokenT> {
+        VToken<TokenT>{
+            token: Token::withdraw(&mut src_token.token, amount)
+        }
+    }
 }
 }
 

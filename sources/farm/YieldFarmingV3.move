@@ -197,7 +197,8 @@ module YieldFarmingV3 {
     /// once start farm boost, can't not by call any more
     public fun extend_farming_asset<
         PoolType: store,
-        AssetT: store>(account: &signer, alloc_point: u128, override_update: bool) acquires FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+        AssetT: store>(account: &signer, alloc_point: u128, override_update: bool)
+    acquires FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
 
         TokenSwapConfig::assert_admin(account);
         let broker = Signer::address_of(account);
@@ -955,8 +956,8 @@ module YieldFarmingV3 {
     }
 
     /// Check stake at address exists.
-    public fun exists_stake_at_address<PoolType: store, AssetT: store>(account: address): bool acquires StakeList{
-        if (exists<StakeList<PoolType, AssetT>>(account) ){
+    public fun exists_stake_at_address<PoolType: store, AssetT: store>(account: address): bool acquires StakeList {
+        if (exists<StakeList<PoolType, AssetT>>(account)) {
             let stake_list = borrow_global<StakeList<PoolType, AssetT>>(account);
             let len = Vector::length(&stake_list.items);
             if (len > 0) {

@@ -20,7 +20,8 @@ module TokenSwapFarm {
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
 
-    const DEFAULT_BOOST_FACTOR: u64 = 1; // user boost factor section is [1,2.5]
+    const DEFAULT_BOOST_FACTOR: u64 = 1;
+    // user boost factor section is [1,2.5]
     const BOOST_FACTOR_PRECESION: u64 = 100; //two-digit precision
 
     /// Event emitted when farm been added
@@ -84,7 +85,8 @@ module TokenSwapFarm {
 
     struct FarmPoolCapability<phantom X, phantom Y> has key, store {
         cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-        release_per_seconds: u128, //abandoned fields
+        release_per_seconds: u128,
+        //abandoned fields
     }
 
     struct FarmMultiplier<phantom X, phantom Y> has key, store {
@@ -102,15 +104,15 @@ module TokenSwapFarm {
         alloc_point: u128
     }
 
-//    struct FarmPoolCapabilityV2<phantom X, phantom Y> has key, store {
-//        cap: YieldFarmingNew::PoolModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-//    }
+    //    struct FarmPoolCapabilityV2<phantom X, phantom Y> has key, store {
+    //        cap: YieldFarmingNew::PoolModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
+    //    }
 
-//    struct FarmPoolStakeV2<phantom X, phantom Y> has key, store {
-//        id: u64,
-//        /// Harvest capability for Farm
-//        cap: YieldFarmingNew::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-//    }
+    //    struct FarmPoolStakeV2<phantom X, phantom Y> has key, store {
+    //        id: u64,
+    //        /// Harvest capability for Farm
+    //        cap: YieldFarmingNew::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
+    //    }
 
     struct UserInfo<phantom X, phantom Y> has key, store {
         user_amount: u128,
@@ -146,7 +148,6 @@ module TokenSwapFarm {
                         Y: copy + drop + store>(
         signer: &signer,
         release_per_seconds: u128) acquires FarmPoolEvent {
-
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -180,10 +181,9 @@ module TokenSwapFarm {
 
     /// Initialize Liquidity pair gov pool, only called by token issuer
     public fun add_farm_v2<X: copy + drop + store,
-                        Y: copy + drop + store>(
+                           Y: copy + drop + store>(
         signer: &signer,
         alloc_point: u128) acquires FarmPoolEvent {
-
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -217,7 +217,7 @@ module TokenSwapFarm {
 
     /// call only for extend
     public fun extend_farm_pool<X: copy + drop + store,
-                                 Y: copy + drop + store>(account: &signer, override_update: bool) acquires FarmMultiplier{
+                                Y: copy + drop + store>(account: &signer, override_update: bool) acquires FarmMultiplier {
         STAR::assert_genesis_address(account);
 
         let broker = Signer::address_of(account);
@@ -231,7 +231,6 @@ module TokenSwapFarm {
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(signer: &signer, multiplier: u64)
     acquires FarmPoolCapability, FarmMultiplier {
-
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -269,7 +268,7 @@ module TokenSwapFarm {
 
 
     public fun set_farm_alloc_point<X: copy + drop + store,
-                                   Y: copy + drop + store>(signer: &signer, alloc_point: u128)
+                                    Y: copy + drop + store>(signer: &signer, alloc_point: u128)
     acquires FarmPoolCapability, FarmPoolInfo {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
@@ -292,7 +291,6 @@ module TokenSwapFarm {
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(
         account: &signer,
         active: bool) acquires FarmPoolEvent, FarmPoolCapability {
-
         STAR::assert_genesis_address(account);
         let admin_addr = Signer::address_of(account);
         let cap = borrow_global_mut<FarmPoolCapability<X, Y>>(admin_addr);
@@ -318,17 +316,17 @@ module TokenSwapFarm {
                 activation_state: active,
             });
     }
-    
+
     //Deposit Token into the pool
-    public fun deposit<PoolType: store,TokenT: copy + drop + store>(
-        account: &signer, 
-        token: Token::Token<TokenT>){
-            YieldFarming::deposit<PoolType,TokenT>(account,token);
+    public fun deposit<PoolType: store, TokenT: copy + drop + store>(
+        account: &signer,
+        token: Token::Token<TokenT>) {
+        YieldFarming::deposit<PoolType, TokenT>(account, token);
     }
 
     //View Treasury Remaining
-    public fun get_treasury_balance<PoolType: store,TokenT: copy + drop + store>():u128{
-        YieldFarming::get_treasury_balance<PoolType,TokenT>(STAR::token_address())
+    public fun get_treasury_balance<PoolType: store, TokenT: copy + drop + store>(): u128 {
+        YieldFarming::get_treasury_balance<PoolType, TokenT>(STAR::token_address())
     }
 
     /// Stake liquidity Token pair
@@ -344,11 +342,11 @@ module TokenSwapFarm {
         };
 
         // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //check if need extend
             if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
                 (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
-                    extend_farm_stake_resource<X, Y>(account);
+                extend_farm_stake_resource<X, Y>(account);
             };
         };
 
@@ -372,14 +370,13 @@ module TokenSwapFarm {
     }
 
     fun extend_farm_stake_resource<X: copy + drop + store,
-                           Y: copy + drop + store>(account: &signer)
-        acquires FarmPoolCapability {
-
+                                   Y: copy + drop + store>(account: &signer)
+    acquires FarmPoolCapability {
         let account_addr = Signer::address_of(account);
         //double check if need extend
         if (!(YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
-            (!YieldFarming::exists_stake_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)))){
-                return
+              (!YieldFarming::exists_stake_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)))) {
+            return
         };
 
         // Access Control
@@ -400,7 +397,7 @@ module TokenSwapFarm {
     }
 
 
-    public fun get_default_boost_factor_scale(): u64{
+    public fun get_default_boost_factor_scale(): u64 {
         DEFAULT_BOOST_FACTOR * BOOST_FACTOR_PRECESION
     }
 
@@ -413,7 +410,7 @@ module TokenSwapFarm {
 
         let account_addr = Signer::address_of(account);
         // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //check if need extend
             if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
                 (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
@@ -446,11 +443,11 @@ module TokenSwapFarm {
 
         let account_addr = Signer::address_of(account);
         // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //check if need extend
             if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
                 (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
-                    extend_farm_stake_resource<X, Y>(account);
+                extend_farm_stake_resource<X, Y>(account);
             };
         };
 
@@ -537,7 +534,7 @@ module TokenSwapFarm {
 
 
         // after pool alloc mode upgrade
-        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             YieldFarming::stake<
                 PoolTypeFarmPool,
                 STAR::STAR,
@@ -606,7 +603,7 @@ module TokenSwapFarm {
 
         // Restake to pool
         // after pool alloc mode upgrade
-        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             YieldFarming::stake<
                 PoolTypeFarmPool,
                 STAR::STAR,
