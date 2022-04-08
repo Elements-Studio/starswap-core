@@ -77,7 +77,7 @@ module TokenSwapVestarMinter {
             Boost::compute_mint_amount(pledge_time_sec, staked_amount)
         };
 
-        let treasury_amount = tresury_total_amount(user_addr);
+        let treasury_amount = value(user_addr);
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
 
         let treasury = borrow_global_mut<Treasury>(user_addr);
@@ -86,7 +86,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Amount of treasury
-    fun tresury_total_amount(account: address): u128 acquires Treasury {
+    public fun value(account: address): u128 acquires Treasury {
         let treasury = borrow_global_mut<Treasury>(account);
         VToken::value<VESTAR::VESTAR>(&treasury.vtoken)
     }
