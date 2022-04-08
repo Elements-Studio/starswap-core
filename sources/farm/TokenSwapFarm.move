@@ -670,7 +670,7 @@ module TokenSwapFarm {
     }
 
     /// boost for farm
-    public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
+    public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, _boost_amount: u128)
     acquires UserInfo, FarmPoolStake, FarmPoolCapability {
         let user_addr = Signer::address_of(account);
         if(!exists<UserInfo<X, Y>>(user_addr)){
@@ -683,7 +683,7 @@ module TokenSwapFarm {
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         //TODO lock boost amount vestar
 //        let boost_vestar_token = TokenSwapBoost::lock_vestar();
-        let boost_vestar_token = Token::zero<VESTAR>();
+        let boost_vestar_token = VToken::zero<VESTAR>();
 
         VToken::deposit(&mut user_info.locked_vetoken, boost_vestar_token);
         update_boost_factor<X, Y>(account);

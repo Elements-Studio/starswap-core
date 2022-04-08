@@ -328,7 +328,6 @@ module YieldFarmingV3 {
         new_asset_weight: u128, //new stake asset weight
         _last_asset_weight: u128, //last stake asset weight
     )  acquires FarmingAsset, StakeList, StakeListExtend {
-        let now_seconds = Timestamp::now_seconds();
         let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
 
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);

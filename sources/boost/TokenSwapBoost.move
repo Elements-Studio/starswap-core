@@ -38,7 +38,7 @@ module TokenSwapBoost {
     }
 
     // TODO compute user boost factor
-    public fun compute_boost_factor(user_locked_vestar_amount: u128) : u64 {
+    public fun compute_boost_factor(_user_locked_vestar_amount: u128) : u64 {
         return 100
     }
 

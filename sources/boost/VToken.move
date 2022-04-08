@@ -30,7 +30,7 @@ module VToken {
     /// Create a new VToken::VToken<TokenT> with a value of 0
     public fun zero<TokenT: store>(): VToken<TokenT> {
         VToken<TokenT> {
-            token: Token::Token<TokenT> { value: 0 }
+            token: Token::zero<TokenT>()
         }
     }
 
