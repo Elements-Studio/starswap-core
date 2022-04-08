@@ -55,7 +55,7 @@ module TokenSwapVestarIssuer {
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
         let to_burn_amount = Boost::compute_issue_amount(pledge_time_sec, amount);
 
-        let treasury_amount = tresury_total_amount(user_addr);
+        let treasury_amount = value(user_addr);
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
 
         let treasury = borrow_global_mut<Treasury>(user_addr);
@@ -64,7 +64,7 @@ module TokenSwapVestarIssuer {
     }
 
     /// Amount of treasury
-    fun tresury_total_amount(account: address): u128 acquires Treasury {
+    public fun value(account: address): u128 acquires Treasury {
         let treasury = borrow_global_mut<Treasury>(account);
         VToken::value<VESTAR::VESTAR>(&treasury.vtoken)
     }
