@@ -16,6 +16,9 @@ module TokenSwapFarm {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
+    use SwapAdmin::VToken::{VToken, Self};
+    use SwapAdmin::VESTAR::{VESTAR};
+    use SwapAdmin::TokenSwapBoost;
 
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
@@ -104,22 +107,11 @@ module TokenSwapFarm {
         alloc_point: u128
     }
 
-    //    struct FarmPoolCapabilityV2<phantom X, phantom Y> has key, store {
-    //        cap: YieldFarmingNew::PoolModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-    //    }
-
-    //    struct FarmPoolStakeV2<phantom X, phantom Y> has key, store {
-    //        id: u64,
-    //        /// Harvest capability for Farm
-    //        cap: YieldFarmingNew::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-    //    }
-
     struct UserInfo<phantom X, phantom Y> has key, store {
-        user_amount: u128,
         boost_factor: u64,
-        vestar_balance: u128,
+        locked_vetoken: VToken<VESTAR>,
+        user_amount: u128,
     }
-
 
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
@@ -135,8 +127,7 @@ module TokenSwapFarm {
 
     /// Called by admin
     /// this will config yield farming global pool info
-    public fun initialize_global_pool_info<
-        PoolType: store>(account: &signer, pool_release_per_second: u128) {
+    public fun initialize_global_pool_info(account: &signer, pool_release_per_second: u128) {
         // Only called by the genesis
         STAR::assert_genesis_address(account);
         YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
@@ -217,12 +208,22 @@ module TokenSwapFarm {
 
     /// call only for extend
     public fun extend_farm_pool<X: copy + drop + store,
-                                Y: copy + drop + store>(account: &signer, override_update: bool) acquires FarmMultiplier {
+                                 Y: copy + drop + store>(account: &signer, override_update: bool) acquires FarmMultiplier, FarmPoolInfo{
         STAR::assert_genesis_address(account);
 
         let broker = Signer::address_of(account);
         let farm_multiplier = borrow_global<FarmMultiplier<X, Y>>(broker);
-        YieldFarming::extend_farming_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account, (farm_multiplier.multiplier as u128), override_update);
+        let alloc_point = (farm_multiplier.multiplier as u128);
+        YieldFarming::extend_farming_asset<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account, alloc_point, override_update);
+
+        if(!exists<FarmPoolInfo<X, Y>>(broker)){
+            move_to(account, FarmPoolInfo<X, Y>{
+                alloc_point: alloc_point
+            });
+        }else {
+            let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
+            farm_pool_info.alloc_point = alloc_point;
+        };
     }
 
 
@@ -251,19 +252,17 @@ module TokenSwapFarm {
         farm_mult.multiplier = multiplier;
     }
 
-    /// Deprecated call
     /// Get farm multiplier of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>(): u64 acquires FarmMultiplier {
-        let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
-        farm_mult.multiplier
-    }
-
-    /// Get farm mutiplier, equals to pool alloc_point
-    public fun get_farm_multiplier_v2<X: copy + drop + store,
-                                      Y: copy + drop + store>(): u64 acquires FarmPoolInfo {
-        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
-        (farm_pool_info.alloc_point as u64)
+                                   Y: copy + drop + store>(): u64 acquires FarmMultiplier, FarmPoolInfo {
+        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+            let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
+            farm_mult.multiplier
+            // Get farm mutiplier, equals to pool alloc_point
+        } else {
+            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+            (farm_pool_info.alloc_point as u64)
+        }
     }
 
 
@@ -333,7 +332,7 @@ module TokenSwapFarm {
     public fun stake<X: copy + drop + store,
                      Y: copy + drop + store>(account: &signer,
                                              amount: u128)
-    acquires FarmPoolCapability, FarmPoolEvent, FarmPoolStake {
+    acquires FarmPoolCapability, FarmPoolEvent, FarmPoolStake, UserInfo {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = Signer::address_of(account);
@@ -405,7 +404,7 @@ module TokenSwapFarm {
     /// Unstake liquidity Token pair
     public fun unstake<X: copy + drop + store,
                        Y: copy + drop + store>(account: &signer, amount: u128)
-    acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
+    acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent, UserInfo {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = Signer::address_of(account);
@@ -471,9 +470,15 @@ module TokenSwapFarm {
             account, STAR::token_address(), &farm.cap)
     }
 
-    /// Query all stake amount
+    /// Query all stake info
     public fun query_info<X: copy + drop + store, Y: copy + drop + store>(): (bool, u128, u128, u128) {
         YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
+    }
+
+    /// Query pool info from pool type v2
+    /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
+    public fun query_info_v2<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u128, u128) {
+        YieldFarming::query_pool_info_v2<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query all stake amount
@@ -488,24 +493,30 @@ module TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 acquires FarmPoolCapability {
-        let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
-        cap.release_per_seconds
+    public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 acquires FarmPoolCapability, FarmPoolInfo {
+        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
+            let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
+            cap.release_per_seconds
+        } else {
+            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+            let (total_alloc_point, pool_release_per_second) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(STAR::token_address());
+            pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
+        }
     }
 
-    /// Query lp release per second
-    public fun query_lp_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 acquires FarmPoolInfo {
-        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+    /// Query farm golbal pool info
+    public fun query_global_pool_info(): (u128, u128) {
         let (total_alloc_point, pool_release_per_second) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(STAR::token_address());
-        pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
+        (total_alloc_point, pool_release_per_second)
     }
+
 
     /// Inner stake operation that unstake all from pool and combind new amount to total asset, then restake.
     fun inner_stake<X: copy + drop + store,
                     Y: copy + drop + store>(account: &signer,
                                             amount: u128,
                                             farm_cap: &FarmPoolCapability<X, Y>)
-    : FarmPoolStake<X, Y> acquires FarmPoolStake {
+    : FarmPoolStake<X, Y> acquires FarmPoolStake ,UserInfo{
         let account_addr = Signer::address_of(account);
         // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
         let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
@@ -548,8 +559,9 @@ module TokenSwapFarm {
                 &farm_cap.cap
             )
         } else {
-            let asset_weight = total_amount;
-            let weight_factor = get_default_boost_factor_scale();
+            let weight_factor = get_boost_factor<X, Y>(account_addr);
+            let asset_weight = calculate_boost_weight(total_amount, weight_factor);
+
             YieldFarming::stake_v2<
                 PoolTypeFarmPool,
                 STAR::STAR,
@@ -557,9 +569,9 @@ module TokenSwapFarm {
                 account,
                 STAR::token_address(),
                 total_token,
-                asset_weight, //TODO weight, multi user boost factor here
+                asset_weight,
                 total_amount,
-                weight_factor, //TODO factor, add boost here
+                weight_factor,
                 0,
                 &farm_cap.cap
             )
@@ -577,7 +589,7 @@ module TokenSwapFarm {
                                               amount: u128,
                                               farm_cap: &FarmPoolCapability<X, Y>,
                                               farm_stake: FarmPoolStake<X, Y>)
-    : FarmPoolStake<X, Y> {
+    : FarmPoolStake<X, Y> acquires  UserInfo{
         let account_addr = Signer::address_of(account);
         let FarmPoolStake{
             cap: unwrap_harvest_cap,
@@ -617,8 +629,10 @@ module TokenSwapFarm {
                 &farm_cap.cap
             )
         } else {
-            let own_asset_weight = own_asset_amount;
-            let weight_factor = get_default_boost_factor_scale();
+            // once farm unstake, user boost factor lose efficacy, become 1
+            unboost_for_unstake<X, Y>(account);
+            let weight_factor = get_boost_factor<X, Y>(account_addr);
+            let own_asset_weight = calculate_boost_weight(own_asset_amount, weight_factor);
             YieldFarming::stake_v2<
                 PoolTypeFarmPool,
                 STAR::STAR,
@@ -626,9 +640,9 @@ module TokenSwapFarm {
                 account,
                 STAR::token_address(),
                 own_asset_token,
-                own_asset_weight, //TODO weight, multi user boost factor here
+                own_asset_weight,
                 own_asset_amount,
-                weight_factor, //TODO factor, add boost here
+                weight_factor,
                 0,
                 &farm_cap.cap
             )
@@ -639,5 +653,105 @@ module TokenSwapFarm {
             id: stake_id,
         }
     }
+
+    /// Query user boost factor
+    public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address): u64 acquires UserInfo {
+        if(exists<UserInfo<X, Y>>(account)){
+            let user_info = borrow_global<UserInfo<X, Y>>(account);
+            user_info.boost_factor
+        } else {
+            get_default_boost_factor_scale()
+        }
+    }
+
+    /// calculation asset weight for boost
+    fun calculate_boost_weight(amount: u128, boost_factor: u64): u128 {
+        amount * (boost_factor as u128) / (BOOST_FACTOR_PRECESION as u128)
+    }
+
+    /// boost for farm
+    public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
+    acquires UserInfo, FarmPoolStake, FarmPoolCapability {
+        let user_addr = Signer::address_of(account);
+        if(!exists<UserInfo<X, Y>>(user_addr)){
+            move_to(account, UserInfo<X, Y>{
+                user_amount: 0,
+                boost_factor: get_default_boost_factor_scale(),
+                locked_vetoken: VToken::zero<VESTAR>(),
+            });
+        };
+        let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
+        //TODO lock boost amount vestar
+//        let boost_vestar_token = TokenSwapBoost::lock_vestar();
+        let boost_vestar_token = Token::zero<VESTAR>();
+
+        VToken::deposit(&mut user_info.locked_vetoken, boost_vestar_token);
+        update_boost_factor<X, Y>(account);
+    }
+
+    /// unboost for farm unstake
+    public fun unboost_for_unstake<X: copy + drop + store, Y: copy + drop + store>(account: &signer)
+    acquires UserInfo {
+        let user_addr = Signer::address_of(account);
+        if(!exists<UserInfo<X, Y>>(user_addr)){
+            move_to(account, UserInfo<X, Y>{
+                user_amount: 0,
+                boost_factor: get_default_boost_factor_scale(),
+                locked_vetoken: VToken::zero<VESTAR>(),
+            });
+        };
+        let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
+        //TODO unlock boost amount vestar
+//        let boost_vestar_token = TokenSwapBoost::unlock_vestar();
+//        let boost_vestar_token = TOken::zero<VESTAR>();
+
+//        VToken::deposit(&mut user_info.locked_vetoken, boost_vestar_token);
+        user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
+    }
+
+    /// boost factor change and triggers
+    fun update_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+        account: &signer,
+    ) acquires  UserInfo, FarmPoolStake, FarmPoolCapability {
+        let user_addr = Signer::address_of(account);
+
+        let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
+        let total_locked_vetoken_amount = VToken::value<VESTAR>(&user_info.locked_vetoken);
+        let new_boost_factor = TokenSwapBoost::compute_boost_factor(total_locked_vetoken_amount);
+
+        let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
+        let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, farm.id);
+
+        let new_asset_weight = calculate_boost_weight(asset_amount, new_boost_factor);
+        let last_asset_weight = calculate_boost_weight(asset_amount, user_info.boost_factor);
+        update_pool_and_stake_weight<X, Y>(account, new_boost_factor, new_asset_weight, last_asset_weight);
+
+        user_info.boost_factor = new_boost_factor;
+
+    }
+
+    fun update_pool_and_stake_weight<X: copy + drop + store, Y: copy + drop + store>(
+        account: &signer,
+        new_weight_factor: u64, //new stake weight factor
+        new_asset_weight: u128, //new stake asset weight
+        last_asset_weight: u128, //last stake asset weight)
+    ) acquires FarmPoolCapability, FarmPoolStake {
+        let account_addr = Signer::address_of(account);
+        // Access Control
+        let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
+
+        let farm = borrow_global<FarmPoolStake<X, Y>>(account_addr);
+
+        // check if need udpate
+//        if (farm.id > 0){
+            YieldFarming::update_pool_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(&farm_cap.cap,
+                STAR::token_address(), new_asset_weight, last_asset_weight);
+            YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(&farm_cap.cap,
+                STAR::token_address(), account_addr, farm.id, new_weight_factor, new_asset_weight, last_asset_weight);
+//        };
+
+    }
+
+
 }
 }

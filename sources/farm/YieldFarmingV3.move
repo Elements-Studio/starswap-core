@@ -48,11 +48,11 @@ module YieldFarmingV3 {
         harvest_index: u128,
         last_update_timestamp: u64,
         // Release count per seconds
-        release_per_second: u128,
+        release_per_second: u128, //abandoned fields
         // Start time, by seconds, user can operate stake only after this timestamp
         start_time: u64,
         // Representing the pool is alive, false: not alive, true: alive.
-        alive: bool,
+        alive: bool, //abandoned fields
     }
 
     struct FarmingAssetExtend<phantom PoolType, phantom AssetT> has key, store {
@@ -68,7 +68,7 @@ module YieldFarmingV3 {
         asset_weight: u128, // reform: before is actually equivalent to asset amount, after is equivalent to asset weight
         last_harvest_index: u128,
         gain: u128,
-        asset_multiplier: u64,
+        asset_multiplier: u64, //abandoned fields
     }
 
     struct StakeExtend<phantom PoolType, phantom AssetT> has key, store {
@@ -300,6 +300,52 @@ module YieldFarmingV3 {
         let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
         golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point - last_alloc_point + alloc_point;
     }
+
+    /// call when weight_factor change, update pool info
+    public fun update_pool_weight<PoolType: store, AssetT: store>(
+        _cap: &ParameterModifyCapability<PoolType, AssetT>,
+        broker: address,
+        new_asset_weight: u128, //new stake asset weight
+        last_asset_weight: u128, //last stake asset weight
+    )  acquires FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+        let now_seconds = Timestamp::now_seconds();
+        let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
+        // Calculate the index that has occurred first, and then update the pool info
+        farming_asset.harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(farming_asset, farming_asset_extend, now_seconds);
+        //update pool asset weight
+        farming_asset.last_update_timestamp = now_seconds;
+        farming_asset.asset_total_weight = farming_asset.asset_total_weight - last_asset_weight + new_asset_weight;
+    }
+
+    /// call when weight_factor change, update stake info for user
+    public fun update_pool_stake_weight<PoolType: store, AssetT: store>(
+        _cap: &ParameterModifyCapability<PoolType, AssetT>,
+        broker: address,
+        user_addr: address,
+        stake_id: u64,
+        new_weight_factor: u64, //new stake weight factor
+        new_asset_weight: u128, //new stake asset weight
+        _last_asset_weight: u128, //last stake asset weight
+    )  acquires FarmingAsset, StakeList, StakeListExtend {
+        let now_seconds = Timestamp::now_seconds();
+        let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
+
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
+
+        let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
+        let stake_extend = get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, stake_id);
+
+        let period_gain = calculate_withdraw_amount_v2(farming_asset.harvest_index, stake.last_harvest_index, stake.asset_weight);
+
+        stake.gain = stake.gain + period_gain;
+        stake.last_harvest_index = farming_asset.harvest_index;
+        stake.asset_weight = new_asset_weight;
+
+        stake_extend.weight_factor = new_weight_factor;
+    }
+
 
     /// deprecated call
     /// Call by stake user, staking amount of asset in order to get yield farming token
@@ -743,7 +789,7 @@ module YieldFarmingV3 {
         )
     }
 
-    /// Queyry pool info from pool type v2
+    /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
     public fun query_pool_info_v2<PoolType: store, AssetT: store>(broker: address): (u128, u128, u128, u128)
         acquires FarmingAsset, FarmingAssetExtend {
