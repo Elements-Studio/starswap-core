@@ -27,6 +27,13 @@ module VToken {
         move_from<OwnerCapability<TokenT>>(Signer::address_of(signer))
     }
 
+    /// Create a new VToken::VToken<TokenT> with a value of 0
+    public fun zero<TokenT: store>(): VToken<TokenT> {
+        VToken<TokenT> {
+            token: Token::Token<TokenT> { value: 0 }
+        }
+    }
+
     public fun mint<TokenT: store>(signer: &signer, amount: u128): VToken<TokenT> acquires OwnerCapability {
         let cap = borrow_global<OwnerCapability<TokenT>>(Signer::address_of(signer));
         VToken<TokenT>{

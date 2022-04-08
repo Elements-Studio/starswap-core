@@ -36,5 +36,11 @@ module TokenSwapBoost {
         let locked_day = locked_time_sec / 60 * 60 * 24;
         locked_amount * locked_day / 365
     }
+
+    // TODO compute user boost factor
+    public fun compute_boost_factor(user_locked_vestar_amount: u128) : u64 {
+        return 100
+    }
+
 }
 }
