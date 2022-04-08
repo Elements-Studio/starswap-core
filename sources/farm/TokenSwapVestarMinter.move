@@ -4,10 +4,12 @@
 
 address SwapAdmin {
 
-module TokenSwapVestarIssuer {
+module TokenSwapVestarMinter {
     use StarcoinFramework::Token;
     use StarcoinFramework::Errors;
     use StarcoinFramework::Signer;
+    use StarcoinFramework::Option;
+    use StarcoinFramework::Vector;
 
     use SwapAdmin::VToken;
     use SwapAdmin::Boost;
@@ -15,6 +17,7 @@ module TokenSwapVestarIssuer {
 
     const ERROR_TREASURY_NOT_EXISTS: u64 = 101;
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
+    const ERROR_ADD_RECORD_ID_INVALID: u64 = 103;
 
     struct Treasury has key, store {
         vtoken: VToken::VToken<VESTAR::VESTAR>,
@@ -24,36 +27,55 @@ module TokenSwapVestarIssuer {
         cap: VToken::OwnerCapability<VESTAR::VESTAR>,
     }
 
-    struct IssueCapability has key, store {}
+    struct MintRecord has key, store, copy, drop {
+        id: u64,
+        minted_amount: u128, // Vestar amount
+        staked_amount: u128,
+        pledge_time_sec: u64,
+    }
+
+    struct MintRecordList has key, store {
+        items: vector<MintRecord>
+    }
+
+    struct MintCapability has key, store {}
 
     struct TreasuryCapability has key, store {}
 
     /// Initialize function will called by upgrading procedure
-    public fun init(signer: &signer): (IssueCapability, TreasuryCapability) {
+    public fun init(signer: &signer): (MintCapability, TreasuryCapability) {
         VToken::register_token<VESTAR::VESTAR>(signer, VESTAR::precision());
         move_to(signer, VestarOwnerCapability{
             cap: VToken::extract_cap<VESTAR::VESTAR>(signer)
         });
-        (IssueCapability{}, TreasuryCapability{})
+        (MintCapability{}, TreasuryCapability{})
     }
 
-    /// Issue with token
-    public fun issue_with_cap(signer: &signer, pledge_time_sec: u64, amount: u128, _cap: &IssueCapability)
-    acquires VestarOwnerCapability, Treasury {
+    /// Mint Vestar with capability
+    public fun mint_with_cap(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
+    acquires VestarOwnerCapability, Treasury, MintRecordList {
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
-        let issue_amount = Boost::compute_issue_amount(pledge_time_sec, amount);
+        let to_mint_amount = Boost::compute_mint_amount(pledge_time_sec, staked_amount);
 
-        // Deposit VESTAR to
-        deposit(signer, VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, issue_amount));
+        // Deposit VESTAR to treasury
+        deposit(signer, VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, to_mint_amount));
+
+        add_to_record(Signer::address_of(signer), id, pledge_time_sec, staked_amount, to_mint_amount);
     }
 
-    /// Recover Vestar token
-    public fun recovery_with_cap(signer: &signer, pledge_time_sec: u64, amount: u128,  _cap: &IssueCapability)
-    acquires Treasury, VestarOwnerCapability {
+    /// Burn Vestar with capability
+    public fun burn_with_cap(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
+    acquires Treasury, VestarOwnerCapability, MintRecordList {
         let user_addr = Signer::address_of(signer);
 
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
-        let to_burn_amount = Boost::compute_issue_amount(pledge_time_sec, amount);
+        let record = pop_from_record(user_addr, id);
+        let to_burn_amount = if (Option::is_some(&record)) {
+            let mint_record = Option::destroy_some(record);
+            mint_record.minted_amount
+        } else {
+            Boost::compute_mint_amount(pledge_time_sec, staked_amount)
+        };
 
         let treasury_amount = tresury_total_amount(user_addr);
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
@@ -100,6 +122,49 @@ module TokenSwapVestarIssuer {
         let account = Signer::address_of(signer);
         let treasury = borrow_global_mut<Treasury>(account);
         VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount)
+    }
+
+    fun add_to_record(user_addr: address, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
+    acquires MintRecordList {
+        let lst = borrow_global_mut<MintRecordList>(user_addr);
+        let idx = find_idx_by_id(&lst.items, id);
+        assert!(Option::is_none(&idx), Errors::invalid_state(ERROR_ADD_RECORD_ID_INVALID));
+
+        Vector::push_back<MintRecord>(&mut lst.items, MintRecord{
+            id,
+            pledge_time_sec,
+            staked_amount,
+            minted_amount,
+        });
+    }
+
+    fun pop_from_record(user_addr: address, id: u64): Option::Option<MintRecord> acquires MintRecordList {
+        let lst = borrow_global_mut<MintRecordList>(user_addr);
+        let idx = find_idx_by_id(&lst.items, id);
+        if (Option::is_some(&idx)) {
+            Option::some<MintRecord>(Vector::remove(&mut lst.items, Option::destroy_some<u64>(idx)))
+        } else {
+            Option::none<MintRecord>()
+        }
+    }
+
+    fun find_idx_by_id(c: &vector<MintRecord>, id: u64): Option::Option<u64> {
+        let len = Vector::length(c);
+        if (len == 0) {
+            return Option::none()
+        };
+
+        let idx = len - 1;
+        loop {
+            let el = Vector::borrow(c, idx);
+            if (el.id == id) {
+                return Option::some(idx)
+            };
+            if (idx == 0) {
+                return Option::none()
+            };
+            idx = idx - 1;
+        }
     }
 }
 }

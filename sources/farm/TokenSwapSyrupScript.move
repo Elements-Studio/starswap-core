@@ -12,10 +12,10 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapFarmBoost;
-    use SwapAdmin::TokenSwapVestarIssuer;
+    use SwapAdmin::TokenSwapVestarMinter;
 
-    struct VestarIssueCapabilityWrapper has key, store {
-        cap: TokenSwapVestarIssuer::IssueCapability,
+    struct VestarMintCapabilityWrapper has key, store {
+        cap: TokenSwapVestarMinter::MintCapability,
     }
 
     public(script) fun add_pool<TokenT: store>(signer: signer,
@@ -39,16 +39,20 @@ module TokenSwapSyrupScript {
 
     public(script) fun stake<TokenT: store>(signer: signer,
                                             pledge_time_sec: u64,
-                                            amount: u128) acquires VestarIssueCapabilityWrapper {
+                                            amount: u128) acquires VestarMintCapabilityWrapper {
         TokenSwapSyrup::stake<TokenT>(&signer, pledge_time_sec, amount);
 
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            let cap = borrow_global<VestarIssueCapabilityWrapper>(VESTAR::token_address());
-            TokenSwapVestarIssuer::issue_with_cap(&signer, pledge_time_sec, amount, &cap.cap);
+            let cap = borrow_global<VestarMintCapabilityWrapper>(VESTAR::token_address());
+            TokenSwapVestarMinter::mint_with_cap(&signer,
+                TokenSwapSyrup::get_global_stake_id<TokenT>(),
+                pledge_time_sec,
+                amount,
+                &cap.cap);
         };
     }
 
-    public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarIssueCapabilityWrapper {
+    public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarMintCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
         let (start_time, end_time, _, amount) = TokenSwapSyrup::get_stake_info<TokenT>(user_addr, id);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
@@ -57,8 +61,8 @@ module TokenSwapSyrupScript {
 
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let pledge_time_sec = end_time - start_time;
-            let cap = borrow_global<VestarIssueCapabilityWrapper>(VESTAR::token_address());
-            TokenSwapVestarIssuer::recovery_with_cap(&signer, pledge_time_sec, amount, &cap.cap);
+            let cap = borrow_global<VestarMintCapabilityWrapper>(VESTAR::token_address());
+            TokenSwapVestarMinter::burn_with_cap(&signer, id, pledge_time_sec, amount, &cap.cap);
         };
     }
 
@@ -82,9 +86,9 @@ module TokenSwapSyrupScript {
 
 
     public(script) fun init_vestar_issuer(signer: signer) {
-        let (issuer_cap, treasury_cap) = TokenSwapVestarIssuer::init(&signer);
+        let (issuer_cap, treasury_cap) = TokenSwapVestarMinter::init(&signer);
         TokenSwapFarmBoost::set_treasury_cap(&signer, treasury_cap);
-        move_to(&signer, VestarIssueCapabilityWrapper{
+        move_to(&signer, VestarMintCapabilityWrapper{
             cap: issuer_cap,
         })
     }

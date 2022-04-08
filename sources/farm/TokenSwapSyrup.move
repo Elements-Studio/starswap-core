@@ -250,9 +250,9 @@ module TokenSwapSyrup {
     }
 
 
-//    public fun update_multiplier_pool<TokenT: store>(signer: &signer, key: &vector<u8>, multiplier: u64) {
-//        // TODO(Valenteen Resee): to implement update multiplier pool
-//    }
+    //    public fun update_multiplier_pool<TokenT: store>(signer: &signer, key: &vector<u8>, multiplier: u64) {
+    //        // TODO(Valenteen Resee): to implement update multiplier pool
+    //    }
 
     /// Deposit Token into the pool
     public fun deposit<PoolType: store, TokenT: copy + drop + store>(
@@ -426,6 +426,11 @@ module TokenSwapSyrup {
         syrup.release_per_second
     }
 
+    /// Get current stake id
+    public fun get_global_stake_id<TokenT: store>(): u64 {
+        YieldFarming::get_global_stake_id<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
+    }
+
     public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
         // 1. Check the time has in config
         assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
@@ -479,7 +484,7 @@ module TokenSwapSyrup {
     /// two condition are matched that
     /// the upgrading switch has opened and new resource doesn't exist
     fun maybe_upgrade_all_stake<TokenT: store>(signer: &signer,
-                                               cap: &YieldFarming::ParameterModifyCapability<PoolTypeSyrup, Token::Token<TokenT>>)  {
+                                               cap: &YieldFarming::ParameterModifyCapability<PoolTypeSyrup, Token::Token<TokenT>>) {
         let account_addr = Signer::address_of(signer);
 
         // Check false if old stakes not exists or new stakes are exist
@@ -502,18 +507,18 @@ module TokenSwapSyrup {
             YieldFarming::extend_farm_stake_info<PoolTypeSyrup, Token::Token<TokenT>>(signer, *stake_id, cap);
 
             // Add weight to child mutiplier pool
-//            let stake_list = borrow_global<SyrupStakeList<TokenT>>(account_addr);
-//            let stake = get_stake(&stake_list.items, *stake_id);
-//            YieldFarmingMultiplier::add_amount<PoolTypeSyrup, Token::Token<TokenT>>(
-//                &key_from_stepwise_multiplier(stake.stepwise_multiplier),
-//                stake.token_amount);
+            //            let stake_list = borrow_global<SyrupStakeList<TokenT>>(account_addr);
+            //            let stake = get_stake(&stake_list.items, *stake_id);
+            //            YieldFarmingMultiplier::add_amount<PoolTypeSyrup, Token::Token<TokenT>>(
+            //                &key_from_stepwise_multiplier(stake.stepwise_multiplier),
+            //                stake.token_amount);
 
             idx = idx + 1;
         }
     }
 
-//    fun key_from_stepwise_multiplier(n: u64): vector<u8> {
-//        BCS::to_bytes<u64>(&n)
-//    }
+    //    fun key_from_stepwise_multiplier(n: u64): vector<u8> {
+    //        BCS::to_bytes<u64>(&n)
+    //    }
 }
 }

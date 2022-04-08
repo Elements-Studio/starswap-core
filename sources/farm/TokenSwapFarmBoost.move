@@ -6,14 +6,14 @@ address SwapAdmin {
 
 module TokenSwapFarmBoost {
 
-    use SwapAdmin::TokenSwapVestarIssuer;
+    use SwapAdmin::TokenSwapVestarMinter;
 
-    struct IssuerTreasuryCapabilityWrapper has key, store {
-        cap: TokenSwapVestarIssuer::TreasuryCapability
+    struct MinterTreasuryCapabilityWrapper has key, store {
+        cap: TokenSwapVestarMinter::TreasuryCapability
     }
 
-    public fun set_treasury_cap(signer: &signer, issuer_treasury_cap: TokenSwapVestarIssuer::TreasuryCapability) {
-        move_to(signer, IssuerTreasuryCapabilityWrapper{
+    public fun set_treasury_cap(signer: &signer, issuer_treasury_cap: TokenSwapVestarMinter::TreasuryCapability) {
+        move_to(signer, MinterTreasuryCapabilityWrapper{
             cap: issuer_treasury_cap
         });
     }
