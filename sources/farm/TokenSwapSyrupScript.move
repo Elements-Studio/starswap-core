@@ -14,6 +14,8 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapVestarMinter;
 
+    const ERROR_UPGRADE_NOT_READY_NOW: u64 = 101;
+
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
     }
@@ -85,7 +87,7 @@ module TokenSwapSyrupScript {
     }
 
 
-    public(script) fun init_vestar_issuer(signer: signer) {
+    public(script) fun upgrade_for_init_vestar_issuer(signer: signer) {
         let (issuer_cap, treasury_cap) = TokenSwapVestarMinter::init(&signer);
         TokenSwapFarmBoost::set_treasury_cap(&signer, treasury_cap);
         move_to(&signer, VestarMintCapabilityWrapper{
@@ -93,7 +95,7 @@ module TokenSwapSyrupScript {
         })
     }
 
-    public(script) fun upgrade_to_allocation_model_with_tokentype<TokenT: store>(signer: signer, override_update: bool) {
+    public(script) fun upgrade_for_allocation_model_with_tokentype<TokenT: store>(signer: signer, override_update: bool) {
         TokenSwapSyrup::upgrade_syrup_pool<TokenT>(&signer, override_update);
     }
 }
