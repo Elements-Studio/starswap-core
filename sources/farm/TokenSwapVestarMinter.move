@@ -18,6 +18,7 @@ module TokenSwapVestarMinter {
     const ERROR_TREASURY_NOT_EXISTS: u64 = 101;
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
     const ERROR_ADD_RECORD_ID_INVALID: u64 = 103;
+    const ERROR_NOT_ADMIN: u64 = 104;
 
     struct Treasury has key, store {
         vtoken: VToken::VToken<VESTAR::VESTAR>,
@@ -29,7 +30,7 @@ module TokenSwapVestarMinter {
 
     struct MintRecord has key, store, copy, drop {
         id: u64,
-        minted_amount: u128, // Vestar amount
+        minted_amount: u128, // Vestar amoun
         staked_amount: u128,
         pledge_time_sec: u64,
     }
@@ -44,6 +45,8 @@ module TokenSwapVestarMinter {
 
     /// Initialize function will called by upgrading procedure
     public fun init(signer: &signer): (MintCapability, TreasuryCapability) {
+        assert!(Signer::address_of(signer) == @SwapAdmin, Errors::invalid_state(ERROR_NOT_ADMIN));
+
         VToken::register_token<VESTAR::VESTAR>(signer, VESTAR::precision());
         move_to(signer, VestarOwnerCapability{
             cap: VToken::extract_cap<VESTAR::VESTAR>(signer)
@@ -60,7 +63,7 @@ module TokenSwapVestarMinter {
         // Deposit VESTAR to treasury
         deposit(signer, VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, to_mint_amount));
 
-        add_to_record(Signer::address_of(signer), id, pledge_time_sec, staked_amount, to_mint_amount);
+        add_to_record(signer, id, pledge_time_sec, staked_amount, to_mint_amount);
     }
 
     /// Burn Vestar with capability
@@ -124,8 +127,15 @@ module TokenSwapVestarMinter {
         VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount)
     }
 
-    fun add_to_record(user_addr: address, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
+    fun add_to_record(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
     acquires MintRecordList {
+        let user_addr = Signer::address_of(signer);
+        if (!exists<MintRecordList>(user_addr)) {
+            move_to(signer, MintRecordList{
+                items: Vector::empty<MintRecord>()
+            });
+        };
+
         let lst = borrow_global_mut<MintRecordList>(user_addr);
         let idx = find_idx_by_id(&lst.items, id);
         assert!(Option::is_none(&idx), Errors::invalid_state(ERROR_ADD_RECORD_ID_INVALID));
