@@ -115,9 +115,12 @@ module TokenSwapFarmBoost {
 
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         let total_locked_vetoken_amount = VToken::value<VESTAR>(&user_info.locked_vetoken);
-        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount);
+        
+        let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
+        let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, farm.id);
 
-        let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, stake_id);
+        let total_farm_amount = query_total_stake<X, Y>();
+        let new_boost_factor = TokenSwapBoost::compute_boost_factor(total_locked_vetoken_amount,asset_amount,total_farm_amount);
 
         let new_asset_weight = calculate_boost_weight(asset_amount, new_boost_factor);
         let last_asset_weight = calculate_boost_weight(asset_amount, user_info.boost_factor);
