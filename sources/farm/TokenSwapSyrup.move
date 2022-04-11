@@ -362,10 +362,8 @@ module TokenSwapSyrup {
         // Upgrade if alloc mode upgrade switch turned on
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            Debug::print(&11111111);
             // maybe upgrade under the upgrading switch turned on
             maybe_upgrade_all_stake<TokenT>(signer, &syrup.param_cap);
-            Debug::print(&22222222);
         };
 
         let SyrupStake<TokenT>{
@@ -377,14 +375,10 @@ module TokenSwapSyrup {
             token_amount: _,
         } = pop_stake<TokenT>(&mut stake_list.items, id);
 
-        Debug::print(&33333333);
-
         let (
             unstaken_token,
             reward_token
         ) = YieldFarming::unstake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(signer, broker_addr, harvest_cap);
-
-        Debug::print(&44444444);
 
         let event = borrow_global_mut<SyrupEvent>(broker_addr);
         Event::emit_event(&mut event.unstake_event_handler,
@@ -394,7 +388,6 @@ module TokenSwapSyrup {
                 admin: broker_addr,
             });
 
-        Debug::print(&55555555);
         (unstaken_token, reward_token)
     }
 
