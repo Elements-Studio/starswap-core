@@ -10,5 +10,10 @@ module Boost {
         let locked_day = pledge_time_sec / 60 * 60 * 24;
         staked_amount * (locked_day as u128) / 365u128
     }
+
+    // TODO compute user boost factor
+    public fun compute_boost_factor(_user_locked_vestar_amount: u128) : u64 {
+        return 100
+    }
 }
 }

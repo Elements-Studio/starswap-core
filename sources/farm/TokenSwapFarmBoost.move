@@ -11,7 +11,7 @@ module TokenSwapFarmBoost {
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwap::LiquidityToken;
     use SwapAdmin::TokenSwapVestarMinter;
-    use SwapAdmin::TokenSwapBoost;
+    use SwapAdmin::Boost;
     use SwapAdmin::VToken::{VToken, Self};
     use SwapAdmin::VESTAR::{VESTAR};
 
@@ -115,7 +115,7 @@ module TokenSwapFarmBoost {
 
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         let total_locked_vetoken_amount = VToken::value<VESTAR>(&user_info.locked_vetoken);
-        let new_boost_factor = TokenSwapBoost::compute_boost_factor(total_locked_vetoken_amount);
+        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount);
 
         let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, stake_id);
 
