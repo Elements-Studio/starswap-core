@@ -6,7 +6,6 @@ address SwapAdmin {
 module TokenSwapFarmBoost {
     use StarcoinFramework::Token;
     use StarcoinFramework::Signer;
-
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwap::LiquidityToken;
@@ -14,6 +13,7 @@ module TokenSwapFarmBoost {
     use SwapAdmin::Boost;
     use SwapAdmin::VToken::{VToken, Self};
     use SwapAdmin::VESTAR::{VESTAR};
+    use SwapAdmin::STAR;
 
     const DEFAULT_BOOST_FACTOR: u64 = 1;
     // user boost factor section is [1,2.5]
@@ -115,9 +115,11 @@ module TokenSwapFarmBoost {
 
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         let total_locked_vetoken_amount = VToken::value<VESTAR>(&user_info.locked_vetoken);
-        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount);
-
+        
         let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, stake_id);
+
+        let total_farm_amount = YieldFarming::query_total_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address());
+        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount,asset_amount,total_farm_amount);
 
         let new_asset_weight = calculate_boost_weight(asset_amount, new_boost_factor);
         let last_asset_weight = calculate_boost_weight(asset_amount, user_info.boost_factor);
