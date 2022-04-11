@@ -1,7 +1,9 @@
 address SwapAdmin {
 
 module Boost {
-
+    use StarcoinFramework::Math;
+    use StarcoinFramework::Token;
+    use SwapAdmin::VESTAR;
     /// The release amount follow the formular
     /// @param locked_time per seconds
     ///
@@ -37,8 +39,8 @@ module Boost {
         if(boost_factor > 25 * factor / 10 ){
             boost_factor = 25 * factor / 10;
         };
-        
-        return (boost_factor as u64) /( factor / Math::pow(10,3))
+        let boost_factor = boost_factor  / ( factor / Math::pow(10,3));
+        return (boost_factor as u64)
     }
 }
 }
