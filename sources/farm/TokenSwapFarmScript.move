@@ -70,5 +70,10 @@ module TokenSwapFarmScript {
     public fun get_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(): u64 {
         TokenSwapFarmRouter::get_farm_multiplier<X, Y>()
     }
+
+    /// boost for farm
+    public(script) fun boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128) {
+        TokenSwapFarmRouter::boost<X, Y>(&signer, boost_amount);
+    }
 }
 }

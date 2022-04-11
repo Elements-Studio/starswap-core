@@ -5,6 +5,7 @@ address SwapAdmin {
 module TokenSwapFarmRouter {
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapFarm;
+    use SwapAdmin::TokenSwapFarmBoost;
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
@@ -178,5 +179,26 @@ module TokenSwapFarmRouter {
         TokenSwapFarm::query_global_pool_info()
     }
 
+    /// boost for farm
+    public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::boost<X, Y>(account, boost_amount);
+        } else {
+            TokenSwapFarm::boost<Y, X>(account, boost_amount);
+        }
+    }
+
+    /// Query user boost factor
+    public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address): u64 {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarmBoost::get_boost_factor<X, Y>(account)
+        } else {
+            TokenSwapFarmBoost::get_boost_factor<Y, X>(account)
+        }
+    }
 }
 }
