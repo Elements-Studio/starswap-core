@@ -6,9 +6,14 @@ module Boost {
     /// @param locked_time per seconds
     ///
     /// `veSTAR reward = UserLockedSTARAmount * UserLockedSTARDay / 365`
-    public fun compute_issue_amount(locked_time_sec: u64, locked_amount: u128): u128 {
-        let locked_day = locked_time_sec / 60 * 60 * 24;
-        locked_amount * (locked_day as u128) / 365u128
+    public fun compute_mint_amount(pledge_time_sec: u64, staked_amount: u128): u128 {
+        let locked_day = pledge_time_sec / 60 * 60 * 24;
+        staked_amount * (locked_day as u128) / 365u128
+    }
+
+    // TODO compute user boost factor
+    public fun compute_boost_factor(_user_locked_vestar_amount: u128) : u64 {
+        return 100
     }
 }
 }
