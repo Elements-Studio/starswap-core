@@ -132,14 +132,13 @@ module YieldFarmingV3 {
 
     /// Called by admin
     /// this will config yield farming global pool info
-    public fun initialize_global_pool_info<
-        PoolType: store>(account: &signer, pool_release_per_second: u128) {
+    public fun initialize_global_pool_info<PoolType: store>(account: &signer, pool_release_per_second: u128) {
         TokenSwapConfig::assert_admin(account);
         assert!(!exists<YieldFarmingGlobalPoolInfo<PoolType>>(Signer::address_of(account)), Errors::invalid_state(ERR_YIELD_FARMING_GLOBAL_POOL_INFO_ALREADY_EXIST));
 
         move_to(account, YieldFarmingGlobalPoolInfo<PoolType>{
             total_alloc_point: 0,
-            pool_release_per_second: pool_release_per_second,
+            pool_release_per_second,
         });
     }
 
@@ -191,12 +190,8 @@ module YieldFarmingV3 {
             alive: false
         });
         move_to(account, FarmingAssetExtend<PoolType, AssetT>{
-            //            asset_total_weight: 0,
             asset_total_amount: 0,
-            alloc_point: alloc_point,
-            //            harvest_index: 0,
-            //            last_update_timestamp: now_seconds,
-            //            start_time: now_seconds + delay,
+            alloc_point,
         });
         ParameterModifyCapability<PoolType, AssetT>{}
     }

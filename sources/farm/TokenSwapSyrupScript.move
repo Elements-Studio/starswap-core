@@ -87,16 +87,18 @@ module TokenSwapSyrupScript {
     }
 
 
-    public(script) fun upgrade_for_init_vestar_issuer(signer: signer) {
+    public(script) fun upgrade_for_init(signer: signer, pool_release_per_second: u128) {
+        TokenSwapSyrup::upgrade_syrup_global(&signer, pool_release_per_second);
+
         let (issuer_cap, treasury_cap) = TokenSwapVestarMinter::init(&signer);
         TokenSwapFarmBoost::set_treasury_cap(&signer, treasury_cap);
         move_to(&signer, VestarMintCapabilityWrapper{
             cap: issuer_cap,
-        })
+        });
     }
 
-    public(script) fun upgrade_for_allocation_model_with_tokentype<TokenT: store>(signer: signer, override_update: bool) {
-        TokenSwapSyrup::upgrade_syrup_pool<TokenT>(&signer, override_update);
+    public(script) fun upgrade_pool_for_token_type<TokenT: store>(signer: signer, alloc_point: u128, override_update: bool) {
+        TokenSwapSyrup::upgrade_pool_for_token_type<TokenT>(&signer, alloc_point, override_update);
     }
 }
 }

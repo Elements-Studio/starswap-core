@@ -11,6 +11,7 @@ module TokenSwapSyrup {
     use StarcoinFramework::Timestamp;
     use StarcoinFramework::Vector;
     use StarcoinFramework::Option;
+    use StarcoinFramework::Debug;
 
     use SwapAdmin::STAR;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
@@ -26,6 +27,7 @@ module TokenSwapSyrup {
     const ERROR_FARMING_STAKE_TIME_NOT_EXISTS: u64 = 106;
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON: u64 = 107;
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON: u64 = 108;
+    const ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS: u64 = 109;
 
     /// Syrup pool of token type
     struct Syrup<phantom TokenT> has key, store {
@@ -360,8 +362,10 @@ module TokenSwapSyrup {
         // Upgrade if alloc mode upgrade switch turned on
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+            Debug::print(&11111111);
             // maybe upgrade under the upgrading switch turned on
             maybe_upgrade_all_stake<TokenT>(signer, &syrup.param_cap);
+            Debug::print(&22222222);
         };
 
         let SyrupStake<TokenT>{
@@ -373,10 +377,14 @@ module TokenSwapSyrup {
             token_amount: _,
         } = pop_stake<TokenT>(&mut stake_list.items, id);
 
+        Debug::print(&33333333);
+
         let (
             unstaken_token,
             reward_token
         ) = YieldFarming::unstake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(signer, broker_addr, harvest_cap);
+
+        Debug::print(&44444444);
 
         let event = borrow_global_mut<SyrupEvent>(broker_addr);
         Event::emit_event(&mut event.unstake_event_handler,
@@ -386,6 +394,7 @@ module TokenSwapSyrup {
                 admin: broker_addr,
             });
 
+        Debug::print(&55555555);
         (unstaken_token, reward_token)
     }
 
@@ -424,6 +433,18 @@ module TokenSwapSyrup {
     public fun query_release_per_second<TokenT: store>(): u128 acquires Syrup {
         let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
         syrup.release_per_second
+    }
+
+    /// Queyry global pool info
+    /// return value: (total_alloc_point, pool_release_per_second)
+    public fun query_syrup_info(): (u128, u128) {
+        YieldFarming::query_global_pool_info<PoolTypeSyrup>(STAR::token_address())
+    }
+
+    /// Query pool info from pool type v2
+    /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
+    public fun query_pool_info_v2<TokenT: store>(): (u128, u128, u128, u128) {
+        YieldFarming::query_pool_info_v2<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
     }
 
     /// Get current stake id
@@ -470,14 +491,26 @@ module TokenSwapSyrup {
         }
     }
 
+    /// Syrup global information
+    public fun upgrade_syrup_global(signer: &signer, pool_release_per_second: u128) {
+        YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(signer, pool_release_per_second);
+    }
+
     /// Only called by genesis account in upgrade scene
-    public fun upgrade_syrup_pool<TokenT: store>(signer: &signer, override_update: bool) acquires SyrupExtInfo {
+    public fun upgrade_pool_for_token_type<TokenT: store>(signer: &signer, alloc_point: u128, override_update: bool) {
         STAR::assert_genesis_address(signer);
 
         // Extend yield farming asset
         let broker = Signer::address_of(signer);
-        let syrup_ext_info = borrow_global<SyrupExtInfo<TokenT>>(broker);
-        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, syrup_ext_info.alloc_point, override_update);
+        assert!(!exists<SyrupExtInfo<TokenT>>(broker), Errors::invalid_state(ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS));
+
+        let multiplier_cap =
+            YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
+        move_to(signer, SyrupExtInfo<TokenT>{
+            alloc_point,
+            multiplier_cap,
+        });
+        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
     }
 
     /// Upgrade all staking resource that
@@ -490,6 +523,7 @@ module TokenSwapSyrup {
         // Check false if old stakes not exists or new stakes are exist
         if (!YieldFarming::exists_stake_at_address<PoolTypeSyrup, Token::Token<TokenT>>(account_addr) ||
             YieldFarming::exists_stake_extend<PoolTypeSyrup, Token::Token<TokenT>>(account_addr)) {
+            Debug::print(&88888888);
             return
         };
 
