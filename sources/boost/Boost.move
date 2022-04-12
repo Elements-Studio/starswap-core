@@ -17,7 +17,7 @@ module Boost {
     /// @param The amount of Vestar staked by users
     /// @param The user's pledge amount on the current farm
     /// @param Total stake on the current farm
-    /// return Boost factor Max:250000 
+    /// return Boost factor Max:250 
     /// `When: UserLockedFarmAmount / TotalLockedFarmAmount < 0.001`
     /// `boost factor = (( UserLockedVeSTARAmount / TotalVeSTARAmount ) / (UserLockedFarmAmount / TotalLockedFarmAmount) )* 1500000  + 1  `
     /// `When: UserLockedFarmAmount / TotalLockedFarmAmount >= 0.001`
