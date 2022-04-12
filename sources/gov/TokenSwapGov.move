@@ -503,11 +503,6 @@ module TokenSwapGov {
               - get_balance_of_treasury<PoolTypeDeveloperFund>()
     }
 
-    /// Upgrade v2 to v3, only called in barnard net for compatibility
-    /// TODO(9191stc): to be remove it before deploy to main net
-    public(script) fun upgrade_v2_to_v3_for_syrup_on_testnet(_signer: signer, _amount: u128)  {
-        abort Errors::deprecated(ERR_DEPRECATED_UPGRADE_ERROR)
-    }
 
     public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
