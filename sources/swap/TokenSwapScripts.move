@@ -48,6 +48,12 @@ module TokenSwapScripts {
         TokenSwapRouter::get_poundage_rate<X, Y>()
     }
 
+    /// Operation_v2 number of liquidity token pair
+    public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
+                                         Y: copy + drop + store>(): (u64, u64) {
+        TokenSwapRouter::get_swap_fee_operation_rate_v2<X, Y>()
+    }
+
     public(script) fun swap_exact_token_for_token<X: copy + drop + store,
                                                   Y: copy + drop + store>(
         signer: signer,
