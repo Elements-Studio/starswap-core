@@ -29,9 +29,9 @@ module Boost {
         let small_LP = 1000;   
         let lp = user_locked_farm_amount * factor / total_farm_amount;
         let boost_factor =  if( lp  <  small_LP){
-                Math::mul_div(user_locked_farm_amount , factor ,  total_farm_amount ) * Math::mul_div(user_locked_vestar_amount , factor ,  total_vestar_amount )  * 1500000 / factor  + ( 1 * factor)
+                ( ( Math::mul_div(user_locked_farm_amount , factor ,  total_farm_amount ) * Math::mul_div(user_locked_vestar_amount , factor ,  total_vestar_amount ) * 1500000 ) / factor  ) + ( 1 * factor)
             }else{
-                Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) + ( 1 * factor)
+                ( (  Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor ) / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) )  +  ( 1 * factor)
             };
         if(boost_factor > 25 * factor / 10 ){
             boost_factor = 25 * factor / 10;
@@ -46,9 +46,9 @@ module Boost {
         let small_LP = 1000;   
         let lp = user_locked_farm_amount * factor / total_farm_amount;
         let boost_factor =  if( lp  <  small_LP){
-                Math::mul_div(user_locked_farm_amount , factor ,  total_farm_amount ) * Math::mul_div(user_locked_vestar_amount , factor ,  total_vestar_amount )  * 1500000 / factor  + ( 1 * factor)
+                ( ( Math::mul_div(user_locked_farm_amount , factor ,  total_farm_amount ) * Math::mul_div(user_locked_vestar_amount , factor ,  total_vestar_amount ) * 1500000 ) / factor  ) + ( 1 * factor)
             }else{
-                Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) + ( 1 * factor)
+                ( (  Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor ) / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) )  +  ( 1 * factor)
             };
         if(boost_factor > 25 * factor / 10 ){
             boost_factor = 25 * factor / 10;
