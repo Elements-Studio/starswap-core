@@ -33,7 +33,7 @@ module Boost {
             }else{
                 ( (  Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor ) / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) )  +  ( 1 * factor)
             };
-        if(boost_factor > 25 * factor / 10 ){
+        if(boost_factor > ( 25 * factor / 10 )){
             boost_factor = 25 * factor / 10;
         };
         let boost_factor = boost_factor  / ( factor / Math::pow(10,2));
@@ -50,7 +50,7 @@ module Boost {
             }else{
                 ( (  Math::mul_div(user_locked_vestar_amount , factor * 3 , total_vestar_amount ) * factor ) / Math::mul_div( user_locked_farm_amount , factor * 2 , total_farm_amount ) )  +  ( 1 * factor)
             };
-        if(boost_factor > 25 * factor / 10 ){
+        if(boost_factor > ( 25 * factor / 10 ) ){
             boost_factor = 25 * factor / 10;
         };
 
