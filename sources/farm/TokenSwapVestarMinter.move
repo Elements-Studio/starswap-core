@@ -71,6 +71,11 @@ module TokenSwapVestarMinter {
     acquires Treasury, VestarOwnerCapability, MintRecordList {
         let user_addr = Signer::address_of(signer);
 
+        // Check user has treasury, if not then return
+        if (!exists<Treasury>(user_addr)) {
+            return
+        };
+
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
         let record = pop_from_record(user_addr, id);
         let to_burn_amount = if (Option::is_some(&record)) {
