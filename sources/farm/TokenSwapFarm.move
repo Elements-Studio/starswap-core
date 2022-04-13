@@ -82,8 +82,7 @@ module TokenSwapFarm {
 
     struct FarmPoolCapability<phantom X, phantom Y> has key, store {
         cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
-        release_per_seconds: u128,
-        //abandoned fields
+        release_per_seconds: u128, //abandoned fields
     }
 
     struct FarmMultiplier<phantom X, phantom Y> has key, store {
@@ -644,7 +643,7 @@ module TokenSwapFarm {
     acquires FarmPoolStake, FarmPoolCapability{
         let user_addr = Signer::address_of(account);
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
-        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(user_addr);
+        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
     }
 

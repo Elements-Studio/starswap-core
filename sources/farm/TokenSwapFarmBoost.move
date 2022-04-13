@@ -98,9 +98,11 @@ module TokenSwapFarmBoost {
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
         //unlock boost amount vestar
-        let vestar_value = TokenSwapVestarMinter::value(user_addr);
-        let vestar_token = VToken::withdraw<VESTAR>(&mut user_info.locked_vetoken, vestar_value);
-        TokenSwapVestarMinter::deposit_with_cap(account, vestar_token, &vestar_treasury_cap.cap);
+        let vestar_value = VToken::value<VESTAR>(&user_info.locked_vetoken);
+        if (vestar_value > 0){
+            let vestar_token = VToken::withdraw<VESTAR>(&mut user_info.locked_vetoken, vestar_value);
+            TokenSwapVestarMinter::deposit_with_cap(account, vestar_token, &vestar_treasury_cap.cap);
+        };
 
         user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
     }
@@ -109,7 +111,7 @@ module TokenSwapFarmBoost {
     fun update_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
         account: &signer,
-        stake_id: u64,
+        stake_id: u64
     ) acquires UserInfo {
         let user_addr = Signer::address_of(account);
 
@@ -119,7 +121,7 @@ module TokenSwapFarmBoost {
         let asset_amount = YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, stake_id);
 
         let total_farm_amount = YieldFarming::query_total_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address());
-        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount,asset_amount,total_farm_amount);
+        let new_boost_factor = Boost::compute_boost_factor(total_locked_vetoken_amount, asset_amount, total_farm_amount);
 
         let new_asset_weight = calculate_boost_weight(asset_amount, new_boost_factor);
         let last_asset_weight = calculate_boost_weight(asset_amount, user_info.boost_factor);
