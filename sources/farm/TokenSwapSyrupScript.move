@@ -47,7 +47,7 @@ module TokenSwapSyrupScript {
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let cap = borrow_global<VestarMintCapabilityWrapper>(VESTAR::token_address());
             TokenSwapVestarMinter::mint_with_cap(&signer,
-                TokenSwapSyrup::get_global_stake_id<TokenT>(),
+                TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(&signer)),
                 pledge_time_sec,
                 amount,
                 &cap.cap);

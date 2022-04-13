@@ -991,12 +991,12 @@ module YieldFarmingV3 {
     }
 
     /// Get global stake id
-    public fun get_global_stake_id<PoolType: store, AssetT: store>(broker: address): u64 acquires StakeListExtend, StakeList {
+    public fun get_global_stake_id<PoolType: store, AssetT: store>(user_addr: address): u64 acquires StakeListExtend, StakeList {
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            let stake_list_ext = borrow_global<StakeListExtend<PoolType, AssetT>>(broker);
+            let stake_list_ext = borrow_global<StakeListExtend<PoolType, AssetT>>(user_addr);
             stake_list_ext.next_id
         } else {
-            let stake_list = borrow_global<StakeList<PoolType, AssetT>>(broker);
+            let stake_list = borrow_global<StakeList<PoolType, AssetT>>(user_addr);
             stake_list.next_id
         }
     }

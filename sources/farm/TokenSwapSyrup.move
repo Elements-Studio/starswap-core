@@ -202,6 +202,10 @@ module TokenSwapSyrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
+        // Check alloc mode has turn on
+        assert!(!TokenSwapConfig::get_alloc_mode_upgrade_switch(),
+            Errors::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON));
+
         let broker_addr = Signer::address_of(signer);
         let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr);
 
@@ -221,6 +225,10 @@ module TokenSwapSyrup {
     public fun set_alive<TokenT: copy + drop + store>(signer: &signer, alive: bool) acquires Syrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
+
+        // Check alloc mode has turn on
+        assert!(!TokenSwapConfig::get_alloc_mode_upgrade_switch(),
+            Errors::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON));
 
         let broker_addr = Signer::address_of(signer);
         let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr);
@@ -441,8 +449,8 @@ module TokenSwapSyrup {
     }
 
     /// Get current stake id
-    public fun get_global_stake_id<TokenT: store>(): u64 {
-        YieldFarming::get_global_stake_id<PoolTypeSyrup, Token::Token<TokenT>>(STAR::token_address())
+    public fun get_global_stake_id<TokenT: store>(user_addr: address): u64 {
+        YieldFarming::get_global_stake_id<PoolTypeSyrup, Token::Token<TokenT>>(user_addr)
     }
 
     public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
@@ -515,7 +523,7 @@ module TokenSwapSyrup {
 
         // Check false if old stakes not exists or new stakes are exist
         if (!YieldFarming::exists_stake_at_address<PoolTypeSyrup, Token::Token<TokenT>>(account_addr) ||
-            YieldFarming::exists_stake_extend<PoolTypeSyrup, Token::Token<TokenT>>(account_addr)) {
+            YieldFarming::exists_stake_list_extend<PoolTypeSyrup, Token::Token<TokenT>>(account_addr)) {
             // Debug::print(&88888888);
             return
         };
