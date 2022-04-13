@@ -741,7 +741,7 @@ module YieldFarmingV3 {
     public fun query_stake<PoolType: store,
                            AssetT: store>(account: address, id: u64): u128 acquires StakeList, StakeListExtend {
         //TODO can be clean up after pool alloc mode upgrade
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        if ((!TokenSwapConfig::get_alloc_mode_upgrade_switch()) || (!exists<StakeListExtend<PoolType, AssetT>>(account))) {
             let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
             let stake = get_stake(&mut stake_list.items, id);
             assert!(stake.id == id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
