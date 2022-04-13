@@ -95,6 +95,9 @@ module TokenSwapVestarMinter {
 
     /// Amount of treasury
     public fun value(account: address): u128 acquires Treasury {
+        if (!exists<Treasury>(account)) {
+            return 0
+        };
         let treasury = borrow_global_mut<Treasury>(account);
         VToken::value<VESTAR::VESTAR>(&treasury.vtoken)
     }
