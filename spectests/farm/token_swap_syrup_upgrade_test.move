@@ -77,7 +77,7 @@ script {
 //# run --signers SwapAdmin
 script {
     use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::TokenSwapSyrupScript;
+    use SwapAdmin::UpgradeScripts;
     use SwapAdmin::CommonHelper;
     use SwapAdmin::STAR;
 
@@ -87,7 +87,7 @@ script {
         assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), 100011);
 
         // upgrade for global init
-        TokenSwapSyrupScript::upgrade_for_init(signer, CommonHelper::pow_amount<STAR::STAR>(10));
+        UpgradeScripts::initialize_global_syrup_info(signer, CommonHelper::pow_amount<STAR::STAR>(10));
     }
 }
 // check: EXECUTED
@@ -99,10 +99,9 @@ script {
 
     use SwapAdmin::TokenMock;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapSyrupScript;
 
     fun upgrade_pool_for_weth(signer: signer) {
-        TokenSwapSyrupScript::upgrade_pool_for_token_type<TokenMock::WETH>(signer, 100, false);
+        TokenSwapSyrup::upgrade_pool_for_token_type<TokenMock::WETH>(&signer, 100, false);
         let (alloc_point, _, _, _) = TokenSwapSyrup::query_pool_info_v2<TokenMock::WETH>();
         Debug::print(&alloc_point);
         assert!(alloc_point == 100, 10012);
