@@ -150,9 +150,9 @@ module TokenSwapVestarMinter {
 
         Vector::push_back<MintRecord>(&mut lst.items, MintRecord{
             id,
-            pledge_time_sec,
-            staked_amount,
             minted_amount,
+            staked_amount,
+            pledge_time_sec,
         });
     }
 

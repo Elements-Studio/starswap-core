@@ -150,3 +150,49 @@ script {
     }
 }
 // check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapConfig;
+
+    fun add_pledage_time_multiplier(signer: signer) {
+        TokenSwapConfig::put_stepwise_multiplier(&signer, 3600, 1);
+    }
+}
+// check: EXECUTED
+
+
+//# run --signers alice
+script {
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenSwapSyrupScript;
+
+    fun alice_stake_all_flow(signer: signer) {
+        TokenSwapSyrupScript::stake<TokenMock::WETH>(signer, 3600, 10000000000);
+    }
+}
+// check: EXECUTED
+
+//# block --author 0x1 --timestamp 15000000
+
+//# run --signers alice
+script {
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Signer;
+
+    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenSwapSyrupScript;
+    use SwapAdmin::TokenSwapVestarMinter;
+
+    fun alice_stake_unall_flow(signer: signer) {
+        let account = Signer::address_of(&signer);
+
+        let vecs = TokenSwapSyrupScript::query_stake_list<TokenMock::WETH>(account);
+        Debug::print(&vecs);
+
+        TokenSwapSyrupScript::unstake<TokenMock::WETH>(signer, 2);
+
+        assert!(TokenSwapVestarMinter::value(account) <= 0, 10014);
+    }
+}
+// check: EXECUTED

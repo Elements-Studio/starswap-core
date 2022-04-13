@@ -114,3 +114,25 @@ script {
 // check: EXECUTED
 
 
+
+//# run --signers alice
+script {
+    use StarcoinFramework::Debug;
+
+    use SwapAdmin::Boost;
+    use alice::VestarHoster;
+
+    fun vestar_mint_and_burn_2(signer: signer) {
+        VestarHoster::mint(&signer, 3600, 100000000000);
+        VestarHoster::mint(&signer, 3600, 100000000000);
+        let treasury_amount = VestarHoster::get_amount_of_treasury(&signer);
+        Debug::print(&treasury_amount);
+
+        let compute_amount = Boost::compute_mint_amount(3600, 100000000000);
+        assert!(compute_amount * 2 == treasury_amount, 10004);
+
+        VestarHoster::burn(&signer, 3600, 100000000000);
+        assert!(VestarHoster::get_amount_of_treasury(&signer) == compute_amount, 10005);
+    }
+}
+// check: EXECUTED
