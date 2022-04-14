@@ -90,6 +90,10 @@ module TokenSwapSyrupScript {
         TokenSwapVestarMinter::value(user_addr)
     }
 
+    public fun query_vestar_amount_by_staked_id(user_addr: address, id: u64): u128 {
+        TokenSwapVestarMinter::value_of_id(user_addr, id)
+    }
+
     public fun upgrade_for_init(signer: &signer, pool_release_per_second: u128) {
         TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
 

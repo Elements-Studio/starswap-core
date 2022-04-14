@@ -102,6 +102,20 @@ module TokenSwapVestarMinter {
         VToken::value<VESTAR::VESTAR>(&treasury.vtoken)
     }
 
+    /// Query amount in record by given id number
+    public fun value_of_id(account: address, id: u64): u128 acquires MintRecordList {
+        if (!exists<MintRecordList>(account)) {
+            return 0
+        };
+        let list = borrow_global<MintRecordList>(account);
+        let idx = find_idx_by_id(&list.items, id);
+        if (Option::is_none(&idx)) {
+            return 0
+        };
+        let record = Vector::borrow(&list.items, Option::destroy_some(idx));
+        record.minted_amount
+    }
+
     /// Withdraw from treasury
     public fun withdraw_with_cap(signer: &signer, amount: u128, _cap: &TreasuryCapability)
     : VToken::VToken<VESTAR::VESTAR> acquires Treasury {
