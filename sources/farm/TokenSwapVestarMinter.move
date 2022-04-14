@@ -78,13 +78,13 @@ module TokenSwapVestarMinter {
 
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
         let record = pop_from_record(user_addr, id);
-        let to_burn_amount = if (Option::is_some(&record)) {
-            let mint_record = Option::destroy_some(record);
-            mint_record.minted_amount
-        } else {
-            Boost::compute_mint_amount(pledge_time_sec, staked_amount)
+        if (Option::is_none(&record)) { // This stake is old stake operation, do nothing.
+            return
         };
+        // assert!(Option::is_some(&record), Errors::invalid_state(ERROR_RECORD_ID_NOT_FOUND));
 
+        let mint_record = Option::destroy_some(record);
+        let to_burn_amount = mint_record.minted_amount;
         let treasury_amount = value(user_addr);
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
 
