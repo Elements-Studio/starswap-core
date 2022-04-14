@@ -114,7 +114,6 @@ script {
 // check: EXECUTED
 
 
-
 //# run --signers alice
 script {
     use StarcoinFramework::Debug;
