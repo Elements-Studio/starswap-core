@@ -92,6 +92,19 @@ module TokenSwapVestarMinter {
             VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
     }
 
+    /// Burn all vestar in treasury
+//    public fun clean_treasury(signer: &signer, id: u64, _cap: &MintCapability) acquires Treasury, VestarOwnerCapability, MintRecordList {
+//        let user_addr = Signer::address_of(signer);
+//        let treasury = borrow_global_mut<Treasury>(user_addr);
+//
+//        let _ = pop_from_record(user_addr, id);
+//        let to_burn_amount = VToken::value(&treasury.vtoken);
+//
+//        let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
+//        VToken::burn_with_cap<VESTAR::VESTAR>(&cap.cap,
+//            VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
+//    }
+
     /// Amount of treasury
     public fun value(account: address): u128 acquires Treasury {
         if (!exists<Treasury>(account)) {
