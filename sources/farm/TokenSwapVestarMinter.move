@@ -67,7 +67,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Burn Vestar with capability
-    public fun burn_with_cap(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
+    public fun burn_with_cap(signer: &signer, id: u64, _pledge_time_sec: u64, _staked_amount: u128, _cap: &MintCapability)
     acquires Treasury, VestarOwnerCapability, MintRecordList {
         let user_addr = Signer::address_of(signer);
 
@@ -78,10 +78,9 @@ module TokenSwapVestarMinter {
 
         let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
         let record = pop_from_record(user_addr, id);
-        if (Option::is_none(&record)) { // This stake is old stake operation, do nothing.
+        if (Option::is_none(&record)) { // Doing nothing if this stake operation is old.
             return
         };
-        // assert!(Option::is_some(&record), Errors::invalid_state(ERROR_RECORD_ID_NOT_FOUND));
 
         let mint_record = Option::destroy_some(record);
         let to_burn_amount = mint_record.minted_amount;
