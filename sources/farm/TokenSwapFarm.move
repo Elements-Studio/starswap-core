@@ -642,6 +642,15 @@ module TokenSwapFarm {
     public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
     acquires FarmPoolStake, FarmPoolCapability{
         let user_addr = Signer::address_of(account);
+        // after pool alloc mode upgrade
+        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+            //check if need extend
+            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
+                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
+                extend_farm_stake_resource<X, Y>(account);
+            };
+        };
+
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
