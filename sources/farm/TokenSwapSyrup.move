@@ -11,7 +11,6 @@ module TokenSwapSyrup {
     use StarcoinFramework::Timestamp;
     use StarcoinFramework::Vector;
     use StarcoinFramework::Option;
-    //use StarcoinFramework::Debug;
 
     use SwapAdmin::STAR;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
@@ -524,7 +523,6 @@ module TokenSwapSyrup {
         // Check false if old stakes not exists or new stakes are exist
         if (!YieldFarming::exists_stake_at_address<PoolTypeSyrup, Token::Token<TokenT>>(account_addr) ||
             YieldFarming::exists_stake_list_extend<PoolTypeSyrup, Token::Token<TokenT>>(account_addr)) {
-            // Debug::print(&88888888);
             return
         };
 
