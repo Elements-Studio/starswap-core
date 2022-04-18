@@ -329,6 +329,18 @@ module TokenSwapRouter {
             TokenSwapConfig::get_poundage_rate<Y, X>()
         }
     }
+    
+    /// Operation number of liquidity token pair
+    public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
+                                 Y: copy + drop + store>(): (u64, u64) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapConfig::get_swap_fee_operation_rate_v2<X, Y>()
+        } else {
+            TokenSwapConfig::get_swap_fee_operation_rate_v2<Y, X>()
+        }
+    }
 
     /// Poundage rate from swap fee
     public fun set_poundage_rate<X: copy + drop + store,
