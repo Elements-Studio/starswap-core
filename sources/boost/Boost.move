@@ -18,45 +18,34 @@ module Boost {
     /// @param The user's pledge amount on the current farm
     /// @param Total stake on the current farm
     /// return Boost factor Max:250 
-    /// `When: UserLockedFarmAmount / TotalLockedFarmAmount < 0.001`
-    /// `boost factor = (( UserLockedVeSTARAmount / TotalVeSTARAmount ) / (UserLockedFarmAmount / TotalLockedFarmAmount) )* 1500000  + 1  `
-    /// `When: UserLockedFarmAmount / TotalLockedFarmAmount >= 0.001`
     /// `boost factor = ( UserLockedVeSTARAmount / TotalVeSTARAmount ) / ( ( 2 / 3) * UserLockedFarmAmount / TotalLockedFarmAmount ) + 1  `
     public fun compute_boost_factor(user_locked_vestar_amount: u128,
                                     user_locked_farm_amount: u128,
                                     total_farm_amount: u128): u64 {
-        let factor = Math::pow(10, 6);
+        let factor = Math::pow(10, 8);
 
         let total_vestar_amount = Token::market_cap<VESTAR::VESTAR>();
-        let small_LP = 1000;
-        let lp = user_locked_farm_amount * factor / total_farm_amount;
-        let boost_factor = if ( lp  <  small_LP) {
-            ((Math::mul_div(user_locked_farm_amount, factor, total_farm_amount) * Math::mul_div(user_locked_vestar_amount, factor, total_vestar_amount) * 1500000) / factor) + (1 * factor)
-        }else {
-            ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor)
-        };
+        let boost_factor = ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor);
         if (boost_factor > (25 * factor / 10)) {
             boost_factor = 25 * factor / 10;
+        }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
+            boost_factor =  1 * factor + 1 * ( factor / 100 ) ;
         };
-        let boost_factor = boost_factor / (factor / Math::pow(10, 2));
+        let boost_factor = boost_factor / ( factor / 100 );
         return (boost_factor as u64)
     }
 
     #[test_only]
     fun compute_boost_factor_test(user_locked_vestar_amount: u128, total_vestar_amount: u128, user_locked_farm_amount: u128, total_farm_amount: u128): u64 {
-        let factor = Math::pow(10, 6);
-        let small_LP = 1000;
-        let lp = user_locked_farm_amount * factor / total_farm_amount;
-        let boost_factor = if ( lp  <  small_LP) {
-            ((Math::mul_div(user_locked_farm_amount, factor, total_farm_amount) * Math::mul_div(user_locked_vestar_amount, factor, total_vestar_amount) * 1500000) / factor) + (1 * factor)
-        }else {
-            ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor)
-        };
-        if (boost_factor > (25 * factor / 10) ) {
-            boost_factor = 25 * factor / 10;
-        };
+        let factor = Math::pow(10, 8);
 
-        let boost_factor = boost_factor / (factor / Math::pow(10, 2));
+        let boost_factor = ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor);        
+        if (boost_factor > (25 * factor / 10)) {  
+            boost_factor = 25 * factor / 10;
+        }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
+            boost_factor =  1 * factor + 1 * ( factor / 100 ) ;
+        };
+        let boost_factor = boost_factor / ( factor / 100 );
         return (boost_factor as u64)
     }
 
@@ -103,12 +92,20 @@ module Boost {
             500000000000000,
             3064578000000000
         );
+        let g = compute_boost_factor_test(
+            1000000000,
+            500000000000000,
+            1000000000000,
+            3064578000000000
+        );
+
         assert!(a == 100, 1001);
-        assert!(b == 197, 1002);
+        assert!(b == 250, 1002);
         assert!(c == 191, 1003);
         assert!(d == 145, 1004);
         assert!(e == 250, 1005);
         assert!(f == 109, 1006);
+        assert!(g == 101, 1007);
     }
 
     #[test]
