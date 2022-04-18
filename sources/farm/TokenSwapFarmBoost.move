@@ -6,6 +6,7 @@ address SwapAdmin {
 module TokenSwapFarmBoost {
     use StarcoinFramework::Token;
     use StarcoinFramework::Signer;
+    use StarcoinFramework::Event;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwap::LiquidityToken;
@@ -28,6 +29,44 @@ module TokenSwapFarmBoost {
 
     struct VeStarTreasuryCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::TreasuryCapability
+    }
+
+    /// Event emitted when unboost been called
+    struct UnBoostEvent has drop, store {
+        /// token code of X type
+        x_token_code: Token::TokenCode,
+        /// token code of X type
+        y_token_code: Token::TokenCode,
+        /// signer of stake user
+        signer: address,
+        ///  boost unstake amount
+        amount: u128,
+    }
+
+    /// Event emitted when boost been called
+    struct BoostEvent has drop, store {
+        /// token code of X type
+        x_token_code: Token::TokenCode,
+        /// token code of X type
+        y_token_code: Token::TokenCode,
+        /// signer of stake user
+        signer: address,
+        //  boost unstake amount
+        amount: u128,
+    }
+
+    struct BoostEventStruct has key, store {
+        boost_event_handler: Event::EventHandle<BoostEvent>,
+        unboost_event_handler: Event::EventHandle<UnBoostEvent>,
+    }
+
+    /// Initialize Boost event
+    public fun initialize_boost_event(account: &signer) {
+        STAR::assert_genesis_address(account);
+        move_to(account, BoostEventStruct{
+            boost_event_handler: Event::new_event_handle<BoostEvent>(account),
+            unboost_event_handler: Event::new_event_handle<UnBoostEvent>(account),
+        });
     }
 
     public fun set_treasury_cap(signer: &signer, vestar_treasury_cap: TokenSwapVestarMinter::TreasuryCapability) {
@@ -62,7 +101,7 @@ module TokenSwapFarmBoost {
         account: &signer,
         boost_amount: u128,
         stake_id: u64)
-    acquires UserInfo, VeStarTreasuryCapabilityWrapper {
+    acquires UserInfo, VeStarTreasuryCapabilityWrapper,BoostEventStruct {
         let user_addr = Signer::address_of(account);
         if (!exists<UserInfo<X, Y>>(user_addr)) {
             move_to(account, UserInfo<X, Y>{
@@ -80,13 +119,23 @@ module TokenSwapFarmBoost {
         VToken::deposit<VESTAR>(&mut user_info.locked_vetoken, boost_vestar_token);
 
         update_boost_factor<X, Y>(cap, account, stake_id);
+
+        // Emit boost event
+        let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
+        Event::emit_event(&mut boost_event.boost_event_handler,
+            BoostEvent{
+                y_token_code: Token::token_code<X>(),
+                x_token_code: Token::token_code<Y>(),
+                signer: user_addr,
+                amount:boost_amount
+            });
     }
 
     /// unboost for farm unstake
     public fun unboost_from_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
         _cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
         account: &signer)
-    acquires UserInfo, VeStarTreasuryCapabilityWrapper {
+    acquires UserInfo, VeStarTreasuryCapabilityWrapper,BoostEventStruct {
         let user_addr = Signer::address_of(account);
         if (!exists<UserInfo<X, Y>>(user_addr)) {
             move_to(account, UserInfo<X, Y>{
@@ -105,6 +154,18 @@ module TokenSwapFarmBoost {
         };
 
         user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
+
+        
+        // Emit unboost event
+        let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
+        Event::emit_event(&mut boost_event.unboost_event_handler,
+            UnBoostEvent{
+                y_token_code: Token::token_code<X>(),
+                x_token_code: Token::token_code<Y>(),
+                signer: user_addr,
+                amount:vestar_value
+            });
+        
     }
 
     /// boost factor change and triggers
