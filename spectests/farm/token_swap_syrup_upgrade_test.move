@@ -79,6 +79,7 @@ script {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::UpgradeScripts;
     use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::STAR;
 
     fun admin_turned_on_alloc_mode_and_init_upgrade(signer: signer) {
@@ -86,6 +87,7 @@ script {
         TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
         assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), 100011);
 
+        TokenSwapFarmBoost::initialize_boost_event(&signer);    
         // upgrade for global init
         UpgradeScripts::initialize_global_syrup_info(signer, CommonHelper::pow_amount<STAR::STAR>(10));
     }
