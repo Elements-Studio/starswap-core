@@ -4,6 +4,7 @@
 address SwapAdmin {
 module TokenSwapFarmScript {
     use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapFarmBoost;
 
     /// Called by admin account
     public(script) fun add_farm_pool<X: copy + drop + store, Y: copy + drop + store>(account: signer, release_per_second: u128) {
@@ -74,6 +75,10 @@ module TokenSwapFarmScript {
     /// boost for farm
     public(script) fun boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128) {
         TokenSwapFarmRouter::boost<X, Y>(&signer, boost_amount);
+    }
+
+    public(script) fun initialize_boost_event(signer: signer){
+       TokenSwapFarmBoost::initialize_boost_event(&signer);
     }
 }
 }
