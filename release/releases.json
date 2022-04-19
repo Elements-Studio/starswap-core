@@ -1,9 +1,9 @@
 {
   "versions": [
     {
-      "version": "1.0.4",
-      "file-name": "Starswap-Core.v1.0.4.blob",
-      "package-hash": "0x20d18a012f64d2d2d41fc79bc464b0ddcfd6401dab376d0c908bb214b0eeec08",
+      "version": "1.0.6",
+      "file-name": "Starswap-Core.v1.0.6.blob",
+      "package-hash": "0x19227c56b2a7b866b750c55959aeb529dfcdae7d6076488fb394e81d3140b4fd",
       "description": "Boost upgrade",
       "date": "2022-04-21"
     }
