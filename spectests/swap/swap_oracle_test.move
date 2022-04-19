@@ -52,6 +52,26 @@ module SwapAdmin::SwapOracleWrapper {
 
         (last_price_x_cumulative_decode, last_price_y_cumulative_decode, last_block_timestamp)
     }
+
+    public fun set_last_oracle_v2<X: copy + drop + store, Y: copy + drop + store>(
+        price_x_cumulative: U256,
+        price_y_cumulative: U256,
+        block_timestamp: u64,
+    ) acquires SwapOralce {
+        let price_oracle = borrow_global_mut<SwapOralce<X, Y>>(@SwapAdmin);
+        price_oracle.last_price_x_cumulative = *&price_x_cumulative;
+        price_oracle.last_price_y_cumulative = *&price_y_cumulative;
+        price_oracle.last_block_timestamp = block_timestamp;
+    }
+
+    public fun get_last_oracle_v2<X: copy + drop + store, Y: copy + drop + store>(): (U256, U256, u64) acquires SwapOralce {
+        let price_oracle = borrow_global<SwapOralce<X, Y>>(@SwapAdmin);
+        let last_block_timestamp = price_oracle.last_block_timestamp;
+        let last_price_x_cumulative = *&price_oracle.last_price_x_cumulative;
+        let last_price_y_cumulative = *&price_oracle.last_price_y_cumulative;
+
+        (last_price_x_cumulative, last_price_y_cumulative, last_block_timestamp)
+    }
 }
 // check: EXECUTED
 
@@ -221,16 +241,17 @@ script {
         let amount_y_out_min = 25000000000000000u128;
         TokenSwapRouter::swap_exact_token_for_token<WETH, WUSDT>(&signer, amount_x_in, amount_y_out_min);
 
-        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
-        SwapOracleWrapper::set_last_oracle<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
+        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WETH, WUSDT>();
+        let (price_x_cumulative_decode, price_y_cumulative_decode, _) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
+        SwapOracleWrapper::set_last_oracle_v2<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
         Debug::print<u128>(&110502);
         Debug::print(&block_timestamp);
-        Debug::print<u128>(&price_x_cumulative);
-        Debug::print<u128>(&price_y_cumulative);
+        Debug::print<u128>(&price_x_cumulative_decode);
+        Debug::print<u128>(&price_y_cumulative_decode);
         let current_block_timestamp = Timestamp::now_seconds() % (1u64 << 32);
         Debug::print<u64>(&current_block_timestamp);
-        assert!(price_x_cumulative >= 0, 1305);
-        assert!(price_y_cumulative >= 0, 1306);
+        assert!(price_x_cumulative_decode >= 0, 1305);
+        assert!(price_y_cumulative_decode >= 0, 1306);
     }
 }
 // check: EXECUTED
@@ -249,11 +270,11 @@ script {
         let amount_y_out = 2500000000000000000000u128; //e21
         TokenSwapRouter::swap_token_for_exact_token<WETH, WUSDT>(&signer, amount_x_in_max, amount_y_out);
 
-        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
+        let (price_x_cumulative_decode, price_y_cumulative_decode, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
         Debug::print<u128>(&110503);
         Debug::print(&block_timestamp);
-        Debug::print<u128>(&price_x_cumulative);
-        Debug::print<u128>(&price_y_cumulative);
+        Debug::print<u128>(&price_x_cumulative_decode);
+        Debug::print<u128>(&price_y_cumulative_decode);
         let current_block_timestamp = Timestamp::now_seconds() % (1u64 << 32);
         Debug::print<u64>(&current_block_timestamp);
 
@@ -279,11 +300,13 @@ script {
         let amount_x_in_max = 500000000000000000000u128; //e20
         let amount_y_out = 2500000000000000000000u128; //e21
 
-        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
+        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WETH, WUSDT>();
+        let price_x_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative0, false));
+        let price_y_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_y_cumulative0, false));
         Debug::print<u128>(&110504);
         Debug::print(&block_timestamp0);
-        Debug::print<u128>(&price_x_cumulative0);
-        Debug::print<u128>(&price_y_cumulative0);
+        Debug::print<u128>(&price_x_cumulative0_decode);
+        Debug::print<u128>(&price_y_cumulative0_decode);
 
         let (price_x_cumulative_base_a1, price_y_cumulative_base_a1, last_block_timestamp_base_a) = TokenSwapRouter::get_cumulative_info<WETH, WUSDT>();
         let price_x_cumulative_base_a = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative_base_a1, false));
@@ -294,12 +317,15 @@ script {
 
         TokenSwapRouter::swap_token_for_exact_token<WETH, WUSDT>(&signer, amount_x_in_max, amount_y_out);
 
-        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
-        SwapOracleWrapper::set_last_oracle<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
+        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WETH, WUSDT>();
+        let price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_x_cumulative, false));
+        let price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_y_cumulative, false));
+        SwapOracleWrapper::set_last_oracle_v2<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
+
 
         Debug::print(&block_timestamp);
-        Debug::print<u128>(&price_x_cumulative);
-        Debug::print<u128>(&price_y_cumulative);
+        Debug::print<u128>(&price_x_cumulative_decode);
+        Debug::print<u128>(&price_y_cumulative_decode);
 
         let (price_x_cumulative_base_b1, price_y_cumulative_base_b1, last_block_timestamp_base_b) = TokenSwapRouter::get_cumulative_info<WETH, WUSDT>();
         let price_x_cumulative_base_b = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative_base_b1, false));
@@ -308,8 +334,8 @@ script {
         Debug::print<u128>(&price_x_cumulative_base_b);
         Debug::print<u128>(&price_y_cumulative_base_b);
 
-        assert!(price_x_cumulative == price_x_cumulative0, 1307);
-        assert!(price_y_cumulative == price_y_cumulative0, 1308);
+        assert!(price_x_cumulative_decode == price_x_cumulative0_decode, 1307);
+        assert!(price_y_cumulative_decode == price_y_cumulative0_decode, 1308);
         assert!(price_x_cumulative_base_b >= price_x_cumulative_base_a, 1309);
         assert!(price_y_cumulative_base_b >= price_y_cumulative_base_a, 1310);
     }
@@ -326,39 +352,46 @@ script {
     use SwapAdmin::TokenMock::{WETH, WUSDT};
     use StarcoinFramework::Debug;
     use SwapAdmin::SwapOracleWrapper;
+    use SwapAdmin::FixedPoint128;
 
     /// reverse token pair swap
     fun swap_token_for_exact_token(signer: signer) {
         let amount_x_in_max = 6000000000000000000000u128; //e22
         let amount_y_out = 100000000000000000u128; //e17
 
-        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices<WUSDT, WETH>();
+        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WUSDT, WETH>();
+        let price_x_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative0, false));
+        let price_y_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_y_cumulative0, false));
         Debug::print<u128>(&110505);
         Debug::print(&block_timestamp0);
-        Debug::print<u128>(&price_x_cumulative0);
-        Debug::print<u128>(&price_y_cumulative0);
+        Debug::print<u128>(&price_x_cumulative0_decode);
+        Debug::print<u128>(&price_y_cumulative0_decode);
         let (reserve_x0, reserve_y0) = TokenSwapRouter::get_reserves<WUSDT, WETH>();
         Debug::print<u128>(&reserve_x0);
         Debug::print<u128>(&reserve_y0);
 
         TokenSwapRouter::swap_token_for_exact_token<WUSDT, WETH>(&signer, amount_x_in_max, amount_y_out);
 
-        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WUSDT, WETH>();
-        SwapOracleWrapper::set_last_oracle<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
+        let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WUSDT, WETH>();
+        let price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_x_cumulative, false));
+        let price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_y_cumulative, false));
+        SwapOracleWrapper::set_last_oracle_v2<WETH, WUSDT>(price_x_cumulative, price_y_cumulative, block_timestamp);
         Debug::print(&block_timestamp);
-        Debug::print<u128>(&price_x_cumulative);
-        Debug::print<u128>(&price_y_cumulative);
+        Debug::print<u128>(&price_x_cumulative_decode);
+        Debug::print<u128>(&price_y_cumulative_decode);
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<WUSDT, WETH>();
         Debug::print<u128>(&reserve_x);
         Debug::print<u128>(&reserve_y);
 
-        assert!(price_x_cumulative == price_x_cumulative0, 1311);
-        assert!(price_y_cumulative == price_y_cumulative0, 1312);
+        assert!(price_x_cumulative_decode == price_x_cumulative0_decode, 1311);
+        assert!(price_y_cumulative_decode == price_y_cumulative0_decode, 1312);
 
         // assert price cumulative
-        let (last_block_price_x_cumulative, last_block_price_y_cumulative, _) = SwapOracleWrapper::get_last_oracle<WETH, WUSDT>();
-        assert!(price_x_cumulative >= last_block_price_x_cumulative, 1311);
-        assert!(price_y_cumulative >= last_block_price_y_cumulative, 1312);
+        let (last_block_price_x_cumulative, last_block_price_y_cumulative, _) = SwapOracleWrapper::get_last_oracle_v2<WETH, WUSDT>();
+        let last_block_price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(last_block_price_x_cumulative, false));
+        let last_block_price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(last_block_price_y_cumulative, false));
+        assert!(price_x_cumulative_decode >= last_block_price_x_cumulative_decode, 1311);
+        assert!(price_y_cumulative_decode >= last_block_price_y_cumulative_decode, 1312);
     }
 }
 // check: EXECUTED
@@ -369,15 +402,99 @@ script {
 script {
     use SwapAdmin::TokenSwapOracleLibrary;
     use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::FixedPoint128;
     use StarcoinFramework::Debug;
+    use SwapAdmin::SwapOracleWrapper;
 
     /// reverse token pair swap
     fun swap_token_for_exact_token(_: signer) {
-        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices<WUSDT, WETH>();
+        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WUSDT, WETH>();
+
+        let price_x_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_x_cumulative0, false));
+        let price_y_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_y_cumulative0, false));
+        SwapOracleWrapper::set_last_oracle_v2<WETH, WUSDT>(price_x_cumulative0, price_y_cumulative0, block_timestamp0);
         Debug::print<u128>(&110506);
         Debug::print(&block_timestamp0);
-        Debug::print<u128>(&price_x_cumulative0);
-        Debug::print<u128>(&price_y_cumulative0);
+        Debug::print<u128>(&price_x_cumulative0_decode);
+        Debug::print<u128>(&price_y_cumulative0_decode);
+    }
+}
+// check: EXECUTED
+
+
+
+//# block --author 0x1 --timestamp 1638418920000
+
+//# run --signers exchanger
+script {
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::SwapOracleWrapper;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::FixedPoint128;
+    use StarcoinFramework::U256::{Self};
+
+    /// reverse token pair swap
+    fun consult_compare(_: signer) {
+        let amount_in:u128 = 100000000000000000u128; //e17
+        let (price_x_cumulative0, price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WUSDT, WETH>();
+        let price_x_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_x_cumulative0, false));
+        let _price_y_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy price_y_cumulative0, false));
+
+        let (last_price_x_cumulative0, last_price_y_cumulative0, last_block_timestamp0) = SwapOracleWrapper::get_last_oracle_v2<WETH, WUSDT>();
+        let last_price_x_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy last_price_x_cumulative0, false));
+        let _last_price_y_cumulative0_decode = FixedPoint128::decode(FixedPoint128::encode_u256(copy last_price_y_cumulative0, false));
+
+        let time_elapsed_expect = 600; //10min
+
+        let time_elapsed = block_timestamp0 - last_block_timestamp0;
+        assert!(time_elapsed == time_elapsed_expect, 1315);
+
+        let price_average = U256::div(U256::sub(price_x_cumulative0, last_price_x_cumulative0), U256::from_u64(time_elapsed));
+        let amount_out = U256::mul(price_average, U256::from_u128(amount_in));
+        let amount_out_decode = FixedPoint128::decode(FixedPoint128::encode_u256(amount_out, false));
+
+        let amount_out_v1 = (price_x_cumulative0_decode - last_price_x_cumulative0_decode) / (time_elapsed as u128) * amount_in;
+
+        Debug::print<u128>(&110507);
+        Debug::print(&block_timestamp0);
+        Debug::print(&last_block_timestamp0);
+        Debug::print(&time_elapsed_expect);
+        Debug::print(&time_elapsed);
+        Debug::print(&amount_out_decode);
+        Debug::print(&amount_out_v1);
+    }
+}
+// check: EXECUTED
+
+
+//# block --author 0x1 --timestamp 1638420120000
+
+//# run --signers exchanger
+script {
+    use SwapAdmin::TokenSwapOracleLibrary;
+    use SwapAdmin::TokenMock::{WETH, WUSDT};
+    use SwapAdmin::SwapOracleWrapper;
+    use StarcoinFramework::Debug;
+    use SwapAdmin::FixedPoint128;
+    use StarcoinFramework::U256::{Self};
+
+    /// reverse token pair swap
+    fun consult(_: signer) {
+        let amount_in:u128 = 100000000000000000u128; //e17
+        let (price_x_cumulative0, _price_y_cumulative0, block_timestamp0) = TokenSwapOracleLibrary::current_cumulative_prices_v2<WUSDT, WETH>();
+        let (last_price_x_cumulative0, _last_price_y_cumulative0, last_block_timestamp0) = SwapOracleWrapper::get_last_oracle_v2<WETH, WUSDT>();
+
+        let time_elapsed_expect = 1800; //30min
+        let time_elapsed = block_timestamp0 - last_block_timestamp0;
+        assert!(time_elapsed == time_elapsed_expect, 1316);
+
+        let price_average = U256::div(U256::sub(price_x_cumulative0, last_price_x_cumulative0), U256::from_u64(time_elapsed));
+        let amount_out = U256::mul(price_average, U256::from_u128(amount_in));
+        let amount_out_decode = FixedPoint128::decode(FixedPoint128::encode_u256(amount_out, false));
+
+        Debug::print<u128>(&110508);
+        Debug::print(&amount_out_decode);
     }
 }
 // check: EXECUTED
