@@ -9,6 +9,8 @@ module TokenSwapFarm {
     use StarcoinFramework::Event;
     use StarcoinFramework::Errors;
     use StarcoinFramework::Vector;
+    use StarcoinFramework::Signature;
+    use StarcoinFramework::BCS;
 
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::STAR;
@@ -20,6 +22,9 @@ module TokenSwapFarm {
 
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
+    const ERR_WHITE_LIST_BOOST_IS_OPEN: u64 = 102;
+    const ERR_WHITE_LIST_BOOST_SIGN_IS_NULL: u64 = 103;
+    const ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER: u64 = 104;
 
     /// Event emitted when farm been added
     struct AddFarmEvent has drop, store {
@@ -642,6 +647,8 @@ module TokenSwapFarm {
     public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
     acquires FarmPoolStake, FarmPoolCapability{
         let user_addr = Signer::address_of(account);
+        let (is_white_list_boost,_) = TokenSwapConfig::get_white_list_boost_switch();
+        assert!( ! is_white_list_boost ,ERR_WHITE_LIST_BOOST_IS_OPEN);
         // after pool alloc mode upgrade
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //check if need extend
@@ -656,6 +663,39 @@ module TokenSwapFarm {
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
     }
 
+    /// boost for farm
+    public fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128,signature:&vector<u8>)acquires FarmPoolStake, FarmPoolCapability{
 
+        let user_addr = Signer::address_of(account);
+        let (is_white_list_boost,white_list_pubkey) = TokenSwapConfig::get_white_list_boost_switch();
+        if(is_white_list_boost){
+            assert!(Signature::ed25519_verify(*signature, white_list_pubkey, BCS::to_bytes(&user_addr)), ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER);
+        };
+
+        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+            //check if need extend
+            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
+                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
+                extend_farm_stake_resource<X, Y>(account);
+            };
+        };
+
+        let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
+        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
+        TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
+        
+    }
+
+
+    #[test]
+    fun test_wl_boost(){
+        use StarcoinFramework::Signature;
+        use StarcoinFramework::BCS;
+
+        let public_key =  x"d6da1bea14990ad936a848c2a375a2c105d5038ce726ed03f8700998c4e840b5";
+        let message = @0xc5578819fD7Ab114AbB77F1596A0fdb4;
+        let signature = x"773c9540497ee99eefa3679e04debe8ed3690f44dcaa9dbe9326ff2958559b5ded7e165886fa845c8acbbc0571ad24a4fced0e1ee239358b3857d0165a09a40d";
+        assert!(Signature::ed25519_verify(signature, public_key, BCS::to_bytes(&message)), 1001);
+    }
 }
 }

@@ -76,6 +76,11 @@ module TokenSwapFarmScript {
     public(script) fun boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128) {
         TokenSwapFarmRouter::boost<X, Y>(&signer, boost_amount);
     }
+           
+    /// white list boost for farm
+    public(script) fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128,signature:vector<u8>) {
+        TokenSwapFarmRouter::wl_boost<X, Y>(&signer, boost_amount,&signature);
+    }
 
     public(script) fun initialize_boost_event(signer: signer){
        TokenSwapFarmBoost::initialize_boost_event(&signer);
