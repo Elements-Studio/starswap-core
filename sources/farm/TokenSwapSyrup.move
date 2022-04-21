@@ -162,10 +162,6 @@ module TokenSwapSyrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
-        // Check alloc mode has turn on
-        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            Errors::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON));
-
         let account = Signer::address_of(signer);
         assert!(!exists<Syrup<TokenT>>(account), ERROR_ADD_POOL_REPEATE);
 
@@ -497,20 +493,42 @@ module TokenSwapSyrup {
     }
 
     /// Only called by genesis account in upgrade scene
-    public fun upgrade_pool_for_token_type<TokenT: store>(signer: &signer, alloc_point: u128, override_update: bool) {
+//    public fun upgrade_pool_for_token_type<TokenT: store>(signer: &signer, alloc_point: u128, override_update: bool) {
+//        STAR::assert_genesis_address(signer);
+//
+//        // Extend yield farming asset
+//        let broker = Signer::address_of(signer);
+//        assert!(!exists<SyrupExtInfo<TokenT>>(broker), Errors::invalid_state(ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS));
+//
+//        let multiplier_cap =
+//            YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
+//        move_to(signer, SyrupExtInfo<TokenT>{
+//            alloc_point,
+//            multiplier_cap,
+//        });
+//        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
+//    }
+
+    /// Extend syrup pool for type
+    public fun extend_syrup_pool<TokenT: store>(signer: &signer, override_update: bool) acquires SyrupExtInfo {
         STAR::assert_genesis_address(signer);
 
-        // Extend yield farming asset
         let broker = Signer::address_of(signer);
-        assert!(!exists<SyrupExtInfo<TokenT>>(broker), Errors::invalid_state(ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS));
-
-        let multiplier_cap =
-            YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
-        move_to(signer, SyrupExtInfo<TokenT>{
-            alloc_point,
-            multiplier_cap,
-        });
+        let alloc_point = 1;
         YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
+
+        if (!exists<SyrupExtInfo<TokenT>>(broker)) {
+            let multiplier_cap =
+                YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
+
+            move_to(signer, SyrupExtInfo<TokenT>{
+                alloc_point,
+                multiplier_cap
+            });
+        } else {
+            let farm_pool_info = borrow_global_mut<SyrupExtInfo<TokenT>>(broker);
+            farm_pool_info.alloc_point = alloc_point;
+        };
     }
 
     /// Upgrade all staking resource that

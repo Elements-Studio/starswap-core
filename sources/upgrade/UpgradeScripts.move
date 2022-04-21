@@ -63,11 +63,9 @@ module UpgradeScripts {
     }
 
     /// Extend syrup pool
-    public(script) fun extend_syrup_pool<TokenT: copy + drop + store>(signer: signer,
-                                                                      alloco_point: u128,
-                                                                      override_update: bool) {
+    public(script) fun extend_syrup_pool<TokenT: copy + drop + store>(signer: signer, override_update: bool) {
         TokenSwapConfig::assert_admin(&signer);
-        TokenSwapSyrup::upgrade_pool_for_token_type<TokenT>(&signer, alloco_point, override_update);
+        TokenSwapSyrup::extend_syrup_pool<TokenT>(&signer, override_update);
     }
 }
 }

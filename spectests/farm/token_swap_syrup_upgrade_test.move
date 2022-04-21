@@ -103,10 +103,10 @@ script {
     use SwapAdmin::TokenSwapSyrup;
 
     fun upgrade_pool_for_weth(signer: signer) {
-        TokenSwapSyrup::upgrade_pool_for_token_type<TokenMock::WETH>(&signer, 100, false);
+        TokenSwapSyrup::extend_syrup_pool<TokenMock::WETH>(&signer, false);
         let (alloc_point, _, _, _) = TokenSwapSyrup::query_pool_info_v2<TokenMock::WETH>();
         Debug::print(&alloc_point);
-        assert!(alloc_point == 100, 10012);
+        assert!(alloc_point == 1, 10012);
     }
 }
 // check: EXECUTED
