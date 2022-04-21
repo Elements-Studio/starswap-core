@@ -309,6 +309,16 @@ script {
 
 //# run --signers SwapAdmin
 script {
+    use SwapAdmin::TokenSwapFarmScript;
+
+    fun initialize_boost_event(signer: signer) {
+        TokenSwapFarmScript::initialize_boost_event(signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
     use SwapAdmin::YieldFarmingAndVestarWrapper;
 
     fun init_vestar(signer: signer) {

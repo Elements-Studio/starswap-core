@@ -110,7 +110,7 @@ module Boost {
 
     #[test]
     public fun test_compute_mint_amount() {
-        assert!(compute_mint_amount(100, 50000000000) == 158548, 10001);
+        assert!(compute_mint_amount(100, 50000000000) == 79274, 10001);
     }
 }
 }

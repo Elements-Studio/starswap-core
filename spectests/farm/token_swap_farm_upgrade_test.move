@@ -209,6 +209,16 @@ script {
 
 //# run --signers SwapAdmin
 script {
+    use SwapAdmin::TokenSwapFarmScript;
+
+    fun initialize_boost_event(signer: signer) {
+        TokenSwapFarmScript::initialize_boost_event(signer)
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
     use SwapAdmin::TokenSwapConfig;
 
     fun upgrade_for_turned_on_alloc_mode(signer: signer) {
