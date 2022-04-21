@@ -5,7 +5,7 @@ address SwapAdmin {
 /// library with helper methods for oracles that are concerned with computing average prices
 module TokenSwapOracleLibrary {
     use StarcoinFramework::Timestamp;
-    use StarcoinFramework::U256::{Self};
+    use StarcoinFramework::U256::{Self, U256};
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::FixedPoint128;
 
@@ -16,6 +16,16 @@ module TokenSwapOracleLibrary {
 
     /// TWAP price oracle, include update price accumulators, on the first call per block
     public fun current_cumulative_prices<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u64) {
+        let (price_x_cumulative, price_y_cumulative, block_timestamp) = current_cumulative_prices_v2<X, Y>();
+        let price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative, false));
+        let price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_y_cumulative, false));
+
+        (price_x_cumulative_decode, price_y_cumulative_decode, block_timestamp)
+    }
+
+    /// TWAP price oracle, include update price accumulators, on the first call per block
+    /// return U256 with precision
+    public fun current_cumulative_prices_v2<X: copy + drop + store, Y: copy + drop + store>(): (U256, U256, u64) {
         let block_timestamp = current_block_timestamp();
         let (price_x_cumulative, price_y_cumulative, last_block_timestamp) = TokenSwapRouter::get_cumulative_info<X, Y>();
 
@@ -31,10 +41,7 @@ module TokenSwapOracleLibrary {
                 price_y_cumulative = U256::add(price_y_cumulative, new_price_y_cumulative);
             };
         };
-        let price_x_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative, false));
-        let price_y_cumulative_decode = FixedPoint128::decode(FixedPoint128::encode_u256(price_y_cumulative, false));
-
-        (price_x_cumulative_decode, price_y_cumulative_decode, block_timestamp)
+        (price_x_cumulative, price_y_cumulative, block_timestamp)
     }
 }
 }
