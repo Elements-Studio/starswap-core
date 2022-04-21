@@ -8,9 +8,9 @@ module Boost {
     /// The release amount follow the formular
     /// @param locked_time per seconds
     ///
-    /// `veSTAR reward = UserLockedSTARAmount * UserLockedSTARDay / 365`
+    /// `veSTAR reward = UserLockedSTARAmount * UserLockedSTARDay / (365 * 2)`
     public fun compute_mint_amount(pledge_time_sec: u64, staked_amount: u128): u128 {
-        staked_amount * (pledge_time_sec as u128) / 31536000
+        staked_amount * (pledge_time_sec as u128) / (31536000 * 2)
     }
 
     /// Boost multiplier calculation follows the formula

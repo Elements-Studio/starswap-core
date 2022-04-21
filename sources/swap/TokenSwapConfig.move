@@ -19,6 +19,8 @@ module TokenSwapConfig {
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
     const DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH: bool = false;
+    const DEFAULT_WHITE_LIST_BOOST_SWITCH: bool = false;
+    const DEFAULT_WHITE_LIST_BOOST_PUBKEY: vector<u8> = x"d6da1bea14990ad936a848c2a375a2c105d5038ce726ed03f8700998c4e840b5";
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
@@ -58,6 +60,11 @@ module TokenSwapConfig {
 
     struct AllocModeUpgradeSwitch has copy, drop, store {
         upgrade_switch: bool,
+    }
+
+    struct WhiteListBoostSwitch has copy, drop, store {
+        white_list_switch: bool,
+        white_list_pubkey: vector<u8>,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -300,6 +307,30 @@ module TokenSwapConfig {
             conf.upgrade_switch
         } else {
             DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH
+        }
+    }
+
+    ///  White list boost switch
+    public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
+        assert_admin(signer);
+        let config = WhiteListBoostSwitch{
+            white_list_switch,
+            white_list_pubkey,
+        };
+        if (Config::config_exist_by_address<WhiteListBoostSwitch>(admin_address())) {
+            Config::set<WhiteListBoostSwitch>(signer, config);
+        } else {
+            Config::publish_new_config<WhiteListBoostSwitch>(signer, config);
+        }
+    }
+
+    ///  White list boost switch
+    public fun get_white_list_boost_switch():(bool,vector<u8>){
+        if (Config::config_exist_by_address<WhiteListBoostSwitch>(admin_address())) {
+            let conf = Config::get_by_address<WhiteListBoostSwitch>(admin_address());
+            ( conf.white_list_switch , *&conf.white_list_pubkey )
+        } else {
+            (DEFAULT_WHITE_LIST_BOOST_SWITCH, DEFAULT_WHITE_LIST_BOOST_PUBKEY)
         }
     }
 

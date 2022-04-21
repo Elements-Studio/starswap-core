@@ -142,6 +142,11 @@ module TokenSwapScripts {
         TokenSwapRouter::set_alloc_mode_upgrade_switch(&signer, upgrade_switch);
     }
 
+    /// Set alloc mode upgrade switch
+    public(script) fun set_white_list_boost_switch(signer: signer, white_list_switch: bool, white_list_pubkey:vector<u8>) {
+        TokenSwapRouter::set_white_list_boost_switch(&signer, white_list_switch,white_list_pubkey);
+    }
+
     /// Get amount in with token pair pondage rate
     public fun get_amount_in<X: copy + drop + store,
                              Y: copy + drop + store>(x_value: u128): u128 {
