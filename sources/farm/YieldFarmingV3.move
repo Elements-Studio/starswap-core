@@ -838,7 +838,7 @@ module YieldFarmingV3 {
         now_seconds: u64): u128  acquires YieldFarmingGlobalPoolInfo {
         assert!(farming_asset.last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
-        let golbal_pool_info = borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(TokenSwapConfig::admin_address());
+        let golbal_pool_info = borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(@SwapAdmin);
         let time_period = now_seconds - farming_asset.last_update_timestamp;
         let global_pool_reward = golbal_pool_info.pool_release_per_second * (time_period as u128);
         let pool_reward = BigExponential::exp(global_pool_reward * farming_asset_extend.alloc_point, golbal_pool_info.total_alloc_point);
