@@ -1,11 +1,12 @@
 {
   "versions": [
     {
-      "version": "1.0.6",
-      "file-name": "Starswap-Core.v1.0.6.blob",
-      "package-hash": "0xf5cd46a94f4e5eb19d7a9c2b692c656e557f05e051fc4ef11ebebf89ab00f73d",
-      "description": "Boost upgrade",
-      "date": "2022-04-21"
+      "version": "1.0.6-alpha.1",
+      "file-name": "Starswap-Core.v1.0.6-alpha.1.blob",
+      "package-hash": "0xa067c03759e5c3836586629fc5555b92459f9ffefa766031e67f7116ae8d6d53",
+      "description": "Boost upgrade pre view for barnard",
+      "network": "barnard",
+      "date": "2022-04-22"
     }
   ]
 }
