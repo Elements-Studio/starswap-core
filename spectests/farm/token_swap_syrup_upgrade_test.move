@@ -106,7 +106,7 @@ script {
         TokenSwapSyrup::extend_syrup_pool<TokenMock::WETH>(&signer, false);
         let (alloc_point, _, _, _) = TokenSwapSyrup::query_pool_info_v2<TokenMock::WETH>();
         Debug::print(&alloc_point);
-        assert!(alloc_point == 1, 10012);
+        assert!(alloc_point == 50, 10012);
     }
 }
 // check: EXECUTED

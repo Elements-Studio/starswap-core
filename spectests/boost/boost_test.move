@@ -50,7 +50,7 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(signer, 800000000u128);
         let alloc_point = 10;
         let cap = YieldFarming::add_asset_v2<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(signer, alloc_point, 0);
-        move_to(signer, GovModfiyParamCapability<X, Y> {
+        move_to(signer, GovModfiyParamCapability<X, Y>{
             cap,
         });
     }
@@ -59,24 +59,24 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     public fun update_pool<X: copy + drop + store, Y: copy + drop + store>(_signer: &signer, alloc_point: u128, last_alloc_point: u128) acquires GovModfiyParamCapability {
         let cap = borrow_global<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
         YieldFarming::update_pool<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(
-        & cap.cap,
-        @SwapAdmin,
-        alloc_point,
-        last_alloc_point);
+            &cap.cap,
+            @SwapAdmin,
+            alloc_point,
+            last_alloc_point);
     }
 
     public fun stake_v2<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, asset_amount: u128, asset_weight: u128, weight_factor: u64, asset: Token::Token<LiquidityToken<X, Y>>, deadline: u64): u64
     acquires GovModfiyParamCapability, StakeCapbabilityList {
         let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
         let (harvest_cap, stake_id) = YieldFarming::stake_v2<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(
-        signer,
-        @SwapAdmin,
-        asset,
-        asset_weight,
-        asset_amount,
-        weight_factor,
-        deadline,
-        & cap.cap);
+            signer,
+            @SwapAdmin,
+            asset,
+            asset_weight,
+            asset_amount,
+            weight_factor,
+            deadline,
+            &cap.cap);
 
         let user_addr = Signer::address_of(signer);
         if (!exists<StakeCapbabilityList<X, Y>>(user_addr)) {
@@ -86,7 +86,7 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         };
 
         let cap_list = borrow_global_mut<StakeCapbabilityList<X, Y>>(user_addr);
-        Vector::push_back( &mut cap_list.items, harvest_cap);
+        Vector::push_back(&mut cap_list.items, harvest_cap);
         stake_id
     }
 
@@ -95,8 +95,8 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         let cap_list = borrow_global_mut<StakeCapbabilityList<X, Y>>(Signer::address_of(signer));
         let cap = Vector::remove(&mut cap_list.items, id - 1);
         let (asset, token) = YieldFarming::unstake<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(signer, @SwapAdmin, cap);
-        let token_val = Token::value<STARWrapper>( & token);
-        let asset_value = Token::value<LiquidityToken<X, Y>>( & asset);
+        let token_val = Token::value<STARWrapper>(&token);
+        let asset_value = Token::value<LiquidityToken<X, Y>>(&asset);
         Account::deposit<STARWrapper>(Signer::address_of(signer), token);
         Account::deposit<LiquidityToken<X, Y>>(Signer::address_of(signer), asset);
         (asset_value, token_val)
@@ -138,14 +138,14 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     public fun boost_to_farm_pool<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, boost_amount: u128, stake_id: u64)
     acquires GovModfiyParamCapability {
         let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
-        TokenSwapFarmBoost::boost_to_farm_pool<X, Y>( & cap.cap, signer, boost_amount, stake_id);
+        TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&cap.cap, signer, boost_amount, stake_id);
     }
 
     /// unboost for farm
     public fun unboost_from_farm_pool<X: copy + drop + store, Y: copy + drop + store>(signer: &signer)
     acquires GovModfiyParamCapability {
         let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
-        TokenSwapFarmBoost::unboost_from_farm_pool<X, Y>( & cap.cap, signer);
+        TokenSwapFarmBoost::unboost_from_farm_pool<X, Y>(&cap.cap, signer);
     }
 
     /// unboost for farm
@@ -166,7 +166,7 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         ) = TokenSwapVestarMinter::init(signer);
         TokenSwapFarmBoost::set_treasury_cap(signer, treasury_cap);
 
-        move_to(signer, CapabilityWrapper {
+        move_to(signer, CapabilityWrapper{
             mint_cap,
             id: 0
         });
@@ -175,12 +175,12 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     public fun mint(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
         cap.id = cap.id + 1;
-        TokenSwapVestarMinter::mint_with_cap(signer, cap.id, pledge_time_sec, staked_amount, & cap.mint_cap);
+        TokenSwapVestarMinter::mint_with_cap(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
     }
 
-    public fun burn(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
+    public fun burn(signer: &signer) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
-        TokenSwapVestarMinter::burn_with_cap(signer, cap.id, pledge_time_sec, staked_amount, & cap.mint_cap);
+        TokenSwapVestarMinter::burn_with_cap(signer, cap.id, &cap.mint_cap);
     }
 
     public fun value(signer: &signer): u128 {
@@ -363,7 +363,7 @@ script {
         let asset_amount = CommonHelper::pow_amount<STARWrapper>(1);
         let asset_weight = asset_amount * 1;
 
-//        let liquidity_amount = TokenSwapRouter::liquidity<Token_X, Token_Y>(Signer::address_of(&signer));
+        //        let liquidity_amount = TokenSwapRouter::liquidity<Token_X, Token_Y>(Signer::address_of(&signer));
         let liquidity_amount: u128 = 1 * (Math::pow(10, 9u64));
         let liquidity_token = TokenSwapRouter::withdraw_liquidity_token<Token_X, Token_Y>(&signer, liquidity_amount);
         let stake_id = YieldFarmingAndVestarWrapper::stake_v2<Token_X, Token_Y>(&signer, asset_amount, asset_weight, 100, liquidity_token, 0);

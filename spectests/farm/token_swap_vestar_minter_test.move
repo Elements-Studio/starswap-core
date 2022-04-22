@@ -39,9 +39,9 @@ module alice::VestarHoster {
         TokenSwapVestarMinter::mint_with_cap(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
     }
 
-    public fun burn(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
+    public fun burn(signer: &signer) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
-        TokenSwapVestarMinter::burn_with_cap(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
+        TokenSwapVestarMinter::burn_with_cap(signer, cap.id, &cap.mint_cap);
     }
 
     public fun get_amount_of_treasury(signer: &signer): u128 {
@@ -106,8 +106,8 @@ script {
     use alice::VestarHoster;
 
     fun vestar_burn(signer: signer) {
-        let perday = 60 * 60 * 24;
-        VestarHoster::burn(&signer, 7 * perday, 1000000);
+        // let perday = 60 * 60 * 24;
+        VestarHoster::burn(&signer);
         assert!(VestarHoster::get_amount_of_treasury(&signer) <= 0, 10003);
     }
 }
@@ -130,7 +130,7 @@ script {
         let compute_amount = Boost::compute_mint_amount(3600, 100000000000);
         assert!(compute_amount * 2 == treasury_amount, 10004);
 
-        VestarHoster::burn(&signer, 3600, 100000000000);
+        VestarHoster::burn(&signer);
         assert!(VestarHoster::get_amount_of_treasury(&signer) == compute_amount, 10005);
     }
 }
