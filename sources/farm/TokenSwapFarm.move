@@ -106,7 +106,6 @@ module TokenSwapFarm {
     }
 
 
-
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
         YieldFarming::initialize<PoolTypeFarmPool, STAR::STAR>(account, token);
@@ -454,9 +453,13 @@ module TokenSwapFarm {
 
     /// Return calculated APY
     public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmPoolStake {
-        let farm = borrow_global<FarmPoolStake<X, Y>>(account);
-        YieldFarming::query_expect_gain<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
-            account, STAR::token_address(), &farm.cap)
+        if (exists<FarmPoolStake<X, Y>>(account)) {
+            let farm = borrow_global<FarmPoolStake<X, Y>>(account);
+            YieldFarming::query_expect_gain<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
+                account, STAR::token_address(), &farm.cap)
+        }else {
+            0
+        }
     }
 
     /// Query all stake info
@@ -477,8 +480,12 @@ module TokenSwapFarm {
 
     /// Query stake amount from user
     public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires FarmPoolStake {
-        let farm = borrow_global<FarmPoolStake<X, Y>>(account);
-        YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account, farm.id)
+        if (exists<FarmPoolStake<X, Y>>(account)) {
+            let farm = borrow_global<FarmPoolStake<X, Y>>(account);
+            YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account, farm.id)
+        } else{
+            0
+        }
     }
 
     /// Query release per second
