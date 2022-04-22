@@ -20,6 +20,8 @@ module TokenSwapFarmBoost {
     // user boost factor section is [1,2.5]
     const BOOST_FACTOR_PRECESION: u64 = 100; //two-digit precision
 
+    const ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH: u64 = 121;
+
 
     struct UserInfo<phantom X, phantom Y> has key, store {
         boost_factor: u64,
@@ -114,7 +116,9 @@ module TokenSwapFarmBoost {
         let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
 
         // lock boost amount vestar
-        boost_amount = TokenSwapVestarMinter::value(user_addr);
+        let vestar_total_amount = TokenSwapVestarMinter::value(user_addr);
+        assert!((boost_amount > 0 && boost_amount <= vestar_total_amount ), ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH);
+        boost_amount = vestar_total_amount;
         let boost_vestar_token = TokenSwapVestarMinter::withdraw_with_cap(account, boost_amount, &vestar_treasury_cap.cap);
         VToken::deposit<VESTAR>(&mut user_info.locked_vetoken, boost_vestar_token);
 
