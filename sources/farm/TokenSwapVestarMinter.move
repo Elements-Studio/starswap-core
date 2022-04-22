@@ -156,7 +156,7 @@ module TokenSwapVestarMinter {
     fun withdraw(signer: &signer, amount: u128): VToken::VToken<VESTAR::VESTAR> acquires Treasury {
         let account = Signer::address_of(signer);
         assert!(exists<Treasury>(account), Errors::invalid_state(ERROR_TREASURY_NOT_EXISTS));
-        let account = Signer::address_of(signer);
+
         let treasury = borrow_global_mut<Treasury>(account);
         VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount)
     }

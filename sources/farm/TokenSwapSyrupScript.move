@@ -68,19 +68,6 @@ module TokenSwapSyrupScript {
         };
     }
 
-//    public(script) fun unstake_and_clean<TokenT: store>(signer: signer, id: u64) acquires VestarMintCapabilityWrapper {
-//        let user_addr = Signer::address_of(&signer);
-//        let (_, _, _, _) = TokenSwapSyrup::get_stake_info<TokenT>(user_addr, id);
-//        let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
-//        Account::deposit<TokenT>(user_addr, asset_token);
-//        Account::deposit<STAR::STAR>(user_addr, reward_token);
-//
-//        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-//            let cap = borrow_global<VestarMintCapabilityWrapper>(VESTAR::token_address());
-//            TokenSwapVestarMinter::clean_treasury(&signer, id, &cap.cap);
-//        };
-//    }
-
     public(script) fun put_stepwise_multiplier(signer: signer,
                                                interval_sec: u64,
                                                multiplier: u64) {
