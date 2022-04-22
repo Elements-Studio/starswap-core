@@ -514,21 +514,23 @@ module TokenSwapSyrup {
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
-        let alloc_point = 1;
-        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
 
-        if (!exists<SyrupExtInfo<TokenT>>(broker)) {
+        let alloc_point = if (!exists<SyrupExtInfo<TokenT>>(broker)) {
             let multiplier_cap =
                 YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
 
+            let alloc_point = 50;
             move_to(signer, SyrupExtInfo<TokenT>{
                 alloc_point,
                 multiplier_cap
             });
+            alloc_point
         } else {
-            let farm_pool_info = borrow_global_mut<SyrupExtInfo<TokenT>>(broker);
-            farm_pool_info.alloc_point = alloc_point;
+            let syrup_ext_info = borrow_global<SyrupExtInfo<TokenT>>(broker);
+            syrup_ext_info.alloc_point
         };
+
+        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
     }
 
     /// Upgrade all staking resource that
