@@ -10,7 +10,7 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapSyrupScript;
+    use SwapAdmin::TokenSwapSyrupBoost;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -59,7 +59,7 @@ module UpgradeScripts {
     /// This will initialize syrup
     public(script) fun initialize_global_syrup_info(signer: signer, pool_release_per_second: u128) {
         TokenSwapConfig::assert_admin(&signer);
-        TokenSwapSyrupScript::upgrade_for_init(&signer, pool_release_per_second);
+        TokenSwapSyrupBoost::initialize_global_syrup_info(&signer, pool_release_per_second);
     }
 
     /// Extend syrup pool

@@ -67,7 +67,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Burn Vestar with capability
-    public fun burn_with_cap(signer: &signer, id: u64, _pledge_time_sec: u64, _staked_amount: u128, _cap: &MintCapability)
+    public fun burn_with_cap(signer: &signer, id: u64, _cap: &MintCapability)
     acquires Treasury, VestarOwnerCapability, MintRecordList {
         let user_addr = Signer::address_of(signer);
 
