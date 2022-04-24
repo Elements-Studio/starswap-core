@@ -1,6 +1,6 @@
-processed 21 tasks
+processed 23 tasks
 
-task 8 'run'. lines 193-203:
+task 8 'run'. lines 203-213:
 {
   "gas_used": 259227,
   "status": {
@@ -8,7 +8,7 @@ task 8 'run'. lines 193-203:
   }
 }
 
-task 9 'run'. lines 205-231:
+task 9 'run'. lines 215-241:
 {
   "gas_used": 1086328,
   "status": {
@@ -16,7 +16,7 @@ task 9 'run'. lines 205-231:
   }
 }
 
-task 10 'run'. lines 233-257:
+task 10 'run'. lines 243-267:
 {
   "gas_used": 763059,
   "status": {
@@ -24,7 +24,7 @@ task 10 'run'. lines 233-257:
   }
 }
 
-task 11 'run'. lines 259-277:
+task 11 'run'. lines 269-287:
 {
   "gas_used": 212694,
   "status": {
@@ -32,7 +32,7 @@ task 11 'run'. lines 259-277:
   }
 }
 
-task 12 'run'. lines 279-295:
+task 12 'run'. lines 289-305:
 {
   "gas_used": 174237,
   "status": {
@@ -40,7 +40,7 @@ task 12 'run'. lines 279-295:
   }
 }
 
-task 13 'run'. lines 297-308:
+task 13 'run'. lines 307-318:
 {
   "gas_used": 97777,
   "status": {
@@ -48,7 +48,7 @@ task 13 'run'. lines 297-308:
   }
 }
 
-task 14 'run'. lines 310-318:
+task 14 'run'. lines 320-328:
 {
   "gas_used": 85014,
   "status": {
@@ -56,7 +56,7 @@ task 14 'run'. lines 310-318:
   }
 }
 
-task 15 'run'. lines 320-328:
+task 15 'run'. lines 330-338:
 {
   "gas_used": 161077,
   "status": {
@@ -64,7 +64,7 @@ task 15 'run'. lines 320-328:
   }
 }
 
-task 16 'run'. lines 330-344:
+task 16 'run'. lines 340-354:
 {
   "gas_used": 167684,
   "status": {
@@ -72,7 +72,7 @@ task 16 'run'. lines 330-344:
   }
 }
 
-task 17 'run'. lines 347-373:
+task 17 'run'. lines 357-383:
 {
   "gas_used": 279823,
   "status": {
@@ -80,7 +80,7 @@ task 17 'run'. lines 347-373:
   }
 }
 
-task 18 'run'. lines 375-406:
+task 18 'run'. lines 385-416:
 {
   "gas_used": 820111,
   "status": {
@@ -88,9 +88,17 @@ task 18 'run'. lines 375-406:
   }
 }
 
-task 20 'run'. lines 411-437:
+task 20 'run'. lines 421-447:
 {
   "gas_used": 806338,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 22 'run'. lines 452-484:
+{
+  "gas_used": 331039,
   "status": {
     "Keep": "Executed"
   }

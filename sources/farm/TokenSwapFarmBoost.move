@@ -97,6 +97,15 @@ module TokenSwapFarmBoost {
         amount * (boost_factor as u128) / (BOOST_FACTOR_PRECESION as u128)
     }
 
+    /// predict boost factor before stake
+    public fun predict_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address, user_lp_amount: u128): u64 {
+        let user_vestar_total_amount = TokenSwapVestarMinter::value(account);
+        let total_farm_amount = YieldFarming::query_total_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address());
+        let exact_total_farm_amount = total_farm_amount + user_lp_amount;
+        let predict_boost_factor = Boost::compute_boost_factor(user_vestar_total_amount, user_lp_amount, exact_total_farm_amount);
+        predict_boost_factor
+    }
+
     /// boost for farm
     public fun boost_to_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
@@ -170,6 +179,47 @@ module TokenSwapFarmBoost {
                 amount:vestar_value
             });
         
+    }
+
+    /// update boost info when lp or vestar value change
+    public fun update_boost_for_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
+        cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
+        account: &signer,
+        stake_id: u64
+    ) acquires UserInfo {
+        let user_addr = Signer::address_of(account);
+        if (!exists<UserInfo<X, Y>>(user_addr)) {
+            move_to(account, UserInfo<X, Y>{
+                user_amount: 0,
+                boost_factor: get_default_boost_factor_scale(),
+                locked_vetoken: VToken::zero<VESTAR>(),
+            });
+        };
+
+        let boost_factor = get_boost_factor<X, Y>(user_addr);
+        // is boost factor valid, then update boost factor
+        if(boost_factor > get_default_boost_factor_scale()) {
+            update_boost_factor<X, Y>(cap, account, stake_id);
+        };
+    }
+
+    /// set user boost info
+    public fun set_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+        _cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
+        account: &signer,
+        new_boost_factor: u64
+    ) acquires UserInfo {
+        let user_addr = Signer::address_of(account);
+        if (!exists<UserInfo<X, Y>>(user_addr)) {
+            move_to(account, UserInfo<X, Y>{
+                user_amount: 0,
+                boost_factor: get_default_boost_factor_scale(),
+                locked_vetoken: VToken::zero<VESTAR>(),
+            });
+        };
+
+        let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
+        user_info.boost_factor = new_boost_factor;
     }
 
     /// boost factor change and triggers
