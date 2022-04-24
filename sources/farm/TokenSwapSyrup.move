@@ -255,10 +255,6 @@ module TokenSwapSyrup {
     }
 
 
-    //    public fun update_multiplier_pool<TokenT: store>(signer: &signer, key: &vector<u8>, multiplier: u64) {
-    //        // TODO(Valenteen Resee): to implement update multiplier pool
-    //    }
-
     /// Deposit Token into the pool
     public fun deposit<PoolType: store, TokenT: copy + drop + store>(
         account: &signer,
@@ -492,23 +488,6 @@ module TokenSwapSyrup {
         YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(signer, pool_release_per_second);
     }
 
-    /// Only called by genesis account in upgrade scene
-//    public fun upgrade_pool_for_token_type<TokenT: store>(signer: &signer, alloc_point: u128, override_update: bool) {
-//        STAR::assert_genesis_address(signer);
-//
-//        // Extend yield farming asset
-//        let broker = Signer::address_of(signer);
-//        assert!(!exists<SyrupExtInfo<TokenT>>(broker), Errors::invalid_state(ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS));
-//
-//        let multiplier_cap =
-//            YieldFarmingMultiplier::init<PoolTypeSyrup, Token::Token<TokenT>>(signer);
-//        move_to(signer, SyrupExtInfo<TokenT>{
-//            alloc_point,
-//            multiplier_cap,
-//        });
-//        YieldFarming::extend_farming_asset<PoolTypeSyrup, Token::Token<TokenT>>(signer, alloc_point, override_update);
-//    }
-
     /// Extend syrup pool for type
     public fun extend_syrup_pool<TokenT: store>(signer: &signer, override_update: bool) acquires SyrupExtInfo {
         STAR::assert_genesis_address(signer);
@@ -547,7 +526,6 @@ module TokenSwapSyrup {
         };
 
         // Access Control
-        // let syrup = borrow_global_mut<Syrup<TokenT>>(STAR::token_address());
         let stake_ids = YieldFarming::query_stake_list<PoolTypeSyrup, Token::Token<TokenT>>(account_addr);
         let len = Vector::length(&stake_ids);
         let idx = 0;
@@ -559,19 +537,8 @@ module TokenSwapSyrup {
             let stake_id = Vector::borrow(&stake_ids, idx);
             YieldFarming::extend_farm_stake_info<PoolTypeSyrup, Token::Token<TokenT>>(signer, *stake_id, cap);
 
-            // Add weight to child mutiplier pool
-            //            let stake_list = borrow_global<SyrupStakeList<TokenT>>(account_addr);
-            //            let stake = get_stake(&stake_list.items, *stake_id);
-            //            YieldFarmingMultiplier::add_amount<PoolTypeSyrup, Token::Token<TokenT>>(
-            //                &key_from_stepwise_multiplier(stake.stepwise_multiplier),
-            //                stake.token_amount);
-
             idx = idx + 1;
         }
     }
-
-    //    fun key_from_stepwise_multiplier(n: u64): vector<u8> {
-    //        BCS::to_bytes<u64>(&n)
-    //    }
 }
 }
