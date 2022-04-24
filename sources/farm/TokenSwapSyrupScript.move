@@ -11,13 +11,17 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
-    use SwapAdmin::TokenSwapSyrupBoost;
+    use SwapAdmin::TokenSwapVestarRouter;
 
     const ERROR_UPGRADE_NOT_READY_NOW: u64 = 101;
 
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
+    }
+
+    struct VestarRouterCapabilityWrapper has key, store {
+        cap: TokenSwapVestarRouter::VestarRouterCapability,
     }
 
     public(script) fun add_pool<TokenT: store>(signer: signer,
@@ -41,19 +45,23 @@ module TokenSwapSyrupScript {
 
     public(script) fun stake<TokenT: store>(signer: signer,
                                             pledge_time_sec: u64,
-                                            amount: u128) {
+                                            amount: u128) acquires VestarRouterCapabilityWrapper {
         TokenSwapSyrup::stake<TokenT>(&signer, pledge_time_sec, amount);
 
-        TokenSwapSyrupBoost::stake<TokenT>(&signer, pledge_time_sec, amount);
+        let broker = @SwapAdmin;
+        let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
+        TokenSwapVestarRouter::stake_hook<TokenT>(&signer, pledge_time_sec, amount, &cap_wrapper.cap);
     }
 
-    public(script) fun unstake<TokenT: store>(signer: signer, id: u64) {
+    public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
         Account::deposit<TokenT>(user_addr, asset_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);
 
-        TokenSwapSyrupBoost::unstake<TokenT>(&signer, id);
+        let broker = @SwapAdmin;
+        let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
+        TokenSwapVestarRouter::unstake_hook<TokenT>(&signer, id, &cap_wrapper.cap);
     }
 
     public(script) fun put_stepwise_multiplier(signer: signer,
@@ -82,12 +90,31 @@ module TokenSwapSyrupScript {
         TokenSwapVestarMinter::value_of_id(user_addr, id)
     }
 
+    public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
+        let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
+        move_to(signer, VestarRouterCapabilityWrapper{
+            cap
+        });
+    }
+
     ///TODO: Turn over capability from script to syrup boost on barnard
     public(script) fun turnover_vestar_mintcap_for_barnard(signer: signer) acquires VestarMintCapabilityWrapper {
+        STAR::assert_genesis_address(&signer);
+
+        let broker = Signer::address_of(&signer);
+
+        if (exists<VestarRouterCapabilityWrapper>(broker) ||
+            !exists<VestarMintCapabilityWrapper>(broker)) {
+            return
+        };
+
         let VestarMintCapabilityWrapper{
-            cap
+            cap: mint_cap
         } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
-        TokenSwapSyrupBoost::turnover_vestar_mintcap_for_barnard(&signer, cap);
+
+        move_to(&signer, VestarRouterCapabilityWrapper{
+            cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
+        });
     }
 }
 }
