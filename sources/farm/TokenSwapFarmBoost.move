@@ -203,8 +203,8 @@ module TokenSwapFarmBoost {
         };
     }
 
-    /// update user boost info
-    public fun update_boost_facotr<X: copy + drop + store, Y: copy + drop + store>(
+    /// set user boost info
+    public fun set_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
         _cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
         account: &signer,
         new_boost_factor: u64

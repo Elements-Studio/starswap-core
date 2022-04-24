@@ -157,10 +157,10 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         TokenSwapFarmBoost::get_boost_factor<X, Y>(account);
     }
 
-    public fun update_boost_facotr<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, new_boost_factor: u64)
+    public fun set_boost_factor<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, new_boost_factor: u64)
     acquires GovModfiyParamCapability {
         let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
-        TokenSwapFarmBoost::update_boost_facotr<X, Y>(&cap.cap, signer, new_boost_factor);
+        TokenSwapFarmBoost::set_boost_factor<X, Y>(&cap.cap, signer, new_boost_factor);
     }
 
 
@@ -472,7 +472,7 @@ script {
         let liquidity_token = TokenSwapRouter::withdraw_liquidity_token<Token_X, Token_Y>(&signer, liquidity_amount);
 
         let predict_boost_factor = TokenSwapFarmBoost::predict_boost_factor<Token_X, Token_Y>(user_addr, asset_amount);
-        YieldFarmingAndVestarWrapper::update_boost_facotr<Token_X, Token_Y>(&signer, predict_boost_factor);
+        YieldFarmingAndVestarWrapper::set_boost_factor<Token_X, Token_Y>(&signer, predict_boost_factor);
 
         let stake_id = YieldFarmingAndVestarWrapper::stake_v2<Token_X, Token_Y>(&signer, asset_amount, asset_weight, 100, liquidity_token, 0);
         assert!(stake_id == 2, 1025);

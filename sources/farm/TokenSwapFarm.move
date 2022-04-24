@@ -558,7 +558,7 @@ module TokenSwapFarm {
             // predict boost factor
             let new_weight_factor = TokenSwapFarmBoost::predict_boost_factor<X, Y>(account_addr, total_amount);
             let asset_weight = TokenSwapFarmBoost::calculate_boost_weight(total_amount, new_weight_factor);
-            TokenSwapFarmBoost::update_boost_facotr<X, Y>(&farm_cap.cap, account, new_weight_factor);
+            TokenSwapFarmBoost::set_boost_factor<X, Y>(&farm_cap.cap, account, new_weight_factor);
 
             YieldFarming::stake_v2<
                 PoolTypeFarmPool,
