@@ -101,7 +101,7 @@ script {
 
 //# block --author 0x1 --timestamp 1646449200000 
 
-//# run --signers SwapAdmin
+//# run --signers alice
 script {
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapGovPoolType::{
@@ -116,7 +116,7 @@ script {
                                 ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeFarmPool>() as u128);
         
         let hour_release = (1646449200 - 1646445600) * second_release;
-        TokenSwapGov::linear_withdraw_farm(&signer,hour_release);
+        TokenSwapGov::linear_withdraw_farm(&signer);
         
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
 
@@ -127,7 +127,7 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers SwapAdmin
+//# run --signers alice
 script {
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapGovPoolType::{
@@ -142,7 +142,7 @@ script {
                                 ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeSyrup>() as u128);
         
         let hour_release = (1646449200 - 1646445600) * second_release;
-        TokenSwapGov::linear_withdraw_syrup(&signer,hour_release);
+        TokenSwapGov::linear_withdraw_syrup(&signer);
         
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeSyrup>();
 
@@ -214,19 +214,13 @@ script {
 //# run --signers SwapAdmin
 script {
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{
-        PoolTypeFarmPool
-    };
+
     //Try extracting again
     fun linear_withdraw_farm(signer: signer) {
-        let second_release = TokenSwapGov::get_total_of_linear_treasury<PoolTypeFarmPool>() / 
-                                ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeFarmPool>() as u128);
-        
-        let hour_release = (1646449200 - 1646445600) * second_release;
-        TokenSwapGov::linear_withdraw_farm(&signer,hour_release);
+        TokenSwapGov::linear_withdraw_farm(&signer);
     }
 }
-// check: MoveAbort 51719
+// check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
@@ -250,7 +244,7 @@ script {
     use SwapAdmin::TokenSwapGov;
     //try to extract 0
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,0);
+        TokenSwapGov::linear_withdraw_farm(&signer);
     }
 }
 // check: MoveAbort 51719
@@ -334,9 +328,12 @@ script {
     };
     //when the maximum time is exceeded
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer,3139269404400 * 2);
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
-        assert!(balance == 55000000000000000 -  3139269404400 * 3 ,1011 );
+        assert!(balance == 54996860730595600 ,1011 );
+        TokenSwapGov::linear_withdraw_farm(&signer);
+
+        let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
+        assert!(balance == 0 ,1011 );
     }
 }
 // check: EXECUTED
@@ -347,7 +344,7 @@ script {
     use SwapAdmin::TokenSwapGovPoolType::{
         PoolTypeCommunity
     };
-    //when the maximum time is exceeded
+    //When the maximum time is exceeded, all are taken out
     fun linear_withdraw_community(signer: signer) {
         TokenSwapGov::linear_withdraw_community(&signer,@community_test,171232873200 * 2);
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeCommunity>();
@@ -360,23 +357,6 @@ script {
 
 
 //# block --author 0x1 --timestamp 1709521200000 
-
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{
-        PoolTypeFarmPool
-    };
-    //When the maximum time is exceeded, all are taken out
-    fun linear_withdraw_farm(signer: signer) {
-        let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
-        let can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeFarmPool>();
-        assert!(can_withdraw == balance, 1012);
-        assert!(can_withdraw == (55000000000000000 - (3139269404400 * 3)), 1012);
-        TokenSwapGov::linear_withdraw_farm(&signer,can_withdraw);
-    }
-}
-// check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
