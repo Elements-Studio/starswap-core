@@ -119,6 +119,10 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         YieldFarming::query_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr)
     }
 
+    public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(user_addr: address, id: u64): u128 {
+        YieldFarming::query_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr, id)
+    }
+
     public fun query_pool_info_v2<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u128, u128) {
         YieldFarming::query_pool_info_v2<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(@SwapAdmin)
     }
@@ -151,6 +155,12 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     /// unboost for farm
     public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address) {
         TokenSwapFarmBoost::get_boost_factor<X, Y>(account);
+    }
+
+    public fun update_boost_facotr<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, new_boost_factor: u64)
+    acquires GovModfiyParamCapability {
+        let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
+        TokenSwapFarmBoost::update_boost_facotr<X, Y>(&cap.cap, signer, new_boost_factor);
     }
 
 
@@ -434,4 +444,41 @@ script {
         assert!(vestar_amount_after > 0, 1020);
     }
 }
+// check: EXECUTED
+
+
+//# block --author 0x1 --timestamp 10006000
+
+//# run --signers alice
+
+script {
+    use StarcoinFramework::Signer;
+    use SwapAdmin::CommonHelper;
+    use StarcoinFramework::Math;
+
+    use SwapAdmin::TokenSwapRouter;
+
+    use SwapAdmin::TokenSwapFarmBoost;
+    use SwapAdmin::YieldFarmingAndVestarWrapper::{STARWrapper, Token_X, Token_Y, Self};
+
+    /// Alice boost farm lp again
+    fun boost_to_farm_pool_again(signer: signer) {
+        let user_addr = Signer::address_of(&signer);
+
+        let asset_amount = CommonHelper::pow_amount<STARWrapper>(5);
+        let asset_weight = asset_amount * 1;
+
+        let liquidity_amount: u128 = 5 * (Math::pow(10, 9u64));
+        let liquidity_token = TokenSwapRouter::withdraw_liquidity_token<Token_X, Token_Y>(&signer, liquidity_amount);
+
+        let predict_boost_factor = TokenSwapFarmBoost::predict_boost_factor<Token_X, Token_Y>(user_addr, asset_amount);
+        YieldFarmingAndVestarWrapper::update_boost_facotr<Token_X, Token_Y>(&signer, predict_boost_factor);
+
+        let stake_id = YieldFarmingAndVestarWrapper::stake_v2<Token_X, Token_Y>(&signer, asset_amount, asset_weight, 100, liquidity_token, 0);
+        assert!(stake_id == 2, 1025);
+
+        let boost_factor = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
+        assert!(boost_factor == predict_boost_factor, 1026);
+        }
+    }
 // check: EXECUTED
