@@ -4,10 +4,16 @@
 address SwapAdmin {
 module TokenSwapFarmScript {
     use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapFarmBoost;
 
     /// Called by admin account
     public(script) fun add_farm_pool<X: copy + drop + store, Y: copy + drop + store>(account: signer, release_per_second: u128) {
         TokenSwapFarmRouter::add_farm_pool<X, Y>(&account, release_per_second);
+    }
+
+    /// Called by admin account
+    public(script) fun add_farm_pool_v2<X: copy + drop + store, Y: copy + drop + store>(account: signer, alloc_point: u128) {
+        TokenSwapFarmRouter::add_farm_pool_v2<X, Y>(&account, alloc_point);
     }
 
     public(script) fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: signer, active: bool) {
@@ -58,8 +64,26 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::set_farm_multiplier<X, Y>(&signer, mutiple);
     }
 
+    public(script) fun set_farm_alloc_point<X: copy + drop + store, Y: copy + drop + store>(signer: signer, alloc_point: u128) {
+        TokenSwapFarmRouter::set_farm_alloc_point<X, Y>(&signer, alloc_point);
+    }
+
     public fun get_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(): u64 {
         TokenSwapFarmRouter::get_farm_multiplier<X, Y>()
+    }
+
+    /// boost for farm
+    public(script) fun boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128) {
+        TokenSwapFarmRouter::boost<X, Y>(&signer, boost_amount);
+    }
+           
+    /// white list boost for farm
+    public(script) fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(signer: signer, boost_amount: u128,signature:vector<u8>) {
+        TokenSwapFarmRouter::wl_boost<X, Y>(&signer, boost_amount,&signature);
+    }
+
+    public(script) fun initialize_boost_event(signer: signer){
+       TokenSwapFarmBoost::initialize_boost_event(&signer);
     }
 }
 }

@@ -390,5 +390,14 @@ module TokenSwapRouter {
         TokenSwapConfig::set_global_freeze_switch(signer, freeze);
     }
 
+    /// Set alloc mode upgrade switch
+    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
+        TokenSwapConfig::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
+    }
+
+    /// Set white list boost switch
+    public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
+        TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch,white_list_pubkey);
+    }
 }
 }

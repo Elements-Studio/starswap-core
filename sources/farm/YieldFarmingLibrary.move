@@ -60,17 +60,32 @@ module YieldFarmingLibrary {
                                        last_update_timestamp: u64,
                                        now_seconds: u64,
                                        release_per_second: u128): u128 {
+        let addtion_harvest_index =
+            calculate_addtion_harvest_index(
+                asset_total_weight,
+                last_update_timestamp,
+                now_seconds,
+                release_per_second);
+
+        let index_u256 = U256::add(
+            U256::from_u128(harvest_index),
+            addtion_harvest_index,
+        );
+        BigExponential::to_safe_u128(index_u256)
+    }
+
+    /// Computer addtion harvest index from old harvest index
+    public fun calculate_addtion_harvest_index(asset_total_weight: u128,
+                                               last_update_timestamp: u64,
+                                               now_seconds: u64,
+                                               release_per_second: u128): U256::U256 {
         assert!(asset_total_weight > 0, Errors::invalid_argument(ERR_FARMING_TOTAL_WEIGHT_IS_ZERO));
         assert!(last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
         let time_period = now_seconds - last_update_timestamp;
         let numr = release_per_second * (time_period as u128);
         let denom = asset_total_weight;
-        let index_u256 = U256::add(
-            U256::from_u128(harvest_index),
-            BigExponential::mantissa(BigExponential::exp(numr, denom))
-        );
-        BigExponential::to_safe_u128(index_u256)
+        BigExponential::mantissa(BigExponential::exp(numr, denom))
     }
 
     /// This function will return a gain index
