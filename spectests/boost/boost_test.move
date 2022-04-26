@@ -450,6 +450,22 @@ script {
 //# block --author 0x1 --timestamp 10006000
 
 //# run --signers alice
+script {
+    use SwapAdmin::YieldFarmingAndVestarWrapper;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::YieldFarmingAndVestarWrapper::{STARWrapper};
+    use StarcoinFramework::Debug;
+
+    fun vestar_mint_again(signer: signer) {
+        let perday = 2 * 60 * 60 * 24;
+        YieldFarmingAndVestarWrapper::mint(&signer, 7 * perday, CommonHelper::pow_amount<STARWrapper>(1) * 1000);
+        Debug::print(&YieldFarmingAndVestarWrapper::value(&signer));
+        assert!(YieldFarmingAndVestarWrapper::value(&signer) > 0, 10001);
+    }
+}
+// check: EXECUTED
+
+//# run --signers alice
 
 script {
     use StarcoinFramework::Signer;
@@ -459,6 +475,7 @@ script {
     use SwapAdmin::TokenSwapRouter;
 
     use SwapAdmin::TokenSwapFarmBoost;
+    use SwapAdmin::Boost;
     use SwapAdmin::YieldFarmingAndVestarWrapper::{STARWrapper, Token_X, Token_Y, Self};
 
     /// Alice boost farm lp again
@@ -479,6 +496,11 @@ script {
 
         let boost_factor = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
         assert!(boost_factor == predict_boost_factor, 1026);
+
+        let vestar_amount = YieldFarmingAndVestarWrapper::value(&signer);
+        let (_, asset_total_amount, _, _) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
+        let another_boost_factor = Boost::compute_boost_factor(vestar_amount, liquidity_amount, asset_total_amount);
+        assert!(predict_boost_factor != another_boost_factor, 1027);
         }
     }
 // check: EXECUTED
