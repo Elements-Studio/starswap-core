@@ -1,4 +1,4 @@
-processed 32 tasks
+processed 33 tasks
 
 task 5 'run'. lines 11-21:
 {
@@ -176,7 +176,26 @@ task 29 'run'. lines 406-420:
   }
 }
 
-task 30 'run'. lines 422-430:
+task 30 'run'. lines 423-432:
+{
+  "gas_used": 100874,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapFarm"
+          }
+        },
+        "function": 2,
+        "code_offset": 33
+      }
+    }
+  }
+}
+
+task 31 'run'. lines 434-442:
 {
   "gas_used": 83256,
   "status": {
@@ -184,7 +203,7 @@ task 30 'run'. lines 422-430:
   }
 }
 
-task 31 'run'. lines 432-441:
+task 32 'run'. lines 444-453:
 {
   "gas_used": 85852,
   "status": {
