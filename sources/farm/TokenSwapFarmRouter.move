@@ -6,6 +6,7 @@ module TokenSwapFarmRouter {
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapFarmBoost;
+    use SwapAdmin::TokenSwapGov;
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
@@ -65,6 +66,7 @@ module TokenSwapFarmRouter {
     public fun harvest<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        TokenSwapGov::linear_withdraw_farm(account);
         if (order == 1) {
             TokenSwapFarm::harvest<X, Y>(account, amount);
         } else {

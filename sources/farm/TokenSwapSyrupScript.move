@@ -12,6 +12,7 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
+    use SwapAdmin::TokenSwapGov;
 
     const ERROR_UPGRADE_NOT_READY_NOW: u64 = 101;
 
@@ -55,6 +56,7 @@ module TokenSwapSyrupScript {
 
     public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
+        TokenSwapGov::linear_withdraw_syrup(&signer);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
         Account::deposit<TokenT>(user_addr, asset_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);

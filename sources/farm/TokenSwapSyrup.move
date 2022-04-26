@@ -18,6 +18,7 @@ module TokenSwapSyrup {
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
 
+
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
     const ERROR_STAKE_ID_INVALID: u64 = 103;

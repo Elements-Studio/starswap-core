@@ -4,7 +4,29 @@
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# block --author 0x1 --timestamp 10000000
+//# block --author 0x1 --timestamp 1646445600000
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun genesis_initialized(signer: signer) {
+        TokenSwapGov::genesis_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun upgrade_dao_treasury_genesis(signer: signer) {
+        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+    }
+}
+// check: EXECUTED
 
 //# run --signers alice
 script {
@@ -13,6 +35,47 @@ script {
 
     fun alice_accept_token(signer: signer) {
         Account::do_accept_token<WETH>(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers alice
+script {
+    use SwapAdmin::STAR;
+    use StarcoinFramework::Account;
+
+    fun swap_admin_accept_STAR(signer: signer) {
+        Account::do_accept_token<STAR::STAR>(&signer);
+    }
+}
+
+//# run --signers SwapAdmin
+script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun linear_initialize(signer: signer) {
+        TokenSwapGov::linear_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use StarcoinFramework::Account;
+    use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeIDO,
+        PoolTypeCommunity,
+    };
+
+    fun dispatch_to_other_account(signer: signer) {
+        TokenSwapGov::dispatch<PoolTypeIDO>(&signer, @alice, 10000000);
+        TokenSwapGov::dispatch<PoolTypeCommunity>(&signer, @alice, 20000000);
+
+        let balance = Account::balance<STAR::STAR>(@alice);
+        assert!(balance == 30000000, 1003);
     }
 }
 // check: EXECUTED
@@ -26,15 +89,21 @@ script {
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeCommunity,
+        PoolTypeSyrup
+    };
 
     fun admin_initialize(signer: signer) {
-        TokenMock::register_token<STAR::STAR>(&signer, 9u8);
+        // TokenMock::register_token<STAR::STAR>(&signer, 9u8);
         TokenMock::register_token<TokenMock::WETH>(&signer, 9u8);
 
-        let powed_mint_aount = CommonHelper::pow_amount<STAR::STAR>(100000000);
+        let powed_mint_aount = CommonHelper::pow_amount<STAR::STAR>(1000000);
 
-        // Initialize pool
-        TokenSwapSyrup::initialize(&signer, TokenMock::mint_token<STAR::STAR>(powed_mint_aount));
+        TokenSwapGov::dispatch<PoolTypeCommunity>(&signer, @SwapAdmin, powed_mint_aount);
+
+        TokenSwapSyrup::deposit<PoolTypeSyrup,STAR::STAR>(&signer, Account::withdraw<STAR::STAR>(&signer,powed_mint_aount));
 
         let release_per_second_amount = CommonHelper::pow_amount<TokenMock::WETH>(100);
 
@@ -125,7 +194,19 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10002000
+//# block --author 0x1 --timestamp 1646445602000
+
+//# run --signers SwapAdmin
+script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun alice_stake_unall_flow(signer: signer) {
+        
+        TokenSwapGov::linear_withdraw_farm(&signer);
+    }
+}
+// check: EXECUTED
 
 //# run --signers alice
 script {
@@ -174,8 +255,8 @@ script {
     }
 }
 // check: EXECUTED
-
-//# block --author 0x1 --timestamp 15000000
+                                   
+//# block --author 0x1 --timestamp   1646450600000
 
 //# run --signers alice
 script {
@@ -185,16 +266,20 @@ script {
     use SwapAdmin::TokenMock;
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::TokenSwapVestarMinter;
-
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeSyrup
+    };
     fun alice_stake_unall_flow(signer: signer) {
         let account = Signer::address_of(&signer);
 
-        let vecs = TokenSwapSyrupScript::query_stake_list<TokenMock::WETH>(account);
-        Debug::print(&vecs);
-
+        let _vecs = TokenSwapSyrupScript::query_stake_list<TokenMock::WETH>(account);
+        Debug::print(&TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeSyrup>());
+        // TokenSwapGov::linear_withdraw_syrup(&signer);
         TokenSwapSyrupScript::unstake<TokenMock::WETH>(signer, 2);
 
         assert!(TokenSwapVestarMinter::value(account) <= 0, 10014);
     }
 }
 // check: EXECUTED
+

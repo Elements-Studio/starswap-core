@@ -75,6 +75,21 @@ script {
 }
 // check: EXECUTED
 
+//# run --signers alice
+script {
+    use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGovPoolType::{
+        PoolTypeSyrup
+    };
+    //Attempt to extract at first hour
+    fun linear_withdraw_syrup(_signer: signer) {
+
+        let _can_withdraw = TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeSyrup>();
+       
+    }
+}
+// check: EXECUTED
+
 //# run --signers SwapAdmin
 script {
     use StarcoinFramework::Account;
