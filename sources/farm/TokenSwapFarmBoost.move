@@ -92,17 +92,28 @@ module TokenSwapFarmBoost {
         }
     }
 
+    /// Query user boost locked vestar amount
+    public fun get_boost_locked_vestar_amount<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 acquires UserInfo {
+        if (exists<UserInfo<X, Y>>(account)) {
+            let user_info = borrow_global<UserInfo<X, Y>>(account);
+            let vestar_value = VToken::value<VESTAR>(&user_info.locked_vetoken);
+            vestar_value
+        } else {
+            0
+        }
+    }
+
     /// calculation asset weight for boost
     public fun calculate_boost_weight(amount: u128, boost_factor: u64): u128 {
         amount * (boost_factor as u128) / (BOOST_FACTOR_PRECESION as u128)
     }
 
     /// predict boost factor before stake
-    public fun predict_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address, user_lp_amount: u128): u64 {
-        let user_vestar_total_amount = TokenSwapVestarMinter::value(account);
+    public fun predict_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address, user_lp_amount: u128): u64 acquires UserInfo{
+        let user_vestar_locked_amount = get_boost_locked_vestar_amount<X, Y>(account);
         let total_farm_amount = YieldFarming::query_total_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address());
         let exact_total_farm_amount = total_farm_amount + user_lp_amount;
-        let predict_boost_factor = Boost::compute_boost_factor(user_vestar_total_amount, user_lp_amount, exact_total_farm_amount);
+        let predict_boost_factor = Boost::compute_boost_factor(user_vestar_locked_amount, user_lp_amount, exact_total_farm_amount);
         predict_boost_factor
     }
 
