@@ -87,7 +87,7 @@ script {
         TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
         assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), 100011);
 
-        TokenSwapFarmBoost::initialize_boost_event(&signer);    
+        TokenSwapFarmBoost::initialize_boost_event(&signer);
         // upgrade for global init
         UpgradeScripts::initialize_global_syrup_info(signer, CommonHelper::pow_amount<STAR::STAR>(10));
     }

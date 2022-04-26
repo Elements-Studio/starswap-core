@@ -2,6 +2,7 @@ address SwapAdmin {
 
 module TokenSwapVestarRouter {
     use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
 
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapSyrup;
@@ -21,8 +22,9 @@ module TokenSwapVestarRouter {
             return
         };
 
+        let id = TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer));
         TokenSwapVestarMinter::mint_with_cap(signer,
-            TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer)),
+            id,
             pledge_time_sec,
             amount,
             &cap.cap);
