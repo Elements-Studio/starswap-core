@@ -10,6 +10,7 @@ module TokenSwapVestarMinter {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Option;
     use StarcoinFramework::Vector;
+    use StarcoinFramework::Event;
 
     use SwapAdmin::VToken;
     use SwapAdmin::Boost;
@@ -30,13 +31,41 @@ module TokenSwapVestarMinter {
 
     struct MintRecord has key, store, copy, drop {
         id: u64,
-        minted_amount: u128, // Vestar amoun
+        minted_amount: u128,
+        // Vestar amount
         staked_amount: u128,
         pledge_time_sec: u64,
     }
 
     struct MintRecordList has key, store {
         items: vector<MintRecord>
+    }
+
+    struct MintEvent has store, drop {
+        account: address,
+        amount: u128,
+    }
+
+    struct BurnEvent has store, drop {
+        account: address,
+        amount: u128,
+    }
+
+    struct DepositEvent has store, drop {
+        account: address,
+        amount: u128,
+    }
+
+    struct WithdrawEvent has store, drop {
+        account: address,
+        amount: u128,
+    }
+
+    struct VestarEventHandler has key, store {
+        mint_event_handler: Event::EventHandle<MintEvent>,
+        burn_event_handler: Event::EventHandle<BurnEvent>,
+        withdraw_event_handler: Event::EventHandle<WithdrawEvent>,
+        deposit_event_handler: Event::EventHandle<DepositEvent>,
     }
 
     struct MintCapability has key, store {}
@@ -51,24 +80,40 @@ module TokenSwapVestarMinter {
         move_to(signer, VestarOwnerCapability{
             cap: VToken::extract_cap<VESTAR::VESTAR>(signer)
         });
+
+        move_to(signer, VestarEventHandler{
+            mint_event_handler: Event::new_event_handle<MintEvent>(signer),
+            burn_event_handler: Event::new_event_handle<BurnEvent>(signer),
+            withdraw_event_handler: Event::new_event_handle<WithdrawEvent>(signer),
+            deposit_event_handler: Event::new_event_handle<DepositEvent>(signer),
+        });
+
         (MintCapability{}, TreasuryCapability{})
     }
 
     /// Mint Vestar with capability
     public fun mint_with_cap(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
-    acquires VestarOwnerCapability, Treasury, MintRecordList {
-        let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
+    acquires VestarOwnerCapability, Treasury, MintRecordList, VestarEventHandler {
+        let broker = Token::token_address<VESTAR::VESTAR>();
+        let cap = borrow_global<VestarOwnerCapability>(broker);
         let to_mint_amount = Boost::compute_mint_amount(pledge_time_sec, staked_amount);
 
+        let vtoken = VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, to_mint_amount);
+        let event_handler = borrow_global_mut<VestarEventHandler>(broker);
+        Event::emit_event(&mut event_handler.mint_event_handler, MintEvent{
+            account: Signer::address_of(signer),
+            amount: to_mint_amount
+        });
+
         // Deposit VESTAR to treasury
-        deposit(signer, VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, to_mint_amount));
+        deposit(signer, vtoken);
 
         add_to_record(signer, id, pledge_time_sec, staked_amount, to_mint_amount);
     }
 
     /// Burn Vestar with capability
     public fun burn_with_cap(signer: &signer, id: u64, _cap: &MintCapability)
-    acquires Treasury, VestarOwnerCapability, MintRecordList {
+    acquires Treasury, VestarOwnerCapability, MintRecordList, VestarEventHandler {
         let user_addr = Signer::address_of(signer);
 
         // Check user has treasury, if not then return
@@ -76,9 +121,11 @@ module TokenSwapVestarMinter {
             return
         };
 
-        let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
+        let broker = Token::token_address<VESTAR::VESTAR>();
+        let cap = borrow_global<VestarOwnerCapability>(broker);
         let record = pop_from_record(user_addr, id);
-        if (Option::is_none(&record)) { // Doing nothing if this stake operation is old.
+        if (Option::is_none(&record)) {
+            // Doing nothing if this stake operation is old.
             return
         };
 
@@ -90,20 +137,14 @@ module TokenSwapVestarMinter {
         let treasury = borrow_global_mut<Treasury>(user_addr);
         VToken::burn_with_cap<VESTAR::VESTAR>(&cap.cap,
             VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
+
+        let event_handler = borrow_global_mut<VestarEventHandler>(broker);
+        Event::emit_event(&mut event_handler.burn_event_handler, BurnEvent{
+            account: user_addr,
+            amount: to_burn_amount
+        });
     }
 
-    /// Burn all vestar in treasury
-//    public fun clean_treasury(signer: &signer, id: u64, _cap: &MintCapability) acquires Treasury, VestarOwnerCapability, MintRecordList {
-//        let user_addr = Signer::address_of(signer);
-//        let treasury = borrow_global_mut<Treasury>(user_addr);
-//
-//        let _ = pop_from_record(user_addr, id);
-//        let to_burn_amount = VToken::value(&treasury.vtoken);
-//
-//        let cap = borrow_global<VestarOwnerCapability>(Token::token_address<VESTAR::VESTAR>());
-//        VToken::burn_with_cap<VESTAR::VESTAR>(&cap.cap,
-//            VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
-//    }
 
     /// Amount of treasury
     public fun value(account: address): u128 acquires Treasury {
@@ -130,21 +171,28 @@ module TokenSwapVestarMinter {
 
     /// Withdraw from treasury
     public fun withdraw_with_cap(signer: &signer, amount: u128, _cap: &TreasuryCapability)
-    : VToken::VToken<VESTAR::VESTAR> acquires Treasury {
+    : VToken::VToken<VESTAR::VESTAR> acquires Treasury, VestarEventHandler {
         withdraw(signer, amount)
     }
 
     /// Deposit to treasury
     public fun deposit_with_cap(signer: &signer,
                                 t: VToken::VToken<VESTAR::VESTAR>,
-                                _cap: &TreasuryCapability) acquires Treasury {
+                                _cap: &TreasuryCapability) acquires Treasury, VestarEventHandler {
         deposit(signer, t);
     }
 
-    fun deposit(signer: &signer, t: VToken::VToken<VESTAR::VESTAR>) acquires Treasury {
-        let account = Signer::address_of(signer);
-        if (exists<Treasury>(account)) {
-            let treasury = borrow_global_mut<Treasury>(account);
+    fun deposit(signer: &signer, t: VToken::VToken<VESTAR::VESTAR>) acquires Treasury, VestarEventHandler {
+        let user_addr = Signer::address_of(signer);
+
+        let event_handler = borrow_global_mut<VestarEventHandler>(Token::token_address<VESTAR::VESTAR>());
+        Event::emit_event(&mut event_handler.deposit_event_handler, DepositEvent{
+            account: user_addr,
+            amount: VToken::value(&t),
+        });
+
+        if (exists<Treasury>(user_addr)) {
+            let treasury = borrow_global_mut<Treasury>(user_addr);
             VToken::deposit<VESTAR::VESTAR>(&mut treasury.vtoken, t);
         } else {
             move_to(signer, Treasury{
@@ -153,12 +201,20 @@ module TokenSwapVestarMinter {
         };
     }
 
-    fun withdraw(signer: &signer, amount: u128): VToken::VToken<VESTAR::VESTAR> acquires Treasury {
-        let account = Signer::address_of(signer);
-        assert!(exists<Treasury>(account), Errors::invalid_state(ERROR_TREASURY_NOT_EXISTS));
+    fun withdraw(signer: &signer, amount: u128): VToken::VToken<VESTAR::VESTAR> acquires Treasury, VestarEventHandler {
+        let user_addr = Signer::address_of(signer);
+        assert!(exists<Treasury>(user_addr), Errors::invalid_state(ERROR_TREASURY_NOT_EXISTS));
 
-        let treasury = borrow_global_mut<Treasury>(account);
-        VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount)
+        let treasury = borrow_global_mut<Treasury>(user_addr);
+        let vtoken = VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount);
+
+        let event_handler = borrow_global_mut<VestarEventHandler>(Token::token_address<VESTAR::VESTAR>());
+        Event::emit_event(&mut event_handler.withdraw_event_handler, WithdrawEvent{
+            account: user_addr,
+            amount
+        });
+
+        vtoken
     }
 
     fun add_to_record(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
@@ -209,6 +265,22 @@ module TokenSwapVestarMinter {
             };
             idx = idx - 1;
         }
+    }
+
+    /// Initialize handle
+    public fun maybe_init_event_handler_barnard(signer: &signer) {
+        assert!(Signer::address_of(signer) == @SwapAdmin, Errors::invalid_state(ERROR_NOT_ADMIN));
+
+        if (exists<VestarEventHandler>(Signer::address_of(signer))) {
+            return
+        };
+
+        move_to(signer, VestarEventHandler{
+            mint_event_handler: Event::new_event_handle<MintEvent>(signer),
+            burn_event_handler: Event::new_event_handle<BurnEvent>(signer),
+            withdraw_event_handler: Event::new_event_handle<WithdrawEvent>(signer),
+            deposit_event_handler: Event::new_event_handle<DepositEvent>(signer),
+        });
     }
 }
 }

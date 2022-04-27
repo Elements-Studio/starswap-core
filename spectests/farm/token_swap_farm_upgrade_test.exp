@@ -1,4 +1,4 @@
-processed 35 tasks
+processed 36 tasks
 
 task 5 'run'. lines 11-20:
 {
@@ -122,7 +122,7 @@ task 19 'run'. lines 251-261:
 
 task 20 'run'. lines 263-287:
 {
-  "gas_used": 239545,
+  "gas_used": 345577,
   "status": {
     "Keep": "Executed"
   }
@@ -170,7 +170,7 @@ task 27 'run'. lines 360-375:
 
 task 28 'run'. lines 378-395:
 {
-  "gas_used": 1207317,
+  "gas_used": 1208627,
   "status": {
     "Keep": "Executed"
   }
@@ -178,7 +178,7 @@ task 28 'run'. lines 378-395:
 
 task 29 'run'. lines 397-414:
 {
-  "gas_used": 724123,
+  "gas_used": 723553,
   "status": {
     "Keep": "Executed"
   }
@@ -186,7 +186,7 @@ task 29 'run'. lines 397-414:
 
 task 30 'run'. lines 416-433:
 {
-  "gas_used": 1571025,
+  "gas_used": 1570455,
   "status": {
     "Keep": "Executed"
   }
@@ -200,7 +200,26 @@ task 32 'run'. lines 437-451:
   }
 }
 
-task 33 'run'. lines 453-461:
+task 33 'run'. lines 454-463:
+{
+  "gas_used": 100874,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapFarm"
+          }
+        },
+        "function": 2,
+        "code_offset": 33
+      }
+    }
+  }
+}
+
+task 34 'run'. lines 465-473:
 {
   "gas_used": 83256,
   "status": {
@@ -208,7 +227,7 @@ task 33 'run'. lines 453-461:
   }
 }
 
-task 34 'run'. lines 463-472:
+task 35 'run'. lines 475-484:
 {
   "gas_used": 85852,
   "status": {

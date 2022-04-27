@@ -105,6 +105,8 @@ module TokenSwapSyrupScript {
 
         let broker = Signer::address_of(&signer);
 
+        TokenSwapVestarMinter::maybe_init_event_handler_barnard(&signer);
+
         if (exists<VestarRouterCapabilityWrapper>(broker) ||
             !exists<VestarMintCapabilityWrapper>(broker)) {
             return

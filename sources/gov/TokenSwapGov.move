@@ -426,13 +426,11 @@ module TokenSwapGov {
     }
     //Farm Linear Treasury Extraction Function
     public fun linear_withdraw_farm(account:&signer) acquires GovTreasuryV2{
-        
         let disp_token = linear_withdraw_farm_syrup<PoolTypeFarmPool>();
         TokenSwapFarm::deposit<PoolTypeFarmPool,STAR::STAR>(account,disp_token);
     }
     //Syrup Linear Treasury Extraction Function
     public fun linear_withdraw_syrup(account:&signer) acquires GovTreasuryV2{
-        
         let disp_token = linear_withdraw_farm_syrup<PoolTypeSyrup>();
         TokenSwapSyrup::deposit<PoolTypeSyrup,STAR::STAR>(account,disp_token);
     }

@@ -450,6 +450,18 @@ script {
 }
 // check: EXECUTED
 
+
+//# run --signers bob
+script {
+    use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenMock::{WBTC, WETH};
+
+    fun boost_without_stake(signer: signer) {
+        TokenSwapFarmRouter::boost<WBTC, WETH>(&signer, 1);
+    }
+}
+// check: ExecutionFailure
+
 //# run --signers SwapAdmin
 script {
     use SwapAdmin::TokenSwapConfig;
@@ -470,3 +482,4 @@ script {
     }
 }
 // check: "Keep(ABORTED { code: 26113"
+
