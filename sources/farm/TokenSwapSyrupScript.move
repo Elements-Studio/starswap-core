@@ -86,8 +86,8 @@ module TokenSwapSyrupScript {
         TokenSwapVestarMinter::value(user_addr)
     }
 
-    public fun query_vestar_amount_by_staked_id(user_addr: address, id: u64): u128 {
-        TokenSwapVestarMinter::value_of_id(user_addr, id)
+    public fun query_vestar_amount_by_staked_id<TokenT: store>(user_addr: address, id: u64): u128 {
+        TokenSwapVestarMinter::value_of_id<TokenT>(user_addr, id)
     }
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
