@@ -60,25 +60,6 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers SwapAdmin
-script {
-    use StarcoinFramework::Account;
-    use SwapAdmin::STAR;
-    use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{
-        PoolTypeIDO,
-        PoolTypeCommunity,
-    };
-
-    fun dispatch_to_other_account(signer: signer) {
-        TokenSwapGov::dispatch<PoolTypeIDO>(&signer, @alice, 10000000);
-        TokenSwapGov::dispatch<PoolTypeCommunity>(&signer, @alice, 20000000);
-
-        let balance = Account::balance<STAR::STAR>(@alice);
-        assert!(balance == 30000000, 1003);
-    }
-}
-// check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
@@ -96,7 +77,7 @@ script {
     };
 
     fun admin_initialize(signer: signer) {
-        // TokenMock::register_token<STAR::STAR>(&signer, 9u8);
+
         TokenMock::register_token<TokenMock::WETH>(&signer, 9u8);
 
         let powed_mint_aount = CommonHelper::pow_amount<STAR::STAR>(1000000);
@@ -196,17 +177,6 @@ script {
 
 //# block --author 0x1 --timestamp 1646445602000
 
-//# run --signers SwapAdmin
-script {
-
-    use SwapAdmin::TokenSwapGov;
-
-    fun alice_stake_unall_flow(signer: signer) {
-        
-        TokenSwapGov::linear_withdraw_farm(&signer);
-    }
-}
-// check: EXECUTED
 
 //# run --signers alice
 script {
@@ -266,16 +236,11 @@ script {
     use SwapAdmin::TokenMock;
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::TokenSwapVestarMinter;
-    use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{
-        PoolTypeSyrup
-    };
     fun alice_stake_unall_flow(signer: signer) {
         let account = Signer::address_of(&signer);
 
-        let _vecs = TokenSwapSyrupScript::query_stake_list<TokenMock::WETH>(account);
-        Debug::print(&TokenSwapGov::get_can_withdraw_of_linear_treasury<PoolTypeSyrup>());
-        // TokenSwapGov::linear_withdraw_syrup(&signer);
+        let vecs = TokenSwapSyrupScript::query_stake_list<TokenMock::WETH>(account);
+        Debug::print(&vecs);
         TokenSwapSyrupScript::unstake<TokenMock::WETH>(signer, 2);
 
         assert!(TokenSwapVestarMinter::value(account) <= 0, 10014);
