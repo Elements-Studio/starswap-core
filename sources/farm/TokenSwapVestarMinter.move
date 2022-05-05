@@ -334,14 +334,14 @@ module TokenSwapVestarMinter {
                 return
             };
 
-            let MintRecord {
+            let MintRecord{
                 id,
                 minted_amount,
                 staked_amount,
                 pledge_time_sec
             } = Vector::pop_back(record_list);
 
-            Vector::push_back(record_list_t, MintRecordT<TokenT> {
+            Vector::push_back(record_list_t, MintRecordT<TokenT>{
                 id,
                 minted_amount,
                 staked_amount,
@@ -355,6 +355,98 @@ module TokenSwapVestarMinter {
         let list = borrow_global<MintRecordListT<TokenT>>(user_addr);
         let idx = find_idx_by_id(&list.items, id);
         Option::is_some(&idx)
+    }
+
+    #[test_only] use StarcoinFramework::Debug;
+    #[test_only] use StarcoinFramework::STC;
+    #[test_only] use SwapAdmin::STAR;
+
+    #[test]
+    fun test_convert_minter_record() {
+        let old_record_list = Vector::empty<MintRecord>();
+        Vector::push_back(&mut old_record_list, MintRecord{
+            id: 1,
+            minted_amount: 100,
+            staked_amount: 100,
+            pledge_time_sec: 100,
+        });
+        Vector::push_back(&mut old_record_list, MintRecord{
+            id: 2,
+            minted_amount: 200,
+            staked_amount: 200,
+            pledge_time_sec: 200,
+        });
+
+        let old_length = Vector::length(&old_record_list);
+        let new_record_list_t = Vector::empty<MintRecordT<VESTAR::VESTAR>>();
+        update_record_to_recordT<VESTAR::VESTAR>(&mut old_record_list, &mut new_record_list_t);
+        let new_length = Vector::length(&new_record_list_t);
+        Debug::print(&new_length);
+        Debug::print(&old_length);
+        assert!(new_length == old_length, 10001);
+
+        let idx = find_idx_by_id(&new_record_list_t, 2);
+        let r = Vector::borrow(&new_record_list_t, Option::destroy_some(idx));
+        assert!(r.minted_amount == 200, 10002);
+    }
+
+    // #[test(a=@xxx, b=@xxx)]
+    #[test(signer = @SwapAdmin)]
+    fun test_add_new_record_for_compatibility(signer: signer) acquires MintRecordListT, MintRecordList {
+        // Add old record
+        let items = Vector::empty<MintRecord>();
+        Vector::push_back(&mut items, MintRecord{
+            id: 1,
+            minted_amount: 100,
+            staked_amount: 100,
+            pledge_time_sec: 100,
+        });
+        move_to(&signer, MintRecordList{
+            items,
+        });
+
+        // add new record
+        add_to_record<STAR::STAR>(&signer, 2, 200, 200, 200);
+
+        // Test repeat record id for other token type
+        add_to_record<STC::STC>(&signer, 2, 200, 200, 200);
+
+        let user_addr = Signer::address_of(&signer);
+        // query new record and old record in new record list
+        assert!(value_of_id<STAR::STAR>(user_addr, 1) == 100, 10003);
+        assert!(value_of_id<STAR::STAR>(user_addr, 2) == 200, 10004);
+        assert!(value_of_id<STC::STC>(user_addr, 2) == 200, 10005);
+    }
+
+    // #[test(a=@xxx, b=@xxx)]
+    #[test(signer = @SwapAdmin)]
+    fun test_pop_record_for_compatibility(signer: signer) acquires MintRecordListT, MintRecordList {
+        // Add old record
+        let items = Vector::empty<MintRecord>();
+        Vector::push_back(&mut items, MintRecord{
+            id: 1,
+            minted_amount: 100,
+            staked_amount: 100,
+            pledge_time_sec: 100,
+        });
+        Vector::push_back(&mut items, MintRecord{
+            id: 2,
+            minted_amount: 200,
+            staked_amount: 200,
+            pledge_time_sec: 200,
+        });
+        move_to(&signer, MintRecordList{
+            items,
+        });
+
+        // pop record from
+        pop_from_record<STAR::STAR>(&signer, 2);
+
+        let user_addr = Signer::address_of(&signer);
+
+        // query new record and old record in new record list
+        assert!(value_of_id<STAR::STAR>(user_addr, 1) == 100, 10006);
+        assert!(!exists_record<STAR::STAR>(user_addr, 2), 10007);
     }
 }
 }
