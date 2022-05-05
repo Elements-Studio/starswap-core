@@ -170,12 +170,23 @@ module TokenSwapVestarMinter {
     }
 
     /// Query amount in record by given id number
-    public fun value_of_id<TokenT: store>(account: address, id: u64): u128 acquires MintRecordListT {
-        if (!exists<MintRecordListT<TokenT>>(account)) {
+    public fun value_of_id(user_addr: address, id: u64): u128 acquires MintRecordList {
+        let list = borrow_global<MintRecordList>(user_addr);
+        let idx = find_idx_by_id_old_list(&list.items, id);
+        if (Option::is_none(&idx)) {
+            return 0
+        };
+        let record = Vector::borrow(&list.items, Option::destroy_some(idx));
+        record.minted_amount
+    }
+
+    /// Query amount in record by given id number
+    public fun value_of_id_by_token<TokenT: store>(user_addr: address, id: u64): u128 acquires MintRecordListT {
+        if (!exists<MintRecordListT<TokenT>>(user_addr)) {
             return 0
         };
 
-        let list = borrow_global<MintRecordListT<TokenT>>(account);
+        let list = borrow_global<MintRecordListT<TokenT>>(user_addr);
         let idx = find_idx_by_id(&list.items, id);
         if (Option::is_none(&idx)) {
             return 0
@@ -232,9 +243,11 @@ module TokenSwapVestarMinter {
         vtoken
     }
 
+    /// Add vestar mint record
     fun add_to_record<TokenT: store>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
     acquires MintRecordListT, MintRecordList {
         let user_addr = Signer::address_of(signer);
+
         if (!exists<MintRecordListT<TokenT>>(user_addr)) {
             move_to(signer, MintRecordListT<TokenT>{
                 items: Vector::empty<MintRecordT<TokenT>>()
@@ -242,12 +255,7 @@ module TokenSwapVestarMinter {
         };
 
         let lst = borrow_global_mut<MintRecordListT<TokenT>>(user_addr);
-
-        // Handle old record list
-        if (exists<MintRecordList>(user_addr)) {
-            let MintRecordList{ items: record_list } = move_from<MintRecordList>(user_addr);
-            update_record_to_recordT<TokenT>(&mut record_list, &mut lst.items);
-        };
+        maybe_upgrade_records(user_addr, &mut lst.items);
 
         let idx = find_idx_by_id(&lst.items, id);
         assert!(Option::is_none(&idx), Errors::invalid_state(ERROR_ADD_RECORD_ID_INVALID));
@@ -260,24 +268,19 @@ module TokenSwapVestarMinter {
         });
     }
 
+    /// Pop vestar mint record
     fun pop_from_record<TokenT: store>(signer: &signer, id: u64)
     : Option::Option<MintRecordT<TokenT>> acquires MintRecordListT, MintRecordList {
         let user_addr = Signer::address_of(signer);
 
-        // Handle old record list
-        let lst = if (exists<MintRecordList>(user_addr)) {
-            let MintRecordList{ items: record_list } = move_from<MintRecordList>(user_addr);
-            if (!exists<MintRecordListT<TokenT>>(user_addr)) {
-                move_to(signer, MintRecordListT<TokenT>{
-                    items: Vector::empty<MintRecordT<TokenT>>(),
-                });
-            };
-            let record_list_t = borrow_global_mut<MintRecordListT<TokenT>>(user_addr);
-            update_record_to_recordT<TokenT>(&mut record_list, &mut record_list_t.items);
-            record_list_t
-        } else {
-            borrow_global_mut<MintRecordListT<TokenT>>(user_addr)
+        if (!exists<MintRecordListT<TokenT>>(user_addr)) {
+            move_to(signer, MintRecordListT<TokenT>{
+                items: Vector::empty<MintRecordT<TokenT>>()
+            });
         };
+
+        let lst = borrow_global_mut<MintRecordListT<TokenT>>(user_addr);
+        maybe_upgrade_records(user_addr, &mut lst.items);
 
         let idx = find_idx_by_id(&lst.items, id);
         if (Option::is_some(&idx)) {
@@ -288,6 +291,25 @@ module TokenSwapVestarMinter {
     }
 
     fun find_idx_by_id<TokenT: store>(c: &vector<MintRecordT<TokenT>>, id: u64): Option::Option<u64> {
+        let len = Vector::length(c);
+        if (len == 0) {
+            return Option::none()
+        };
+
+        let idx = len - 1;
+        loop {
+            let el = Vector::borrow(c, idx);
+            if (el.id == id) {
+                return Option::some(idx)
+            };
+            if (idx == 0) {
+                return Option::none()
+            };
+            idx = idx - 1;
+        }
+    }
+
+    fun find_idx_by_id_old_list(c: &vector<MintRecord>, id: u64): Option::Option<u64> {
         let len = Vector::length(c);
         if (len == 0) {
             return Option::none()
@@ -322,6 +344,16 @@ module TokenSwapVestarMinter {
         });
     }
 
+    /// Auto convert to new if exist old record list
+    public fun maybe_upgrade_records<TokenT: store>(user_addr: address, items: &mut vector<MintRecordT<TokenT>>) acquires MintRecordList {
+        if (!exists<MintRecordList>(user_addr)) {
+            return
+        };
+
+        let MintRecordList{ items: old_record_list } = move_from<MintRecordList>(user_addr);
+        update_record_to_recordT<TokenT>(&mut old_record_list, items);
+    }
+
     public fun update_record_to_recordT<TokenT: store>(record_list: &mut vector<MintRecord>,
                                                        record_list_t: &mut vector<MintRecordT<TokenT>>) {
         let len = Vector::length(record_list);
@@ -352,6 +384,10 @@ module TokenSwapVestarMinter {
 
     /// Check vestar record has exists
     public fun exists_record<TokenT: store>(user_addr: address, id: u64): bool acquires MintRecordListT {
+        if (!exists<MintRecordListT<TokenT>>(user_addr)) {
+            return false
+        };
+
         let list = borrow_global<MintRecordListT<TokenT>>(user_addr);
         let idx = find_idx_by_id(&list.items, id);
         Option::is_some(&idx)
@@ -413,9 +449,9 @@ module TokenSwapVestarMinter {
 
         let user_addr = Signer::address_of(&signer);
         // query new record and old record in new record list
-        assert!(value_of_id<STAR::STAR>(user_addr, 1) == 100, 10003);
-        assert!(value_of_id<STAR::STAR>(user_addr, 2) == 200, 10004);
-        assert!(value_of_id<STC::STC>(user_addr, 2) == 200, 10005);
+        assert!(value_of_id_by_token<STAR::STAR>(user_addr, 1) == 100, 10003);
+        assert!(value_of_id_by_token<STAR::STAR>(user_addr, 2) == 200, 10004);
+        assert!(value_of_id_by_token<STC::STC>(user_addr, 2) == 200, 10005);
     }
 
     // #[test(a=@xxx, b=@xxx)]
@@ -445,7 +481,7 @@ module TokenSwapVestarMinter {
         let user_addr = Signer::address_of(&signer);
 
         // query new record and old record in new record list
-        assert!(value_of_id<STAR::STAR>(user_addr, 1) == 100, 10006);
+        assert!(value_of_id_by_token<STAR::STAR>(user_addr, 1) == 100, 10006);
         assert!(!exists_record<STAR::STAR>(user_addr, 2), 10007);
     }
 }

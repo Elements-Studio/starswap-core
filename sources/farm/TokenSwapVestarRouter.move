@@ -29,6 +29,22 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
+    public fun stake_hook_with_id<TokenT: store>(signer: &signer,
+                                                 id: u64,
+                                                 pledge_time_sec: u64,
+                                                 amount: u128,
+                                                 cap: &VestarRouterCapability) {
+        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+            return
+        };
+
+        TokenSwapVestarMinter::mint_with_cap<TokenT>(signer,
+            id,
+            pledge_time_sec,
+            amount,
+            &cap.cap);
+    }
+
     public fun unstake_hook<TokenT: store>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
