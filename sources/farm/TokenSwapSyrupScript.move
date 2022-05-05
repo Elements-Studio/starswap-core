@@ -64,6 +64,28 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::unstake_hook<TokenT>(&signer, id, &cap_wrapper.cap);
     }
 
+    /// Boost stake that had staked before the boost function online
+    public(script) fun take_vestar_by_stake_id<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
+        let user_addr = Signer::address_of(&signer);
+
+        // Continuing handle must to determine that the vestar record not exist and the stake exist
+        if (TokenSwapVestarRouter::exists_record<TokenT>(user_addr, id)) {
+            return
+        };
+
+        let (
+            start_time,
+            end_time,
+            _,
+            token_amount
+        ) = TokenSwapSyrup::get_stake_info<TokenT>(user_addr, id);
+
+        let pledge_time_sec = end_time - start_time;
+        let broker = @SwapAdmin;
+        let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
+        TokenSwapVestarRouter::stake_hook<TokenT>(&signer, pledge_time_sec, token_amount, &cap_wrapper.cap);
+    }
+
     public(script) fun put_stepwise_multiplier(signer: signer,
                                                interval_sec: u64,
                                                multiplier: u64) {
@@ -86,8 +108,8 @@ module TokenSwapSyrupScript {
         TokenSwapVestarMinter::value(user_addr)
     }
 
-    public fun query_vestar_amount_by_staked_id(user_addr: address, id: u64): u128 {
-        TokenSwapVestarMinter::value_of_id(user_addr, id)
+    public fun query_vestar_amount_by_staked_id<TokenT: store>(user_addr: address, id: u64): u128 {
+        TokenSwapVestarMinter::value_of_id<TokenT>(user_addr, id)
     }
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {

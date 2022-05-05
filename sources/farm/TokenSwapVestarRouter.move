@@ -21,8 +21,9 @@ module TokenSwapVestarRouter {
             return
         };
 
-        TokenSwapVestarMinter::mint_with_cap(signer,
-            TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer)),
+        let id = TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer));
+        TokenSwapVestarMinter::mint_with_cap<TokenT>(signer,
+            id,
             pledge_time_sec,
             amount,
             &cap.cap);
@@ -32,7 +33,11 @@ module TokenSwapVestarRouter {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
         };
-        TokenSwapVestarMinter::burn_with_cap(signer, id, &cap.cap);
+        TokenSwapVestarMinter::burn_with_cap<TokenT>(signer, id, &cap.cap);
+    }
+
+    public fun exists_record<TokenT: store>(user_addr: address, id: u64): bool {
+        TokenSwapVestarMinter::exists_record<TokenT>(user_addr, id)
     }
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128): VestarRouterCapability {
