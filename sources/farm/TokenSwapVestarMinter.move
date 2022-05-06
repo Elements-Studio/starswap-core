@@ -171,6 +171,10 @@ module TokenSwapVestarMinter {
 
     /// Query amount in record by given id number
     public fun value_of_id(user_addr: address, id: u64): u128 acquires MintRecordList {
+        if (!exists<MintRecordList>(user_addr)) {
+            return 0
+        };
+
         let list = borrow_global<MintRecordList>(user_addr);
         let idx = find_idx_by_id_old_list(&list.items, id);
         if (Option::is_none(&idx)) {

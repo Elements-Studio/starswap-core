@@ -2,12 +2,15 @@ address SwapAdmin {
 
 module TokenSwapVestarRouter {
     use StarcoinFramework::Signer;
+    use StarcoinFramework::Errors;
 
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::STAR;
+
+    const ERROR_ALLOC_MODEL_NOT_OPEN: u64 = 101;
 
     struct VestarRouterCapability has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
@@ -34,9 +37,7 @@ module TokenSwapVestarRouter {
                                                  pledge_time_sec: u64,
                                                  amount: u128,
                                                  cap: &VestarRouterCapability) {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            return
-        };
+        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), Errors::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
 
         TokenSwapVestarMinter::mint_with_cap<TokenT>(signer,
             id,

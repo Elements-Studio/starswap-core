@@ -13,8 +13,6 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
 
-    const ERROR_UPGRADE_NOT_READY_NOW: u64 = 101;
-
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
