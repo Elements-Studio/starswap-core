@@ -131,7 +131,7 @@ script {
                                 ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeFarmPool>() as u128);
         
         let hour_release = (1646449200 - 1646445600) * second_release;
-        TokenSwapGov::linear_withdraw_farm(&signer);
+        TokenSwapGov::linear_withdraw_farm(&signer , 0);
         
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
 
@@ -157,7 +157,7 @@ script {
                                 ( TokenSwapGov::get_hodl_of_linear_treasury<PoolTypeSyrup>() as u128);
         
         let hour_release = (1646449200 - 1646445600) * second_release;
-        TokenSwapGov::linear_withdraw_syrup(&signer);
+        TokenSwapGov::linear_withdraw_syrup(&signer , 0);
         
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeSyrup>();
 
@@ -232,7 +232,7 @@ script {
 
     //Try extracting again
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer);
+        TokenSwapGov::linear_withdraw_farm(&signer , 0);
     }
 }
 // check: EXECUTED
@@ -259,7 +259,7 @@ script {
     use SwapAdmin::TokenSwapGov;
     //try to extract 0
     fun linear_withdraw_farm(signer: signer) {
-        TokenSwapGov::linear_withdraw_farm(&signer);
+        TokenSwapGov::linear_withdraw_farm(&signer , 0);
     }
 }
 // check: MoveAbort 51719
@@ -345,7 +345,7 @@ script {
     fun linear_withdraw_farm(signer: signer) {
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
         assert!(balance == 54996860730595600 ,1011 );
-        TokenSwapGov::linear_withdraw_farm(&signer);
+        TokenSwapGov::linear_withdraw_farm(&signer , 0);
 
         let balance = TokenSwapGov::get_balance_of_linear_treasury<PoolTypeFarmPool>();
         assert!(balance == 0 ,1011 );

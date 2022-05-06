@@ -56,7 +56,7 @@ module TokenSwapSyrupScript {
 
     public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
-        TokenSwapGov::linear_withdraw_syrup(&signer);
+        TokenSwapGov::linear_withdraw_syrup(&signer , 0);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
         Account::deposit<TokenT>(user_addr, asset_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);

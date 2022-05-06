@@ -45,6 +45,7 @@ module TokenSwapFarmRouter {
     public fun stake<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        TokenSwapGov::linear_withdraw_farm( account , 0 );
         if (order == 1) {
             TokenSwapFarm::stake<X, Y>(account, amount);
         } else {
@@ -55,6 +56,7 @@ module TokenSwapFarmRouter {
     public fun unstake<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        TokenSwapGov::linear_withdraw_farm( account , 0 );
         if (order == 1) {
             TokenSwapFarm::unstake<X, Y>(account, amount);
         } else {
@@ -66,7 +68,7 @@ module TokenSwapFarmRouter {
     public fun harvest<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        TokenSwapGov::linear_withdraw_farm(account);
+        TokenSwapGov::linear_withdraw_farm( account , 0 );
         if (order == 1) {
             TokenSwapFarm::harvest<X, Y>(account, amount);
         } else {
