@@ -25,7 +25,7 @@ module TokenSwapVestarRouter {
         };
 
         let id = TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer));
-        TokenSwapVestarMinter::mint_with_cap<TokenT>(signer,
+        TokenSwapVestarMinter::mint_with_cap_T<TokenT>(signer,
             id,
             pledge_time_sec,
             amount,
@@ -39,7 +39,7 @@ module TokenSwapVestarRouter {
                                                  cap: &VestarRouterCapability) {
         assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), Errors::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
 
-        TokenSwapVestarMinter::mint_with_cap<TokenT>(signer,
+        TokenSwapVestarMinter::mint_with_cap_T<TokenT>(signer,
             id,
             pledge_time_sec,
             amount,
@@ -50,7 +50,7 @@ module TokenSwapVestarRouter {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
         };
-        TokenSwapVestarMinter::burn_with_cap<TokenT>(signer, id, &cap.cap);
+        TokenSwapVestarMinter::burn_with_cap_T<TokenT>(signer, id, &cap.cap);
     }
 
     public fun exists_record<TokenT: store>(user_addr: address, id: u64): bool {

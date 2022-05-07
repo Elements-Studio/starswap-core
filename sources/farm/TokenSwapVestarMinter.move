@@ -20,6 +20,7 @@ module TokenSwapVestarMinter {
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
     const ERROR_ADD_RECORD_ID_INVALID: u64 = 103;
     const ERROR_NOT_ADMIN: u64 = 104;
+    const ERROR_FUNCTION_OBSOLETE: u64 = 105;
 
     struct Treasury has key, store {
         vtoken: VToken::VToken<VESTAR::VESTAR>,
@@ -43,7 +44,7 @@ module TokenSwapVestarMinter {
         items: vector<MintRecord>
     }
 
-    struct MintRecordT<phantom TokenT> has key, store, copy, drop {
+    struct MintRecordT<phantom StakeTokenT> has key, store, copy, drop {
         id: u64,
         minted_amount: u128,
         // Vestar amount
@@ -51,8 +52,8 @@ module TokenSwapVestarMinter {
         pledge_time_sec: u64,
     }
 
-    struct MintRecordListT<phantom TokenT> has key, store {
-        items: vector<MintRecordT<TokenT>>
+    struct MintRecordListT<phantom StakeTokenT> has key, store {
+        items: vector<MintRecordT<StakeTokenT>>
     }
 
     struct MintEvent has store, drop {
@@ -105,8 +106,12 @@ module TokenSwapVestarMinter {
         (MintCapability{}, TreasuryCapability{})
     }
 
+    public fun mint_with_cap(_signer: &signer, _id: u64, _pledge_time_sec: u64, _staked_amount: u128, _cap: &MintCapability) {
+        abort Errors::invalid_argument(ERROR_FUNCTION_OBSOLETE)
+    }
+
     /// Mint Vestar with capability
-    public fun mint_with_cap<TokenT: store>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
+    public fun mint_with_cap_T<TokenT: store>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
     acquires VestarOwnerCapability, Treasury, MintRecordListT, VestarEventHandler, MintRecordList {
         let broker = Token::token_address<VESTAR::VESTAR>();
         let cap = borrow_global<VestarOwnerCapability>(broker);
@@ -125,8 +130,12 @@ module TokenSwapVestarMinter {
         add_to_record<TokenT>(signer, id, pledge_time_sec, staked_amount, to_mint_amount);
     }
 
+    public fun burn_with_cap(_signer: &signer, _id: u64, _pledge_time_sec: u64, _staked_amount: u128, _cap: &MintCapability) {
+        abort Errors::invalid_argument(ERROR_FUNCTION_OBSOLETE)
+    }
+
     /// Burn Vestar with capability
-    public fun burn_with_cap<TokenT: store>(signer: &signer, id: u64, _cap: &MintCapability)
+    public fun burn_with_cap_T<TokenT: store>(signer: &signer, id: u64, _cap: &MintCapability)
     acquires Treasury, VestarOwnerCapability, MintRecordListT, VestarEventHandler, MintRecordList {
         let user_addr = Signer::address_of(signer);
 

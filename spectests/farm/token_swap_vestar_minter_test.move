@@ -37,12 +37,12 @@ module alice::VestarHoster {
     public fun mint<TokenT: store>(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
         cap.id = cap.id + 1;
-        TokenSwapVestarMinter::mint_with_cap<STAR::STAR>(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
+        TokenSwapVestarMinter::mint_with_cap_T<STAR::STAR>(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
     }
 
     public fun burn<TokenT: store>(signer: &signer) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
-        TokenSwapVestarMinter::burn_with_cap<TokenT>(signer, cap.id, &cap.mint_cap);
+        TokenSwapVestarMinter::burn_with_cap_T<TokenT>(signer, cap.id, &cap.mint_cap);
     }
 
     public fun get_amount_of_treasury(signer: &signer): u128 {

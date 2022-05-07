@@ -185,12 +185,12 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     public fun mint(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
         cap.id = cap.id + 1;
-        TokenSwapVestarMinter::mint_with_cap<STARWrapper>(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
+        TokenSwapVestarMinter::mint_with_cap_T<STARWrapper>(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
     }
 
     public fun burn(signer: &signer) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
-        TokenSwapVestarMinter::burn_with_cap<STARWrapper>(signer, cap.id, &cap.mint_cap);
+        TokenSwapVestarMinter::burn_with_cap_T<STARWrapper>(signer, cap.id, &cap.mint_cap);
     }
 
     public fun value(signer: &signer): u128 {
