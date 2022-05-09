@@ -13,8 +13,6 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
 
-    const ERROR_UPGRADE_NOT_READY_NOW: u64 = 101;
-
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
@@ -64,6 +62,26 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::unstake_hook<TokenT>(&signer, id, &cap_wrapper.cap);
     }
 
+    /// Boost stake that had staked before the boost function online
+    public(script) fun take_vestar_by_stake_id<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
+        let user_addr = Signer::address_of(&signer);
+
+        // if there not have stake id then report error
+        let (
+            start_time,
+            end_time,
+            _,
+            token_amount
+        ) = TokenSwapSyrup::get_stake_info<TokenT>(user_addr, id);
+
+        let pledge_time_sec = end_time - start_time;
+        let broker = @SwapAdmin;
+        let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
+
+        // if the stake has staked hook vestar then report error
+        TokenSwapVestarRouter::stake_hook_with_id<TokenT>(&signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
+    }
+
     public(script) fun put_stepwise_multiplier(signer: signer,
                                                interval_sec: u64,
                                                multiplier: u64) {
@@ -89,6 +107,11 @@ module TokenSwapSyrupScript {
     public fun query_vestar_amount_by_staked_id(user_addr: address, id: u64): u128 {
         TokenSwapVestarMinter::value_of_id(user_addr, id)
     }
+
+    public fun query_vestar_amount_by_staked_id_tokentype<TokenT: store>(user_addr: address, id: u64): u128 {
+        TokenSwapVestarMinter::value_of_id_by_token<TokenT>(user_addr, id)
+    }
+
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
         let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
