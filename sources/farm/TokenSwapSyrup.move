@@ -17,6 +17,7 @@ module TokenSwapSyrup {
     use SwapAdmin::YieldFarmingMultiplier;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapGov;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
@@ -113,6 +114,15 @@ module TokenSwapSyrup {
     /// Initialize for Syrup pool
     public fun initialize(signer: &signer, token: Token::Token<STAR::STAR>) {
         YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(signer, token);
+
+        move_to(signer, SyrupEvent{
+            add_pool_event: Event::new_event_handle<AddPoolEvent>(signer),
+            activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(signer),
+            stake_event_handler: Event::new_event_handle<StakeEvent>(signer),
+            unstake_event_handler: Event::new_event_handle<UnstakeEvent>(signer),
+        });
+    }
+    public fun initialize_event(signer: &signer) {
 
         move_to(signer, SyrupEvent{
             add_pool_event: Event::new_event_handle<AddPoolEvent>(signer),
@@ -351,7 +361,7 @@ module TokenSwapSyrup {
         Token::Token<STAR::STAR>
     ) acquires SyrupStakeList, SyrupEvent, Syrup {
         TokenSwapConfig::assert_global_freeze();
-
+        TokenSwapGov::linear_withdraw_syrup(signer,0);
         let user_addr = Signer::address_of(signer);
         let broker_addr = STAR::token_address();
         assert!(id > 0, Errors::invalid_state(ERROR_STAKE_ID_INVALID));

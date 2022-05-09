@@ -11,8 +11,7 @@ module TokenSwapGov {
     use StarcoinFramework::Event;
     use StarcoinFramework::Errors;
     use SwapAdmin::STAR;
-    use SwapAdmin::TokenSwapFarm;
-    use SwapAdmin::TokenSwapSyrup;
+    use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapGovPoolType::{
         PoolTypeCommunity,
@@ -193,6 +192,7 @@ module TokenSwapGov {
         withdraw_linearGovTreasury_event_handler:Event::EventHandle<LinearGovTreasuryWithdrawEvent<PoolType>>,
         withdraw_genesisGovTreasury_event_handler:Event::EventHandle<GenesisGovTreasuryWithdrawEvent<PoolType>>,
     }
+
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public fun genesis_initialize(account: &signer) {
         STAR::assert_genesis_address(account);
@@ -206,14 +206,14 @@ module TokenSwapGov {
         let farm_genesis = calculate_amount_from_percent(GOV_PERCENT_FARM_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, farm_genesis);
         let farm_genesis_token = Account::withdraw<STAR::STAR>(account, farm_genesis);
-        TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
+        YieldFarming::initialize<PoolTypeFarmPool, STAR::STAR>(account, farm_genesis_token);
 
 
         // Release 10% for syrup token stake. genesis release 5%.
         let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, syrup_genesis);
         let syrup_genesis_token = Account::withdraw<STAR::STAR>(account, syrup_genesis);
-        TokenSwapSyrup::initialize(account, syrup_genesis_token);
+        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(account, syrup_genesis_token);
 
 
         //Release 5% for community. genesis release 2%.
@@ -336,7 +336,7 @@ module TokenSwapGov {
             withdraw_genesisGovTreasury_event_handler:Event::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeDeveloperFund>>(account),
         });
 
-
+    
         
         //  ido.
         let GovTreasury{ 
@@ -410,34 +410,32 @@ module TokenSwapGov {
     //Farm and syrup linear treasury extraction functions need to pass in generic parameters        PoolTypeFarmPool ,PoolTypeSyrup 
     fun linear_withdraw_farm_syrup<PoolType: store>(
         account:&signer,
-        amount:u128):Token::Token<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
+        _amount:u128):Token::Token<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
             TokenSwapConfig::assert_global_freeze();
             let can_withdraw_amount = get_can_withdraw_of_linear_treasury<PoolType>();
-            assert!(amount != 0, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_IS_ZERO));
-            assert!(can_withdraw_amount >= amount, Errors::invalid_argument(ERR_WITHDRAW_AMOUNT_TOO_MANY));
 
-            let treasury = borrow_global_mut<GovTreasuryV2<PoolType>>(Signer::address_of(account));        
+            let treasury = borrow_global_mut<GovTreasuryV2<PoolType>>(STAR::token_address());        
             
-            let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.linear_treasury, amount);
+            let disp_token = Token::withdraw<STAR::STAR>(&mut treasury.linear_treasury, can_withdraw_amount);
 
-            let treasury_event = borrow_global_mut<GovTreasuryEvent<PoolType>>(Signer::address_of(account));
+            let treasury_event = borrow_global_mut<GovTreasuryEvent<PoolType>>(STAR::token_address());
             Event::emit_event(&mut treasury_event.withdraw_linearGovTreasury_event_handler, LinearGovTreasuryWithdrawEvent<PoolType> {
-                amount:amount,
+                amount:can_withdraw_amount,
                 remainder:Token::value<STAR::STAR>(&treasury.linear_treasury),
                 signer:Signer::address_of(account),
-                receiver:Signer::address_of(account),
+                receiver:STAR::token_address(),
             });
             disp_token
     }
     //Farm Linear Treasury Extraction Function
     public fun linear_withdraw_farm(account:&signer,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
         let disp_token = linear_withdraw_farm_syrup<PoolTypeFarmPool>(account,amount);
-        TokenSwapFarm::deposit<PoolTypeFarmPool,STAR::STAR>(account,disp_token);
+        YieldFarming::deposit<PoolTypeFarmPool, STAR::STAR>(account, disp_token);
     }
     //Syrup Linear Treasury Extraction Function
     public fun linear_withdraw_syrup(account:&signer,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
         let disp_token = linear_withdraw_farm_syrup<PoolTypeSyrup>(account,amount);
-        TokenSwapSyrup::deposit<PoolTypeSyrup,STAR::STAR>(account,disp_token);
+        YieldFarming::deposit<PoolTypeSyrup, STAR::STAR>(account, disp_token);
     }
 
     //Amount to get linear treasury
@@ -494,8 +492,8 @@ module TokenSwapGov {
               - get_balance_of_treasury<PoolTypeCommunity>()
               - get_balance_of_linear_treasury<PoolTypeFarmPool>()
               - get_balance_of_linear_treasury<PoolTypeSyrup>()
-              - TokenSwapFarm::get_treasury_balance<PoolTypeFarmPool,STAR::STAR>()
-              - TokenSwapSyrup::get_treasury_balance<PoolTypeSyrup,STAR::STAR>()
+              - YieldFarming::get_treasury_balance<PoolTypeFarmPool,STAR::STAR>(STAR::token_address())
+              - YieldFarming::get_treasury_balance<PoolTypeSyrup,STAR::STAR>(STAR::token_address())
               - get_balance_of_treasury<PoolTypeIDO>()
               - get_balance_of_linear_treasury<PoolTypeProtocolTreasury>()
               - get_balance_of_treasury<PoolTypeProtocolTreasury>()

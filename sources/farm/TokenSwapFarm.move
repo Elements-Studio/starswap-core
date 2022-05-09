@@ -19,7 +19,7 @@ module TokenSwapFarm {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwapFarmBoost;
-
+    use SwapAdmin::TokenSwapGov;
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
     const ERR_WHITE_LIST_BOOST_IS_OPEN: u64 = 102;
@@ -109,6 +109,17 @@ module TokenSwapFarm {
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
         YieldFarming::initialize<PoolTypeFarmPool, STAR::STAR>(account, token);
+
+        move_to(account, FarmPoolEvent{
+            add_farm_event_handler: Event::new_event_handle<AddFarmEvent>(account),
+            activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(account),
+            stake_event_handler: Event::new_event_handle<StakeEvent>(account),
+            unstake_event_handler: Event::new_event_handle<UnstakeEvent>(account),
+        });
+    }
+
+    /// Initialize farm big pool
+    public fun initialize_farm_pool_event(account: &signer) {
 
         move_to(account, FarmPoolEvent{
             add_farm_event_handler: Event::new_event_handle<AddFarmEvent>(account),
@@ -514,6 +525,7 @@ module TokenSwapFarm {
                                             farm_cap: &FarmPoolCapability<X, Y>)
     : FarmPoolStake<X, Y> acquires FarmPoolStake {
         let account_addr = Signer::address_of(account);
+        TokenSwapGov::linear_withdraw_farm(account,0);
         // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
         let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
             let FarmPoolStake<X, Y>{
@@ -589,6 +601,7 @@ module TokenSwapFarm {
                                               farm_stake: FarmPoolStake<X, Y>)
     : FarmPoolStake<X, Y> {
         let account_addr = Signer::address_of(account);
+        TokenSwapGov::linear_withdraw_farm(account,0);
         let FarmPoolStake{
             cap: unwrap_harvest_cap,
             id: _,

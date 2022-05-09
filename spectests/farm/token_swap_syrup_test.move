@@ -4,7 +4,39 @@
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# block --author 0x1 --timestamp 10000000
+//# block --author 0x1 --timestamp 1646445600000
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun genesis_initialized(signer: signer) {
+        TokenSwapGov::genesis_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun upgrade_dao_treasury_genesis(signer: signer) {
+        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun linear_initialize(signer: signer) {
+        TokenSwapGov::linear_initialize(&signer);
+    }
+}
 
 //# run --signers alice
 script {
@@ -28,13 +60,15 @@ script {
     use SwapAdmin::STAR;
 
     fun admin_initialize(signer: signer) {
-        TokenMock::register_token<STAR::STAR>(&signer, 9u8);
+        // TokenMock::register_token<STAR::STAR>(&signer, 9u8);
         TokenMock::register_token<TokenMock::WETH>(&signer, 9u8);
 
         let powed_mint_aount = CommonHelper::pow_amount<STAR::STAR>(100000000);
 
         // Initialize pool
-        TokenSwapSyrup::initialize(&signer, TokenMock::mint_token<STAR::STAR>(powed_mint_aount));
+        // TokenSwapSyrup::initialize(&signer, TokenMock::mint_token<STAR::STAR>(powed_mint_aount));
+
+        TokenSwapSyrup::initialize_event(&signer);
 
         let release_per_second_amount = CommonHelper::pow_amount<TokenMock::WETH>(100);
 
@@ -97,7 +131,7 @@ script {
 }
 // check: "Keep(ABORTED { code: 26625"
 
-//# block --author 0x1 --timestamp 10002000
+//# block --author 0x1 --timestamp 1646445602000
 
 //# run --signers alice
 script {

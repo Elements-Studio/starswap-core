@@ -4,7 +4,40 @@
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# block --author 0x1 --timestamp 10000000
+//# block --author 0x1 --timestamp 1646445600000
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun genesis_initialized(signer: signer) {
+        TokenSwapGov::genesis_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun upgrade_dao_treasury_genesis(signer: signer) {
+        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun linear_initialize(signer: signer) {
+        TokenSwapGov::linear_initialize(&signer);
+    }
+}
+
 
 //# run --signers SwapAdmin
 script {
@@ -71,12 +104,12 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::TokenMock::{WBTC, WETH};
+    use SwapAdmin::TokenSwapFarm;
 
     fun admin_governance_genesis(signer: signer) {
-        TokenSwapGov::genesis_initialize(&signer);
+        TokenSwapFarm::initialize_farm_pool_event(&signer);
         TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
         TokenSwapFarmRouter::reset_farm_activation<WBTC, WETH>(&signer, true);
     }
@@ -104,7 +137,7 @@ script {
     }
 }
 
-//# block --author 0x1 --timestamp 10001000
+//# block --author 0x1 --timestamp 1646445601000
 
 //# run --signers SwapAdmin
 script {
@@ -122,7 +155,7 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10002000
+//# block --author 0x1 --timestamp 1646445602000
 
 //# run --signers SwapAdmin
 script {
@@ -171,7 +204,7 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10003000
+//# block --author 0x1 --timestamp 1646445603000
 
 //# run --signers alice
 script {
@@ -198,7 +231,7 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10004000
+//# block --author 0x1 --timestamp 1646445604000
 
 //# run --signers alice
 script {
