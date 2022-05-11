@@ -9,11 +9,11 @@ module IDizedSet {
     const ERROR_COLLECTION_ITEM_CANNOT_FOUND: u64 = 101;
     const ERROR_TWO_COLLECTION_ID_REPEATE: u64 = 102;
 
-    struct Set<T> {
+    struct Set<T> has store {
         items: vector<SetItem<T>>,
     }
 
-    struct SetItem<T> {
+    struct SetItem<T> has store {
         id: vector<u8>,
         t: T,
     }
