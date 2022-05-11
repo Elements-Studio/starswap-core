@@ -67,5 +67,9 @@ module UpgradeScripts {
         TokenSwapConfig::assert_admin(&signer);
         TokenSwapSyrup::extend_syrup_pool<TokenT>(&signer, override_update);
     }
+
+    public(script) fun repair_farm_alloc_point(signer: signer, total_alloc_point: u128){
+        TokenSwapFarm::repair_farm_alloc_point(&signer, total_alloc_point);
+    }
 }
 }

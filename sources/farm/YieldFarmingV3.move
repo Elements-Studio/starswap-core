@@ -302,6 +302,17 @@ module YieldFarmingV3 {
         golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point - last_alloc_point + alloc_point;
     }
 
+    public fun update_pool2<PoolType: store>(
+        account: &signer,
+        broker: address,
+        total_alloc_point: u128,
+    )  acquires YieldFarmingGlobalPoolInfo {
+        TokenSwapConfig::assert_admin(account);
+        //update global pool info total alloc point
+        let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
+        golbal_pool_info.total_alloc_point = total_alloc_point;
+    }
+
     /// call when weight_factor change, update pool info
     public fun update_pool_weight<PoolType: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,

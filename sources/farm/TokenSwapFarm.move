@@ -278,6 +278,18 @@ module TokenSwapFarm {
         farm_pool_info.alloc_point = alloc_point;
     }
 
+    public fun repair_farm_alloc_point(signer: &signer, total_alloc_point: u128) {
+        // Only called by the genesis
+        STAR::assert_genesis_address(signer);
+
+        YieldFarming::update_pool2<PoolTypeFarmPool>(
+            signer,
+            @SwapAdmin,
+            total_alloc_point,
+        );
+    }
+
+
     /// Deprecated call
     /// Reset activation of farm from token type X and Y
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(
