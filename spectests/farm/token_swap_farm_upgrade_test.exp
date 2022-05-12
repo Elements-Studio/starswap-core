@@ -1,4 +1,4 @@
-processed 33 tasks
+processed 34 tasks
 
 task 5 'run'. lines 11-21:
 {
@@ -32,71 +32,7 @@ task 8 'run'. lines 83-96:
   }
 }
 
-task 9 'run'. lines 98-114:
-{
-  "gas_used": 595379,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 10 'run'. lines 117-151:
-{
-  "gas_used": 1586103,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 11 'run'. lines 153-170:
-{
-  "gas_used": 788408,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 12 'run'. lines 172-186:
-{
-  "gas_used": 1201322,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 13 'run'. lines 189-197:
-{
-  "gas_used": 70504,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 14 'run'. lines 199-208:
-{
-  "gas_used": 81674,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 15 'run'. lines 210-218:
-{
-  "gas_used": 85014,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 16 'run'. lines 220-230:
-{
-  "gas_used": 97777,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 17 'run'. lines 232-256:
+task 9 'run'. lines 98-109:
 {
   "gas_used": 345577,
   "status": {
@@ -104,7 +40,122 @@ task 17 'run'. lines 232-256:
   }
 }
 
-task 18 'run'. lines 258-271:
+task 10 'run'. lines 111-127:
+{
+  "gas_used": 355932,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 36,
+        "code_offset": 1
+      }
+    }
+  }
+}
+
+task 11 'run'. lines 130-164:
+{
+  "gas_used": 1586103,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 12 'run'. lines 166-183:
+{
+  "gas_used": 355932,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 36,
+        "code_offset": 1
+      }
+    }
+  }
+}
+
+task 13 'run'. lines 185-199:
+{
+  "gas_used": 169047,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapFarm"
+          }
+        },
+        "function": 24,
+        "code_offset": 24
+      }
+    }
+  }
+}
+
+task 14 'run'. lines 202-210:
+{
+  "gas_used": 70504,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 15 'run'. lines 212-221:
+{
+  "gas_used": 81674,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 16 'run'. lines 223-231:
+{
+  "gas_used": 85014,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 17 'run'. lines 233-243:
+{
+  "gas_used": 97777,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 18 'run'. lines 245-269:
+{
+  "gas_used": 81648,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        30721
+      ]
+    }
+  }
+}
+
+task 19 'run'. lines 271-284:
 {
   "gas_used": 243073,
   "status": {
@@ -112,73 +163,99 @@ task 18 'run'. lines 258-271:
   }
 }
 
-task 20 'run'. lines 276-290:
+task 21 'run'. lines 289-303:
 {
-  "gas_used": 679176,
+  "gas_used": 71404,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        "Script",
+        1018
+      ]
+    }
+  }
+}
+
+task 22 'run'. lines 305-321:
+{
+  "gas_used": 157314,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        "Script",
+        1021
+      ]
+    }
+  }
+}
+
+task 23 'run'. lines 324-338:
+{
+  "gas_used": 89016,
+  "status": {
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapFarm"
+          }
+        },
+        "function": 8,
+        "code_offset": 24
+      }
+    }
+  }
+}
+
+task 25 'run'. lines 342-357:
+{
+  "gas_used": 71404,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        "Script",
+        1028
+      ]
+    }
+  }
+}
+
+task 26 'run'. lines 360-377:
+{
+  "gas_used": 665129,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 21 'run'. lines 292-308:
+task 27 'run'. lines 379-396:
 {
-  "gas_used": 212244,
+  "gas_used": 665129,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 22 'run'. lines 311-325:
+task 28 'run'. lines 398-415:
 {
-  "gas_used": 849873,
+  "gas_used": 858594,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 24 'run'. lines 329-344:
+task 30 'run'. lines 419-433:
 {
-  "gas_used": 1180737,
+  "gas_used": 656664,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 25 'run'. lines 347-364:
+task 31 'run'. lines 436-445:
 {
-  "gas_used": 1208627,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 26 'run'. lines 366-383:
-{
-  "gas_used": 723553,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 27 'run'. lines 385-402:
-{
-  "gas_used": 1570455,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 29 'run'. lines 406-420:
-{
-  "gas_used": 685904,
-  "status": {
-    "Keep": "Executed"
-  }
-}
-
-task 30 'run'. lines 423-432:
-{
-  "gas_used": 100874,
+  "gas_used": 74257,
   "status": {
     "Keep": {
       "ExecutionFailure": {
@@ -189,13 +266,13 @@ task 30 'run'. lines 423-432:
           }
         },
         "function": 2,
-        "code_offset": 33
+        "code_offset": 20
       }
     }
   }
 }
 
-task 31 'run'. lines 434-442:
+task 32 'run'. lines 447-455:
 {
   "gas_used": 83256,
   "status": {
@@ -203,7 +280,7 @@ task 31 'run'. lines 434-442:
   }
 }
 
-task 32 'run'. lines 444-453:
+task 33 'run'. lines 457-466:
 {
   "gas_used": 85852,
   "status": {

@@ -34,23 +34,45 @@ task 10 'run'. lines 205-224:
 
 task 12 'run'. lines 228-244:
 {
-  "gas_used": 474464,
+  "gas_used": 74646,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 30,
+        "code_offset": 47
+      }
+    }
   }
 }
 
 task 14 'run'. lines 248-271:
 {
-  "gas_used": 1034934,
+  "gas_used": 74646,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 30,
+        "code_offset": 47
+      }
+    }
   }
 }
 
 task 15 'run'. lines 273-289:
 {
-  "gas_used": 121650,
+  "gas_used": 332882,
   "status": {
     "Keep": "Executed"
   }
@@ -58,18 +80,19 @@ task 15 'run'. lines 273-289:
 
 task 16 'run'. lines 291-312:
 {
-  "gas_used": 559222,
+  "gas_used": 74664,
   "status": {
     "Keep": {
-      "MoveAbort": [
-        {
+      "ExecutionFailure": {
+        "location": {
           "Module": {
             "address": "0x8c109349c6bd91411d6bc962e080c4a3",
             "name": "YieldFarmingV3"
           }
         },
-        30209
-      ]
+        "function": 30,
+        "code_offset": 47
+      }
     }
   }
 }
@@ -100,24 +123,57 @@ task 22 'run'. lines 348-367:
 
 task 24 'run'. lines 371-392:
 {
-  "gas_used": 539643,
+  "gas_used": 98643,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 22,
+        "code_offset": 39
+      }
+    }
   }
 }
 
 task 26 'run'. lines 396-412:
 {
-  "gas_used": 535526,
+  "gas_used": 88983,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 22,
+        "code_offset": 39
+      }
+    }
   }
 }
 
 task 28 'run'. lines 416-432:
 {
-  "gas_used": 531473,
+  "gas_used": 84930,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 22,
+        "code_offset": 39
+      }
+    }
   }
 }

@@ -97,6 +97,19 @@ script {
 
 //# run --signers SwapAdmin
 script {
+    use SwapAdmin::UpgradeScripts;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::STAR;
+
+    // init veSTAR
+    fun init_vestar(signer: signer) {
+        UpgradeScripts::initialize_global_syrup_info(signer, CommonHelper::pow_amount<STAR::STAR>(10));
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
     use SwapAdmin::TokenSwapFarmRouter;

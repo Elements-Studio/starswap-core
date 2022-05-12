@@ -10,49 +10,83 @@ task 4 'run'. lines 9-18:
 
 task 5 'run'. lines 20-59:
 {
-  "gas_used": 997730,
+  "gas_used": 618788,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 36,
+        "code_offset": 1
+      }
+    }
   }
 }
 
 task 6 'run'. lines 61-75:
 {
-  "gas_used": 876919,
+  "gas_used": 10408,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        "function": 24,
+        "code_offset": 3
+      }
+    }
   }
 }
 
 task 7 'run'. lines 77-98:
 {
-  "gas_used": 98964,
+  "gas_used": 32513,
   "status": {
     "Keep": {
-      "MoveAbort": [
-        {
+      "ExecutionFailure": {
+        "location": {
           "Module": {
             "address": "0x8c109349c6bd91411d6bc962e080c4a3",
             "name": "TokenSwapSyrup"
           }
         },
-        26625
-      ]
+        "function": 22,
+        "code_offset": 16
+      }
     }
   }
 }
 
 task 9 'run'. lines 102-130:
 {
-  "gas_used": 815891,
+  "gas_used": 32513,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapSyrup"
+          }
+        },
+        "function": 22,
+        "code_offset": 16
+      }
+    }
   }
 }
 
 task 10 'run'. lines 132-163:
 {
-  "gas_used": 909294,
+  "gas_used": 841888,
   "status": {
     "Keep": "Executed"
   }

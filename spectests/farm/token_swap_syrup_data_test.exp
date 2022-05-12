@@ -10,56 +10,133 @@ task 4 'run'. lines 9-18:
 
 task 5 'run'. lines 20-64:
 {
-  "gas_used": 1323580,
+  "gas_used": 743237,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 36,
+        "code_offset": 1
+      }
+    }
   }
 }
 
 task 6 'run'. lines 67-99:
 {
-  "gas_used": 580901,
+  "gas_used": 173930,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        "function": 24,
+        "code_offset": 3
+      }
+    }
   }
 }
 
 task 7 'run'. lines 101-111:
 {
-  "gas_used": 534418,
+  "gas_used": 10442,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        "function": 24,
+        "code_offset": 3
+      }
+    }
   }
 }
 
 task 9 'run'. lines 115-131:
 {
-  "gas_used": 542073,
+  "gas_used": 8541,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapSyrup"
+          }
+        },
+        "function": 13,
+        "code_offset": 1
+      }
+    }
   }
 }
 
 task 11 'run'. lines 135-150:
 {
-  "gas_used": 134419,
+  "gas_used": 66659,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "YieldFarmingV3"
+          }
+        },
+        "function": 1,
+        "code_offset": 17
+      }
+    }
   }
 }
 
 task 13 'run'. lines 154-170:
 {
-  "gas_used": 542055,
+  "gas_used": 8541,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwapSyrup"
+          }
+        },
+        "function": 13,
+        "code_offset": 1
+      }
+    }
   }
 }
 
 task 14 'run'. lines 172-182:
 {
-  "gas_used": 536939,
+  "gas_used": 10442,
   "status": {
-    "Keep": "Executed"
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x00000000000000000000000000000001",
+            "name": "Token"
+          }
+        },
+        "function": 24,
+        "code_offset": 3
+      }
+    }
   }
 }

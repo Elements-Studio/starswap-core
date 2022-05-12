@@ -73,12 +73,30 @@ script {
 script {
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapFarm;
+    use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_governance_genesis(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
-        TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
-        TokenSwapFarmRouter::reset_farm_activation<WBTC, WETH>(&signer, true);
+        TokenSwapFarm::initialize_global_pool_info(&signer, 800000000u128);
+        TokenSwapFarmBoost::initialize_boost_event(&signer);
+
+        TokenSwapFarmRouter::add_farm_pool_v2<WBTC, WETH>(&signer, 30);
+    }
+}
+// check: EXECUTED
+
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::UpgradeScripts;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::STAR;
+
+    // init veSTAR
+    fun init_vestar(signer: signer) {
+        UpgradeScripts::initialize_global_syrup_info(signer, CommonHelper::pow_amount<STAR::STAR>(10));
     }
 }
 // check: EXECUTED
@@ -234,10 +252,10 @@ script {
 
     fun admin_set_release_multi_basic(signer: signer) {
         // Set to 10x
-        TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 10);
-        let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
-        assert!(alive, 1030);
-        assert!(release_per_sec == 1000000000, 1031); // Check relesase per second
+        TokenSwapFarmRouter::set_farm_alloc_point<WBTC, WETH>(&signer, 10);
+        let (alloc_point, _, _, _) = TokenSwapFarmRouter::query_info_v2<WBTC, WETH>();
+//        assert!(alive, 1030);
+        assert!(alloc_point == 10, 1031); // Check alloc point
 
         let mutipler = TokenSwapFarmRouter::get_farm_multiplier<WBTC, WETH>();
         Debug::print(&mutipler);

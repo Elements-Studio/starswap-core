@@ -247,15 +247,9 @@ module TokenSwapFarm {
 
     /// Get farm multiplier of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>(): u64 acquires FarmMultiplier, FarmPoolInfo {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
-            let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
-            farm_mult.multiplier
-            // Get farm mutiplier, equals to pool alloc_point
-        } else {
-            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
-            (farm_pool_info.alloc_point as u64)
-        }
+                                   Y: copy + drop + store>(): u64 acquires FarmPoolInfo {
+        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+        (farm_pool_info.alloc_point as u64)
     }
 
 
@@ -333,13 +327,11 @@ module TokenSwapFarm {
             Account::do_accept_token<STAR::STAR>(account);
         };
 
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
+
+        //check if need extend
+        if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
+            (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
+            extend_farm_stake_resource<X, Y>(account);
         };
 
         // Actual stake
@@ -396,13 +388,10 @@ module TokenSwapFarm {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = Signer::address_of(account);
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
+        //check if need extend
+        if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
+            (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
+            extend_farm_stake_resource<X, Y>(account);
         };
 
         // Actual stake
@@ -429,13 +418,10 @@ module TokenSwapFarm {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = Signer::address_of(account);
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
+        //check if need extend
+        if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) &&
+            (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr))) {
+            extend_farm_stake_resource<X, Y>(account);
         };
 
         let farm_harvest_cap = borrow_global_mut<FarmPoolStake<X, Y>>(account_addr);
@@ -489,15 +475,10 @@ module TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 acquires FarmPoolCapability, FarmPoolInfo {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()){
-            let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
-            cap.release_per_seconds
-        } else {
-            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
-            let (total_alloc_point, pool_release_per_second) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(STAR::token_address());
-            pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
-        }
+    public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 acquires FarmPoolInfo {
+        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+        let (total_alloc_point, pool_release_per_second) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(STAR::token_address());
+        pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
     }
 
     /// Query farm golbal pool info
@@ -539,22 +520,7 @@ module TokenSwapFarm {
         let total_token = Token::join<LiquidityToken<X, Y>>(own_token, addition_token);
         let total_amount = Token::value<LiquidityToken<X, Y>>(&total_token);
 
-
-        // after pool alloc mode upgrade
-        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            YieldFarming::stake<
-                PoolTypeFarmPool,
-                STAR::STAR,
-                Token::Token<LiquidityToken<X, Y>>>(
-                account,
-                STAR::token_address(),
-                total_token,
-                total_amount,
-                1,
-                0,
-                &farm_cap.cap
-            )
-        } else {
+        let (new_harvest_cap, stake_id) =  {
             // predict boost factor
             let new_weight_factor = TokenSwapFarmBoost::predict_boost_factor<X, Y>(account_addr, total_amount);
             let asset_weight = TokenSwapFarmBoost::calculate_boost_weight(total_amount, new_weight_factor);
@@ -613,20 +579,7 @@ module TokenSwapFarm {
 
         // Restake to pool
         // after pool alloc mode upgrade
-        let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            YieldFarming::stake<
-                PoolTypeFarmPool,
-                STAR::STAR,
-                Token::Token<LiquidityToken<X, Y>>>(
-                account,
-                STAR::token_address(),
-                own_asset_token,
-                own_asset_amount,
-                1,
-                0,
-                &farm_cap.cap
-            )
-        } else {
+        let (new_harvest_cap, stake_id) =  {
             // once farm unstake, user boost factor lose efficacy, become 1
             TokenSwapFarmBoost::unboost_from_farm_pool<X, Y>(&farm_cap.cap, account);
             let weight_factor = TokenSwapFarmBoost::get_boost_factor<X, Y>(account_addr);
@@ -656,15 +609,10 @@ module TokenSwapFarm {
     public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
     acquires FarmPoolStake, FarmPoolCapability{
         let user_addr = Signer::address_of(account);
-        let (is_white_list_boost,_) = TokenSwapConfig::get_white_list_boost_switch();
-        assert!( ! is_white_list_boost ,ERR_WHITE_LIST_BOOST_IS_OPEN);
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
+        //check if need extend
+        if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
+            (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
+            extend_farm_stake_resource<X, Y>(account);
         };
 
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
@@ -674,25 +622,21 @@ module TokenSwapFarm {
 
     /// boost for farm
     public fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128,signature:&vector<u8>)acquires FarmPoolStake, FarmPoolCapability{
-
         let user_addr = Signer::address_of(account);
         let (is_white_list_boost,white_list_pubkey) = TokenSwapConfig::get_white_list_boost_switch();
         if(is_white_list_boost){
             assert!(Signature::ed25519_verify(*signature, white_list_pubkey, BCS::to_bytes(&user_addr)), ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER);
         };
 
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
+        //check if need extend
+        if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
+            (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
+            extend_farm_stake_resource<X, Y>(account);
         };
 
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
-        
     }
 
 
