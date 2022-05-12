@@ -279,6 +279,34 @@ module YieldFarmingV3 {
         });
         stake_list_extend.next_id = stake_id;
     }
+    
+    // ParameterModifyCapability Access control
+    public fun extend_farm_stake_info_v2<
+        PoolType: store,
+        AssetT: store>(account: &signer,
+                       stake_id: u64,
+                       next_id:u64,
+                       _cap: &ParameterModifyCapability<PoolType, AssetT>) acquires StakeList, StakeListExtend {
+        let user_addr = Signer::address_of(account);
+        if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
+            move_to(account, StakeListExtend<PoolType, AssetT>{
+                next_id: 0,
+                items: Vector::empty<StakeExtend<PoolType, AssetT>>(),
+            });
+        };
+
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
+
+        let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
+        Vector::push_back<StakeExtend<PoolType, AssetT>>(&mut stake_list_extend.items, StakeExtend<PoolType, AssetT>{
+            id: stake_id,
+            asset_amount: stake.asset_weight,
+            weight_factor: stake.asset_multiplier,
+        });
+        stake_list_extend.next_id = next_id;
+    }
+
 
     // modify parameter v2
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );
@@ -771,6 +799,28 @@ module YieldFarmingV3 {
                 break
             };
             let stake = Vector::borrow<Stake<PoolType, AssetT>>(&stake_list.items, idx);
+            Vector::push_back(&mut ret_list, stake.id);
+            idx = idx + 1;
+        };
+        ret_list
+    }
+
+    /// Query  stake id list from user
+    public fun query_stake_list_v2<PoolType: store,
+                                AssetT: store>(user_addr: address): vector<u64> acquires StakeListExtend {
+        let stake_list = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
+        let len = Vector::length(&stake_list.items);
+        if (len <= 0) {
+            return Vector::empty<u64>()
+        };
+
+        let ret_list = Vector::empty<u64>();
+        let idx = 0;
+        loop {
+            if (idx >= len) {
+                break
+            };
+            let stake = Vector::borrow<StakeExtend<PoolType, AssetT>>(&stake_list.items, idx);
             Vector::push_back(&mut ret_list, stake.id);
             idx = idx + 1;
         };
