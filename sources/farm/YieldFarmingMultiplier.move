@@ -138,6 +138,10 @@ module YieldFarmingMultiplier {
         )
     }
 
+    public fun destroy_cap<P, A>(cap: PoolCapability<P, A>) {
+        let PoolCapability<P, A>{} = cap;
+    }
+
     /// Find by key which is from user
     fun find_pool_by_key<PoolType: store,
                          AssetT: store>(c: &mut vector<MultiplierPool<PoolType, AssetT>>,

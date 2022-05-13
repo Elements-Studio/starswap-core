@@ -16,6 +16,7 @@ module TokenSwapMultiPool {
 
     struct Pools<phantom PoolType, phantom AssetT> has key {
         pool_set: IDizedSet::Set<PoolItem<PoolType, AssetT>>,
+        total_weight_no_pool: u128,
     }
 
     struct PoolItem<phantom PoolType, phantom AssetT> has store {
@@ -45,9 +46,10 @@ module TokenSwapMultiPool {
     struct MutiPoolCapability<phantom PoolType, phantom AssetT> has key, store {}
 
     /// Initialize from total asset weight and amount
-    public fun init<P, A>(signer: &signer): MutiPoolCapability<P, A> {
+    public fun init<P, A>(signer: &signer, no_pool_weight: u128): MutiPoolCapability<P, A> {
         move_to(signer, Pools{
             pool_set: IDizedSet::empty<PoolItem<P, A>>(),
+            total_weight_no_pool: no_pool_weight
         });
         MutiPoolCapability<P, A>{}
     }
@@ -62,9 +64,9 @@ module TokenSwapMultiPool {
     ///
     public fun put_pool<P, A>(signer: &signer,
                               time_cycle: u64,
-                              multiplier: u64,
-                              _cap: &MutiPoolCapability<P, A>) acquires Pools {
-
+                              new_multiplier: u64,
+                              _cap: &MutiPoolCapability<P, A>)
+    acquires Pools {
         let broker = Signer::address_of(signer);
         require_admin(broker);
 
@@ -72,12 +74,12 @@ module TokenSwapMultiPool {
         let pools = borrow_global_mut<Pools<P, A>>(broker);
 
         if (IDizedSet::exists_at(&pools.pool_set, &pool_key)) {
-            update<P, A>(broker, &pool_key, multiplier)
+            update<P, A>(broker, &pool_key, new_multiplier)
         } else {
             IDizedSet::push_back(&mut pools.pool_set, &pool_key, PoolItem<P, A>{
                 asset_weight: 0,
                 asset_amount: 0,
-                multiplier,
+                multiplier: new_multiplier,
                 update_records: Vector::empty<UpdateRecord>(),
             });
         }
@@ -178,7 +180,7 @@ module TokenSwapMultiPool {
 
     public fun calculate_suitable_weight<P, A>(user: address,
                                                stake_id: u64,
-                                               settle_time: u64): u128
+                                               settle_time: u64): (u64, u128)
     acquires Pools, Stakes {
         let broker = TokenSwapConfig::admin_address();
 
@@ -196,11 +198,12 @@ module TokenSwapMultiPool {
             settle_time)
     }
 
+    /// Compute weight by given records, and return suiteable new multiplier
     public fun compute_suitable_stake_weight_by_records(records: &vector<UpdateRecord>,
                                                         stake_amount: u128,
                                                         stake_multiplier: u64,
                                                         stake_start_time: u64,
-                                                        stake_end_time: u64): u128 {
+                                                        stake_end_time: u64): (u64, u128) {
         let record_len = Vector::length(records);
         let idx = 0;
         let scale = 1000;
@@ -225,7 +228,7 @@ module TokenSwapMultiPool {
                 };
             };
         };
-        (stake_amount * ((suitable_multiplier / scale) as u128))
+        (suitable_multiplier, (stake_amount * ((suitable_multiplier / scale) as u128)))
     }
 
 
@@ -245,26 +248,30 @@ module TokenSwapMultiPool {
     }
 
     /// Query total amount and weight in pool
-    /// @return (multiplier, asset_weight, asset_amount)
-    public fun query_total<P, A>(): (u128, u128) acquires Pools {
+    /// @return (pool_amount, pool_weight, no_pool_weight)
+    public fun query_tvl<P, A>(): (u128, u128, u128) acquires Pools {
         let broker = TokenSwapConfig::admin_address();
         let pools = borrow_global_mut<Pools<P, A>>(broker);
 
         let len = IDizedSet::length(&pools.pool_set);
-        let total_amount = 0;
-        let total_weight = 0;
+        let pool_amount = 0;
+        let pool_weight = 0;
 
         if (len == 0) {
-            return (total_amount, total_weight)
+            return (pool_amount, pool_weight, pools.total_weight_no_pool)
         };
 
         let idx = len - 1;
         loop {
             let pool = IDizedSet::borrow_idx(&pools.pool_set, idx);
-            total_weight = total_weight + pool.asset_weight;
-            total_amount = total_amount + pool.asset_amount;
+            pool_weight = pool_weight + pool.asset_weight;
+            pool_amount = pool_amount + pool.asset_amount;
+            if (idx <= 0) {
+                break
+            };
             idx = idx - 1;
-        }
+        };
+        (pool_amount, pool_weight, pools.total_weight_no_pool)
     }
 
     public fun get_pool_key_by_time(time_cycle: u64): vector<u8> {
@@ -280,7 +287,7 @@ module TokenSwapMultiPool {
     ///
     fun update<P, A>(broker: address,
                      key: &vector<u8>,
-                     multiplier: u64): u128
+                     multiplier: u64)
     acquires Pools {
         let pools = borrow_global_mut<Pools<P, A>>(broker);
         let pool_item = IDizedSet::borrow_mut(&mut pools.pool_set, key);
@@ -292,8 +299,6 @@ module TokenSwapMultiPool {
             update_time: Timestamp::now_seconds(),
             multiplier,
         });
-
-        pool_item.asset_weight
     }
 
     fun id_to_str(_id: u64): vector<u8> {
