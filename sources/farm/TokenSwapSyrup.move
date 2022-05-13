@@ -17,9 +17,10 @@ module TokenSwapSyrup {
     use SwapAdmin::YieldFarmingMultiplier;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapMultiPool;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
-    const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
+    const ERROR_TIME_CYCLE_INVALID: u64 = 102;
     const ERROR_STAKE_ID_INVALID: u64 = 103;
     const ERROR_HARVEST_STILL_LOCKING: u64 = 104;
     const ERROR_FARMING_STAKE_NOT_EXISTS: u64 = 105;
@@ -38,6 +39,11 @@ module TokenSwapSyrup {
     /// Syrup pool extend information
     struct SyrupExtInfo<phantom TokenT> has key, store {
         multiplier_cap: YieldFarmingMultiplier::PoolCapability<PoolTypeSyrup, Token::Token<TokenT>>,
+        alloc_point: u128,
+    }
+
+    struct SyrupExtInfo2<phantom TokenT> has key, store {
+        multiplier_cap: TokenSwapMultiPool::MutiPoolCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         alloc_point: u128,
     }
 
@@ -269,10 +275,10 @@ module TokenSwapSyrup {
 
     /// Stake token type to syrup
     /// @param: pledege_time per second
-    public fun stake<TokenT: store>(signer: &signer, pledge_time_sec: u64, amount: u128)
-    acquires Syrup, SyrupStakeList, SyrupEvent {
+    public fun stake<TokenT: store>(signer: &signer, time_cycle: u64, amount: u128)
+    acquires Syrup, SyrupStakeList, SyrupEvent, SyrupExtInfo2 {
         TokenSwapConfig::assert_global_freeze();
-        assert!(pledge_time_sec > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
+        assert!(time_cycle > 0, Errors::invalid_state(ERROR_TIME_CYCLE_INVALID));
 
         let user_addr = Signer::address_of(signer);
         let broker_addr = STAR::token_address();
@@ -288,10 +294,10 @@ module TokenSwapSyrup {
         };
 
         let stake_token = Account::withdraw<TokenT>(signer, amount);
-        let stepwise_multiplier = pledage_time_to_multiplier(pledge_time_sec);
+        let stepwise_multiplier = multiplier_from_timecycle<TokenT>(time_cycle);
         let now_seconds = Timestamp::now_seconds();
         let start_time = now_seconds;
-        let end_time = start_time + pledge_time_sec;
+        let end_time = start_time + time_cycle;
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
         let (harvest_cap, id) = if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
@@ -305,7 +311,7 @@ module TokenSwapSyrup {
                 amount * (stepwise_multiplier as u128),
                 amount,
                 stepwise_multiplier,
-                pledge_time_sec,
+                time_cycle,
                 &syrup.param_cap)
         } else {
             YieldFarming::stake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
@@ -314,7 +320,7 @@ module TokenSwapSyrup {
                 stake_token,
                 amount,
                 stepwise_multiplier,
-                pledge_time_sec,
+                time_cycle,
                 &syrup.param_cap)
         };
 
@@ -328,6 +334,10 @@ module TokenSwapSyrup {
             start_time,
             end_time,
         });
+
+        let ext_info = borrow_global_mut<SyrupExtInfo2<TokenT>>(broker_addr);
+        TokenSwapMultiPool::add_stake<PoolTypeSyrup, Token::Token<TokenT>>(
+            signer, time_cycle, id, amount, &ext_info.multiplier_cap);
 
         // Publish stake event to chain
         let event = borrow_global_mut<SyrupEvent>(broker_addr);
@@ -345,7 +355,7 @@ module TokenSwapSyrup {
     public fun unstake<TokenT: store>(signer: &signer, id: u64): (
         Token::Token<TokenT>,
         Token::Token<STAR::STAR>
-    ) acquires SyrupStakeList, SyrupEvent, Syrup {
+    ) acquires SyrupStakeList, SyrupEvent, Syrup, SyrupExtInfo2 {
         TokenSwapConfig::assert_global_freeze();
 
         let user_addr = Signer::address_of(signer);
@@ -378,6 +388,10 @@ module TokenSwapSyrup {
             unstaken_token,
             reward_token
         ) = YieldFarming::unstake<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(signer, broker_addr, harvest_cap);
+
+        // Remove asset from multiplier pool
+        let ext_info =  borrow_global_mut<SyrupExtInfo2<TokenT>>(broker_addr);
+        TokenSwapMultiPool::remove_stake<PoolTypeSyrup, Token::Token<TokenT>>(signer, id, &ext_info.multiplier_cap);
 
         let event = borrow_global_mut<SyrupEvent>(broker_addr);
         Event::emit_event(&mut event.unstake_event_handler,
@@ -444,6 +458,26 @@ module TokenSwapSyrup {
         YieldFarming::get_global_stake_id<PoolTypeSyrup, Token::Token<TokenT>>(user_addr)
     }
 
+    /// Put stepwise multiplier for syrup
+    public fun put_multiplier_with_timecycle<TokenT: store>(signer: &signer,
+                                                            time_cycle: u64,
+                                                            multiplier: u64)
+    acquires SyrupExtInfo2 {
+        TokenSwapConfig::assert_admin(signer);
+
+        let ext_info = borrow_global_mut<SyrupExtInfo2<TokenT>>(TokenSwapConfig::admin_address());
+        let (total_weight, pool_total_weight) = TokenSwapMultiPool::put_pool<PoolTypeSyrup, Token::Token<TokenT>>(
+            signer, time_cycle, multiplier, &ext_info.multiplier_cap);
+    }
+
+    public fun multiplier_from_timecycle<TokenT: store>(time_cycle: u64): u64 acquires SyrupExtInfo2 {
+        let ext_info =
+            borrow_global_mut<SyrupExtInfo2<TokenT>>(TokenSwapConfig::admin_address());
+        let (multiplier, _, _) = TokenSwapMultiPool::query_pool_info<PoolTypeSyrup, Token::Token<TokenT>>(time_cycle);
+        multiplier
+    }
+
+    /// TODO: DEPRECATED(1.0.8)
     public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
         // 1. Check the time has in config
         assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
@@ -452,6 +486,7 @@ module TokenSwapSyrup {
         // 2. return multiplier of time
         TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
     }
+
 
     fun get_stake<TokenT: store>(c: &vector<SyrupStake<TokenT>>, id: u64): &SyrupStake<TokenT> {
         let idx = find_idx_by_id<TokenT>(c, id);

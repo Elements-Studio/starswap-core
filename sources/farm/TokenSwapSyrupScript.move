@@ -9,9 +9,9 @@ module TokenSwapSyrupScript {
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
+    use SwapAdmin::TokenSwapConfig;
 
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
@@ -82,10 +82,17 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::stake_hook_with_id<TokenT>(&signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
     }
 
+    /// TODO: DEPRECATED(1.0.8)
     public(script) fun put_stepwise_multiplier(signer: signer,
-                                               interval_sec: u64,
+                                               time_period: u64,
                                                multiplier: u64) {
-        TokenSwapConfig::put_stepwise_multiplier(&signer, interval_sec, multiplier);
+        TokenSwapConfig::put_stepwise_multiplier(&signer, time_period, multiplier);
+    }
+
+    public(script) fun put_multiplier_with_timecycle<TokenT: store>(signer: signer,
+                                                                    time_cycle: u64,
+                                                                    multiplier: u64) {
+        TokenSwapSyrup::put_multiplier_with_timecycle<TokenT>(&signer, time_cycle, multiplier);
     }
 
     public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {
