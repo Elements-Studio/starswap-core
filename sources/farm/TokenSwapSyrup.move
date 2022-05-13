@@ -296,7 +296,6 @@ module TokenSwapSyrup {
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
         let (harvest_cap, id) = if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             // maybe upgrade under the upgrading switch turned on
-            maybe_upgrade_all_stake<TokenT>(signer, &syrup.param_cap);
 
             YieldFarming::stake_v2<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
                 signer,
@@ -317,7 +316,7 @@ module TokenSwapSyrup {
                 pledge_time_sec,
                 &syrup.param_cap)
         };
-
+        maybe_upgrade_all_stake<TokenT>(signer, &syrup.param_cap);
         // Save stake to list
         let stake_list = borrow_global_mut<SyrupStakeList<TokenT>>(user_addr);
         Vector::push_back<SyrupStake<TokenT>>(&mut stake_list.items, SyrupStake<TokenT>{

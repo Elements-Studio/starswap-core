@@ -590,6 +590,13 @@ module YieldFarmingV3 {
                 staked_latest_harvest_index,
                 asset_weight,
             );
+            
+            let items_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(Signer::address_of(signer));
+            let StakeExtend<PoolType, AssetT>{
+                id: _out_stake_id2,
+                asset_amount: _staked_asset_amount,
+                weight_factor: _staked_weight_factor,
+            } = pop_stake_extend<PoolType, AssetT>(&mut items_extend.items, stake_id);
             (new_harvest_index, now_seconds, period_gain, asset_weight, staked_asset_weight)
             // after pool alloc mode upgrade
         } else {
@@ -616,11 +623,11 @@ module YieldFarmingV3 {
         farming_asset.last_update_timestamp = now_seconds;
 
         // update farming asset extend
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //TODO can borrow twice in a function ?
-            let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
-            farming_asset_extend.asset_total_amount = farming_asset_extend.asset_total_amount - asset_amount;
-        };
+        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
+        farming_asset_extend.asset_total_amount = farming_asset_extend.asset_total_amount - asset_amount;
+        // };
 
         (staked_asset, withdraw_token)
     }
