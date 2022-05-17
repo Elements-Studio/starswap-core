@@ -530,28 +530,28 @@ module TokenSwapSyrup {
             let len_stake = Vector::length(&stake_ids);
             let len_extend_stake = Vector::length(&stake_extend_ids);
             
-            if( len_stake > len_extend_stake){
-                let idx = 0;
-                let next_id = if( len_extend_stake == 0 ){
-                                    *Vector::borrow<u64>(&stake_ids , len_stake - 1 )
-                            }else{
-                                if( *Vector::borrow<u64>(&stake_ids , len_stake - 1 ) >= *Vector::borrow<u64>(&stake_extend_ids , len_extend_stake - 1 )  ){
+           
+            let idx = 0;
+            let next_id = if( len_extend_stake == 0 ){
+                                *Vector::borrow<u64>(&stake_ids , len_stake - 1 )
+                        }else{
+                            if( *Vector::borrow<u64>(&stake_ids , len_stake - 1 ) >= *Vector::borrow<u64>(&stake_extend_ids , len_extend_stake - 1 )  ){
                                 * Vector::borrow<u64>(&stake_ids , len_stake - 1 )
-                                }else{
+                            }else{
                                 * Vector::borrow<u64>(&stake_extend_ids , len_stake - 1 )
-                                }
-                            };
-                loop{
-                    if( idx >= len_stake){
-                        break
-                    };
-                    if(! Vector::contains<u64>( &stake_extend_ids , Vector::borrow<u64>( &stake_ids , idx )) ){
-                        let stake_id = Vector::borrow(&stake_ids, idx);
-                        YieldFarming::extend_farm_stake_info_v2<PoolTypeSyrup, Token::Token<TokenT>>(signer, *stake_id , next_id , cap);
-                    };
-                    idx = idx + 1 ;
-                }
+                            }
+                        };
+            loop{
+                if( idx >= len_stake){
+                    break
+                };
+                if(! Vector::contains<u64>( &stake_extend_ids , Vector::borrow<u64>( &stake_ids , idx )) ){
+                    let stake_id = Vector::borrow(&stake_ids, idx);
+                    YieldFarming::extend_farm_stake_info_v2<PoolTypeSyrup, Token::Token<TokenT>>(signer, *stake_id , next_id , cap);
+                };
+                idx = idx + 1 ;
             };
+           
             return 
         };
         // Access Control

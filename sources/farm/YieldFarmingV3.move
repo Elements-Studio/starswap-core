@@ -305,6 +305,8 @@ module YieldFarmingV3 {
             weight_factor: stake.asset_multiplier,
         });
         stake_list_extend.next_id = next_id;
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+        stake_list.next_id = next_id;
     }
 
 
