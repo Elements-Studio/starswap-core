@@ -6,7 +6,40 @@
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# block --author 0x1 --timestamp 10000000
+//# block --author 0x1 --timestamp 1646445600000
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun genesis_initialized(signer: signer) {
+        TokenSwapGov::genesis_initialize(&signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+
+script {
+    use SwapAdmin::TokenSwapGov;
+
+    fun upgrade_dao_treasury_genesis(signer: signer) {
+        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+
+    use SwapAdmin::TokenSwapGov;
+
+    fun linear_initialize(signer: signer) {
+        TokenSwapGov::linear_initialize(&signer);
+    }
+}
+// check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
@@ -82,12 +115,10 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_governance_genesis(signer: signer) {
-        TokenSwapGov::genesis_initialize(&signer);
         TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
         TokenSwapFarmRouter::reset_farm_activation<WBTC, WETH>(&signer, true);
         TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 30);
@@ -271,7 +302,7 @@ script {
 // check: EXECUTED
 
 
-//# block --author 0x1 --timestamp 10002000
+//# block --author 0x1 --timestamp 1646445602000
 
 //# run --signers alice
 script {
@@ -324,7 +355,7 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10038000
+//# block --author 0x1 --timestamp 1646445638000
 
 //# run --signers alice
 script {
@@ -401,7 +432,7 @@ script {
 }
 // check: EXECUTED
 
-//# block --author 0x1 --timestamp 10060000
+//# block --author 0x1 --timestamp 1646445660000
 
 //# run --signers SwapAdmin
 script {

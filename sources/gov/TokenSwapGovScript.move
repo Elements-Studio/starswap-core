@@ -23,13 +23,13 @@ module TokenSwapGovScript {
     }
 
     /// Linear extraction of Farm treasury
-    public(script) fun linear_withdraw_farm(account: signer ,amount :u128) {
-        TokenSwapGov::linear_withdraw_farm(&account, amount);
+    public(script) fun linear_withdraw_farm(account: signer , amount:u128 ) {
+        TokenSwapGov::linear_withdraw_farm(&account , amount);
     }
 
     /// Linear extraction of Syrup treasury
-    public(script) fun linear_withdraw_syrup(account: signer ,amount :u128) {
-        TokenSwapGov::linear_withdraw_syrup(&account, amount);
+    public(script) fun linear_withdraw_syrup(account: signer , amount:u128 ) {
+        TokenSwapGov::linear_withdraw_syrup(&account , amount);
     }
 
     /// Linear extraction of Community treasury
