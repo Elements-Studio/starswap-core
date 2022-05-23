@@ -370,7 +370,37 @@ module TokenSwapFarm {
               (!YieldFarming::exists_stake_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)))) {
             return
         };
-
+        if (!YieldFarming::exists_stake_at_address<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr) ||
+            YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr)) {
+            let stake_ids = YieldFarming::query_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account_addr);
+            let stake_extend_ids = YieldFarming::query_stake_list_v2<PoolTypeFarmPool,Token::Token<LiquidityToken<X, Y>>>(account_addr);
+            let len_stake = Vector::length(&stake_ids);
+            let len_extend_stake = Vector::length(&stake_extend_ids);
+            
+           
+            let idx = 0;
+            let next_id = if( len_extend_stake == 0 ){
+                                *Vector::borrow<u64>(&stake_ids , len_stake - 1 )
+                        }else{
+                            if( *Vector::borrow<u64>(&stake_ids , len_stake - 1 ) >= *Vector::borrow<u64>(&stake_extend_ids , len_extend_stake - 1 )  ){
+                                * Vector::borrow<u64>(&stake_ids , len_stake - 1 )
+                            }else{
+                                * Vector::borrow<u64>(&stake_extend_ids , len_stake - 1 )
+                            }
+                        };
+            loop{
+                if( idx >= len_stake){
+                    break
+                };
+                if(! Vector::contains<u64>( &stake_extend_ids , Vector::borrow<u64>( &stake_ids , idx )) ){
+                    let stake_id = Vector::borrow(&stake_ids, idx);
+                    YieldFarming::extend_farm_stake_info_v2<PoolTypeFarmPool, Token::Token<TokenT>>(signer, *stake_id , next_id , cap);
+                };
+                idx = idx + 1 ;
+            };
+           
+            return 
+        };
         // Access Control
         let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
 
