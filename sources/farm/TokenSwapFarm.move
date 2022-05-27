@@ -437,9 +437,6 @@ module TokenSwapFarm {
                 extend_farm_stake_resource<X, Y>(account);
             };
         };
-        let farm = borrow_global<FarmPoolStake<X, Y>>(account_addr);
-        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
-        TokenSwapFarmBoost::update_boost_for_farm_pool<X,Y>(&farm_cap.cap,account,farm.id); 
 
         let farm_harvest_cap = borrow_global_mut<FarmPoolStake<X, Y>>(account_addr);
         let token = YieldFarming::harvest<
@@ -452,6 +449,10 @@ module TokenSwapFarm {
             &farm_harvest_cap.cap,
         );
         Account::deposit<STAR::STAR>(account_addr, token);
+
+        let farm = borrow_global<FarmPoolStake<X, Y>>(account_addr);
+        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
+        TokenSwapFarmBoost::update_boost_for_farm_pool<X,Y>(&farm_cap.cap,account,farm.id); 
     }
 
     /// Return calculated APY
