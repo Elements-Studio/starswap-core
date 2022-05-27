@@ -138,7 +138,6 @@ module TokenSwapFarmBoost {
         // lock boost amount vestar
         let vestar_total_amount = TokenSwapVestarMinter::value(user_addr);
         assert!((boost_amount > 0 && boost_amount <= vestar_total_amount ), ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH);
-        boost_amount = vestar_total_amount;
         let boost_vestar_token = TokenSwapVestarMinter::withdraw_with_cap(account, boost_amount, &vestar_treasury_cap.cap);
         VToken::deposit<VESTAR>(&mut user_info.locked_vetoken, boost_vestar_token);
 
