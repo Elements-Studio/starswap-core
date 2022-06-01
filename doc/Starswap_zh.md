@@ -162,4 +162,47 @@ public(script) fun upgrade_dao_treasury_genesis(signer: signer) {}
 - WhiteListBoostSwitch - 白名单开关
 #### TokenSwapFee.move
 Swap 交易手续费的相关代码
+- initialize_token_swap_fee - Swap 交易费初始化
+- init_swap_oper_fee_config - 设置 Swap 交易费分成比例
+- handle_token_swap_fee - 交易手续费处理
+- intra_handle_token_swap_fee - 交易手续费处理
+- emit_swap_fee_event - 手续费事件
+- swap_fee_direct_deposit - 手续费支付给 管理员 或者输入到 LP 中
+- swap_fee_swap - 将 X 换为  FeeToken 支付给管理员
+#### TokenSwapOracleLibrary.move
+价格预言机，可以保存一定时间内的平均价格
+- current_block_timestamp - 获取当前的区块时间
+- current_cumulative_prices_v2 - 获取一定时间内两个Token平均价格
+current_cumulative_prices_v2 相对于 current_cumulative_prices 增加了根据区块时间来更新返回价格
+```
+    /// TWAP price oracle, include update price accumulators, on the first call per block
+    /// return U256 with precision
+    public fun current_cumulative_prices_v2<X: copy + drop + store, Y: copy + drop + store>(): (U256, U256, u64) {
+        let block_timestamp = current_block_timestamp();
+        let (price_x_cumulative, price_y_cumulative, last_block_timestamp) = TokenSwapRouter::get_cumulative_info<X, Y>();
 
+        // if time has elapsed since the last update on the pair, mock the accumulated price values
+        if (last_block_timestamp != block_timestamp) {
+            let (x_reserve, y_reserve) = TokenSwapRouter::get_reserves<X, Y>();
+            if (x_reserve !=0 && y_reserve != 0){
+                let time_elapsed = block_timestamp - last_block_timestamp;
+                // counterfactual
+                let new_price_x_cumulative = U256::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(y_reserve), x_reserve)), U256::from_u64(time_elapsed));
+                let new_price_y_cumulative = U256::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(x_reserve), y_reserve)), U256::from_u64(time_elapsed));
+                price_x_cumulative = U256::add(price_x_cumulative, new_price_x_cumulative);
+                price_y_cumulative = U256::add(price_y_cumulative, new_price_y_cumulative);
+            };
+        };
+        (price_x_cumulative, price_y_cumulative, block_timestamp)
+    }
+```
+
+#### TokenSwapLibrary.move
+作为 Swap 底层公共库，与代币具体类型无关
+- quote - 提供流动性时给定 代币 X 数量，返回需要的 代币 Y 的数量
+- get_amount_in - 给定输出的 代币 数量，求需要输入的代币数
+- get_amount_out - 给定输入的 代币 数量，求输出的代币数
+- get_amount_in_without_fee - 无费率时给定输出的 代币 数量，求需要输入的代币数
+- get_amount_out_without_fee - 无费率时给定输入的 代币 数量，求输出的代币数
+
+#### TokenSwap.move
