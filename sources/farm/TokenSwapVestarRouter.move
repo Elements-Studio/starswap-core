@@ -74,11 +74,5 @@ module TokenSwapVestarRouter {
         }
     }
 
-    ///TODO: Turn over capability from script to syrup boost on barnard
-    public fun turnover_vestar_mintcap_for_barnard(cap: TokenSwapVestarMinter::MintCapability): VestarRouterCapability {
-        VestarRouterCapability{
-            cap
-        }
-    }
 }
 }

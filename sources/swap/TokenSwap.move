@@ -25,17 +25,6 @@ module TokenSwap {
     }
 
     /// Event emitted when add token pair register.
-    /// (Obsoleted)
-    struct TokenPairRegisterEvent has drop, store {
-        /// token code of X type
-        x_token_code: Token::TokenCode,
-        /// token code of X type
-        y_token_code: Token::TokenCode,
-        /// signer of token pair register
-        signer: address,
-    }
-
-    /// Event emitted when add token pair register.
     struct RegisterEvent has drop, store {
         /// token code of X type
         x_token_code: Token::TokenCode,
@@ -99,24 +88,6 @@ module TokenSwap {
         signer: address,
     }
 
-    /// (Obsoleted)
-    struct TokenPair<phantom X, phantom Y> has key, store {
-        token_x_reserve: Token::Token<X>,
-        token_y_reserve: Token::Token<Y>,
-        last_block_timestamp: u64,
-        last_price_x_cumulative: U256,
-        last_price_y_cumulative: U256,
-        last_k: U256,
-        // token_pair_register_event: Event::EventHandle<TokenPairRegisterEvent>,
-
-        // reserve0 * reserve1, as of immediately after the most recent liquidity event
-        add_liquidity_event: Event::EventHandle<AddLiquidityEvent>,
-        remove_liquidity_event: Event::EventHandle<RemoveLiquidityEvent>,
-        swap_event: Event::EventHandle<SwapEvent>,
-
-        /// Obsoleted field
-        swap_fee_event: Event::EventHandle<SwapFeeEvent>,
-    }
 
     /// Struct for swap pair
     struct TokenSwapPair<phantom X, phantom Y> has key, store {
@@ -203,21 +174,6 @@ module TokenSwap {
         move_to(signer, LiquidityTokenCapability{ mint: mint_capability, burn: burn_capability });
     }
 
-    fun make_token_pair<X: copy + drop + store, Y: copy + drop + store>(signer: &signer): TokenPair<X, Y> {
-        TokenPair<X, Y>{
-            token_x_reserve: Token::zero<X>(),
-            token_y_reserve: Token::zero<Y>(),
-            last_block_timestamp: 0,
-            last_price_x_cumulative: U256::zero(),
-            last_price_y_cumulative: U256::zero(),
-            last_k: U256::zero(),
-            // token_pair_register_event: Event::new_event_handle<TokenPairRegisterEvent>(signer),
-            add_liquidity_event: Event::new_event_handle<AddLiquidityEvent>(signer),
-            remove_liquidity_event: Event::new_event_handle<RemoveLiquidityEvent>(signer),
-            swap_event: Event::new_event_handle<SwapEvent>(signer),
-            swap_fee_event: Event::new_event_handle<SwapFeeEvent>(signer),
-        }
-    }
 
     fun make_token_swap_pair<X: copy + drop + store, Y: copy + drop + store>(): TokenSwapPair<X, Y> {
         TokenSwapPair<X, Y>{
@@ -501,42 +457,6 @@ module TokenSwap {
             y_out: Token::value<Y>(&token_y_out),
         });
         (token_x_out, token_y_out, token_x_fee, token_y_fee)
-    }
-
-    /// Maybe called by admin while upgrade
-    public fun upgrade_tokenpair_to_tokenswappair<X: copy + drop + store,
-                                                  Y: copy + drop + store>(signer: &signer) acquires TokenPair {
-        let account = Signer::address_of(signer);
-        if (exists<TokenPair<X, Y>>(account)) {
-            let TokenPair<X, Y>{
-                token_x_reserve,
-                token_y_reserve,
-                last_block_timestamp,
-                last_price_x_cumulative,
-                last_price_y_cumulative,
-                last_k,
-                add_liquidity_event,
-                remove_liquidity_event,
-                swap_event,
-                swap_fee_event,
-            } = move_from<TokenPair<X, Y>>(account);
-
-            Event::destroy_handle(add_liquidity_event);
-            Event::destroy_handle(remove_liquidity_event);
-            Event::destroy_handle(swap_event);
-            Event::destroy_handle(swap_fee_event);
-
-            move_to(signer, TokenSwapPair<X, Y>{
-                token_x_reserve,
-                token_y_reserve,
-                last_block_timestamp,
-                last_price_x_cumulative,
-                last_price_y_cumulative,
-                last_k,
-            });
-        };
-
-        maybe_init_event_handle(signer);
     }
 }
 }

@@ -122,26 +122,5 @@ module TokenSwapSyrupScript {
         });
     }
 
-    ///TODO: Turn over capability from script to syrup boost on barnard
-    public(script) fun turnover_vestar_mintcap_for_barnard(signer: signer) acquires VestarMintCapabilityWrapper {
-        STAR::assert_genesis_address(&signer);
-
-        let broker = Signer::address_of(&signer);
-
-        TokenSwapVestarMinter::maybe_init_event_handler_barnard(&signer);
-
-        if (exists<VestarRouterCapabilityWrapper>(broker) ||
-            !exists<VestarMintCapabilityWrapper>(broker)) {
-            return
-        };
-
-        let VestarMintCapabilityWrapper{
-            cap: mint_cap
-        } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
-
-        move_to(&signer, VestarRouterCapabilityWrapper{
-            cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
-        });
-    }
 }
 }

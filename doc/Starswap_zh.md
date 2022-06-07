@@ -206,3 +206,149 @@ current_cumulative_prices_v2 相对于 current_cumulative_prices 增加了根据
 - get_amount_out_without_fee - 无费率时给定输入的 代币 数量，求输出的代币数
 
 #### TokenSwap.move
+Starswap 的 swap功能实现
+- maybe_init_event_handle - 尝试初始化事件
+- swap_pair_exists - 检查币对是否存在
+- register_swap_pair - 注册币对
+- mint - 将X,Y币对放入流动池中并 mint 对应币对的 LP Token 
+- burn  - 将 X,Y 币对从流动池中取出并 burn 对应的LP Token
+- get_reserves - 获取一个币对的 X,Y 流动性数量
+- get_cumulative_info - 获取 一个币对累计的价格信息
+- swap - 交换两个代币
+- compare_token - 对比两个代币
+- assert_is_token - 检测 传入的泛型是否是 TokenType 类型
+- return_back_to_lp_pool - 将 fee 注入到LP中 
+- cacl_actual_swap_fee_operation_rate - 计算费率
+- mint_and_emit_event - 注入流动性并mint LPToken 发出事件
+- burn_and_emit_event - 提取流动性并 burn LPToken 发出事件
+- swap_and_emit_event - Swap 代币 并发出事件
+#### TokenSwapRouter.move
+用来调换币对的顺序，方便调用底层的函数
+- swap_pair_exists - 检查币对是否存在
+- swap_pair_token_auto_accept - 调用者接收该币对
+- register_swap_pair - 注册币对
+- add_liquidity - 添加指定币对的流动性
+- remove_liquidity - 移除指定币对的流动性
+- swap_exact_token_for_token - 指定最小换出代币的交换
+- swap_token_for_exact_token - 指定最大输入代币的交换 
+- liquidity - 获取 指定用户指定币对的 LP Token 数量
+- total_liquidity - 获取指定币对的 LP Token 数量
+- get_reserves - 获取一个币对的 X,Y 流动性数量
+- get_cumulative_info - 获取 一个币对累计的价格信息
+- withdraw_liquidity_token - 提取指定数量的指定代币对的 LP Token
+- deposit_liquidity_token - 输入指定数量的指定代币对的 LP Token
+- get_poundage_rate - 获取指定币对的手续费比例
+- get_swap_fee_operation_rate_v2 - 获取指定币对的手续费流向比例
+- set_swap_fee_operation_rate_v2 - 设置指定币对的手续费流向比例
+- set_fee_auto_convert_switch - 设置 Fee 自动兑换开关
+- set_global_freeze_switch - 设置冻结开关
+- set_alloc_mode_upgrade_switch - 设置 boost 升级开关
+- set_white_list_boost_switch - 设置 boost 白名单开关
+#### TokenSwapFarm.move
+Swap 的 Farm 功能层 ，包含了大多数的 Farm 操作
+- initialize_farm_pool - 初始化 Farm 国库
+- initialize_global_pool_info - 升级 Farm 
+- add_farm - Boost 之前的 添加 Farm池
+- add_farm_v2 - Boost 之后的 添加 Farm 池
+- extend_farm_pool - 升级Boost 开关前的 Farm 池
+- get_farm_multiplier - 获得池子的倍率
+- set_farm_alloc_point - 设置池子的分配占比
+- deposit - 存入 Token 到 Farm 的国库中
+- stake - 将指定的币对流动性质押到 Farm 池中
+- unstake -  将指定的币对流动性从 Farm 池取出
+- harvest - harvest 指定的 Farm 池中的奖励
+- boost - 加速指定币对的 Farm 池
+- get_treasury_balance - 查看 Farm 的国库中的余额
+- lookup_gain - 获取指定币对 Farm 的 APY
+- query_info_v2 - 获取 Farm 池子的信息
+- query_total_stake - 获指定币对总质押数
+- query_stake - 获取指定地址的指定币对质押数
+- query_release_per_second - 获取指定币对 Farm 池每秒释放量
+- query_global_pool_info - 获取全部 Farm 池子的信息
+#### TokenSwapFarmBoost.move
+Swap 的 Farm Boost 相关操作
+- initialize_boost_event - 初始化 Boost 事件
+- set_treasury_cap - 设置国库能力
+- get_default_boost_factor_scale - 获取默认的boost 倍率
+- get_boost_factor - 查询某个地址的boost 倍率
+- get_boost_locked_vestar_amount - 查询某个地址的VeSTAR质押量
+- calculate_boost_weight - 计算加速占比重
+- predict_boost_factor - 预测 boost 倍率
+- boost_to_farm_pool - 对指定币对的 Farm 质押
+- unboost_from_farm_pool - 取消指定币对的 Farm 质押
+#### TokenSwapFarmRouter.move
+Swap 的 Farm 路由相关操作，主要用于币对查找
+- add_farm_pool - Boost 前增加指定币对的Farm池子
+- add_farm_pool_v2 - Boost 后增加指定币对的Farm池子
+- stake - 质押指定币对LP Token 到指定Farm 池
+- unstake - 取消质押指定币对 LP Token
+- harvest - 提取质押指定币对 LP Token 的奖励
+- boost - 加速指定币对的 Farm 池子
+- set_farm_multiplier - 设置指定币对 Farm 池子的倍率
+- set_farm_alloc_point - 设置指定币对 Farm 池子的倍率
+- lookup_gain - 获取指定币对 Farm 的 APY
+- query_total_stake - 获指定币对总质押数
+- query_stake - 获取指定地址的指定币对质押数
+- query_info_v2 - 获取 Farm 池子的信息
+- query_release_per_second - 获取指定币对 Farm 池每秒释放量
+- get_farm_multiplier - 获得池子的倍率
+- query_global_pool_info - 获取全部 Farm 池子的信息
+- get_boost_factor - 获取某个地址的 boost 倍率
+#### TokenSwapFarmScript.move
+用于合约调用的脚本函数
+- add_farm_pool - Boost 前增加指定币对的Farm池子
+- add_farm_pool_v2 - Boost 后增加指定币对的Farm池子
+- stake - 质押指定币对LP Token 到指定Farm 池
+- unstake - 取消质押指定币对 LP Token
+- harvest - 提取质押指定币对 LP Token 的奖励
+- boost - 加速指定币对的 Farm 池子
+- set_farm_multiplier - 设置指定币对 Farm 池子的倍率
+- set_farm_alloc_point - 设置指定币对 Farm 池子的倍率
+- initialize_boost_event - 初始化 Boost 事件
+#### TokenSwapSyrup.move
+Swap 的 Syrup 功能层 ，包含了大多数的 Syrup 操作
+- initialize - Syrup 的初始化
+- add_pool_v2 - Boost 后加新 Syrup 池
+- set_release_per_second - 设置 Syrup 池每秒释放量
+- set_alive - 设置 Syrup 池的状态
+- update_allocation_point - 设置 Syrup 池的分配占比
+- deposit - 注入 Token 到 Syrup 国库中
+- get_treasury_balance - 查看 Syrup 的国库中的余额
+- stake - 质押指定币 到 Syrup 池
+- unstake - 取消质押指定币的 Syrup 池
+- get_stake_info - 获取某个地址某个币的某次质押状态
+- query_total_stake - 获取某个币 Syrup 总质押状态
+- query_expect_gain - 获取某个地址某个币某次质押的预期收益
+- query_stake_list - 获取某个地址某个币所有的质押
+- query_release_per_second - 获取指定币 Syrup 池每秒释放量
+- query_pool_info_v2 - 获取指定币 Syrup 的状态
+- get_global_stake_id - 获取某个地址的当前最大质押ID
+- pledage_time_to_multiplier - 获取质押时间对应的倍率
+- upgrade_syrup_global - Syrup 的 Boost 升级
+- extend_syrup_pool - 升级 Syrup 池结构
+#### TokenSwapSyrupScript.move
+- add_pool - 加新 Syrup 池
+- set_release_per_second - 设置 Syrup 池每秒释放量
+- set_alive - 设置 Syrup 池的状态
+- stake - 质押指定币 到 Syrup 池
+- unstake - 取消质押指定币的 Syrup 池
+- take_vestar_by_stake_id - Boost 开启前的 Syrup 获取 VeSTAR
+- put_stepwise_multiplier - 设置质押时间以及对应的倍率
+#### TokenSwapVestarMinter.move
+Swap层关于VeSTAR的相关操作
+- init - 初始化 VeSTAR 
+- mint_with_cap_T - 通过capability Mint 指定Token
+- burn_with_cap_T - 通过capability Burn 指定Token
+- value - 获得指定账号下 VESTAR 的数量
+- value_of_id - 获得在指定账号下的指定Stake 获得的VeSTAR
+- value_of_id_by_token - 获得在指定账号下的指定Stake 获得的指定 Token
+- withdraw_with_cap - 通过 capability 提取 VESTAR
+- deposit_with_cap - 通过 capability 注入 VESTAR
+- maybe_upgrade_records - 升级 record list
+#### TokenSwapVestarRouter.move
+Vestar的功能整合路由
+- initialize_global_syrup_info - 初始化 Boost 后的 VeSTAR 
+- stake_hook - 质押时Mint VeSTAR
+- stake_hook_with_id - 给指定的 ID Syrup Mint VeSTAR
+- unstake_hook - 取消质押时burn VeSTAR
+- exists_record - 查看是否有 Record 表格

@@ -341,22 +341,6 @@ module TokenSwapVestarMinter {
         }
     }
 
-    /// Initialize handle
-    public fun maybe_init_event_handler_barnard(signer: &signer) {
-        assert!(Signer::address_of(signer) == @SwapAdmin, Errors::invalid_state(ERROR_NOT_ADMIN));
-
-        if (exists<VestarEventHandler>(Signer::address_of(signer))) {
-            return
-        };
-
-        move_to(signer, VestarEventHandler{
-            mint_event_handler: Event::new_event_handle<MintEvent>(signer),
-            burn_event_handler: Event::new_event_handle<BurnEvent>(signer),
-            withdraw_event_handler: Event::new_event_handle<WithdrawEvent>(signer),
-            deposit_event_handler: Event::new_event_handle<DepositEvent>(signer),
-        });
-    }
-
     /// Auto convert to new if exist old record list
     public fun maybe_upgrade_records<TokenT: store>(user_addr: address, items: &mut vector<MintRecordT<TokenT>>) acquires MintRecordList {
         if (!exists<MintRecordList>(user_addr)) {

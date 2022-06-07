@@ -194,17 +194,6 @@ module TokenSwapFarmRouter {
         }
     }
 
-    /// white list boost for farm
-    public fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128,signature:&vector<u8>) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::wl_boost<X, Y>(account, boost_amount,signature);
-        } else {
-            TokenSwapFarm::wl_boost<Y, X>(account, boost_amount,signature);
-        }
-    }
-
     /// Query user boost factor
     public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address): u64 {
         let order = TokenSwap::compare_token<X, Y>();

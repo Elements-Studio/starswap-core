@@ -9,8 +9,7 @@ module TokenSwapFarm {
     use StarcoinFramework::Event;
     use StarcoinFramework::Errors;
     use StarcoinFramework::Vector;
-    use StarcoinFramework::Signature;
-    use StarcoinFramework::BCS;
+
 
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::STAR;
@@ -109,7 +108,7 @@ module TokenSwapFarm {
     /// Initialize farm big pool
     public fun initialize_farm_pool(account: &signer, token: Token::Token<STAR::STAR>) {
         YieldFarming::initialize<PoolTypeFarmPool, STAR::STAR>(account, token);
-
+    
         move_to(account, FarmPoolEvent{
             add_farm_event_handler: Event::new_event_handle<AddFarmEvent>(account),
             activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(account),
@@ -675,30 +674,6 @@ module TokenSwapFarm {
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
     }
-
-    /// boost for farm
-    public fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128,signature:&vector<u8>)acquires FarmPoolStake, FarmPoolCapability{
-
-        let user_addr = Signer::address_of(account);
-        let (is_white_list_boost,white_list_pubkey) = TokenSwapConfig::get_white_list_boost_switch();
-        if(is_white_list_boost){
-            assert!(Signature::ed25519_verify(*signature, white_list_pubkey, BCS::to_bytes(&user_addr)), ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER);
-        };
-
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user_addr))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
-        };
-
-        let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
-        let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
-        TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
-        
-    }
-
 
     #[test]
     fun test_wl_boost(){
