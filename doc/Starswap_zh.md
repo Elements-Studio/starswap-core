@@ -352,3 +352,38 @@ Vestar的功能整合路由
 - stake_hook_with_id - 给指定的 ID Syrup Mint VeSTAR
 - unstake_hook - 取消质押时burn VeSTAR
 - exists_record - 查看是否有 Record 表格
+#### YieldFarmingLibrary.move
+用于计算 Yield 的基础库
+- calculate_harvest_index_with_asse_info - 更新Farm 的信息
+- calculate_harvest_index_weight_zero - 计算资源为0时的收获
+- calculate_harvest_index - 计算收获
+- calculate_addtion_harvest_index - 从旧的计算收获得到新的计算收获
+- calculate_withdraw_amount  - 计算增资指数
+#### YieldFarmingV3.move
+- initialize - 池子初始化
+- initialize_global_pool_info - 升级初始化 global 池信息
+- add_asset_v2 - 添加资产
+- extend_farming_asset - 升级 Boost
+- deposit - 向国库内注入 Token
+- extend_farm_stake_info - 升级成 Boost 之后的结构
+- update_pool - 更新池的分配
+- update_pool_weight - 更新池的比重
+- update_pool_stake_weight - 更新用户池比重
+- stake_v2 - 质押
+- unstake - 取消质押
+- harvest - 提取收益
+- query_expect_gain - 获取产量
+- query_total_stake - 获取质押总量
+- query_stake - 获取某个用户的某个质押
+- query_stake_list - 获取用户的所有stake
+- query_pool_info_v2 - 获取用户的资产信息
+- query_global_pool_info - 查询总池子信息
+- calculate_withdraw_amount_v2 - 计算资产指数
+- get_treasury_balance - 获取国库剩余
+- get_global_stake_id - 获取某个用户最后一个质押的id
+- exists_at - 查看某个用户是否存在 Farming
+- exists_asset_at - 查看某个用户是否存在 FarmingAsset
+- exists_stake_at_address - 查看某个用户是否质押过
+- exists_stake_list - 查看某个用户是否存在 StakeList
+- exists_stake_list_extend - 查看某个用户是否存在 StakeListExtend
+- exists_stake_extend - 查看某个用户是否存在 StakeExtend
