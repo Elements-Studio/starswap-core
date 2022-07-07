@@ -9,6 +9,7 @@ module TokenSwapVestarRouter {
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::STAR;
+    use SwapAdmin::VestarPlugin;
 
     const ERROR_ALLOC_MODEL_NOT_OPEN: u64 = 101;
 
@@ -72,6 +73,11 @@ module TokenSwapVestarRouter {
         VestarRouterCapability{
             cap: issuer_cap,
         }
+    }
+
+    /// Register to DAO
+    public fun register_to_dao(signer: &signer) {
+        VestarPlugin::register(Signer::address_of(signer));
     }
 
     ///TODO: Turn over capability from script to syrup boost on barnard

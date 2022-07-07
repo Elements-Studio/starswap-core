@@ -124,6 +124,8 @@ module TokenSwapVestarMinter {
             amount: to_mint_amount
         });
 
+        VestarPlugin::increase_sbt(Signer::address_of(signer), &vtoken);
+
         // Deposit VESTAR to treasury
         deposit(signer, vtoken);
 
@@ -158,6 +160,9 @@ module TokenSwapVestarMinter {
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
 
         let treasury = borrow_global_mut<Treasury>(user_addr);
+
+        VestarPlugin::decrease_sbt(Signer::address_of(signer), &treasury.vtoken);
+
         VToken::burn_with_cap<VESTAR::VESTAR>(&cap.cap,
             VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
 
@@ -409,6 +414,7 @@ module TokenSwapVestarMinter {
     #[test_only] use StarcoinFramework::Debug;
     #[test_only] use StarcoinFramework::STC;
     #[test_only] use SwapAdmin::STAR;
+    use SwapAdmin::VestarPlugin;
 
     #[test]
     fun test_convert_minter_record() {

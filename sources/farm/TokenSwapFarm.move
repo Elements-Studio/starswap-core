@@ -11,8 +11,8 @@ module TokenSwapFarm {
     use StarcoinFramework::Vector;
     use StarcoinFramework::Signature;
     use StarcoinFramework::BCS;
-
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
+
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwap::LiquidityToken;
     use SwapAdmin::TokenSwapRouter;
@@ -452,7 +452,7 @@ module TokenSwapFarm {
 
         let farm = borrow_global<FarmPoolStake<X, Y>>(account_addr);
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
-        TokenSwapFarmBoost::update_boost_for_farm_pool<X,Y>(&farm_cap.cap,account,farm.id); 
+        TokenSwapFarmBoost::update_boost_for_farm_pool<X,Y>(&farm_cap.cap,account,farm.id);
     }
 
     /// Return calculated APY
@@ -658,10 +658,10 @@ module TokenSwapFarm {
 
     /// boost for farm
     public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128)
-    acquires FarmPoolStake, FarmPoolCapability{
+    acquires FarmPoolStake, FarmPoolCapability {
         let user_addr = Signer::address_of(account);
-        let (is_white_list_boost,_) = TokenSwapConfig::get_white_list_boost_switch();
-        assert!( ! is_white_list_boost ,ERR_WHITE_LIST_BOOST_IS_OPEN);
+        let (is_white_list_boost, _) = TokenSwapConfig::get_white_list_boost_switch();
+        assert!(! is_white_list_boost, ERR_WHITE_LIST_BOOST_IS_OPEN);
         // after pool alloc mode upgrade
         if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             //check if need extend
@@ -696,7 +696,6 @@ module TokenSwapFarm {
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@SwapAdmin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
-        
     }
 
 
