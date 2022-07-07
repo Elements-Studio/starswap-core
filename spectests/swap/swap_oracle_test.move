@@ -1,4 +1,4 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 --public-keys Bridge=0xa0b9394a752f51b1a7956950c67a84ec1d0e627ef4e44cadef3aedbd53f8bc35
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 --public-keys Bridge=0x8085e172ecf785692da465ba3339da46c4b43640c3f92a45db803690cc3c4a36
 
 //# faucet --addr alice --amount 10000000000000000
 
