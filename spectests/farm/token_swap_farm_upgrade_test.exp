@@ -2,7 +2,7 @@ processed 36 tasks
 
 task 5 'run'. lines 11-20:
 {
-  "gas_used": 1001004,
+  "gas_used": 1014248,
   "status": {
     "Keep": "Executed"
   }
@@ -10,7 +10,7 @@ task 5 'run'. lines 11-20:
 
 task 6 'run'. lines 22-31:
 {
-  "gas_used": 196596,
+  "gas_used": 199907,
   "status": {
     "Keep": "Executed"
   }
@@ -18,7 +18,7 @@ task 6 'run'. lines 22-31:
 
 task 7 'run'. lines 33-42:
 {
-  "gas_used": 967941,
+  "gas_used": 981185,
   "status": {
     "Keep": "Executed"
   }
@@ -42,7 +42,7 @@ task 9 'run'. lines 56-67:
 
 task 10 'run'. lines 69-114:
 {
-  "gas_used": 2343271,
+  "gas_used": 2366448,
   "status": {
     "Keep": "Executed"
   }
@@ -66,7 +66,7 @@ task 12 'run'. lines 129-145:
 
 task 13 'run'. lines 148-182:
 {
-  "gas_used": 1586103,
+  "gas_used": 1592725,
   "status": {
     "Keep": "Executed"
   }
@@ -82,7 +82,7 @@ task 14 'run'. lines 184-201:
 
 task 15 'run'. lines 203-217:
 {
-  "gas_used": 1268523,
+  "gas_used": 1275145,
   "status": {
     "Keep": "Executed"
   }
@@ -154,7 +154,7 @@ task 24 'run'. lines 323-339:
 
 task 25 'run'. lines 342-356:
 {
-  "gas_used": 1002928,
+  "gas_used": 1006239,
   "status": {
     "Keep": "Executed"
   }
@@ -162,7 +162,7 @@ task 25 'run'. lines 342-356:
 
 task 27 'run'. lines 360-375:
 {
-  "gas_used": 1281721,
+  "gas_used": 1288343,
   "status": {
     "Keep": "Executed"
   }
@@ -170,7 +170,7 @@ task 27 'run'. lines 360-375:
 
 task 28 'run'. lines 378-395:
 {
-  "gas_used": 1275828,
+  "gas_used": 1279139,
   "status": {
     "Keep": "Executed"
   }
@@ -186,7 +186,7 @@ task 29 'run'. lines 397-414:
 
 task 30 'run'. lines 416-433:
 {
-  "gas_used": 1637656,
+  "gas_used": 1640967,
   "status": {
     "Keep": "Executed"
   }
@@ -194,7 +194,7 @@ task 30 'run'. lines 416-433:
 
 task 32 'run'. lines 437-451:
 {
-  "gas_used": 1457556,
+  "gas_used": 1460867,
   "status": {
     "Keep": "Executed"
   }

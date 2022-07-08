@@ -9,9 +9,9 @@ module TokenSwapVestarRouter {
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::STAR;
-    use SwapAdmin::VestarPlugin;
 
     const ERROR_ALLOC_MODEL_NOT_OPEN: u64 = 101;
+    const ERROR_CANNOT_CLAIM_SBT: u64 = 102;
 
     struct VestarRouterCapability has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
@@ -75,11 +75,14 @@ module TokenSwapVestarRouter {
         }
     }
 
-    /// Register to DAO
-    public fun register_to_dao(signer: &signer) {
-        VestarPlugin::register(Signer::address_of(signer));
-    }
-
+//    /// TODO To register DAO
+//    /// Register to DAO
+//    public fun claim_sbt<TokenX, TokenY>(signer: &signer) {
+//        assert!(!GenesisDao::is_member<StarswapDao>(member), Errors::invalid_state(ERROR_CANNOT_CLAIM_SBT));
+//
+//        let locked_amount = TokenSwapFarmBoost::get_boost_locked_vestar_amount<>(member);
+//    }
+//
     ///TODO: Turn over capability from script to syrup boost on barnard
     public fun turnover_vestar_mintcap_for_barnard(cap: TokenSwapVestarMinter::MintCapability): VestarRouterCapability {
         VestarRouterCapability{
