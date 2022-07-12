@@ -6,6 +6,7 @@
 
 //# block --author 0x1 --timestamp 10000000
 
+
 //# run --signers alice
 script {
     use StarcoinFramework::Account;
@@ -140,7 +141,9 @@ script {
     fun append_new_pool(signer: signer) {
         TokenSwapSyrup::add_pool_v2<TokenMock::WUSDT>(&signer, 50, 0);
 
-        let (alloc_point, asset_total_amount, asset_total_weight, harvest_index) = TokenSwapSyrup::query_pool_info_v2<TokenMock::WUSDT>();
+        let (alloc_point, asset_total_amount, asset_total_weight, harvest_index) =
+            TokenSwapSyrup::query_pool_info_v2<TokenMock::WUSDT>();
+
         assert!(alloc_point == 50, 100016);
         assert!(asset_total_weight == 0, 100017);
         assert!(asset_total_amount == 0, 100018);
@@ -186,7 +189,7 @@ script {
 script {
     use StarcoinFramework::StdlibUpgradeScripts;
 
-    fun main() {
+    fun upgrade_from_v11_to_v12() {
         StdlibUpgradeScripts::upgrade_from_v11_to_v12();
     }
 }
@@ -196,8 +199,25 @@ script {
 script {
     use SwapAdmin::TokenSwapDao;
 
-    fun admin_create_dao(signer: signer) {
+    fun dao_created(signer: signer) {
         TokenSwapDao::create_dao(signer, 10, 10, 10, 10, 10);
+    }
+}
+// check: EXECUTED
+
+
+//# run --signers alice
+script {
+    use StarcoinFramework::GenesisDao;
+
+    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::VestarPlugin;
+
+    fun dao_alice_check_is_member(signer: signer) {
+        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10100);
+        VestarPlugin::accept_sbt<TokenSwapDao::TokenSwapDao>(&signer);
+        VestarPlugin::join_member<TokenSwapDao::TokenSwapDao>(@alice);
+        assert!(GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10101);
     }
 }
 // check: EXECUTED
@@ -208,12 +228,20 @@ script {
 
     use SwapAdmin::TokenSwapDao;
     use SwapAdmin::VestarPlugin;
+    use SwapAdmin::TokenSwapVestarMinter;
+    use StarcoinFramework::Debug;
 
-    fun check_is_member(signer: signer) {
-        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10001);
-        VestarPlugin::accept_sbt<TokenSwapDao::TokenSwapDao>(&signer);
-        VestarPlugin::join_member<TokenSwapDao::TokenSwapDao>(@alice);
-        assert!(GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10002);
+    fun dao_alice_claim_sbt_after_join_dao(signer: signer) {
+        let sbt_amount_before_claim =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        assert!(sbt_amount_before_claim <= 0, 10102);
+
+        TokenSwapVestarMinter::claim_sbt(&signer);
+
+        let sbt_amount_after_claim =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        Debug::print(&sbt_amount_after_claim);
+        assert!(sbt_amount_after_claim > 0, 10103);
     }
 }
 // check: EXECUTED
@@ -229,9 +257,43 @@ script {
     use SwapAdmin::TokenSwapDao;
     use SwapAdmin::VestarPlugin;
 
-    fun alice_stake_after_dao(signer: signer) {
-        TokenSwapSyrupScript::stake<TokenMock::WETH>(signer, 1, CommonHelper::pow_amount<TokenMock::WETH>(100));
-        assert!(GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice) > 0, 10003);
+    fun dao_alice_stake_after_claimed_sbt(signer: signer) {
+        let sbt_before_stake =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        assert!(sbt_before_stake > 0, 10104);
+
+        TokenSwapSyrupScript::stake<TokenMock::WETH>(
+            signer, 1, CommonHelper::pow_amount<TokenMock::WETH>(100));
+
+        let sbt_after_stake =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        assert!(sbt_after_stake > sbt_before_stake, 10105);
     }
 }
 // check: EXECUTED
+
+
+//# run --signers alice
+script {
+    use StarcoinFramework::GenesisDao;
+
+    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::VestarPlugin;
+    use SwapAdmin::TokenSwapVestarMinter;
+    use StarcoinFramework::Debug;
+
+    fun dao_alice_reclaim_no_change(signer: signer) {
+        let sbt_amount_before_claim =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        assert!(sbt_amount_before_claim > 0, 10106);
+
+        TokenSwapVestarMinter::claim_sbt(&signer);
+
+        let sbt_amount_after_claim =
+            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+        Debug::print(&sbt_amount_after_claim);
+        assert!(sbt_amount_before_claim == sbt_amount_before_claim, 10107);
+    }
+}
+// check: EXECUTED
+

@@ -8,10 +8,10 @@
 
 
 //# run --signers SwapAdmin
-script{
+script {
     use StarcoinFramework::StdlibUpgradeScripts;
 
-    fun main(){
+    fun main() {
         StdlibUpgradeScripts::upgrade_from_v11_to_v12();
     }
 }
@@ -20,10 +20,10 @@ script{
 script {
     use StarcoinFramework::GenesisDao;
 
-    use SwapAdmin::StarswapDao;
+    use SwapAdmin::TokenSwapDao;
 
     fun check_is_member() {
-        assert!(!GenesisDao::is_member<StarswapDao::StarswapDao>(@alice), 10001);
+        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10001);
     }
 }
 // check: EXECUTED
@@ -41,10 +41,10 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use SwapAdmin::StarswapDao;
+    use SwapAdmin::TokenSwapDao;
 
     fun admin_create_dao(signer: signer) {
-        StarswapDao::create_dao(signer, 10, 10, 10, 10, 10);
+        TokenSwapDao::create_dao(signer, 10, 10, 10, 10, 10);
     }
 }
 // check: EXECUTED
@@ -54,16 +54,16 @@ script {
 script {
     use StarcoinFramework::GenesisDao;
 
-    use SwapAdmin::StarswapDao;
+    use SwapAdmin::TokenSwapDao;
     use SwapAdmin::VestarPlugin;
 
     fun check_is_member(signer: signer) {
-        assert!(!GenesisDao::is_member<StarswapDao::StarswapDao>(@alice), 10001);
+        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10001);
 
-        VestarPlugin::accept_sbt<StarswapDao::StarswapDao>(&signer);
-        VestarPlugin::join_member<StarswapDao::StarswapDao>(@alice);
+        VestarPlugin::accept_sbt<TokenSwapDao::TokenSwapDao>(&signer);
+        VestarPlugin::join_member<TokenSwapDao::TokenSwapDao>(@alice);
 
-        assert!(GenesisDao::is_member<StarswapDao::StarswapDao>(@alice), 10002);
+        assert!(GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10002);
     }
 }
 // check: EXECUTED

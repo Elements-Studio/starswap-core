@@ -17,12 +17,18 @@ module TokenSwapFarmBoost {
     use SwapAdmin::VESTAR::{VESTAR};
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSBTMapping;
+    use SwapAdmin::TokenSwapDao::TokenSwapDao;
+
+    use StarcoinFramework::Errors;
+    use StarcoinFramework::GenesisDao;
 
     const DEFAULT_BOOST_FACTOR: u64 = 1;
     // user boost factor section is [1,2.5]
     const BOOST_FACTOR_PRECESION: u64 = 100; //two-digit precision
 
     const ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH: u64 = 121;
+    const ERR_BOOST_VESTAR_NOT_EXISTS: u64 = 122;
+    const ERR_DAO_NOT_MEMBER: u64 = 123;
 
     struct UserInfo<phantom X, phantom Y> has key, store {
         boost_factor: u64,
@@ -275,14 +281,15 @@ module TokenSwapFarmBoost {
             @SwapAdmin, account_addr, stake_id, new_weight_factor, new_asset_weight, last_asset_weight);
     }
 
-//    public fun claim_sbt<X: copy + drop + store,
-//                         Y: copy + drop + store>(signer: &signer) acquires UserInfo {
-//        assert!(!GenesisDao::is_member<StarswapDao>(member), Errors::invalid_state(ERROR_CANNOT_CLAIM_SBT));
-//        assert!(!exists<SBTConverted>(member), Errors::invalid_state(ERROR_CANNOT_CLAIM_SBT));
-//
-//        let user_info = borrow_global<UserInfo<X, Y>>(member);
-//        VestarPlugin::increase_sbt<StarswapDao>(member, &user_info.locked_vetoken);
-//    }
+    /// Claim sbt from DAO
+    public fun claim_sbt<X: copy + drop + store,
+                         Y: copy + drop + store>(signer: &signer) acquires UserInfo {
+        let user_addr = Signer::address_of(signer);
+        assert!(exists<UserInfo<X, Y>>(user_addr), Errors::invalid_state(ERR_BOOST_VESTAR_NOT_EXISTS));
+        assert!(GenesisDao::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERR_DAO_NOT_MEMBER));
+        let user_info = borrow_global<UserInfo<X, Y>>(user_addr);
+        TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(signer, &user_info.locked_vetoken);
+    }
 
 }
 }
