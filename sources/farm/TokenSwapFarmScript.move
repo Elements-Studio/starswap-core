@@ -85,5 +85,6 @@ module TokenSwapFarmScript {
     public(script) fun initialize_boost_event(signer: signer){
        TokenSwapFarmBoost::initialize_boost_event(&signer);
     }
+
 }
 }

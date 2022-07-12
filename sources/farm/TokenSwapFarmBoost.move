@@ -143,7 +143,9 @@ module TokenSwapFarmBoost {
         let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
 
         // May be mapping sbt from locked token
-        TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(account, &user_info.locked_vetoken);
+        if (GenesisDao::is_member<TokenSwapDao>(user_addr)) {
+            TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(account, &user_info.locked_vetoken);
+        };
 
         // lock boost amount vestar
         let vestar_total_amount = TokenSwapVestarMinter::value(user_addr);

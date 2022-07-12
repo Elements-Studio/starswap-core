@@ -1,9 +1,10 @@
 address SwapAdmin {
 module TokenSwapSBTMapping {
 
+    use StarcoinFramework::Signer;
+
     use SwapAdmin::VToken;
     use SwapAdmin::VESTAR;
-    use StarcoinFramework::Signer;
     use SwapAdmin::VestarPlugin;
     use SwapAdmin::TokenSwapDao;
 
@@ -31,8 +32,7 @@ module TokenSwapSBTMapping {
         VestarPlugin::increase_sbt<TokenSwapDao::TokenSwapDao>(user_addr, token);
     }
 
-    public(friend) fun maybe_map_in_treasury(sender: &signer,
-                                             token: &VToken::VToken<VESTAR::VESTAR>) : bool {
+    public(friend) fun maybe_map_in_treasury(sender: &signer, token: &VToken::VToken<VESTAR::VESTAR>): bool {
         let user_addr = Signer::address_of(sender);
         if (exists<TreasuryMapFlag>(user_addr)) {
             return false
