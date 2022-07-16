@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
       - master
+  push:
 
 jobs:
   build-and-test:
@@ -10,29 +11,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: checkout
-        uses: actions/checkout@v1
-        with:
-          submodules: recursive
-      - name: setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
+      - name: checkout-move
+        uses: actions/checkout@v3
+
       - name: setup environment
         run: |
           bash scripts/dev_setup.sh -b -t -p 
+
       - name: test
         run: |
           source "$HOME/.profile"
           mpm package test
+
       - name: integration test
         run: |
           source "$HOME/.profile"
-          mpm integration-tes
+          mpm integration-test
           
       - name: build
         run: |
           source "$HOME/.profile"
           mpm package build
+
       - name: check changed files
         run: bash ./scripts/changed_files.sh
