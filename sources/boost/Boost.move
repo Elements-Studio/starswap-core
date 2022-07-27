@@ -25,7 +25,14 @@ module Boost {
         let factor = Math::pow(10, 8);
 
         let total_vestar_amount = Token::market_cap<VESTAR::VESTAR>();
-        let boost_factor = ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor);
+        
+        let boost_factor = 1 * factor;   
+        let dividend = Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor;
+        let divisor  = Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
+        
+        if(divisor != 0){
+            boost_factor = ( dividend / divisor ) + boost_factor; 
+        };
         if (boost_factor > (25 * factor / 10)) {
             boost_factor = 25 * factor / 10;
         }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
@@ -39,7 +46,13 @@ module Boost {
     fun compute_boost_factor_test(user_locked_vestar_amount: u128, total_vestar_amount: u128, user_locked_farm_amount: u128, total_farm_amount: u128): u64 {
         let factor = Math::pow(10, 8);
 
-        let boost_factor = ((Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor) / Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount)) + (1 * factor);        
+        let boost_factor = 1 * factor;   
+        let dividend = Math::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor;
+        let divisor  = Math::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
+        
+        if(divisor != 0){
+            boost_factor = ( dividend / divisor ) + boost_factor; 
+        };
         if (boost_factor > (25 * factor / 10)) {  
             boost_factor = 25 * factor / 10;
         }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
