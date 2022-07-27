@@ -112,6 +112,13 @@ module Boost {
             3064578000000000
         );
 
+        let h = compute_boost_factor_test(
+            0,
+            500000000000000,
+            1,
+            3064578000000000
+        );
+
         assert!(a == 100, 1001);
         assert!(b == 250, 1002);
         assert!(c == 191, 1003);
@@ -119,6 +126,7 @@ module Boost {
         assert!(e == 250, 1005);
         assert!(f == 109, 1006);
         assert!(g == 101, 1007);
+        assert!(h == 100, 1008);
     }
 
     #[test]
