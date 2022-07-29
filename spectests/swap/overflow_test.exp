@@ -3,42 +3,34 @@ processed 9 tasks
 task 4 'run'. lines 19-28:
 {
   "gas_used": 132384,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 5 'run'. lines 31-44:
 {
   "gas_used": 147177,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 6 'run'. lines 46-58:
 {
   "gas_used": 516208,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 7 'run'. lines 61-78:
 {
   "gas_used": 410754,
   "status": {
-    "Keep": {
-      "ExecutionFailure": {
-        "location": {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwap"
-          }
-        },
-        "function": 13,
-        "code_offset": 22
-      }
+    "ExecutionFailure": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwap"
+        }
+      },
+      "function": 13,
+      "code_offset": 22
     }
   }
 }
@@ -46,7 +38,5 @@ task 7 'run'. lines 61-78:
 task 8 'run'. lines 81-103:
 {
   "gas_used": 22914,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }

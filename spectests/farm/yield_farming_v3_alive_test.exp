@@ -3,49 +3,39 @@ processed 28 tasks
 task 8 'run'. lines 131-141:
 {
   "gas_used": 34981,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 9 'run'. lines 143-153:
 {
   "gas_used": 34981,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 10 'run'. lines 155-165:
 {
   "gas_used": 34981,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 11 'run'. lines 167-194:
 {
   "gas_used": 652225,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 12 'run'. lines 196-206:
 {
   "gas_used": 47138,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "YieldFarmingV3"
-          }
-        },
-        28929
-      ]
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "YieldFarmingV3"
+        }
+      },
+      "abort_code": "28929"
     }
   }
 }
@@ -53,71 +43,53 @@ task 12 'run'. lines 196-206:
 task 14 'run'. lines 210-220:
 {
   "gas_used": 14861,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 15 'run'. lines 222-230:
 {
   "gas_used": 49999,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 17 'run'. lines 234-267:
 {
   "gas_used": 639553,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 19 'run'. lines 271-279:
 {
   "gas_used": 261429,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 21 'run'. lines 283-291:
 {
   "gas_used": 49999,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 23 'run'. lines 295-319:
 {
   "gas_used": 1050499,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 25 'run'. lines 323-333:
 {
   "gas_used": 95044,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 26 'run'. lines 336-344:
 {
   "gas_used": 236026,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 27 'run'. lines 347-366:
 {
   "gas_used": 343139,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }

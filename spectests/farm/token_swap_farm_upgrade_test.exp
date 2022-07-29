@@ -3,218 +3,166 @@ processed 36 tasks
 task 5 'run'. lines 11-20:
 {
   "gas_used": 1001004,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 6 'run'. lines 22-31:
 {
   "gas_used": 196596,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 7 'run'. lines 33-42:
 {
   "gas_used": 967941,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 8 'run'. lines 44-54:
 {
   "gas_used": 380067,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 9 'run'. lines 56-67:
 {
   "gas_used": 85995,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 10 'run'. lines 69-114:
 {
   "gas_used": 2343271,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 11 'run'. lines 116-127:
 {
   "gas_used": 542087,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 12 'run'. lines 129-145:
 {
   "gas_used": 662580,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 13 'run'. lines 148-182:
 {
   "gas_used": 1586103,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 14 'run'. lines 184-201:
 {
   "gas_used": 855609,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 15 'run'. lines 203-217:
 {
   "gas_used": 1268523,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 16 'run'. lines 220-228:
 {
   "gas_used": 70504,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 17 'run'. lines 230-239:
 {
   "gas_used": 81674,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 18 'run'. lines 241-249:
 {
   "gas_used": 85014,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 19 'run'. lines 251-261:
 {
   "gas_used": 97777,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 20 'run'. lines 263-287:
 {
   "gas_used": 345577,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 21 'run'. lines 289-302:
 {
   "gas_used": 243073,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 23 'run'. lines 307-321:
 {
   "gas_used": 679176,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 24 'run'. lines 323-339:
 {
   "gas_used": 212244,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 25 'run'. lines 342-356:
 {
   "gas_used": 1002928,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 27 'run'. lines 360-375:
 {
   "gas_used": 1281721,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 28 'run'. lines 378-395:
 {
   "gas_used": 1276120,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 29 'run'. lines 397-414:
 {
   "gas_used": 791046,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 30 'run'. lines 416-433:
 {
   "gas_used": 1637948,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 32 'run'. lines 437-451:
 {
   "gas_used": 1457848,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 33 'run'. lines 454-463:
 {
   "gas_used": 100874,
   "status": {
-    "Keep": {
-      "ExecutionFailure": {
-        "location": {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwapFarm"
-          }
-        },
-        "function": 2,
-        "code_offset": 33
-      }
+    "ExecutionFailure": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapFarm"
+        }
+      },
+      "function": 2,
+      "code_offset": 33
     }
   }
 }
@@ -222,25 +170,21 @@ task 33 'run'. lines 454-463:
 task 34 'run'. lines 465-473:
 {
   "gas_used": 83256,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 35 'run'. lines 475-484:
 {
   "gas_used": 87971,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TokenSwapConfig"
-          }
-        },
-        26113
-      ]
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapConfig"
+        }
+      },
+      "abort_code": "26113"
     }
   }
 }

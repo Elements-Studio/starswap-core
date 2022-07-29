@@ -3,73 +3,57 @@ processed 26 tasks
 task 8 'run'. lines 130-148:
 {
   "gas_used": 210903,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 9 'run'. lines 150-165:
 {
   "gas_used": 173856,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 10 'run'. lines 167-178:
 {
   "gas_used": 97777,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 11 'run'. lines 181-201:
 {
   "gas_used": 132903,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 13 'run'. lines 205-220:
 {
   "gas_used": 480609,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 15 'run'. lines 224-248:
 {
   "gas_used": 1118683,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 16 'run'. lines 250-270:
 {
   "gas_used": 132967,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 17 'run'. lines 272-293:
 {
   "gas_used": 565367,
   "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "YieldFarmingV3"
-          }
-        },
-        30209
-      ]
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "YieldFarmingV3"
+        }
+      },
+      "abort_code": "30209"
     }
   }
 }
@@ -77,31 +61,23 @@ task 17 'run'. lines 272-293:
 task 19 'run'. lines 297-312:
 {
   "gas_used": 314303,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 21 'run'. lines 316-332:
 {
   "gas_used": 314297,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 23 'run'. lines 337-358:
 {
   "gas_used": 604638,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
 
 task 25 'run'. lines 362-378:
 {
   "gas_used": 596468,
-  "status": {
-    "Keep": "Executed"
-  }
+  "status": "Executed"
 }
