@@ -294,6 +294,22 @@ script {
         assert!(TokenSwapFarmBoost::get_boost_factor<TokenMock::WBTC,TokenMock::WETH>(account) == 249,10010);
         TokenSwapFarmRouter::harvest<TokenMock::WBTC,TokenMock::WETH>(&signer,100);
         assert!(TokenSwapFarmBoost::get_boost_factor<TokenMock::WBTC,TokenMock::WETH>(account) == 174,10011);
+    }
+}
+// check: EXECUTED
+
+//# run --signers alice
+script {
+    use SwapAdmin::TokenSwapFarmRouter;
+    use StarcoinFramework::Signer;
+    use SwapAdmin::TokenMock;
+
+    fun vestar_query(signer: signer) {
+        let account = Signer::address_of(&signer);
+        let farm_boost_vestar = TokenSwapFarmRouter::get_boost_locked_vestar_amount<TokenMock::WBTC,TokenMock::WETH>(account);
+        let farm_boost_vestar_reverse = TokenSwapFarmRouter::get_boost_locked_vestar_amount<TokenMock::WETH,TokenMock::WBTC>(account);
+        assert!(farm_boost_vestar > 0, 10012);
+        assert!(farm_boost_vestar == farm_boost_vestar_reverse, 10013);
 
     }
 }
