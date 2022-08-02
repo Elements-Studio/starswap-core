@@ -3,70 +3,90 @@ processed 18 tasks
 task 6 'run'. lines 15-27:
 {
   "gas_used": 504960,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 7 'run'. lines 30-43:
 {
   "gas_used": 517722,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 8 'run'. lines 45-53:
 {
   "gas_used": 117449,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 9 'run'. lines 56-71:
 {
   "gas_used": 195679,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 10 'run'. lines 73-83:
 {
   "gas_used": 34291,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 11 'run'. lines 85-95:
 {
   "gas_used": 34084,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 12 'run'. lines 98-108:
 {
   "gas_used": 104953,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 13 'run'. lines 111-137:
 {
   "gas_used": 2699829,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 14 'run'. lines 140-157:
 {
   "gas_used": 3142692,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 15 'run'. lines 160-174:
 {
   "gas_used": 270592,
   "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwap"
-        }
-      },
-      "function": 9,
-      "code_offset": 1
+    "Keep": {
+      "ExecutionFailure": {
+        "location": {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TokenSwap"
+          }
+        },
+        "function": 9,
+        "code_offset": 1
+      }
     }
   }
 }
@@ -74,11 +94,15 @@ task 15 'run'. lines 160-174:
 task 16 'run'. lines 177-211:
 {
   "gas_used": 2837790,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 17 'run'. lines 214-249:
 {
   "gas_used": 2757705,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
