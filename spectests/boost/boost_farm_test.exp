@@ -1,4 +1,4 @@
-processed 21 tasks
+processed 22 tasks
 
 task 4 'run'. lines 9-18:
 {
@@ -112,9 +112,17 @@ task 19 'run'. lines 264-282:
   }
 }
 
-task 20 'run'. lines 284-300:
+task 20 'run'. lines 284-299:
 {
   "gas_used": 1439371,
+  "status": {
+    "Keep": "Executed"
+  }
+}
+
+task 21 'run'. lines 301-316:
+{
+  "gas_used": 148412,
   "status": {
     "Keep": "Executed"
   }
