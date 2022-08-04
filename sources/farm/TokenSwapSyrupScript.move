@@ -54,7 +54,7 @@ module TokenSwapSyrupScript {
 
     public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
-        TokenSwapGov::linear_withdraw_syrup(&signer , 0);
+        TokenSwapGov::linear_withdraw_syrup(&signer, 0);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
         Account::deposit<TokenT>(user_addr, asset_token);
         Account::deposit<STAR::STAR>(user_addr, reward_token);
@@ -111,13 +111,17 @@ module TokenSwapSyrupScript {
     }
 
     public fun query_vestar_amount_by_staked_id_tokentype<TokenT: store>(user_addr: address, id: u64): u128 {
-        TokenSwapVestarMinter::value_of_id_by_token<TokenT>(user_addr, id)
+        let old_value = TokenSwapVestarMinter::value_of_id(user_addr, id);
+        if (old_value > 0) {
+            old_value
+        } else {
+            TokenSwapVestarMinter::value_of_id_by_token<TokenT>(user_addr, id)
+        }
     }
-
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
         let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
-        move_to(signer, VestarRouterCapabilityWrapper{
+        move_to(signer, VestarRouterCapabilityWrapper {
             cap
         });
     }
@@ -135,11 +139,11 @@ module TokenSwapSyrupScript {
             return
         };
 
-        let VestarMintCapabilityWrapper{
+        let VestarMintCapabilityWrapper {
             cap: mint_cap
         } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
 
-        move_to(&signer, VestarRouterCapabilityWrapper{
+        move_to(&signer, VestarRouterCapabilityWrapper {
             cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
         });
     }
