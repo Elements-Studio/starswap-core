@@ -8,6 +8,7 @@ module TimelyReleasePool {
 
     const ERROR_LINEAR_RELEASE_EXISTS: u64 = 1001;
     const ERROR_LINEAR_NOT_READY_YET: u64 = 1002;
+    const ERROR_EVENT_INIT_REPEATE: u64 = 1003;
 
     struct TimelyReleasePool<phantom PoolT, phantom TokenT> has key {
         // Treasury total amount
@@ -22,13 +23,8 @@ module TimelyReleasePool {
         interval: u64,
     }
 
-    struct TreasuryWithdrawEvent has key {}
-
-    struct TreasuryDepositEvent has key {}
-
     struct WithdrawCapability<phantom PoolT, phantom TokenT> has key, store {}
 
-    struct ParameterCapability<phantom PoolT, phantom TokenT> has key, store {}
 
     public fun init<PoolT: store, TokenT: store>(sender: &signer,
                                                  init_token: Token::Token<TokenT>,
@@ -45,6 +41,7 @@ module TimelyReleasePool {
             latest_withdraw_time: 0,
             interval,
         });
+
         WithdrawCapability<PoolT, TokenT> {}
     }
 
@@ -60,10 +57,20 @@ module TimelyReleasePool {
                                     TokenT: store>(
         broker: address,
         release_per_time: u128,
-        _cap: &ParameterCapability<PoolT, TokenT>
+        _cap: &WithdrawCapability<PoolT, TokenT>
     ) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
         pool.release_per_time = release_per_time;
+    }
+
+    public fun set_interval<PoolT: store,
+                            TokenT: store>(
+        broker: address,
+        interval: u64,
+        _cap: &WithdrawCapability<PoolT, TokenT>
+    ) acquires TimelyReleasePool {
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        pool.interval = interval;
     }
 
     /// Withdraw from treasury
@@ -72,11 +79,12 @@ module TimelyReleasePool {
     : Token::Token<TokenT> acquires TimelyReleasePool {
         let now_time = Timestamp::now_seconds();
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-            let time_interval = now_time - pool.latest_withdraw_time;
+        let time_interval = now_time - pool.latest_withdraw_time;
         assert!(time_interval > pool.interval, Errors::invalid_state(ERROR_LINEAR_NOT_READY_YET));
         let times = time_interval / pool.interval;
         let token = Token::withdraw(&mut pool.treasury, (times as u128) * pool.release_per_time);
         pool.latest_withdraw_time = now_time;
+
         token
     }
 }
