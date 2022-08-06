@@ -37,7 +37,6 @@ module SwapAdmin::TimelyReleaseWrapper {
     }
 }
 
-
 //# run --signers SwapAdmin
 script {
     use StarcoinFramework::Math;
@@ -50,9 +49,8 @@ script {
     fun init_token(signer: signer) {
         let scale_index: u8 = 9;
         TokenMock::register_token<WUSDT>(&signer, scale_index);
-        let scaling_factor = Math::pow(10, (scale_index as u64));
 
-        CommonHelper::safe_mint<WUSDT>(&signer, 1000000 * scaling_factor);
+        CommonHelper::safe_mint<WUSDT>(&signer, CommonHelper::pow_amount<WUSDT>(1000000));
 
         // Register swap pair
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
@@ -214,7 +212,7 @@ script {
 
     use SwapAdmin::TimelyReleaseWrapper;
 
-    fun withdraw_abort_not_ready_yet(sender: signer) {
+    fun withdraw_aborted_by_not_interval(sender: signer) {
         let token = TimelyReleaseWrapper::withdraw<STC>();
         let token_amount = Token::value<STC>(&token);
         Debug::print(&token_amount);

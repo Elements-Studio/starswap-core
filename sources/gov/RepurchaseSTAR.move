@@ -1,5 +1,5 @@
 address SwapAdmin {
-module RepurcheseSTAR {
+module RepurchaseSTAR {
 
     use StarcoinFramework::STC;
     use StarcoinFramework::Account;
@@ -21,10 +21,9 @@ module RepurcheseSTAR {
             &sender, total_amount, begin_time, interval, release_per_time);
     }
 
-    public(script) fun purchase(sender: signer) {
-        let slipper = 100; // TODO: to config slipper value
+    public(script) fun purchase(sender: signer, slipper: u128) {
         let token =
-            Repurchease::purchase<RepurcheseSTAR, STAR::STAR, STC::STC>(&sender, @RepurchaseAccount, slipper);
+            Repurchease::repurchase<RepurcheseSTAR, STAR::STAR, STC::STC>(&sender, @RepurchaseAccount, slipper);
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
     }
 

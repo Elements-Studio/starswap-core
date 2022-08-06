@@ -41,7 +41,8 @@ module Repurchease {
     }
 
     public fun init_event(sender: &signer) {
-        assert!(Signer::address_of(sender) == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        let sender_addr = Signer::address_of(sender);
+        assert!(sender_addr == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
 
         move_to(sender, EventStore {
             accept_event_handle: Event::new_event_handle<AcceptEvent>(sender),
@@ -60,7 +61,7 @@ module Repurchease {
         let sender_address = Signer::address_of(sender);
         assert!(sender_address == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
         assert!(
-            exists<RepurchaseCap<PoolT, ToTokenT>>(Signer::address_of(sender)),
+            !exists<RepurchaseCap<PoolT, ToTokenT>>(Signer::address_of(sender)),
             Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS)
         );
 
@@ -77,7 +78,7 @@ module Repurchease {
             cap
         });
 
-        if (Account::is_accept_token<FromTokenT>(sender_address)) {
+        if (!Account::is_accept_token<FromTokenT>(sender_address)) {
             Account::do_accept_token<FromTokenT>(sender);
         };
 
@@ -125,9 +126,9 @@ module Repurchease {
     }
 
     /// Purchease from a token type to a token
-    public fun purchase<PoolT: store,
-                        FromTokenT: copy + drop + store,
-                        ToTokenT: copy + drop + store>(
+    public fun repurchase<PoolT: store,
+                          FromTokenT: copy + drop + store,
+                          ToTokenT: copy + drop + store>(
         sender: &signer,
         broker: address,
         slipper: u128,
@@ -135,9 +136,14 @@ module Repurchease {
         let cap = borrow_global<RepurchaseCap<PoolT, ToTokenT>>(broker);
         let to_token = TimelyReleasePool::withdraw(broker, &cap.cap);
         let to_token_val = Token::value<ToTokenT>(&to_token);
-        let y_out = TokenSwapRouter::compute_y_out<ToTokenT, FromTokenT>(to_token_val, to_token_val + slipper);
+        let y_out = TokenSwapRouter::compute_y_out<ToTokenT, FromTokenT>(
+            to_token_val,
+            to_token_val + slipper);
 
-        Account::deposit<FromTokenT>(@RepurchaseAccount, Account::withdraw<FromTokenT>(sender, y_out));
+        let sender_addr = Signer::address_of(sender);
+        let from_token = Account::withdraw<FromTokenT>(sender, y_out);
+
+        Account::deposit<FromTokenT>(@RepurchaseAccount, from_token);
 
         let event_store = borrow_global_mut<EventStore>(@RepurchaseAccount);
         Event::emit_event(&mut event_store.purchease_event_handle, PurchaseEvent {
@@ -145,7 +151,7 @@ module Repurchease {
             to_token_code: Token::token_code<ToTokenT>(),
             from_amount: y_out,
             to_amount: to_token_val,
-            user: Signer::address_of(sender),
+            user: sender_addr,
         });
 
         to_token
