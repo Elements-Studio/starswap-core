@@ -41,7 +41,7 @@ module Repurchease {
     }
 
     public fun init_event(sender: &signer) {
-        assert!(Signer::address_of(sender) == @RepurcheseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        assert!(Signer::address_of(sender) == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
 
         move_to(sender, EventStore {
             accept_event_handle: Event::new_event_handle<AcceptEvent>(sender),
@@ -58,7 +58,7 @@ module Repurchease {
         release_per_time: u128
     ) acquires EventStore {
         let sender_address = Signer::address_of(sender);
-        assert!(sender_address == @RepurcheseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        assert!(sender_address == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
         assert!(
             exists<RepurchaseCap<PoolT, ToTokenT>>(Signer::address_of(sender)),
             Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS)
@@ -81,7 +81,7 @@ module Repurchease {
             Account::do_accept_token<FromTokenT>(sender);
         };
 
-        let event_store = borrow_global_mut<EventStore>(@RepurcheseAccount);
+        let event_store = borrow_global_mut<EventStore>(@RepurchaseAccount);
         Event::emit_event(&mut event_store.accept_event_handle, AcceptEvent {
             from_token_code: Token::token_code<FromTokenT>(),
             to_token_code: Token::token_code<ToTokenT>(),
@@ -94,28 +94,28 @@ module Repurchease {
     public fun set_release_per_time<PoolT: store, TokenT: store>(sender: &signer, release_per_time: u128)
     acquires RepurchaseCap {
         let sender_address = Signer::address_of(sender);
-        assert!(sender_address == @RepurcheseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        assert!(sender_address == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
 
         let cap = borrow_global_mut<RepurchaseCap<PoolT, TokenT>>(Signer::address_of(sender));
         set_release_per_time_with_cap<PoolT, TokenT>(cap, release_per_time);
     }
 
     public fun set_release_per_time_with_cap<PoolT: store, TokenT: store>(cap: &RepurchaseCap<PoolT, TokenT>, release_per_time: u128) {
-        TimelyReleasePool::set_release_per_time<PoolT, TokenT>(@RepurcheseAccount, release_per_time, &cap.cap);
+        TimelyReleasePool::set_release_per_time<PoolT, TokenT>(@RepurchaseAccount, release_per_time, &cap.cap);
     }
 
     /// Interval value
     public fun set_interval<PoolT: store, TokenT: store>(sender: &signer, interval: u64)
     acquires RepurchaseCap {
         let sender_address = Signer::address_of(sender);
-        assert!(sender_address == @RepurcheseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        assert!(sender_address == @RepurchaseAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
 
         let cap = borrow_global_mut<RepurchaseCap<PoolT, TokenT>>(Signer::address_of(sender));
         set_interval_with_cap<PoolT, TokenT>(cap, interval);
     }
 
     public fun set_interval_with_cap<PoolT: store, TokenT: store>(cap: &RepurchaseCap<PoolT, TokenT>, interval: u64) {
-        TimelyReleasePool::set_interval<PoolT, TokenT>(@RepurcheseAccount, interval, &cap.cap);
+        TimelyReleasePool::set_interval<PoolT, TokenT>(@RepurchaseAccount, interval, &cap.cap);
     }
 
     /// Extract capability if need DAO to propose config parameter
@@ -137,9 +137,9 @@ module Repurchease {
         let to_token_val = Token::value<ToTokenT>(&to_token);
         let y_out = TokenSwapRouter::compute_y_out<ToTokenT, FromTokenT>(to_token_val, to_token_val + slipper);
 
-        Account::deposit<FromTokenT>(@RepurcheseAccount, Account::withdraw<FromTokenT>(sender, y_out));
+        Account::deposit<FromTokenT>(@RepurchaseAccount, Account::withdraw<FromTokenT>(sender, y_out));
 
-        let event_store = borrow_global_mut<EventStore>(@RepurcheseAccount);
+        let event_store = borrow_global_mut<EventStore>(@RepurchaseAccount);
         Event::emit_event(&mut event_store.purchease_event_handle, PurchaseEvent {
             from_token_code: Token::token_code<FromTokenT>(),
             to_token_code: Token::token_code<ToTokenT>(),

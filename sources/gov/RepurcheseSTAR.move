@@ -22,8 +22,9 @@ module RepurcheseSTAR {
     }
 
     public(script) fun purchase(sender: signer) {
+        let slipper = 100; // TODO: to config slipper value
         let token =
-            Repurchease::purchase<RepurcheseSTAR, STAR::STAR, STC::STC>(&sender, @RepurcheseAccount, 100);
+            Repurchease::purchase<RepurcheseSTAR, STAR::STAR, STC::STC>(&sender, @RepurchaseAccount, slipper);
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
     }
 

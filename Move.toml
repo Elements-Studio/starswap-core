@@ -6,7 +6,7 @@ version = "1.0.9"
 StarcoinFramework = "0x1"
 SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
 SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
-RepurcheseAccount = "0xa1869437e19a33eba1b7277218af539c"
+RepurchaseAccount = "0xa1869437e19a33eba1b7277218af539c"
 
 [dependencies]
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
