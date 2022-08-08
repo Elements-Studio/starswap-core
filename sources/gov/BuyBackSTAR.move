@@ -7,6 +7,7 @@ module BuyBackSTAR {
 
     use SwapAdmin::BuyBack;
     use SwapAdmin::STAR;
+    use SwapAdmin::TimelyReleasePool;
 
     struct BuyBackSTAR has store {}
 
@@ -33,6 +34,10 @@ module BuyBackSTAR {
 
     public(script) fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
+    }
+
+    public fun query_info() {
+        TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
     }
 }
 }

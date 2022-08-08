@@ -22,6 +22,8 @@ module TimelyReleasePool {
         latest_withdraw_time: u64,
         // How long the user can withdraw in each period, 0 is every seconds
         interval: u64,
+        // Total treasury amount
+        total_treasury_amount: u128,
     }
 
     struct WithdrawCapability<phantom PoolT, phantom TokenT> has key, store {}
@@ -35,8 +37,10 @@ module TimelyReleasePool {
         let sender_addr = Signer::address_of(sender);
         assert!(!exists<TimelyReleasePool<PoolT, TokenT>>(sender_addr), Errors::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
 
+        let total_treasury_amount = Token::value<TokenT>(&init_token);
         move_to(sender, TimelyReleasePool<PoolT, TokenT> {
             treasury: init_token,
+            total_treasury_amount,
             release_per_time,
             begin_time,
             latest_withdraw_time: begin_time,
@@ -90,6 +94,20 @@ module TimelyReleasePool {
         pool.latest_withdraw_time = now_time;
 
         token
+    }
+
+    /// query pool info
+    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address):
+    (u128, u128, u128, u64, u64, u64) acquires TimelyReleasePool {
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        (
+            Token::value<TokenT>(&pool.treasury),
+            pool.total_treasury_amount,
+            pool.release_per_time,
+            pool.begin_time,
+            pool.latest_withdraw_time,
+            pool.interval
+        )
     }
 }
 }
