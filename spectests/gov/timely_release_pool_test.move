@@ -39,7 +39,6 @@ module SwapAdmin::TimelyReleaseWrapper {
 
 //# run --signers SwapAdmin
 script {
-    use StarcoinFramework::Math;
     use StarcoinFramework::STC::STC;
 
     use SwapAdmin::TokenMock::{Self, WUSDT};
@@ -220,4 +219,4 @@ script {
         Account::deposit<STC>(Signer::address_of(&sender), token);
     }
 }
-// check: EXECUTED
+// check: ABORT

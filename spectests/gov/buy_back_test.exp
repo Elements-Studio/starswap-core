@@ -26,12 +26,22 @@ task 9 'run'. lines 64-103:
 
 task 10 'run'. lines 105-124:
 {
-  "gas_used": 211415,
+  "gas_used": 210047,
   "status": "Executed"
 }
 
 task 12 'run'. lines 128-152:
 {
-  "gas_used": 447959,
-  "status": "Executed"
+  "gas_used": 213991,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapRouter"
+        }
+      },
+      "abort_code": "1006"
+    }
+  }
 }

@@ -1,16 +1,16 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 --public-keys RepurchaseAccount=0x760670dd3a152f7130534758d366eea7540078832e0985cde498c40c9a2b6ae3 --addresses RepurchaseAccount=0xa1869437e19a33eba1b7277218af539c
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 --public-keys BuyBackAccount=0x760670dd3a152f7130534758d366eea7540078832e0985cde498c40c9a2b6ae3 --addresses BuyBackAccount=0xa1869437e19a33eba1b7277218af539c
 
 //# faucet --addr alice --amount 10000000000000000
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
 
-//# faucet --addr RepurchaseAccount --amount 10000000000000000
+//# faucet --addr BuyBackAccount --amount 10000000000000000
 
 //# block --author 0x1 --timestamp 86400000
 
 //# publish
-module RepurchaseAccount::RepurcheasePoolType {
-    struct RepurcheasePoolType has store {}
+module BuyBackAccount::BuyBackPoolType {
+    struct BuyBackPoolType has store {}
 }
 
 //# run --signers SwapAdmin
@@ -102,17 +102,17 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers RepurchaseAccount
+//# run --signers BuyBackAccount
 script {
     use StarcoinFramework::STC::STC;
 
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::Repurchease;
+    use SwapAdmin::BuyBack;
 
     fun init_repurchase(signer: signer) {
-        Repurchease::init_event(&signer);
-        Repurchease::accept<RepurchaseAccount::RepurcheasePoolType::RepurcheasePoolType, WUSDT, STC>(
+        BuyBack::init_event(&signer);
+        BuyBack::accept<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(
             &signer,
             CommonHelper::pow_amount<STC>(100),
             86400,
@@ -130,18 +130,18 @@ script {
     use StarcoinFramework::STC::STC;
 
     use SwapAdmin::TokenMock::{WUSDT};
-    use SwapAdmin::Repurchease;
+    use SwapAdmin::BuyBack;
     use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
     use StarcoinFramework::Token;
 
     fun do_repurchase(sender: signer) {
-        let token = Repurchease::repurchase<
-            RepurchaseAccount::RepurcheasePoolType::RepurcheasePoolType,
+        let token = BuyBack::buy_back<
+            BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
             WUSDT,
             STC
-        >(&sender, @RepurchaseAccount, 100);
+        >(&sender, @BuyBackAccount, 100);
 
         let receiver = Signer::address_of(&sender);
         Debug::print(&Token::value<STC>(&token));
