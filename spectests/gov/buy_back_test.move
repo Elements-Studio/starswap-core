@@ -110,7 +110,7 @@ script {
     use SwapAdmin::CommonHelper;
     use SwapAdmin::BuyBack;
 
-    fun init_repurchase(signer: signer) {
+    fun init_payback(signer: signer) {
         BuyBack::init_event(&signer);
         BuyBack::accept<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(
             &signer,
@@ -136,7 +136,7 @@ script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::Token;
 
-    fun do_repurchase(sender: signer) {
+    fun do_payback(sender: signer) {
         let token = BuyBack::buy_back<
             BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
             WUSDT,

@@ -37,7 +37,7 @@ module BuyBack {
         /// event stream for withdraw
         accept_event_handle: Event::EventHandle<AcceptEvent>,
         /// event stream for deposit
-        purchease_event_handle: Event::EventHandle<BuyBackEvent>,
+        payback_event_handle: Event::EventHandle<BuyBackEvent>,
     }
 
     public fun init_event(sender: &signer) {
@@ -46,7 +46,7 @@ module BuyBack {
 
         move_to(sender, EventStore {
             accept_event_handle: Event::new_event_handle<AcceptEvent>(sender),
-            purchease_event_handle: Event::new_event_handle<BuyBackEvent>(sender),
+            payback_event_handle: Event::new_event_handle<BuyBackEvent>(sender),
         });
     }
 
@@ -114,7 +114,7 @@ module BuyBack {
         Account::deposit<SellTokenT>(@BuyBackAccount, sell_token);
 
         let event_store = borrow_global_mut<EventStore>(@BuyBackAccount);
-        Event::emit_event(&mut event_store.purchease_event_handle, BuyBackEvent {
+        Event::emit_event(&mut event_store.payback_event_handle, BuyBackEvent {
             sell_token_code: Token::token_code<SellTokenT>(),
             buy_token_code: Token::token_code<BuyTokenT>(),
             sell_amount: y_out,
