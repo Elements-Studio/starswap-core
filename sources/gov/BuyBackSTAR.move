@@ -17,15 +17,22 @@ module BuyBackSTAR {
                             total_amount: u128,
                             begin_time: u64,
                             interval: u64,
-                            release_per_time: u128, ) {
-        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(
-            &sender, total_amount, begin_time, interval, release_per_time);
+                            release_per_time: u128) {
+        BuyBack::init_event(&sender);
+        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, total_amount, begin_time, interval, release_per_time);
     }
 
     public(script) fun buy_back(sender: signer, slipper: u128) {
-        let token =
-            BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount, slipper);
+        let token = BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount, slipper);
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
+    }
+
+    public fun query_info() : (u128, u128, u128, u64, u64, u64, u64, u128) {
+        TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount)
+    }
+
+    public fun pool_exists() : bool {
+        BuyBack::pool_exists<BuyBackSTAR, STAR::STAR, STC::STC>(@BuyBackAccount)
     }
 
     public(script) fun set_release_per_time(sender: signer, release_per_time: u128) {
@@ -34,10 +41,6 @@ module BuyBackSTAR {
 
     public(script) fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
-    }
-
-    public fun query_info() {
-        TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
     }
 }
 }

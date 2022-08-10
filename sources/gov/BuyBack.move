@@ -50,6 +50,11 @@ module BuyBack {
         });
     }
 
+    /// Check pool has exists
+    public fun pool_exists<PoolT: store, SellTokenT: store, BuyTokenT: store>(broker: address): bool {
+        exists<BuyBackCap<PoolT, BuyTokenT>>(broker)
+    }
+
     /// Accept with token type
     public fun accept<PoolT: store, SellTokenT: store, BuyTokenT: store>(
         sender: &signer,
@@ -58,10 +63,9 @@ module BuyBack {
         interval: u64,
         release_per_time: u128
     ) acquires EventStore {
-        let sender_address = Signer::address_of(sender);
-        assert!(sender_address == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        let broker = Signer::address_of(sender);
         assert!(
-            !exists<BuyBackCap<PoolT, BuyTokenT>>(Signer::address_of(sender)),
+            !exists<BuyBackCap<PoolT, BuyTokenT>>(broker),
             Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS)
         );
 
@@ -80,7 +84,7 @@ module BuyBack {
         });
 
         // Auto accept sell token
-        if (!Account::is_accept_token<SellTokenT>(sender_address)) {
+        if (!Account::is_accept_token<SellTokenT>(broker)) {
             Account::do_accept_token<SellTokenT>(sender);
         };
 
@@ -89,7 +93,7 @@ module BuyBack {
             buy_token_code: Token::token_code<BuyTokenT>(),
             sell_token_code: Token::token_code<SellTokenT>(),
             total_amount,
-            user: sender_address,
+            user: broker,
         });
     }
 

@@ -3,33 +3,41 @@ processed 16 tasks
 task 4 'run'. lines 40-60:
 {
   "gas_used": 741952,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 5 'run'. lines 62-100:
 {
   "gas_used": 723904,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 6 'run'. lines 103-121:
 {
   "gas_used": 88209,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 7 'run'. lines 123-136:
 {
   "gas_used": 21847,
   "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "257025"
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TimelyReleasePool"
+          }
+        },
+        257025
+      ]
     }
   }
 }
@@ -38,14 +46,16 @@ task 9 'run'. lines 140-156:
 {
   "gas_used": 22049,
   "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "256513"
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TimelyReleasePool"
+          }
+        },
+        256513
+      ]
     }
   }
 }
@@ -53,27 +63,33 @@ task 9 'run'. lines 140-156:
 task 11 'run'. lines 160-178:
 {
   "gas_used": 82031,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 13 'run'. lines 182-200:
 {
   "gas_used": 82031,
-  "status": "Executed"
+  "status": {
+    "Keep": "Executed"
+  }
 }
 
 task 15 'run'. lines 204-222:
 {
   "gas_used": 22049,
   "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "256513"
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TimelyReleasePool"
+          }
+        },
+        256513
+      ]
     }
   }
 }
