@@ -8,6 +8,7 @@ module BuyBackSTAR {
     use SwapAdmin::BuyBack;
     use SwapAdmin::STAR;
     use SwapAdmin::TimelyReleasePool;
+    use SwapAdmin::TokenSwapRouter;
 
     struct BuyBackSTAR has store {}
 
@@ -22,13 +23,33 @@ module BuyBackSTAR {
         BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, total_amount, begin_time, interval, release_per_time);
     }
 
-    public(script) fun buy_back(sender: signer, slipper: u128) {
-        let token = BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount, slipper);
+    public(script) fun buy_back(sender: signer) {
+        let token = BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
     }
 
-    public fun query_info() : (u128, u128, u128, u64, u64, u64, u64, u128) {
-        TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount)
+    public fun query_info(): (u128, u128, u128, u64, u64, u64, u64, u128, u128) {
+        let (
+            treasury_balance,
+            total_treasury_amount,
+            release_per_time,
+            begin_time,
+            latest_withdraw_time,
+            interval,
+            current_time_stamp,
+            current_time_amount,
+        ) = TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
+        (
+            treasury_balance,
+            total_treasury_amount,
+            release_per_time,
+            begin_time,
+            latest_withdraw_time,
+            interval,
+            current_time_stamp,
+            current_time_amount,
+            TokenSwapRouter::compute_y_out<STAR::STAR, STC::STC>(current_time_amount),
+        )
     }
 
     public fun pool_exists() : bool {

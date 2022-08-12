@@ -82,8 +82,7 @@ module TimelyReleasePool {
     }
 
     /// Withdraw from treasury
-    public fun withdraw<PoolT: store, TokenT: store>(broker: address,
-                                                     _cap: &WithdrawCapability<PoolT, TokenT>)
+    public fun withdraw<PoolT: store, TokenT: store>(broker: address, _cap: &WithdrawCapability<PoolT, TokenT>)
     : Token::Token<TokenT> acquires TimelyReleasePool {
         let now_time = Timestamp::now_seconds();
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
@@ -94,6 +93,8 @@ module TimelyReleasePool {
         let times = time_interval / pool.interval;
 
         let token = Token::withdraw(&mut pool.treasury, (times as u128) * pool.release_per_time);
+
+        // Update latest release time and latest withdraw time
         pool.latest_withdraw_time = now_time;
         pool.latest_release_time = pool.latest_release_time + (times * pool.interval);
 
@@ -101,13 +102,14 @@ module TimelyReleasePool {
     }
 
     /// query pool info
-    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address):
-    (u128, u128, u128, u64, u64, u64, u64, u128) acquires TimelyReleasePool {
+    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        let current_time_amount = if (pool.latest_release_time < pool.latest_withdraw_time) {
-            (((pool.latest_withdraw_time - pool.latest_release_time) / pool.interval) as u128) * pool.release_per_time
+
+        let now = Timestamp::now_seconds();
+        let current_time_amount = if (pool.latest_release_time < now) {
+            (((now - pool.latest_release_time) / pool.interval) as u128) * pool.release_per_time
         } else {
-            (((pool.latest_release_time - pool.latest_withdraw_time) / pool.interval) as u128) * pool.release_per_time
+            pool.release_per_time
         };
 
         let current_time_stamp = pool.latest_release_time + pool.interval;

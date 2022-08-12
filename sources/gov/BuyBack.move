@@ -64,6 +64,8 @@ module BuyBack {
         release_per_time: u128
     ) acquires EventStore {
         let broker = Signer::address_of(sender);
+
+        assert!(broker == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
         assert!(
             !exists<BuyBackCap<PoolT, BuyTokenT>>(broker),
             Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS)
@@ -103,14 +105,11 @@ module BuyBack {
                         BuyTokenT: copy + drop + store>(
         sender: &signer,
         broker: address,
-        slipper: u128,
     ): Token::Token<BuyTokenT> acquires BuyBackCap, EventStore {
         let cap = borrow_global<BuyBackCap<PoolT, BuyTokenT>>(broker);
         let buy_token = TimelyReleasePool::withdraw(broker, &cap.cap);
         let buy_token_val = Token::value<BuyTokenT>(&buy_token);
-        let y_out = TokenSwapRouter::compute_y_out<SellTokenT, BuyTokenT>(
-            buy_token_val,
-            buy_token_val + slipper);
+        let y_out = TokenSwapRouter::compute_y_out<SellTokenT, BuyTokenT>(buy_token_val);
 
         let sender_addr = Signer::address_of(sender);
         let sell_token = Account::withdraw<SellTokenT>(sender, y_out);
