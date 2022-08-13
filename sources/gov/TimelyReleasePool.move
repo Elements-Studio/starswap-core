@@ -53,6 +53,23 @@ module TimelyReleasePool {
         WithdrawCapability<PoolT, TokenT> {}
     }
 
+    /// Uninitialize a timely pool
+    public fun uninit<PoolT: store, TokenT: store>(cap: WithdrawCapability<PoolT, TokenT>, broker: address)
+    : Token::Token<TokenT> acquires TimelyReleasePool {
+        let WithdrawCapability<PoolT, TokenT> {} = cap;
+        let TimelyReleasePool<PoolT, TokenT> {
+            total_treasury_amount: _,
+            treasury,
+            release_per_time: _,
+            begin_time: _,
+            latest_withdraw_time: _,
+            latest_release_time: _,
+            interval: _,
+        } = move_from<TimelyReleasePool<PoolT, TokenT>>(broker);
+
+        treasury
+    }
+
     /// Deposit token to treasury
     public fun deposit<PoolT: store, TokenT: store>(broker: address,
                                                     token: Token::Token<TokenT>) acquires TimelyReleasePool {
@@ -92,7 +109,13 @@ module TimelyReleasePool {
         assert!(time_interval >= pool.interval, Errors::invalid_state(ERROR_LINEAR_NOT_READY_YET));
         let times = time_interval / pool.interval;
 
-        let token = Token::withdraw(&mut pool.treasury, (times as u128) * pool.release_per_time);
+        let withdraw_amount = (times as u128) * pool.release_per_time;
+        let treasury_balance = Token::value(&pool.treasury);
+        if (withdraw_amount > treasury_balance) {
+            withdraw_amount = treasury_balance;
+        };
+
+        let token = Token::withdraw(&mut pool.treasury, withdraw_amount);
 
         // Update latest release time and latest withdraw time
         pool.latest_withdraw_time = now_time;
@@ -107,12 +130,19 @@ module TimelyReleasePool {
 
         let now = Timestamp::now_seconds();
         let current_time_amount = if (pool.latest_release_time < now) {
-            (((now - pool.latest_release_time) / pool.interval) as u128) * pool.release_per_time
+            let ret = (((now - pool.latest_release_time) / pool.interval) as u128) * pool.release_per_time;
+            let treasury_balance = Token::value(&pool.treasury);
+            if (ret > treasury_balance) {
+                treasury_balance
+            } else {
+                ret
+            }
         } else {
             pool.release_per_time
         };
 
-        let current_time_stamp = pool.latest_release_time + pool.interval;
+        let diff = (now - pool.latest_release_time) / pool.interval;
+        let current_time_stamp = pool.latest_release_time + ((diff + 1) * pool.interval);
         (
             Token::value<TokenT>(&pool.treasury),
             pool.total_treasury_amount,

@@ -23,9 +23,18 @@ module BuyBackSTAR {
         BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, total_amount, begin_time, interval, release_per_time);
     }
 
+    public(script) fun uninit(sender: signer) {
+        BuyBack::dismiss<BuyBackSTAR, STC::STC>(&sender);
+    }
+
     public(script) fun buy_back(sender: signer) {
         let token = BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
+    }
+
+    public(script) fun deposit(sender: signer, amount: u128) {
+        let token = Account::withdraw<STC::STC>(&sender, amount);
+        BuyBack::deposit<BuyBackSTAR, STC::STC>(@BuyBackAccount, token);
     }
 
     public fun query_info(): (u128, u128, u128, u64, u64, u64, u64, u128, u128) {
@@ -48,7 +57,7 @@ module BuyBackSTAR {
             interval,
             current_time_stamp,
             current_time_amount,
-            TokenSwapRouter::compute_y_out<STAR::STAR, STC::STC>(current_time_amount),
+            TokenSwapRouter::compute_y_out<STC::STC, STAR::STAR>(current_time_amount),
         )
     }
 
@@ -62,6 +71,10 @@ module BuyBackSTAR {
 
     public(script) fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
+    }
+
+    public (script) fun upgrade_event_store_for_barnard(sender: signer) {
+        BuyBack::upgrade_event_struct(&sender);
     }
 }
 }

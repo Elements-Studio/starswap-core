@@ -143,7 +143,7 @@ script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::BuyBack;
 
-    fun do_payback(sender: signer) {
+    fun do_buyback(sender: signer) {
         let token = BuyBack::buy_back<
             BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
             WUSDT,
@@ -170,7 +170,6 @@ script {
     use SwapAdmin::TimelyReleasePool;
 
     fun query_buyback_information(_sender: signer) {
-
         let (
             treasury_balance,
             total_treasury_amount,
@@ -182,6 +181,7 @@ script {
             current_time_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC::STC>(@BuyBackAccount);
 
+        Debug::print(&11111111);
         Debug::print(&treasury_balance);
         Debug::print(&total_treasury_amount);
         Debug::print(&release_per_time);
@@ -190,7 +190,38 @@ script {
         Debug::print(&interval);
         Debug::print(&current_time_stamp);
         Debug::print(&current_time_amount);
+        Debug::print(&22222222);
 
-        assert!(current_time_amount == 300000000000, 10005);
+        assert!(current_time_amount == 99000000000, 10005);
+        assert!(treasury_balance >= current_time_amount, 10006);
     }
 }
+
+//# run --signers alice
+script {
+    use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Account;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Token;
+
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::BuyBack;
+    use SwapAdmin::CommonHelper;
+
+    fun do_buyback_again_beyond_max_release_time(sender: signer) {
+        let token = BuyBack::buy_back<
+            BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
+            WUSDT,
+            STC
+        >(&sender, @BuyBackAccount);
+        let receiver = Signer::address_of(&sender);
+        let token_amount = Token::value<STC>(&token);
+        let alice_balance = Account::balance<WUSDT>(@alice);
+        assert!(token_amount <= CommonHelper::pow_amount<STC>(100), 10007);
+        Debug::print(&token_amount);
+        Debug::print(&alice_balance);
+        Account::deposit<STC>(receiver, token);
+    }
+}
+// check: EXECUTED
