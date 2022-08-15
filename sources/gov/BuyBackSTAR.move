@@ -3,7 +3,6 @@ module BuyBackSTAR {
 
     use StarcoinFramework::STC;
     use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
 
     use SwapAdmin::BuyBack;
     use SwapAdmin::STAR;
@@ -28,8 +27,7 @@ module BuyBackSTAR {
     }
 
     public(script) fun buy_back(sender: signer) {
-        let token = BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
-        Account::deposit<STC::STC>(Signer::address_of(&sender), token);
+        BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
     }
 
     public(script) fun deposit(sender: signer, amount: u128) {

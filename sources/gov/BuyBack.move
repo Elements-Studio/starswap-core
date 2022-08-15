@@ -93,23 +93,12 @@ module BuyBack {
         release_per_time: u128
     ) {
         let broker = Signer::address_of(sender);
-
-        assert!(broker == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
-        assert!(
-            !exists<BuyBackCap<PoolT, BuyTokenT>>(broker),
-            Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS)
-        );
+        assert!(!exists<BuyBackCap<PoolT, BuyTokenT>>(broker), Errors::invalid_state(ERROR_TREASURY_HAS_EXISTS));
 
         // Deposit buy token to treasury
         let token = Account::withdraw<BuyTokenT>(sender, total_amount);
         let cap =
-            TimelyReleasePool::init<PoolT, BuyTokenT>(
-                sender,
-                token,
-                begin_time,
-                interval,
-                release_per_time);
-
+            TimelyReleasePool::init<PoolT, BuyTokenT>(sender, token, begin_time, interval, release_per_time);
         move_to(sender, BuyBackCap<PoolT, BuyTokenT> {
             cap
         });
@@ -156,26 +145,34 @@ module BuyBack {
                         BuyTokenT: copy + drop + store>(
         sender: &signer,
         broker: address,
-    ): Token::Token<BuyTokenT> acquires BuyBackCap {
-        let cap = borrow_global<BuyBackCap<PoolT, BuyTokenT>>(broker);
-        let buy_token = TimelyReleasePool::withdraw(broker, &cap.cap);
-        let buy_token_val = Token::value<BuyTokenT>(&buy_token);
-        let y_out = TokenSwapRouter::compute_y_out<SellTokenT, BuyTokenT>(buy_token_val);
-
+    ) acquires BuyBackCap {
         let sender_addr = Signer::address_of(sender);
-        let sell_token = Account::withdraw<SellTokenT>(sender, y_out);
+        assert!(exists<BuyBackCap<PoolT, BuyTokenT>>(broker), Errors::invalid_state(ERROR_NO_PERMISSION));
 
-        Account::deposit<SellTokenT>(@BuyBackAccount, sell_token);
+        let cap = borrow_global<BuyBackCap<PoolT, BuyTokenT>>(broker);
+
+        // Withdraw from timely release pool
+        let buy_token = TimelyReleasePool::withdraw(broker, &cap.cap);
+        let amount_x_in = Token::value<BuyTokenT>(&buy_token);
+
+        // Deposit to trigger account
+        let amount_y_out = TokenSwapRouter::compute_y_out<BuyTokenT, SellTokenT>(amount_x_in);
+
+        Account::deposit<BuyTokenT>(sender_addr, buy_token);
+
+        // User do swap from swap pool
+        TokenSwapRouter::swap_exact_token_for_token<BuyTokenT, SellTokenT>(sender, amount_x_in, amount_y_out);
+
+        // Withdraw SellToken from swap trigger account
+        Account::deposit<SellTokenT>(broker, Account::withdraw<SellTokenT>(sender, amount_y_out));
 
         EventUtil::emit_event(@BuyBackAccount, BuyBackEvent {
             sell_token_code: Token::token_code<SellTokenT>(),
             buy_token_code: Token::token_code<BuyTokenT>(),
-            sell_amount: y_out,
-            buy_amount: buy_token_val,
+            sell_amount: amount_y_out,
+            buy_amount: amount_x_in,
             user: sender_addr,
         });
-
-        buy_token
     }
 
     /// Release per time
@@ -188,7 +185,8 @@ module BuyBack {
         set_release_per_time_with_cap<PoolT, TokenT>(cap, release_per_time);
     }
 
-    public fun set_release_per_time_with_cap<PoolT: store, TokenT: store>(cap: &BuyBackCap<PoolT, TokenT>, release_per_time: u128) {
+    public fun set_release_per_time_with_cap<PoolT: store, TokenT: store>(cap: &BuyBackCap<PoolT, TokenT>,
+                                                                          release_per_time: u128) {
         TimelyReleasePool::set_release_per_time<PoolT, TokenT>(@BuyBackAccount, release_per_time, &cap.cap);
     }
 

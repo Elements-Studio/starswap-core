@@ -25,7 +25,7 @@ script {
         let scale_index: u8 = 9;
         TokenMock::register_token<WUSDT>(&signer, scale_index);
 
-        CommonHelper::safe_mint<WUSDT>(&signer, CommonHelper::pow_amount<WUSDT>(1000000));
+        CommonHelper::safe_mint<WUSDT>(&signer, CommonHelper::pow_amount<WUSDT>(100000000));
 
         // Register swap pair
         TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
@@ -55,7 +55,7 @@ script {
         CommonHelper::transfer<WUSDT>(
             &signer,
             @alice,
-            CommonHelper::pow_amount<WUSDT>(5000)
+            CommonHelper::pow_amount<WUSDT>(50000)
         );
     }
 }
@@ -110,10 +110,11 @@ script {
 //# run --signers BuyBackAccount
 script {
     use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Debug;
 
+    use SwapAdmin::BuyBack;
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::BuyBack;
     use SwapAdmin::TimelyReleasePool;
 
     fun init_payback(signer: signer) {
@@ -125,7 +126,27 @@ script {
             10,
             CommonHelper::pow_amount<STC>(1),
         );
-        TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
+        let (
+            treasury_balance,
+            total_treasury_amount,
+            release_per_time,
+            begin_time,
+            latest_withdraw_time,
+            interval,
+            current_time_stamp,
+            current_time_amount,
+        ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
+
+        Debug::print(&11111111);
+        Debug::print(&treasury_balance);
+        Debug::print(&total_treasury_amount);
+        Debug::print(&release_per_time);
+        Debug::print(&begin_time);
+        Debug::print(&latest_withdraw_time);
+        Debug::print(&interval);
+        Debug::print(&current_time_stamp);
+        Debug::print(&current_time_amount);
+        Debug::print(&22222222);
     }
 }
 // check: EXECUTED
@@ -136,26 +157,30 @@ script {
 script {
     use StarcoinFramework::STC::STC;
     use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
-    use StarcoinFramework::Token;
 
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::BuyBack;
+    use SwapAdmin::TimelyReleasePool;
 
     fun do_buyback(sender: signer) {
-        let token = BuyBack::buy_back<
-            BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
-            WUSDT,
-            STC
-        >(&sender, @BuyBackAccount);
-        let receiver = Signer::address_of(&sender);
-        let token_amount = Token::value<STC>(&token);
-        let alice_balance = Account::balance<WUSDT>(@alice);
-        assert!(token_amount == 1000000000, 10004);
-        Debug::print(&token_amount);
-        Debug::print(&alice_balance);
-        Account::deposit<STC>(receiver, token);
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            current_time_amount,
+        ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
+
+        BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
+        let sell_amount = Account::balance<WUSDT>(@BuyBackAccount);
+        Debug::print(&current_time_amount);
+        Debug::print(&sell_amount);
+        assert!(sell_amount >= (current_time_amount * 4), 10004);
+        Debug::print(&sell_amount);
     }
 }
 // check: EXECUTED
@@ -181,7 +206,7 @@ script {
             current_time_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC::STC>(@BuyBackAccount);
 
-        Debug::print(&11111111);
+        Debug::print(&33333333);
         Debug::print(&treasury_balance);
         Debug::print(&total_treasury_amount);
         Debug::print(&release_per_time);
@@ -190,7 +215,7 @@ script {
         Debug::print(&interval);
         Debug::print(&current_time_stamp);
         Debug::print(&current_time_amount);
-        Debug::print(&22222222);
+        Debug::print(&44444444);
 
         assert!(current_time_amount == 99000000000, 10005);
         assert!(treasury_balance >= current_time_amount, 10006);
@@ -201,27 +226,39 @@ script {
 script {
     use StarcoinFramework::STC::STC;
     use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
-    use StarcoinFramework::Token;
 
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::BuyBack;
-    use SwapAdmin::CommonHelper;
+    use SwapAdmin::TimelyReleasePool;
 
     fun do_buyback_again_beyond_max_release_time(sender: signer) {
-        let token = BuyBack::buy_back<
-            BuyBackAccount::BuyBackPoolType::BuyBackPoolType,
-            WUSDT,
-            STC
-        >(&sender, @BuyBackAccount);
-        let receiver = Signer::address_of(&sender);
-        let token_amount = Token::value<STC>(&token);
-        let alice_balance = Account::balance<WUSDT>(@alice);
-        assert!(token_amount <= CommonHelper::pow_amount<STC>(100), 10007);
-        Debug::print(&token_amount);
-        Debug::print(&alice_balance);
-        Account::deposit<STC>(receiver, token);
+        let (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            current_time_amount,
+        ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
+
+        BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
+        let sell_amount_balance = Account::balance<WUSDT>(@BuyBackAccount);
+        Debug::print(&current_time_amount);
+        Debug::print(&sell_amount_balance);
+    }
+}
+// check: EXECUTED
+
+//# run --signers BuyBackAccount
+script {
+    use StarcoinFramework::STC::STC;
+    use SwapAdmin::BuyBack;
+
+    fun dismiss(sender: signer) {
+        BuyBack::dismiss<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(&sender);
     }
 }
 // check: EXECUTED
