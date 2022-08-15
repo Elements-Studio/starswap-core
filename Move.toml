@@ -10,4 +10,4 @@ BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 
 [dependencies]
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
-Bridge = {local = "./bridge-dep"}
+Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "565b1ada6cdb0d94764a5cbd130472959793aa2a" }
