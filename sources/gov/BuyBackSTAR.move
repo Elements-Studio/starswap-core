@@ -11,8 +11,6 @@ module BuyBackSTAR {
 
     struct BuyBackSTAR has store {}
 
-    const ERROR_NO_PERMISSION: u64 = 1001;
-
     public(script) fun init(sender: signer,
                             total_amount: u128,
                             begin_time: u64,

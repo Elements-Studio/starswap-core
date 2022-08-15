@@ -10,6 +10,7 @@ module TimelyReleasePool {
     const ERROR_LINEAR_NOT_READY_YET: u64 = 1002;
     const ERROR_EVENT_INIT_REPEATE: u64 = 1003;
     const ERROR_EVENT_NOT_START_YET: u64 = 1004;
+    const ERROR_TRESURY_IS_EMPTY: u64 = 1005;
 
     struct TimelyReleasePool<phantom PoolT, phantom TokenT> has key {
         // Total treasury amount
@@ -103,6 +104,7 @@ module TimelyReleasePool {
     : Token::Token<TokenT> acquires TimelyReleasePool {
         let now_time = Timestamp::now_seconds();
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        assert!(Token::value(&pool.treasury) > 0, Errors::invalid_state(ERROR_TRESURY_IS_EMPTY));
         assert!(now_time > pool.begin_time, Errors::invalid_state(ERROR_EVENT_NOT_START_YET));
 
         let time_interval = now_time - pool.latest_release_time;
@@ -126,7 +128,7 @@ module TimelyReleasePool {
 
     /// query pool info
     public fun query_pool_info<PoolT: store, TokenT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128) acquires TimelyReleasePool {
-        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        let pool = borrow_global<TimelyReleasePool<PoolT, TokenT>>(broker);
 
         let now = Timestamp::now_seconds();
         let current_time_amount = if (pool.latest_release_time < now) {
