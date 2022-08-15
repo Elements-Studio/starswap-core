@@ -6,11 +6,11 @@ module TimelyReleasePool {
     use StarcoinFramework::Token;
     use StarcoinFramework::Timestamp;
 
-    const ERROR_LINEAR_RELEASE_EXISTS: u64 = 1001;
-    const ERROR_LINEAR_NOT_READY_YET: u64 = 1002;
-    const ERROR_EVENT_INIT_REPEATE: u64 = 1003;
-    const ERROR_EVENT_NOT_START_YET: u64 = 1004;
-    const ERROR_TRESURY_IS_EMPTY: u64 = 1005;
+    const ERROR_LINEAR_RELEASE_EXISTS: u64 = 2001;
+    const ERROR_LINEAR_NOT_READY_YET: u64 = 2002;
+    const ERROR_EVENT_INIT_REPEATE: u64 = 3003;
+    const ERROR_EVENT_NOT_START_YET: u64 = 3004;
+    const ERROR_TRESURY_IS_EMPTY: u64 = 3005;
 
     struct TimelyReleasePool<phantom PoolT, phantom TokenT> has key {
         // Total treasury amount
@@ -127,12 +127,16 @@ module TimelyReleasePool {
     }
 
     /// query pool info
-    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128) acquires TimelyReleasePool {
+    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128)
+    acquires TimelyReleasePool {
         let pool = borrow_global<TimelyReleasePool<PoolT, TokenT>>(broker);
 
         let now = Timestamp::now_seconds();
         let current_time_amount = if (pool.latest_release_time < now) {
-            let ret = (((now - pool.latest_release_time) / pool.interval) as u128) * pool.release_per_time;
+            let time = (((now - pool.latest_release_time) / pool.interval) as u128);
+            if (time == 0) { time = 1 }; // One time minimized
+
+            let ret = time * pool.release_per_time;
             let treasury_balance = Token::value(&pool.treasury);
             if (ret > treasury_balance) {
                 treasury_balance

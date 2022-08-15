@@ -44,6 +44,13 @@ module BuyBackSTAR {
             current_time_stamp,
             current_time_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
+
+        let amount_y_out = if (current_time_amount > 0) {
+            TokenSwapRouter::compute_y_out<STC::STC, STAR::STAR>(current_time_amount)
+        } else {
+            0
+        };
+
         (
             treasury_balance,
             total_treasury_amount,
@@ -53,7 +60,7 @@ module BuyBackSTAR {
             interval,
             current_time_stamp,
             current_time_amount,
-            TokenSwapRouter::compute_y_out<STC::STC, STAR::STAR>(current_time_amount),
+            amount_y_out,
         )
     }
 
