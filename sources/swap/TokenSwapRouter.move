@@ -255,7 +255,7 @@ module TokenSwapRouter {
         swap_pair_token_auto_accept<Y>(signer);
 
         // calculate actual x in
-        let x_in = compute_x_in<X, Y>(amount_x_in_max);
+        let x_in = compute_x_in<X, Y>(amount_y_out);
         assert!(x_in <= amount_x_in_max, ERROR_ROUTER_X_IN_OVER_LIMIT_MAX);
 
         // do actual swap

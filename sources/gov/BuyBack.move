@@ -27,7 +27,6 @@ module BuyBack {
     }
 
     struct DissmissEvent has key, store, drop {
-        sell_token_code: Token::TokenCode,
         buy_token_code: Token::TokenCode,
         user: address,
     }
@@ -81,7 +80,7 @@ module BuyBack {
     }
 
     /// Check pool has exists
-    public fun pool_exists<PoolT: store, SellTokenT: store, BuyTokenT: store>(broker: address): bool {
+    public fun pool_exists<PoolT: store, BuyTokenT: store>(broker: address): bool {
         exists<BuyBackCap<PoolT, BuyTokenT>>(broker)
     }
 
@@ -138,6 +137,12 @@ module BuyBack {
 
         let treasury_token = TimelyReleasePool::uninit<PoolT, BuyTokenT>(cap, @BuyBackAccount);
         Account::deposit(sender_addr, treasury_token);
+
+        // Emit dissmiss event
+        EventUtil::emit_event(@BuyBackAccount, DissmissEvent {
+            buy_token_code: Token::token_code<BuyTokenT>(),
+            user: sender_addr,
+        })
     }
 
     /// Deposit into

@@ -187,17 +187,17 @@ script {
 
 //# run --signers exchanger
 script {
+    use StarcoinFramework::STC::STC;
+    use StarcoinFramework::Debug;
+    use Bridge::XUSDT::XUSDT;
+
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
-    use StarcoinFramework::STC::STC;
     use SwapAdmin::TokenMock::{WETH};
-    use Bridge::XUSDT::XUSDT;
-
     use SwapAdmin::CommonHelper;
     use SwapAdmin::SafeMath;
-    use StarcoinFramework::Debug;
 
     fun swap_exact_token_for_token_swap(signer: signer) {
         let amount_x_in = 20000;
@@ -230,18 +230,17 @@ script {
 
 //# run --signers exchanger
 script {
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::STC::STC;
+    use Bridge::XUSDT::XUSDT;
+
     use SwapAdmin::TokenSwap;
+    use SwapAdmin::SafeMath;
+    use SwapAdmin::CommonHelper;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
-
-    use StarcoinFramework::STC::STC;
     use SwapAdmin::TokenMock::{WETH};
-    use Bridge::XUSDT::XUSDT;
-
-    use SwapAdmin::CommonHelper;
-    use SwapAdmin::SafeMath;
-    use StarcoinFramework::Debug;
 
     fun swap_token_for_exact_token_swap(signer: signer) {
         let amount_x_in_max = 30000;
@@ -250,6 +249,7 @@ script {
 
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<STC, WETH>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC, WETH>();
+
         let x_in = TokenSwapLibrary::get_amount_in(amount_y_out, reserve_x, reserve_y, fee_numberator, fee_denumerator);
         TokenSwapRouter::swap_token_for_exact_token<STC, WETH>(&signer, amount_x_in_max, amount_y_out);
 
@@ -321,11 +321,9 @@ script {
 
 
 //# run --signers exchanger
-
-
 script {
     use StarcoinFramework::STC::STC;
-    
+
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
@@ -358,8 +356,6 @@ script {
 
 
 //# run --signers exchanger
-
-
 script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::STC::STC;

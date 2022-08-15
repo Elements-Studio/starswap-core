@@ -62,7 +62,7 @@ module BuyBackSTAR {
     }
 
     public fun pool_exists() : bool {
-        BuyBack::pool_exists<BuyBackSTAR, STAR::STAR, STC::STC>(@BuyBackAccount)
+        BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
     }
 
     public(script) fun set_release_per_time(sender: signer, release_per_time: u128) {
