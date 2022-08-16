@@ -75,9 +75,5 @@ module BuyBackSTAR {
     public(script) fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
     }
-
-    public (script) fun upgrade_event_store_for_barnard(sender: signer) {
-        BuyBack::upgrade_event_struct(&sender);
-    }
 }
 }
