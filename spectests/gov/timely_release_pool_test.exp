@@ -26,7 +26,7 @@ task 6 'run'. lines 103-121:
 
 task 7 'run'. lines 123-136:
 {
-  "gas_used": 21847,
+  "gas_used": 24309,
   "status": {
     "Keep": {
       "MoveAbort": [
@@ -36,7 +36,7 @@ task 7 'run'. lines 123-136:
             "name": "TimelyReleasePool"
           }
         },
-        257025
+        769025
       ]
     }
   }
@@ -44,7 +44,7 @@ task 7 'run'. lines 123-136:
 
 task 9 'run'. lines 140-156:
 {
-  "gas_used": 22049,
+  "gas_used": 24511,
   "status": {
     "Keep": {
       "MoveAbort": [
@@ -54,7 +54,7 @@ task 9 'run'. lines 140-156:
             "name": "TimelyReleasePool"
           }
         },
-        256513
+        512513
       ]
     }
   }
@@ -62,7 +62,7 @@ task 9 'run'. lines 140-156:
 
 task 11 'run'. lines 160-178:
 {
-  "gas_used": 84839,
+  "gas_used": 87301,
   "status": {
     "Keep": "Executed"
   }
@@ -70,7 +70,7 @@ task 11 'run'. lines 160-178:
 
 task 13 'run'. lines 182-200:
 {
-  "gas_used": 84839,
+  "gas_used": 87301,
   "status": {
     "Keep": "Executed"
   }
@@ -78,7 +78,7 @@ task 13 'run'. lines 182-200:
 
 task 15 'run'. lines 204-222:
 {
-  "gas_used": 22049,
+  "gas_used": 24511,
   "status": {
     "Keep": {
       "MoveAbort": [
@@ -88,7 +88,7 @@ task 15 'run'. lines 204-222:
             "name": "TimelyReleasePool"
           }
         },
-        256513
+        512513
       ]
     }
   }
