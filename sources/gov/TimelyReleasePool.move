@@ -75,12 +75,12 @@ module TimelyReleasePool {
     public fun deposit<PoolT: store, TokenT: store>(broker: address,
                                                     token: Token::Token<TokenT>) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        pool.total_treasury_amount = pool.total_treasury_amount + Token::value(&token);
         Token::deposit<TokenT>(&mut pool.treasury, token);
     }
 
     /// Set release per time
-    public fun set_release_per_time<PoolT: store,
-                                    TokenT: store>(
+    public fun set_release_per_time<PoolT: store, TokenT: store>(
         broker: address,
         release_per_time: u128,
         _cap: &WithdrawCapability<PoolT, TokenT>
