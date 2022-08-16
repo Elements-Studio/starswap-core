@@ -39,13 +39,6 @@ module BuyBack {
         user: address,
     }
 
-    struct EventStore has key {
-        /// event stream for withdraw
-        accept_event_handle: Event::EventHandle<AcceptEvent>,
-        /// event stream for deposit
-        payback_event_handle: Event::EventHandle<BuyBackEvent>,
-    }
-
     struct EventHandleWrapper<phantom EventT: store + drop> has key {
         handle: Event::EventHandle<EventT>,
     }
@@ -54,26 +47,6 @@ module BuyBack {
         let sender_addr = Signer::address_of(sender);
         assert!(sender_addr == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
 
-        EventUtil::init_event_with_T<AcceptEvent>(sender);
-        EventUtil::init_event_with_T<BuyBackEvent>(sender);
-        EventUtil::init_event_with_T<DissmissEvent>(sender);
-    }
-
-    public fun upgrade_event_struct(sender: &signer) acquires EventStore {
-        let sender_addr = Signer::address_of(sender);
-        if (!exists<EventStore>(sender_addr)) {
-            return
-        };
-
-        // Destroy old event data
-        let EventStore {
-            accept_event_handle,
-            payback_event_handle
-        } = move_from<EventStore>(sender_addr);
-        Event::destroy_handle(accept_event_handle);
-        Event::destroy_handle(payback_event_handle);
-
-        // Construct new event data
         EventUtil::init_event_with_T<AcceptEvent>(sender);
         EventUtil::init_event_with_T<BuyBackEvent>(sender);
         EventUtil::init_event_with_T<DissmissEvent>(sender);
