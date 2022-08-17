@@ -108,7 +108,7 @@ module TokenSwapConfig {
     }
 
     /// Get fee auto convert switch config
-    public fun get_fee_auto_convert_switch(): (bool) {
+    public fun get_fee_auto_convert_switch(): bool {
         if (Config::config_exist_by_address<SwapFeeSwitchConfig>(admin_address())) {
             let conf = Config::get_by_address<SwapFeeSwitchConfig>(admin_address());
             conf.auto_convert_switch
