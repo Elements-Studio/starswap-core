@@ -6,7 +6,7 @@ module TokenSwapSBTMapping {
     use SwapAdmin::VToken;
     use SwapAdmin::VESTAR;
     use SwapAdmin::VestarPlugin;
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
 
     friend SwapAdmin::TokenSwapVestarMinter;
     friend SwapAdmin::TokenSwapFarmBoost;
@@ -29,7 +29,7 @@ module TokenSwapSBTMapping {
         move_to(sender, FarmMapFlag<X, Y> {
             amount
         });
-        VestarPlugin::increase_sbt<TokenSwapDao::TokenSwapDao>(user_addr, token);
+        VestarPlugin::increase_sbt<TokenSwapDAO::TokenSwapDao>(user_addr, token);
     }
 
     public(friend) fun maybe_map_in_treasury(sender: &signer, token: &VToken::VToken<VESTAR::VESTAR>): bool {
@@ -41,16 +41,16 @@ module TokenSwapSBTMapping {
         move_to(sender, TreasuryMapFlag {
             amount
         });
-        VestarPlugin::increase_sbt<TokenSwapDao::TokenSwapDao>(user_addr, token);
+        VestarPlugin::increase_sbt<TokenSwapDAO::TokenSwapDao>(user_addr, token);
         true
     }
 
     public(friend) fun increase(user_addr: address, amount: u128) {
-        VestarPlugin::increase_sbt_value<TokenSwapDao::TokenSwapDao>(user_addr, amount);
+        VestarPlugin::increase_sbt_value<TokenSwapDAO::TokenSwapDao>(user_addr, amount);
     }
 
     public(friend) fun decrease(user_addr: address, amount: u128) {
-        VestarPlugin::decrease_sbt_value<TokenSwapDao::TokenSwapDao>(user_addr, amount);
+        VestarPlugin::decrease_sbt_value<TokenSwapDAO::TokenSwapDao>(user_addr, amount);
     }
 
     public fun has_treasury_flag(user_addr: address): bool {

@@ -191,6 +191,14 @@ module TokenSwapRouter {
         // TokenSwap::emit_remove_liquidity_event<X, Y>(signer, liquidity, amount_x_min, amount_y_min);
     }
 
+    /// Computer y out value by given x_in and slipper value
+    public fun compute_y_out<X: copy + drop + store, Y: copy + drop + store>(amount_x_in: u128): u128 {
+        // calculate actual y out
+        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
+        let (reserve_x, reserve_y) = get_reserves<X, Y>();
+        TokenSwapLibrary::get_amount_out(amount_x_in, reserve_x, reserve_y, fee_numberator, fee_denumerator)
+    }
+
     public fun swap_exact_token_for_token<X: copy + drop + store, Y: copy + drop + store>(
         signer: &signer,
         amount_x_in: u128,
@@ -202,9 +210,7 @@ module TokenSwapRouter {
         // auto accept swap token
         swap_pair_token_auto_accept<Y>(signer);
         // calculate actual y out
-        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
-        let (reserve_x, reserve_y) = get_reserves<X, Y>();
-        let y_out = TokenSwapLibrary::get_amount_out(amount_x_in, reserve_x, reserve_y, fee_numberator, fee_denumerator);
+        let y_out = compute_y_out<X, Y>(amount_x_in);
         assert!(y_out >= amount_y_out_min, ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED);
 
         // do actual swap
@@ -229,6 +235,14 @@ module TokenSwapRouter {
         }
     }
 
+    /// Computer x in value by given y_out and x_in slipper value
+    public fun compute_x_in<X: copy + drop + store, Y: copy + drop + store>(amount_y_out: u128) : u128 {
+        // calculate actual x in
+        let (reserve_x, reserve_y) = get_reserves<X, Y>();
+        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
+        TokenSwapLibrary::get_amount_in(amount_y_out, reserve_x, reserve_y, fee_numberator, fee_denumerator)
+    }
+
     public fun swap_token_for_exact_token<X: copy + drop + store, Y: copy + drop + store>(
         signer: &signer,
         amount_x_in_max: u128,
@@ -241,9 +255,7 @@ module TokenSwapRouter {
         swap_pair_token_auto_accept<Y>(signer);
 
         // calculate actual x in
-        let (reserve_x, reserve_y) = get_reserves<X, Y>();
-        let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
-        let x_in = TokenSwapLibrary::get_amount_in(amount_y_out, reserve_x, reserve_y, fee_numberator, fee_denumerator);
+        let x_in = compute_x_in<X, Y>(amount_y_out);
         assert!(x_in <= amount_x_in_max, ERROR_ROUTER_X_IN_OVER_LIMIT_MAX);
 
         // do actual swap

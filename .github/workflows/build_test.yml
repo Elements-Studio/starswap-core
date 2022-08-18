@@ -1,0 +1,36 @@
+name: Build and Test
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    name: build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: checkout-move
+        uses: actions/checkout@v3
+
+      - name: setup environment
+        run: |
+          bash scripts/dev_setup.sh -b -t -p 
+
+      - name: test
+        run: |
+          source "$HOME/.profile"
+          mpm package test
+
+      - name: integration test
+        run: |
+          source "$HOME/.profile"
+          mpm integration-test
+          
+      - name: build
+        run: |
+          source "$HOME/.profile"
+          mpm package build
+
+      - name: check changed files
+        run: bash ./scripts/changed_files.sh

@@ -1,13 +1,13 @@
 address SwapAdmin {
-module TokenSwapDaoScript {
+module TokenSwapDAOScript {
 
     use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::TokenSwapVestarMinter;
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
     use SwapAdmin::VestarPlugin;
 
     use StarcoinFramework::Signer;
-    use StarcoinFramework::GenesisDao;
+    use StarcoinFramework::DAOSpace;
     use StarcoinFramework::Errors;
 
     const ERROR_HAS_BECOME_MEMBER_ALREADY: u64 = 1001;
@@ -26,10 +26,10 @@ module TokenSwapDaoScript {
     /// Join TokenSwapDao, called by user
     public(script) fun join(sender: signer) {
         let member = Signer::address_of(&sender);
-        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(member),
+        assert!(!DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(member),
             Errors::invalid_state(ERROR_HAS_BECOME_MEMBER_ALREADY));
-        VestarPlugin::accept_sbt<TokenSwapDao::TokenSwapDao>(&sender);
-        VestarPlugin::join_member<TokenSwapDao::TokenSwapDao>(member);
+        VestarPlugin::accept_sbt<TokenSwapDAO::TokenSwapDao>(&sender);
+        VestarPlugin::join_member<TokenSwapDAO::TokenSwapDao>(member);
     }
 }
 }

@@ -17,10 +17,10 @@ module TokenSwapFarmBoost {
     use SwapAdmin::VESTAR::{VESTAR};
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSBTMapping;
-    use SwapAdmin::TokenSwapDao::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO::TokenSwapDao;
 
     use StarcoinFramework::Errors;
-    use StarcoinFramework::GenesisDao;
+    use StarcoinFramework::DAOSpace;
 
     const DEFAULT_BOOST_FACTOR: u64 = 1;
     // user boost factor section is [1,2.5]
@@ -143,7 +143,7 @@ module TokenSwapFarmBoost {
         let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
 
         // May be mapping sbt from locked token
-        if (GenesisDao::is_member<TokenSwapDao>(user_addr)) {
+        if (DAOSpace::is_member<TokenSwapDao>(user_addr)) {
             TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(account, &user_info.locked_vetoken);
         };
 
@@ -288,7 +288,7 @@ module TokenSwapFarmBoost {
                          Y: copy + drop + store>(signer: &signer) acquires UserInfo {
         let user_addr = Signer::address_of(signer);
         assert!(exists<UserInfo<X, Y>>(user_addr), Errors::invalid_state(ERR_BOOST_VESTAR_NOT_EXISTS));
-        assert!(GenesisDao::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERR_DAO_NOT_MEMBER));
+        assert!(DAOSpace::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERR_DAO_NOT_MEMBER));
         let user_info = borrow_global<UserInfo<X, Y>>(user_addr);
         TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(signer, &user_info.locked_vetoken);
     }

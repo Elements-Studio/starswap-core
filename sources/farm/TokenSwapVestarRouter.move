@@ -78,7 +78,7 @@ module TokenSwapVestarRouter {
 //    /// TODO To register DAO
 //    /// Register to DAO
 //    public fun claim_sbt<TokenX, TokenY>(signer: &signer) {
-//        assert!(!GenesisDao::is_member<StarswapDao>(member), Errors::invalid_state(ERROR_CANNOT_CLAIM_SBT));
+//        assert!(!DAOSpace::is_member<StarswapDao>(member), Errors::invalid_state(ERROR_CANNOT_CLAIM_SBT));
 //
 //        let locked_amount = TokenSwapFarmBoost::get_boost_locked_vestar_amount<>(member);
 //    }

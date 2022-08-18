@@ -11,13 +11,13 @@ module TokenSwapVestarMinter {
     use StarcoinFramework::Option;
     use StarcoinFramework::Vector;
     use StarcoinFramework::Event;
-    use StarcoinFramework::GenesisDao;
+    use StarcoinFramework::DAOSpace;
 
     use SwapAdmin::VToken;
     use SwapAdmin::Boost;
     use SwapAdmin::VESTAR;
     use SwapAdmin::TokenSwapSBTMapping;
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
 
     const ERROR_TREASURY_NOT_EXISTS: u64 = 101;
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
@@ -136,7 +136,7 @@ module TokenSwapVestarMinter {
 
         // Convert VESTAR to SBT
         let treasury = borrow_global<Treasury>(user_addr);
-        if (GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(user_addr) &&
+        if (DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(user_addr) &&
             !TokenSwapSBTMapping::maybe_map_in_treasury(signer, &treasury.vtoken)) {
             TokenSwapSBTMapping::increase(user_addr, to_mint_amount);
         };
@@ -174,7 +174,7 @@ module TokenSwapVestarMinter {
         let treasury = borrow_global_mut<Treasury>(user_addr);
 
         // Decrease SBT if burned
-        if (GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(user_addr)) {
+        if (DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(user_addr)) {
             // The function `maybe_map_in_treasury` must be called,
             // considering that VESTAR has not been mapped to SBT
             // when it was destroying
@@ -248,7 +248,7 @@ module TokenSwapVestarMinter {
     public fun claim_sbt(signer: &signer) acquires Treasury {
         let user_addr = Signer::address_of(signer);
         assert!(exists<Treasury>(user_addr), Errors::invalid_state(ERROR_TREASURY_NOT_EXISTS));
-        assert!(GenesisDao::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERROR_NOT_MEMBER));
+        assert!(DAOSpace::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERROR_NOT_MEMBER));
         let treasury = borrow_global<Treasury>(user_addr);
         TokenSwapSBTMapping::maybe_map_in_treasury(signer, &treasury.vtoken);
     }
@@ -441,7 +441,7 @@ module TokenSwapVestarMinter {
     #[test_only] use StarcoinFramework::Debug;
     #[test_only] use StarcoinFramework::STC;
     #[test_only] use SwapAdmin::STAR;
-    use SwapAdmin::TokenSwapDao::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO::TokenSwapDao;
 
     #[test]
     fun test_convert_minter_record() {

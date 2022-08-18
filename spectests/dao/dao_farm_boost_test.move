@@ -349,10 +349,10 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
 
     fun dao_created(signer: signer) {
-        TokenSwapDao::create_dao(signer, 10, 10, 10, 10, 10);
+        TokenSwapDAO::create_dao(signer, 10, 10, 10, 10, 10);
     }
 }
 // check: EXECUTED
@@ -439,39 +439,39 @@ script {
 
 //# run --signers alice
 script {
-    use StarcoinFramework::GenesisDao;
+    use StarcoinFramework::DAOSpace;
 
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
     use SwapAdmin::VestarPlugin;
 
     fun dao_alice_join_member(signer: signer) {
-        assert!(!GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10100);
-        VestarPlugin::accept_sbt<TokenSwapDao::TokenSwapDao>(&signer);
-        VestarPlugin::join_member<TokenSwapDao::TokenSwapDao>(@alice);
-        assert!(GenesisDao::is_member<TokenSwapDao::TokenSwapDao>(@alice), 10101);
+        assert!(!DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(@alice), 10100);
+        VestarPlugin::accept_sbt<TokenSwapDAO::TokenSwapDao>(&signer);
+        VestarPlugin::join_member<TokenSwapDAO::TokenSwapDao>(@alice);
+        assert!(DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(@alice), 10101);
     }
 }
 
 //# run --signers alice
 script {
-    use StarcoinFramework::GenesisDao;
+    use StarcoinFramework::DAOSpace;
     use StarcoinFramework::Debug;
 
-    use SwapAdmin::TokenSwapDao;
+    use SwapAdmin::TokenSwapDAO;
     use SwapAdmin::VestarPlugin;
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::YieldFarmingAndVestarWrapper::{Token_X, Token_Y};
 
     fun dao_alice_claim_sbt_after_join_dao(signer: signer) {
         let sbt_amount_before_claim =
-            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+            DAOSpace::query_sbt<TokenSwapDAO::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
         assert!(sbt_amount_before_claim <= 0, 10102);
 
         // Claim SBT
         TokenSwapFarmBoost::claim_sbt<Token_X, Token_Y>(&signer);
 
         let sbt_amount_after_claim =
-            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+            DAOSpace::query_sbt<TokenSwapDAO::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
 
         Debug::print(&sbt_amount_after_claim);
         assert!(sbt_amount_after_claim > sbt_amount_before_claim, 10103);
@@ -481,7 +481,7 @@ script {
 
         // But we can't get any SBT
         let sbt_claim_again =
-            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+            DAOSpace::query_sbt<TokenSwapDAO::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
         assert!(sbt_claim_again == sbt_amount_after_claim, 10104)
     }
 }
@@ -497,14 +497,14 @@ script {
 //
 //    use SwapAdmin::TokenSwapFarmBoost;
 //    use SwapAdmin::YieldFarmingAndVestarWrapper::{Token_X, Token_Y, Self};
-//    use StarcoinFramework::GenesisDao;
+//    use StarcoinFramework::DAOSpace;
 //    use SwapAdmin::TokenSwapDao;
 //    use SwapAdmin::VestarPlugin;
 //
 //    /// Alice boost farm lp
 //    fun boost_to_farm_pool_again(signer: signer) {
 //        let sbt_amount_before_stake =
-//            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+//            DAOSpace::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
 //
 //        let user_addr = Signer::address_of(&signer);
 //        let boost_factor = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
@@ -529,7 +529,7 @@ script {
 //        assert!(vestar_amount_after == 0, 100006);
 //
 //        let sbt_amount_after_stake =
-//            GenesisDao::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
+//            DAOSpace::query_sbt<TokenSwapDao::TokenSwapDao, VestarPlugin::VestarPlugin>(@alice);
 //
 //        assert!(sbt_amount_before_stake == sbt_amount_after_stake, 100007);
 //    }
