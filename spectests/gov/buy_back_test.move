@@ -137,7 +137,7 @@ script {
             current_time_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
 
-        Debug::print(&11111111);
+        Debug::print(&x"11111111");
         Debug::print(&treasury_balance);
         Debug::print(&total_treasury_amount);
         Debug::print(&release_per_time);
@@ -146,7 +146,7 @@ script {
         Debug::print(&interval);
         Debug::print(&current_time_stamp);
         Debug::print(&current_time_amount);
-        Debug::print(&22222222);
+        Debug::print(&x"11111111");
     }
 }
 // check: EXECUTED
@@ -162,8 +162,9 @@ script {
     use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::BuyBack;
     use SwapAdmin::TimelyReleasePool;
+    use SwapAdmin::TokenSwapRouter;
 
-    fun do_buyback(sender: signer) {
+    fun do_buyback_after_one_cycle(sender: signer) {
         let (
             _,
             _,
@@ -172,15 +173,28 @@ script {
             _,
             _,
             _,
-            current_time_amount,
+            current_time_release_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
 
+        let before_buy_stc_amount = Account::balance<STC>(@BuyBackAccount);
+
+        let except_y_out_amount = TokenSwapRouter::compute_y_out<STC, WUSDT>(current_time_release_amount);
         BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
-        let sell_amount = Account::balance<WUSDT>(@BuyBackAccount);
-        Debug::print(&current_time_amount);
-        Debug::print(&sell_amount);
-        assert!(sell_amount >= (current_time_amount * 4), 10004);
-        Debug::print(&sell_amount);
+
+        let selled_amount = Account::balance<WUSDT>(@BuyBackAccount);
+        Debug::print(&x"000000");
+        Debug::print(&except_y_out_amount);
+        Debug::print(&selled_amount);
+        Debug::print(&before_buy_stc_amount);
+        Debug::print(&current_time_release_amount);
+        Debug::print(&x"000000");
+
+        // Check amount of Sell token type not changed
+        assert!(selled_amount == except_y_out_amount, 100040);
+
+        // Check amount of Buy token type not changed
+        assert!(before_buy_stc_amount == Account::balance<STC>(@BuyBackAccount), 100041);
+        assert!(selled_amount >= (current_time_release_amount * 4), 100042);
     }
 }
 // check: EXECUTED
@@ -217,8 +231,8 @@ script {
         Debug::print(&current_time_amount);
         Debug::print(&44444444);
 
-        assert!(current_time_amount == 99000000000, 10005);
-        assert!(treasury_balance >= current_time_amount, 10006);
+        assert!(current_time_amount == 99000000000, 100050);
+        assert!(treasury_balance >= current_time_amount, 100051);
     }
 }
 
@@ -248,6 +262,7 @@ script {
 
         BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
         let sell_amount_balance = Account::balance<WUSDT>(@BuyBackAccount);
+
         Debug::print(&treasury_balance);
         Debug::print(&sell_amount_balance);
         Debug::print(&current_time_amount);
@@ -256,14 +271,13 @@ script {
 // check: EXECUTED
 
 
+//# block --author 0x1 --timestamp 289420000
+
 //# run --signers alice
 script {
     use StarcoinFramework::STC::STC;
-    //use StarcoinFramework::Account;
     use StarcoinFramework::Debug;
 
-    //use SwapAdmin::TokenMock::{WUSDT};
-    // use SwapAdmin::BuyBack;
     use SwapAdmin::TimelyReleasePool;
 
     fun query_after_withdraw_all(_sender: signer) {
@@ -278,13 +292,27 @@ script {
             current_time_amount,
         ) = TimelyReleasePool::query_pool_info<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, STC>(@BuyBackAccount);
 
-//        BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
-//        let sell_amount_balance = Account::balance<WUSDT>(@BuyBackAccount);
         Debug::print(&treasury_balance);
         Debug::print(&current_time_amount);
+
+        assert!(treasury_balance == 0, 100070);
+        assert!(current_time_amount == 0, 100071);
     }
 }
 // check: EXECUTED
+
+//# run --signers alice
+script {
+    use StarcoinFramework::STC::STC;
+
+    use SwapAdmin::TokenMock::{WUSDT};
+    use SwapAdmin::BuyBack;
+
+    fun do_buyback_again(sender: signer) {
+        BuyBack::buy_back<BuyBackAccount::BuyBackPoolType::BuyBackPoolType, WUSDT, STC>(&sender, @BuyBackAccount);
+    }
+}
+// check: MoveAbort 769281
 
 //# run --signers BuyBackAccount
 script {
