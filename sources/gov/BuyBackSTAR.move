@@ -11,11 +11,11 @@ module BuyBackSTAR {
 
     struct BuyBackSTAR has store {}
 
-    public(script) fun init(sender: signer,
-                            total_amount: u128,
-                            begin_time: u64,
-                            interval: u64,
-                            release_per_time: u128) {
+    public fun init(sender: signer,
+                    total_amount: u128,
+                    begin_time: u64,
+                    interval: u64,
+                    release_per_time: u128) {
         BuyBack::init_event(&sender);
         BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, total_amount, begin_time, interval, release_per_time);
     }
