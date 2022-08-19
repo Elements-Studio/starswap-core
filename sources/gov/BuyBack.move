@@ -14,6 +14,7 @@ module BuyBack {
 
     const ERROR_TREASURY_HAS_EXISTS: u64 = 1001;
     const ERROR_NO_PERMISSION: u64 = 1002;
+    const ERROR_INIT_REPEATE: u64 = 1003;
 
     struct BuyBackCap<phantom PoolT, phantom TokenT> has key {
         cap: TimelyReleasePool::WithdrawCapability<PoolT, TokenT>
@@ -46,6 +47,7 @@ module BuyBack {
     public fun init_event(sender: &signer) {
         let sender_addr = Signer::address_of(sender);
         assert!(sender_addr == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
+        assert!(!EventUtil::exist_event_T<AcceptEvent>(sender_addr), Errors::invalid_state(ERROR_INIT_REPEATE));
 
         EventUtil::init_event_with_T<AcceptEvent>(sender);
         EventUtil::init_event_with_T<BuyBackEvent>(sender);

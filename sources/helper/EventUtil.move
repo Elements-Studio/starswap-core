@@ -25,9 +25,12 @@ module SwapAdmin::EventUtil {
         Event::destroy_handle<EventT>(handle);
     }
 
-
     public fun emit_event<EventT: store + drop>(broker: address, event: EventT) acquires EventHandleWrapper {
         let event_handle = borrow_global_mut<EventHandleWrapper<EventT>>(broker);
         Event::emit_event(&mut event_handle.handle, event);
+    }
+
+    public fun exist_event_T<EventT: store + drop>(broker: address): bool {
+        exists<EventHandleWrapper<EventT>>(broker)
     }
 }

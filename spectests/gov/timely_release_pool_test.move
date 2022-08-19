@@ -35,6 +35,20 @@ module SwapAdmin::TimelyReleaseWrapper {
             borrow_global_mut<WithdrawCapWrapper<TokenT>>(@SwapAdmin);
         TimelyReleasePool::withdraw<MockTimelyReleasePool, TokenT>(@SwapAdmin, &wrapper.cap)
     }
+
+    public fun set_release_per_seconds<TokenT: store>(amount: u128) acquires WithdrawCapWrapper {
+        let wrapper = borrow_global_mut<WithdrawCapWrapper<TokenT>>(@SwapAdmin);
+        TimelyReleasePool::set_release_per_time<MockTimelyReleasePool, TokenT>(@SwapAdmin, amount, &wrapper.cap);
+    }
+
+    public fun set_interval<TokenT: store>(interval: u64) acquires WithdrawCapWrapper {
+        let wrapper = borrow_global_mut<WithdrawCapWrapper<TokenT>>(@SwapAdmin);
+        TimelyReleasePool::set_interval<MockTimelyReleasePool, TokenT>(@SwapAdmin, interval, &wrapper.cap);
+    }
+
+    public fun query_info<TokenT: store>(): (u128, u128, u128, u64, u64, u64, u64, u128) {
+        TimelyReleasePool::query_pool_info<MockTimelyReleasePool, TokenT>(@SwapAdmin)
+    }
 }
 
 //# run --signers SwapAdmin
@@ -133,7 +147,7 @@ script {
         Account::deposit<STC::STC>(Signer::address_of(&sender), token);
     }
 }
-// check: ABORT
+// check: MoveAbort 769025
 
 //# block --author 0x1 --timestamp 86401000
 
@@ -153,7 +167,7 @@ script {
         Account::deposit<STC>(Signer::address_of(&sender), token);
     }
 }
-// check: ABORT
+// check: MoveAbort 512513
 
 //# block --author 0x1 --timestamp 86410000
 
@@ -219,4 +233,22 @@ script {
         Account::deposit<STC>(Signer::address_of(&sender), token);
     }
 }
-// check: ABORT
+// check: MoveAbort 512513
+
+//# run --signers alice
+script {
+    use StarcoinFramework::STC::STC;
+    use SwapAdmin::TimelyReleaseWrapper;
+    use SwapAdmin::CommonHelper;
+
+    fun set_parameters(_sender: signer) {
+        TimelyReleaseWrapper::set_release_per_seconds<STC>(CommonHelper::pow_amount<STC>(5));
+        TimelyReleaseWrapper::set_interval<STC>(10000);
+
+        let (_, _, release_per_time, _, _, interval, _, _) = TimelyReleaseWrapper::query_info<STC>();
+
+        assert!(release_per_time == CommonHelper::pow_amount<STC>(5), 10004);
+        assert!(interval == 10000, 10005);
+    }
+}
+// check: EXECUTED
