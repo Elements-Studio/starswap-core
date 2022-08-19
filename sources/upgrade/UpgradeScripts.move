@@ -5,9 +5,7 @@ module UpgradeScripts {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Version;
     use StarcoinFramework::Option;
-    use StarcoinFramework::Timestamp;
     use StarcoinFramework::Errors;
-    use StarcoinFramework::STC;
 
     use SwapAdmin::TokenSwapFee;
     use SwapAdmin::TokenSwapConfig;
@@ -15,7 +13,6 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::BuyBackSTAR;
-    use SwapAdmin::CommonHelper;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -76,15 +73,13 @@ module UpgradeScripts {
     }
 
     // Must called by buyback account
-    public(script) fun upgrade_from_v1_0_10_to_v1_11(buyback_account: signer) {
+    public(script) fun upgrade_from_v1_0_10_to_v1_0_11(buyback_account: signer,
+                                                     deposit_amount: u128,
+                                                     begin_time: u64,
+                                                     interval: u64,
+                                                     release_per_time: u128) {
         assert!(Signer::address_of(&buyback_account) == @BuyBackAccount, Errors::invalid_argument(ERROR_INVALID_PARAMETER));
-
-        BuyBackSTAR::init(
-            buyback_account,
-            CommonHelper::pow_amount<STC::STC>(942460),
-            Timestamp::now_seconds(),
-            300,
-            128500000);
+        BuyBackSTAR::init(buyback_account, deposit_amount, begin_time, interval, release_per_time);
     }
 }
 }

@@ -89,8 +89,7 @@ module TimelyReleasePool {
         pool.release_per_time = release_per_time;
     }
 
-    public fun set_interval<PoolT: store,
-                            TokenT: store>(
+    public fun set_interval<PoolT: store, TokenT: store>(
         broker: address,
         interval: u64,
         _cap: &WithdrawCapability<PoolT, TokenT>
