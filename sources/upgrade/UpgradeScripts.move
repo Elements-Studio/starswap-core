@@ -74,10 +74,10 @@ module UpgradeScripts {
 
     // Must called by buyback account
     public(script) fun upgrade_from_v1_0_10_to_v1_0_11(buyback_account: signer,
-                                                     deposit_amount: u128,
-                                                     begin_time: u64,
-                                                     interval: u64,
-                                                     release_per_time: u128) {
+                                                       deposit_amount: u128,
+                                                       begin_time: u64,
+                                                       interval: u64,
+                                                       release_per_time: u128) {
         assert!(Signer::address_of(&buyback_account) == @BuyBackAccount, Errors::invalid_argument(ERROR_INVALID_PARAMETER));
         BuyBackSTAR::init(buyback_account, deposit_amount, begin_time, interval, release_per_time);
     }
