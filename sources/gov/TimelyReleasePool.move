@@ -131,23 +131,24 @@ module TimelyReleasePool {
         let pool = borrow_global<TimelyReleasePool<PoolT, TokenT>>(broker);
 
         let now = Timestamp::now_seconds();
-        let current_time_amount = if (pool.latest_release_time < now) {
+        let (current_time_amount, current_time_stamp)= if (pool.latest_release_time < now) {// The pool has started
             let time = (((now - pool.latest_release_time) / pool.interval) as u128);
             if (time == 0) { time = 1 }; // One time minimized
+
+            let diff_times = (now - pool.latest_release_time) / pool.interval;
+            let current_time_stamp = pool.latest_release_time + ((diff_times + 1) * pool.interval);
 
             let ret = time * pool.release_per_time;
             let treasury_balance = Token::value(&pool.treasury);
             if (ret > treasury_balance) {
-                treasury_balance
+                (treasury_balance, current_time_stamp)
             } else {
-                ret
+                (ret, current_time_stamp)
             }
-        } else {
-            pool.release_per_time
+        } else { // The pool not start yet
+            (pool.release_per_time, 0)
         };
 
-        let diff = (now - pool.latest_release_time) / pool.interval;
-        let current_time_stamp = pool.latest_release_time + ((diff + 1) * pool.interval);
         (
             Token::value<TokenT>(&pool.treasury),
             pool.total_treasury_amount,

@@ -120,6 +120,7 @@ script {
     use StarcoinFramework::STC;
 
     use SwapAdmin::TimelyReleaseWrapper;
+    use StarcoinFramework::Debug;
 
     fun initalize_pool(sender: signer) {
         let scale_index: u8 = 9;
@@ -127,9 +128,29 @@ script {
         TimelyReleaseWrapper::init<STC::STC>(
             &sender,
             1000 * scaling_factor,
-            86400,
+            86401,
             10,
             1 * scaling_factor);
+
+        let (
+            treasury_amount,
+            total_treasury_amount,
+            release_per_time,
+            begin_time,
+            latest_withdraw_time,
+            interval,
+            current_time_stamp,
+            current_time_amount,
+        ) = TimelyReleaseWrapper::query_info<STC::STC>();
+
+        Debug::print(&treasury_amount);
+        Debug::print(&total_treasury_amount);
+        Debug::print(&release_per_time);
+        Debug::print(&begin_time);
+        Debug::print(&latest_withdraw_time);
+        Debug::print(&interval);
+        Debug::print(&current_time_stamp);
+        Debug::print(&current_time_amount);
     }
 }
 // check: EXECUTED

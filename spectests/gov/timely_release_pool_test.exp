@@ -16,15 +16,15 @@ task 5 'run'. lines 76-114:
   }
 }
 
-task 6 'run'. lines 117-135:
+task 6 'run'. lines 117-156:
 {
-  "gas_used": 88804,
+  "gas_used": 120754,
   "status": {
     "Keep": "Executed"
   }
 }
 
-task 7 'run'. lines 137-150:
+task 7 'run'. lines 158-171:
 {
   "gas_used": 24309,
   "status": {
@@ -42,7 +42,25 @@ task 7 'run'. lines 137-150:
   }
 }
 
-task 9 'run'. lines 154-170:
+task 9 'run'. lines 175-191:
+{
+  "gas_used": 24309,
+  "status": {
+    "Keep": {
+      "MoveAbort": [
+        {
+          "Module": {
+            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+            "name": "TimelyReleasePool"
+          }
+        },
+        769025
+      ]
+    }
+  }
+}
+
+task 11 'run'. lines 195-213:
 {
   "gas_used": 24511,
   "status": {
@@ -60,7 +78,7 @@ task 9 'run'. lines 154-170:
   }
 }
 
-task 11 'run'. lines 174-192:
+task 13 'run'. lines 217-235:
 {
   "gas_used": 87301,
   "status": {
@@ -68,7 +86,7 @@ task 11 'run'. lines 174-192:
   }
 }
 
-task 13 'run'. lines 196-214:
+task 15 'run'. lines 239-257:
 {
   "gas_used": 87301,
   "status": {
@@ -76,27 +94,9 @@ task 13 'run'. lines 196-214:
   }
 }
 
-task 15 'run'. lines 218-236:
+task 16 'run'. lines 259-275:
 {
-  "gas_used": 24511,
-  "status": {
-    "Keep": {
-      "MoveAbort": [
-        {
-          "Module": {
-            "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-            "name": "TimelyReleasePool"
-          }
-        },
-        512513
-      ]
-    }
-  }
-}
-
-task 16 'run'. lines 238-254:
-{
-  "gas_used": 73437,
+  "gas_used": 73629,
   "status": {
     "Keep": "Executed"
   }
