@@ -216,6 +216,7 @@ module TokenSwapFarmRouter {
         }
     }
 
+
     /// Query user boost locked vestar amount
     public fun get_boost_locked_vestar_amount<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
@@ -224,6 +225,17 @@ module TokenSwapFarmRouter {
             TokenSwapFarmBoost::get_boost_locked_vestar_amount<X, Y>(account)
         } else {
             TokenSwapFarmBoost::get_boost_locked_vestar_amount<Y, X>(account)
+        }
+    }
+
+    public fun claim_sbt<X: copy + drop + store,
+                         Y: copy + drop + store>(signer: &signer) {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarmBoost::claim_sbt<X, Y>(signer)
+        } else {
+            TokenSwapFarmBoost::claim_sbt<Y, X>(signer)
         }
     }
 }

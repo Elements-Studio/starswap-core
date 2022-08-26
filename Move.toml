@@ -1,6 +1,6 @@
 [package]
 name = "Starswap-Core"
-version = "1.0.11"
+version = "1.1.1"
 
 [addresses]
 StarcoinFramework = "0x1"
@@ -9,5 +9,5 @@ SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
 BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 
 [dependencies]
-StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
-Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "b2116064ef85f278ac2e1eba2fc6893e72d5f6f2" }
+StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "0404a536621cd3899053685e65f525c4d2513f70" }
+Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "35f6023faec623457c8e559432a24e5b56024335" }

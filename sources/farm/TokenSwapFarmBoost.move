@@ -8,6 +8,7 @@ module TokenSwapFarmBoost {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Event;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
+
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwap::LiquidityToken;
     use SwapAdmin::TokenSwapVestarMinter;
@@ -15,13 +16,19 @@ module TokenSwapFarmBoost {
     use SwapAdmin::VToken::{VToken, Self};
     use SwapAdmin::VESTAR::{VESTAR};
     use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapSBTMapping;
+    use SwapAdmin::TokenSwapDAO::TokenSwapDao;
+
+    use StarcoinFramework::Errors;
+    use StarcoinFramework::DAOSpace;
 
     const DEFAULT_BOOST_FACTOR: u64 = 1;
     // user boost factor section is [1,2.5]
     const BOOST_FACTOR_PRECESION: u64 = 100; //two-digit precision
 
     const ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH: u64 = 121;
-
+    const ERR_BOOST_VESTAR_NOT_EXISTS: u64 = 122;
+    const ERR_DAO_NOT_MEMBER: u64 = 123;
 
     struct UserInfo<phantom X, phantom Y> has key, store {
         boost_factor: u64,
@@ -135,9 +142,15 @@ module TokenSwapFarmBoost {
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
         let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
 
+        // May be mapping sbt from locked token
+        if (DAOSpace::is_member<TokenSwapDao>(user_addr)) {
+            TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(account, &user_info.locked_vetoken);
+        };
+
         // lock boost amount vestar
         let vestar_total_amount = TokenSwapVestarMinter::value(user_addr);
-        assert!((boost_amount > 0 && boost_amount <= vestar_total_amount ), ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH);
+        assert!((boost_amount > 0 && boost_amount <= vestar_total_amount), ERR_BOOST_VESTAR_BALANCE_NOT_ENOUGH);
+
         let boost_vestar_token = TokenSwapVestarMinter::withdraw_with_cap(account, boost_amount, &vestar_treasury_cap.cap);
         VToken::deposit<VESTAR>(&mut user_info.locked_vetoken, boost_vestar_token);
 
@@ -177,7 +190,6 @@ module TokenSwapFarmBoost {
         };
 
         user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
-
         
         // Emit unboost event
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
@@ -270,5 +282,16 @@ module TokenSwapFarmBoost {
         YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(cap,
             @SwapAdmin, account_addr, stake_id, new_weight_factor, new_asset_weight, last_asset_weight);
     }
+
+    /// Claim sbt from DAO
+    public fun claim_sbt<X: copy + drop + store,
+                         Y: copy + drop + store>(signer: &signer) acquires UserInfo {
+        let user_addr = Signer::address_of(signer);
+        assert!(exists<UserInfo<X, Y>>(user_addr), Errors::invalid_state(ERR_BOOST_VESTAR_NOT_EXISTS));
+        assert!(DAOSpace::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERR_DAO_NOT_MEMBER));
+        let user_info = borrow_global<UserInfo<X, Y>>(user_addr);
+        TokenSwapSBTMapping::maybe_map_in_farming<X, Y>(signer, &user_info.locked_vetoken);
+    }
+
 }
 }

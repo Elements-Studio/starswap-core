@@ -11,16 +11,20 @@ module TokenSwapVestarMinter {
     use StarcoinFramework::Option;
     use StarcoinFramework::Vector;
     use StarcoinFramework::Event;
+    use StarcoinFramework::DAOSpace;
 
     use SwapAdmin::VToken;
     use SwapAdmin::Boost;
     use SwapAdmin::VESTAR;
+    use SwapAdmin::TokenSwapSBTMapping;
+    use SwapAdmin::TokenSwapDAO;
 
     const ERROR_TREASURY_NOT_EXISTS: u64 = 101;
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
     const ERROR_ADD_RECORD_ID_INVALID: u64 = 103;
     const ERROR_NOT_ADMIN: u64 = 104;
     const ERROR_FUNCTION_OBSOLETE: u64 = 105;
+    const ERROR_NOT_MEMBER: u64 = 106;
 
     struct Treasury has key, store {
         vtoken: VToken::VToken<VESTAR::VESTAR>,
@@ -92,18 +96,18 @@ module TokenSwapVestarMinter {
         assert!(Signer::address_of(signer) == @SwapAdmin, Errors::invalid_state(ERROR_NOT_ADMIN));
 
         VToken::register_token<VESTAR::VESTAR>(signer, VESTAR::precision());
-        move_to(signer, VestarOwnerCapability{
+        move_to(signer, VestarOwnerCapability {
             cap: VToken::extract_cap<VESTAR::VESTAR>(signer)
         });
 
-        move_to(signer, VestarEventHandler{
+        move_to(signer, VestarEventHandler {
             mint_event_handler: Event::new_event_handle<MintEvent>(signer),
             burn_event_handler: Event::new_event_handle<BurnEvent>(signer),
             withdraw_event_handler: Event::new_event_handle<WithdrawEvent>(signer),
             deposit_event_handler: Event::new_event_handle<DepositEvent>(signer),
         });
 
-        (MintCapability{}, TreasuryCapability{})
+        (MintCapability {}, TreasuryCapability {})
     }
 
     public fun mint_with_cap(_signer: &signer, _id: u64, _pledge_time_sec: u64, _staked_amount: u128, _cap: &MintCapability) {
@@ -117,15 +121,25 @@ module TokenSwapVestarMinter {
         let cap = borrow_global<VestarOwnerCapability>(broker);
         let to_mint_amount = Boost::compute_mint_amount(pledge_time_sec, staked_amount);
 
+        let user_addr = Signer::address_of(signer);
         let vtoken = VToken::mint_with_cap<VESTAR::VESTAR>(&cap.cap, to_mint_amount);
+
+        // Publish event
         let event_handler = borrow_global_mut<VestarEventHandler>(broker);
-        Event::emit_event(&mut event_handler.mint_event_handler, MintEvent{
-            account: Signer::address_of(signer),
+        Event::emit_event(&mut event_handler.mint_event_handler, MintEvent {
+            account: user_addr,
             amount: to_mint_amount
         });
 
         // Deposit VESTAR to treasury
         deposit(signer, vtoken);
+
+        // Convert VESTAR to SBT
+        let treasury = borrow_global<Treasury>(user_addr);
+        if (DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(user_addr) &&
+            !TokenSwapSBTMapping::maybe_map_in_treasury(signer, &treasury.vtoken)) {
+            TokenSwapSBTMapping::increase(user_addr, to_mint_amount);
+        };
 
         add_to_record<TokenT>(signer, id, pledge_time_sec, staked_amount, to_mint_amount);
     }
@@ -158,16 +172,25 @@ module TokenSwapVestarMinter {
         assert!(to_burn_amount <= treasury_amount, Errors::invalid_state(ERROR_INSUFFICIENT_BURN_AMOUNT));
 
         let treasury = borrow_global_mut<Treasury>(user_addr);
+
+        // Decrease SBT if burned
+        if (DAOSpace::is_member<TokenSwapDAO::TokenSwapDao>(user_addr)) {
+            // The function `maybe_map_in_treasury` must be called,
+            // considering that VESTAR has not been mapped to SBT
+            // when it was destroying
+            TokenSwapSBTMapping::maybe_map_in_treasury(signer, &treasury.vtoken);
+            TokenSwapSBTMapping::decrease(user_addr, VToken::value(&treasury.vtoken));
+        };
+
         VToken::burn_with_cap<VESTAR::VESTAR>(&cap.cap,
             VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, to_burn_amount));
 
         let event_handler = borrow_global_mut<VestarEventHandler>(broker);
-        Event::emit_event(&mut event_handler.burn_event_handler, BurnEvent{
+        Event::emit_event(&mut event_handler.burn_event_handler, BurnEvent {
             account: user_addr,
             amount: to_burn_amount
         });
     }
-
 
     /// Amount of treasury
     public fun value(account: address): u128 acquires Treasury {
@@ -221,11 +244,20 @@ module TokenSwapVestarMinter {
         deposit(signer, t);
     }
 
+    /// Claim SBT from treasury
+    public fun claim_sbt(signer: &signer) acquires Treasury {
+        let user_addr = Signer::address_of(signer);
+        assert!(exists<Treasury>(user_addr), Errors::invalid_state(ERROR_TREASURY_NOT_EXISTS));
+        assert!(DAOSpace::is_member<TokenSwapDao>(user_addr), Errors::invalid_state(ERROR_NOT_MEMBER));
+        let treasury = borrow_global<Treasury>(user_addr);
+        TokenSwapSBTMapping::maybe_map_in_treasury(signer, &treasury.vtoken);
+    }
+
     fun deposit(signer: &signer, t: VToken::VToken<VESTAR::VESTAR>) acquires Treasury, VestarEventHandler {
         let user_addr = Signer::address_of(signer);
 
         let event_handler = borrow_global_mut<VestarEventHandler>(Token::token_address<VESTAR::VESTAR>());
-        Event::emit_event(&mut event_handler.deposit_event_handler, DepositEvent{
+        Event::emit_event(&mut event_handler.deposit_event_handler, DepositEvent {
             account: user_addr,
             amount: VToken::value(&t),
         });
@@ -234,10 +266,10 @@ module TokenSwapVestarMinter {
             let treasury = borrow_global_mut<Treasury>(user_addr);
             VToken::deposit<VESTAR::VESTAR>(&mut treasury.vtoken, t);
         } else {
-            move_to(signer, Treasury{
+            move_to(signer, Treasury {
                 vtoken: t
             });
-        };
+        }
     }
 
     fun withdraw(signer: &signer, amount: u128): VToken::VToken<VESTAR::VESTAR> acquires Treasury, VestarEventHandler {
@@ -248,7 +280,7 @@ module TokenSwapVestarMinter {
         let vtoken = VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount);
 
         let event_handler = borrow_global_mut<VestarEventHandler>(Token::token_address<VESTAR::VESTAR>());
-        Event::emit_event(&mut event_handler.withdraw_event_handler, WithdrawEvent{
+        Event::emit_event(&mut event_handler.withdraw_event_handler, WithdrawEvent {
             account: user_addr,
             amount
         });
@@ -262,7 +294,7 @@ module TokenSwapVestarMinter {
         let user_addr = Signer::address_of(signer);
 
         if (!exists<MintRecordListT<TokenT>>(user_addr)) {
-            move_to(signer, MintRecordListT<TokenT>{
+            move_to(signer, MintRecordListT<TokenT> {
                 items: Vector::empty<MintRecordT<TokenT>>()
             });
         };
@@ -273,7 +305,7 @@ module TokenSwapVestarMinter {
         let idx = find_idx_by_id(&lst.items, id);
         assert!(Option::is_none(&idx), Errors::invalid_state(ERROR_ADD_RECORD_ID_INVALID));
 
-        Vector::push_back<MintRecordT<TokenT>>(&mut lst.items, MintRecordT<TokenT>{
+        Vector::push_back<MintRecordT<TokenT>>(&mut lst.items, MintRecordT<TokenT> {
             id,
             minted_amount,
             staked_amount,
@@ -287,7 +319,7 @@ module TokenSwapVestarMinter {
         let user_addr = Signer::address_of(signer);
 
         if (!exists<MintRecordListT<TokenT>>(user_addr)) {
-            move_to(signer, MintRecordListT<TokenT>{
+            move_to(signer, MintRecordListT<TokenT> {
                 items: Vector::empty<MintRecordT<TokenT>>()
             });
         };
@@ -349,7 +381,7 @@ module TokenSwapVestarMinter {
             return
         };
 
-        move_to(signer, VestarEventHandler{
+        move_to(signer, VestarEventHandler {
             mint_event_handler: Event::new_event_handle<MintEvent>(signer),
             burn_event_handler: Event::new_event_handle<BurnEvent>(signer),
             withdraw_event_handler: Event::new_event_handle<WithdrawEvent>(signer),
@@ -363,7 +395,7 @@ module TokenSwapVestarMinter {
             return
         };
 
-        let MintRecordList{ items: old_record_list } = move_from<MintRecordList>(user_addr);
+        let MintRecordList { items: old_record_list } = move_from<MintRecordList>(user_addr);
         update_record_to_recordT<TokenT>(&mut old_record_list, items);
     }
 
@@ -379,14 +411,14 @@ module TokenSwapVestarMinter {
                 return
             };
 
-            let MintRecord{
+            let MintRecord {
                 id,
                 minted_amount,
                 staked_amount,
                 pledge_time_sec
             } = Vector::pop_back(record_list);
 
-            Vector::push_back(record_list_t, MintRecordT<TokenT>{
+            Vector::push_back(record_list_t, MintRecordT<TokenT> {
                 id,
                 minted_amount,
                 staked_amount,
@@ -409,17 +441,18 @@ module TokenSwapVestarMinter {
     #[test_only] use StarcoinFramework::Debug;
     #[test_only] use StarcoinFramework::STC;
     #[test_only] use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapDAO::TokenSwapDao;
 
     #[test]
     fun test_convert_minter_record() {
         let old_record_list = Vector::empty<MintRecord>();
-        Vector::push_back(&mut old_record_list, MintRecord{
+        Vector::push_back(&mut old_record_list, MintRecord {
             id: 1,
             minted_amount: 100,
             staked_amount: 100,
             pledge_time_sec: 100,
         });
-        Vector::push_back(&mut old_record_list, MintRecord{
+        Vector::push_back(&mut old_record_list, MintRecord {
             id: 2,
             minted_amount: 200,
             staked_amount: 200,
@@ -444,13 +477,13 @@ module TokenSwapVestarMinter {
     fun test_add_new_record_for_compatibility(signer: signer) acquires MintRecordListT, MintRecordList {
         // Add old record
         let items = Vector::empty<MintRecord>();
-        Vector::push_back(&mut items, MintRecord{
+        Vector::push_back(&mut items, MintRecord {
             id: 1,
             minted_amount: 100,
             staked_amount: 100,
             pledge_time_sec: 100,
         });
-        move_to(&signer, MintRecordList{
+        move_to(&signer, MintRecordList {
             items,
         });
 
@@ -472,19 +505,19 @@ module TokenSwapVestarMinter {
     fun test_pop_record_for_compatibility(signer: signer) acquires MintRecordListT, MintRecordList {
         // Add old record
         let items = Vector::empty<MintRecord>();
-        Vector::push_back(&mut items, MintRecord{
+        Vector::push_back(&mut items, MintRecord {
             id: 1,
             minted_amount: 100,
             staked_amount: 100,
             pledge_time_sec: 100,
         });
-        Vector::push_back(&mut items, MintRecord{
+        Vector::push_back(&mut items, MintRecord {
             id: 2,
             minted_amount: 200,
             staked_amount: 200,
             pledge_time_sec: 200,
         });
-        move_to(&signer, MintRecordList{
+        move_to(&signer, MintRecordList {
             items,
         });
 
