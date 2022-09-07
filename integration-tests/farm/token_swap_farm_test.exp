@@ -1,0 +1,107 @@
+processed 24 tasks
+
+task 4 'run'. lines 9-18:
+{
+  "gas_used": 1001004,
+  "status": "Executed"
+}
+
+task 5 'run'. lines 20-29:
+{
+  "gas_used": 196596,
+  "status": "Executed"
+}
+
+task 6 'run'. lines 31-40:
+{
+  "gas_used": 967941,
+  "status": "Executed"
+}
+
+task 7 'run'. lines 42-51:
+{
+  "gas_used": 256191,
+  "status": "Executed"
+}
+
+task 8 'run'. lines 53-63:
+{
+  "gas_used": 60143,
+  "status": "Executed"
+}
+
+task 9 'run'. lines 65-103:
+{
+  "gas_used": 1665694,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 105-115:
+{
+  "gas_used": 288390,
+  "status": "Executed"
+}
+
+task 11 'run'. lines 117-136:
+{
+  "gas_used": 748475,
+  "status": "Executed"
+}
+
+task 13 'run'. lines 140-154:
+{
+  "gas_used": 765014,
+  "status": "Executed"
+}
+
+task 15 'run'. lines 158-173:
+{
+  "gas_used": 1118570,
+  "status": "Executed"
+}
+
+task 16 'run'. lines 176-203:
+{
+  "gas_used": 1139448,
+  "status": "Executed"
+}
+
+task 18 'run'. lines 207-230:
+{
+  "gas_used": 1803249,
+  "status": "Executed"
+}
+
+task 20 'run'. lines 234-258:
+{
+  "gas_used": 2118858,
+  "status": "Executed"
+}
+
+task 21 'run'. lines 260-278:
+{
+  "gas_used": 421125,
+  "status": "Executed"
+}
+
+task 22 'run'. lines 280-288:
+{
+  "gas_used": 83256,
+  "status": "Executed"
+}
+
+task 23 'run'. lines 290-299:
+{
+  "gas_used": 87971,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapConfig"
+        }
+      },
+      "abort_code": "26113"
+    }
+  }
+}

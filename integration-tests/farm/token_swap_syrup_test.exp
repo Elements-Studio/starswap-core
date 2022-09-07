@@ -1,0 +1,47 @@
+processed 11 tasks
+
+task 4 'run'. lines 9-18:
+{
+  "gas_used": 34291,
+  "status": "Executed"
+}
+
+task 5 'run'. lines 20-59:
+{
+  "gas_used": 997730,
+  "status": "Executed"
+}
+
+task 6 'run'. lines 61-75:
+{
+  "gas_used": 876919,
+  "status": "Executed"
+}
+
+task 7 'run'. lines 77-98:
+{
+  "gas_used": 98964,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapSyrup"
+        }
+      },
+      "abort_code": "26625"
+    }
+  }
+}
+
+task 9 'run'. lines 102-130:
+{
+  "gas_used": 815891,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 132-163:
+{
+  "gas_used": 909294,
+  "status": "Executed"
+}
