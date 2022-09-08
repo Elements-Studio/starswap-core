@@ -21,25 +21,22 @@ mpm spectest
 mpm package test
 ```
 
----
-## Move CLI (Old version)
-### Compile Contracts
 
-```commandline
-move clean
-move check 
-move publish  --ignore-breaking-changes
-```
+## Contributing
 
-### Run Functional Tests
+First off, thanks for taking the time to contribute! Contributions are what makes the open-source community such an amazing place to learn, inspire, and create. Any contributions you make will benefit everybody else and are **greatly appreciated**.
 
-```commandline
-move functional-test
-```
+Contributions in the following are welcome:
 
-### Run Unit Tests
+1. Report a bug.
+2. Submit a feature request.
+3. Implement feature or fix bug.
 
-```commandline
-move unit-test -g
-```
+### How to add new module to starswap-core:
+
+1. Add New Move module to `sources` dir, such as `MyModule.move`.
+2. Write Move code and add unit test in the module file.
+3. Add an integration test to [integration-tests](../integration-tests) dir, such as: `test_my_module.move`.
+4. Run the integration test `mpm integration-test test_my_module.move `.
+5. Run script `./script/build.sh` for build and generate documents.
 

@@ -2,5 +2,5 @@
 
 mpm package build
 mpm package test
-mpm spectest
+mpm integration-test
 mpm release
