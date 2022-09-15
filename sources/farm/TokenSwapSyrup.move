@@ -13,6 +13,7 @@ module TokenSwapSyrup {
     use StarcoinFramework::Option;
     use StarcoinFramework::BCS;
 
+    use SwapAdmin::YieldFarmingMultiplier;
     use SwapAdmin::STAR;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
     use SwapAdmin::TokenSwapSyrupMultiplierPool;
@@ -30,6 +31,7 @@ module TokenSwapSyrup {
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON: u64 = 107;
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON: u64 = 108;
     const ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS: u64 = 109;
+    const ERROR_CONFIG_ERROR: u64 = 110;
 
     /// Syrup pool of token type
     struct Syrup<phantom TokenT> has key, store {
@@ -41,8 +43,7 @@ module TokenSwapSyrup {
     /// DEPRECATED
     /// Syrup pool extend information,
     struct SyrupExtInfo<phantom TokenT> has key, store {
-        // DEPRECATED field
-        multiplier_cap: TokenSwapSyrupMultiplierPool::PoolCapability<PoolTypeSyrup, Token::Token<TokenT>>,
+        multiplier_cap: YieldFarmingMultiplier::PoolCapability<PoolTypeSyrup, Token::Token<TokenT>>,
         alloc_point: u128,
     }
 
@@ -191,11 +192,11 @@ module TokenSwapSyrup {
         });
 
         // Extend multiplier
-        let multiplier_cap =
+        let multiplier_pool_cap =
             TokenSwapSyrupMultiplierPool::initialize<PoolTypeSyrup, Token::Token<TokenT>>(signer);
-        move_to(signer, SyrupExtInfo<TokenT> {
+        move_to(signer, SyrupExtInfoV2<TokenT> {
             alloc_point,
-            multiplier_cap
+            multiplier_pool_cap
         });
 
         // Publish event
@@ -223,7 +224,7 @@ module TokenSwapSyrup {
             &syrup.param_cap, broker_addr(), release_per_second);
     }
 
-    /// TODO: Deprecated call
+    /// TODO: DEPRECATED call
     /// Set alivestate for token type pool
     public fun set_alive<TokenT: copy + drop + store>(_signer: &signer, _alive: bool) {
         abort Errors::invalid_state(ERR_DEPRECATED)
@@ -234,7 +235,7 @@ module TokenSwapSyrup {
     public fun update_allocation_point<TokenT: store>(
         signer: &signer,
         alloc_point: u128
-    ) acquires Syrup, SyrupExtInfo {
+    ) acquires Syrup, SyrupExtInfoV2 {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -245,7 +246,7 @@ module TokenSwapSyrup {
 
         let broker = Signer::address_of(signer);
         let syrup = borrow_global<Syrup<TokenT>>(broker);
-        let syrup_ext_info = borrow_global_mut<SyrupExtInfo<TokenT>>(broker);
+        let syrup_ext_info = borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker);
 
         YieldFarming::update_pool<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
             &syrup.param_cap, broker, alloc_point, syrup_ext_info.alloc_point);
@@ -576,6 +577,54 @@ module TokenSwapSyrup {
 
             idx = idx + 1;
         }
+    }
+
+    public fun upgrade_from_v1_0_11_to_v1_0_12(account: &signer) acquires SyrupExtInfo {
+        STAR::assert_genesis_address(account);
+        let broker_addr = broker_addr();
+
+        let SyrupExtInfo<STAR::STAR> {
+            multiplier_cap,
+            alloc_point,
+        } = move_from<SyrupExtInfo<STAR::STAR>>(broker_addr);
+
+        // Convert to new capability
+        YieldFarmingMultiplier::uninitialize(multiplier_cap);
+
+        let new_cap = TokenSwapSyrupMultiplierPool::initialize<
+            PoolTypeSyrup,
+            Token::Token<STAR::STAR>
+        >(account);
+
+        // Add pools from config
+        let (
+            time_list,
+            multiplier_list
+        ) = TokenSwapConfig::get_stepwise_multiplier_list();
+
+        assert!(
+            Vector::length(&time_list) == Vector::length(&multiplier_list),
+            Errors::invalid_state(ERROR_CONFIG_ERROR)
+        );
+
+        loop {
+            if (Vector::is_empty(&time_list)) {
+                break
+            };
+            let time = Vector::pop_back(&mut time_list);
+            let multiplier = Vector::pop_back(&mut multiplier_list);
+            TokenSwapSyrupMultiplierPool::add_pool(
+                &new_cap,
+                broker_addr,
+                &pledge_time_to_key(time),
+                multiplier);
+        };
+
+        // Construct new struct of syrup info
+        move_to(account, SyrupExtInfoV2<STAR::STAR> {
+            alloc_point,
+            multiplier_pool_cap: new_cap
+        });
     }
 
     fun broker_addr(): address {

@@ -219,6 +219,28 @@ module TokenSwapConfig {
         }
     }
 
+    public fun get_stepwise_multiplier_list() : (
+        vector<u64>, // time
+        vector<u64>  // multiplier
+    ) {
+        let time_list = Vector::empty<u64>();
+        let multiplier_list = Vector::empty<u64>();
+        if (!Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
+            return (time_list, multiplier_list)
+        };
+
+        let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
+        loop {
+            if (Vector::is_empty(&conf.list)) {
+                break
+            };
+            let s = Vector::pop_back(&mut conf.list);
+            Vector::push_back(&mut time_list, s.interval_sec);
+            Vector::push_back(&mut multiplier_list, s.multiplier);
+        };
+        (time_list, multiplier_list)
+    }
+
     /// Check is the time second has in stepwise multiplier list
     public fun has_in_stepwise(time_sec: u64) : bool {
         if (!Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {

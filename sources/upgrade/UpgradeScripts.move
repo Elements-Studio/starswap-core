@@ -81,5 +81,13 @@ module UpgradeScripts {
         assert!(Signer::address_of(&buyback_account) == @BuyBackAccount, Errors::invalid_argument(ERROR_INVALID_PARAMETER));
         BuyBackSTAR::init(buyback_account, deposit_amount, begin_time, interval, release_per_time);
     }
+
+
+    public(script) fun upgrade_from_v1_0_11_to_v1_0_12(account: signer) {
+        TokenSwapConfig::assert_admin(&account);
+        TokenSwapSyrup::upgrade_from_v1_0_11_to_v1_0_12(&account);
+    }
+
+
 }
 }
