@@ -145,11 +145,12 @@ module YieldFarmingV3 {
 
     /// Called by admin
     /// this will reset release amount per second
-    public fun modify_global_release_per_second<PoolType: store>(account: &signer, pool_release_per_second: u128)
+    public fun modify_global_release_per_second<PoolType: store, AssetT: store>(_cap: &ParameterModifyCapability<PoolType, AssetT>,
+                                                                                broker: address,
+                                                                                pool_release_per_second: u128)
     acquires YieldFarmingGlobalPoolInfo {
-        TokenSwapConfig::assert_admin(account);
         let pool_info =
-            borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(Signer::address_of(account));
+            borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
         pool_info.pool_release_per_second = pool_release_per_second;
     }
 
@@ -206,7 +207,7 @@ module YieldFarmingV3 {
         ParameterModifyCapability<PoolType, AssetT> {}
     }
 
-
+    /// DEPRECATED
     /// call only for migrate, can call reentrance
     /// once start farm boost, can't not by call any more
     public fun extend_farming_asset<
@@ -243,7 +244,7 @@ module YieldFarmingV3 {
         Token::deposit<RewardTokenT>(&mut farming.treasury_token, treasury_token);
     }
 
-    /// deprecated call
+    /// DEPRECATED call
     public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         _broker: address,
@@ -264,12 +265,11 @@ module YieldFarmingV3 {
         // farming_asset.alive = alive;
     }
 
-    // ParameterModifyCapability Access control
-    public fun extend_farm_stake_info<
-        PoolType: store,
-        AssetT: store>(account: &signer,
-                       stake_id: u64,
-                       _cap: &ParameterModifyCapability<PoolType, AssetT>) acquires StakeList, StakeListExtend {
+    /// ParameterModifyCapability Access control
+    public fun extend_farm_stake_info<PoolType: store, AssetT: store>(account: &signer,
+                                                                      stake_id: u64,
+                                                                      _cap: &ParameterModifyCapability<PoolType, AssetT>)
+    acquires StakeList, StakeListExtend {
         let user_addr = Signer::address_of(account);
         if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
             move_to(account, StakeListExtend<PoolType, AssetT> {
@@ -1013,7 +1013,7 @@ module YieldFarmingV3 {
     }
 
     /// Get information by given capability
-    public fun get_info_from_cap<PoolT: store, AssetT: store>(cap: &HarvestCapability<PoolT, AssetT>): (u64, u64){
+    public fun get_info_from_cap<PoolT: store, AssetT: store>(cap: &HarvestCapability<PoolT, AssetT>): (u64, u64) {
         (cap.stake_id, cap.deadline)
     }
 

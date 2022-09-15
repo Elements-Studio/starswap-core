@@ -37,7 +37,11 @@ module SwapAdmin::YieldFarmingWarpper {
         items: vector<YieldFarming::HarvestCapability<MockPoolType, MockAssetType>>
     }
 
-    public fun initialize_global_pool(account: &signer, treasury: Token::Token<MockTokenType>, release_per_second: u128) {
+    public fun initialize_global_pool(
+        account: &signer,
+        treasury: Token::Token<MockTokenType>,
+        release_per_second: u128
+    ) {
         YieldFarming::initialize_global_pool_info<MockPoolType>(
             account,
             release_per_second);
@@ -51,14 +55,30 @@ module SwapAdmin::YieldFarmingWarpper {
         });
     }
 
-    public fun reset_release_per_second(account: &signer, amount: u128) {
-        YieldFarmingV3::modify_global_release_per_second<MockPoolType>(account, amount);
+    public fun reset_release_per_second(
+        account: &signer,
+        amount: u128
+    ) acquires GovModfiyParamCapability {
+        let account_addr = Signer::address_of(account);
+        let cap = borrow_global_mut<GovModfiyParamCapability>(account_addr);
+        YieldFarmingV3::modify_global_release_per_second<MockPoolType, MockAssetType>(
+            &cap.cap,
+            Signer::address_of(account),
+            amount
+        );
     }
 
-    public fun stake(signer: &signer, value: u128, multiplier: u64, deadline: u64): u64
-    acquires GovModfiyParamCapability, StakeCapbabilityList {
+    public fun stake(
+        signer: &signer,
+        value: u128,
+        multiplier: u64,
+        deadline: u64
+    ): u64 acquires GovModfiyParamCapability, StakeCapbabilityList {
         let cap = borrow_global_mut<GovModfiyParamCapability>(broker_addr());
-        let (harvest_cap, stake_id) = YieldFarming::stake_v2<MockPoolType, MockTokenType, MockAssetType>(
+        let (
+            harvest_cap,
+            stake_id
+        ) = YieldFarming::stake_v2<MockPoolType, MockTokenType, MockAssetType>(
             signer,
             broker_addr(),
             MockAssetType { value },
@@ -66,7 +86,8 @@ module SwapAdmin::YieldFarmingWarpper {
             value,
             multiplier,
             deadline,
-            &cap.cap);
+            &cap.cap
+        );
 
         let user_addr = Signer::address_of(signer);
         if (!exists<StakeCapbabilityList>(user_addr)) {
@@ -80,7 +101,10 @@ module SwapAdmin::YieldFarmingWarpper {
         stake_id
     }
 
-    fun match_id(items: &vector<YieldFarming::HarvestCapability<MockPoolType, MockAssetType>>, id: u64): Option::Option<u64> {
+    fun match_id(
+        items: &vector<YieldFarming::HarvestCapability<MockPoolType, MockAssetType>>,
+        id: u64
+    ): Option::Option<u64> {
         let i = 0;
         while (i < Vector::length(items)) {
             let cap = Vector::borrow(items, i);
@@ -114,7 +138,12 @@ module SwapAdmin::YieldFarmingWarpper {
         assert!(Option::is_some(&idx), 10001);
 
         let cap = Vector::borrow(&cap_list.items, Option::destroy_some(idx));
-        YieldFarming::harvest<MockPoolType, MockTokenType, MockAssetType>(Signer::address_of(signer), broker_addr(), 0, cap)
+        YieldFarming::harvest<MockPoolType, MockTokenType, MockAssetType>(
+            Signer::address_of(signer),
+            broker_addr(),
+            0,
+            cap
+        )
     }
 
     public fun query_expect_gain(user_addr: address, id: u64): u128 acquires StakeCapbabilityList {
@@ -333,7 +362,12 @@ script {
 
     fun bob_stake_1(signer: signer) {
         // First stake operation, 1x, deadline after 60 seconds
-        let stake_id = YieldFarmingWarpper::stake(&signer, CommonHelper::pow_amount<MockTokenType>(1), 1, 60);
+        let stake_id = YieldFarmingWarpper::stake(
+            &signer,
+            CommonHelper::pow_amount<MockTokenType>(1),
+            1,
+            60
+        );
         assert!(stake_id == 1, 10040);
     }
 }
