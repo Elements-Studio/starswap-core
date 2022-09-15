@@ -32,8 +32,6 @@ module SwapAdmin::MultiplierPoolHelper {
             10,
         );
 
-
-
         move_to(account, PoolCapabilityWarpper {
             cap
         });

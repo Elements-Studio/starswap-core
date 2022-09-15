@@ -248,8 +248,16 @@ module TokenSwapSyrup {
         let syrup = borrow_global<Syrup<TokenT>>(broker);
         let syrup_ext_info = borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker);
 
-        YieldFarming::update_pool<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
-            &syrup.param_cap, broker, alloc_point, syrup_ext_info.alloc_point);
+        YieldFarming::update_pool<
+            PoolTypeSyrup,
+            STAR::STAR,
+            Token::Token<TokenT>
+        >(
+            &syrup.param_cap,
+            broker,
+            alloc_point,
+            syrup_ext_info.alloc_point
+        );
         syrup_ext_info.alloc_point = alloc_point;
     }
 

@@ -26,7 +26,9 @@ module YieldFarmingMultiplier {
     struct PoolCapability<phantom PoolType, phantom AssetT> has key, store {}
 
     /// Initialize from total asset weight and amount
-    public fun init<PoolType: store, AssetT: store>(_signer: &signer): PoolCapability<PoolType, AssetT> {
+    public fun init<PoolType: store, AssetT: store>(
+        _signer: &signer
+    ): PoolCapability<PoolType, AssetT> {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
