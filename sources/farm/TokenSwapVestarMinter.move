@@ -430,8 +430,6 @@ module TokenSwapVestarMinter {
         let new_record_list_t = Vector::empty<MintRecordT<VESTAR::VESTAR>>();
         update_record_to_recordT<VESTAR::VESTAR>(&mut old_record_list, &mut new_record_list_t);
         let new_length = Vector::length(&new_record_list_t);
-        Debug::print(&new_length);
-        Debug::print(&old_length);
         assert!(new_length == old_length, 10001);
 
         let idx = find_idx_by_id(&new_record_list_t, 2);
