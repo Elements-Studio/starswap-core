@@ -1,0 +1,22 @@
+[package]
+name = "Starswap-Core-Aptos"
+version = "0.0.1"
+#upgrade_policy = "immutable"
+
+[addresses]
+#liquidswap_lp = "0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9"
+StarcoinFramework = "0x1"
+SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
+SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
+BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
+
+[dependencies]
+StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
+Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "b2116064ef85f278ac2e1eba2fc6893e72d5f6f2" }
+
+
+#[dependencies.AptosFramework]
+#git = "https://github.com/aptos-labs/aptos-core.git"
+#rev = "8f634bcd2e48c4972868d0053d3532f4f760ae19"
+#subdir = "aptos-move/framework/aptos-framework"
+
