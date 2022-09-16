@@ -9,74 +9,88 @@
 //# run --signers SwapAdmin
 
 script {
-    use SwapAdmin::TokenSwapGov;
-
-    fun TokenSwapGov_genesis_initialized(signer: signer) {
-        TokenSwapGov::genesis_initialize(&signer);
-    }
-}
-// check: EXECUTED
-
-//# run --signers SwapAdmin
-script {
     use SwapAdmin::UpgradeScripts;
-    use SwapAdmin::TokenSwapConfig;
 
-    fun UpgradeScripts_initialize_global_pool_info(signer: signer) {
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
-        UpgradeScripts::initialize_global_pool_info(
-            signer,
-            1000000000
+    fun UpgradeScript_genesis_initialize_for_latest_version(signer: signer) {
+        UpgradeScripts::genesis_initialize_for_latest_version(
+            &signer,
+            100000000,
+            100000000,
         );
     }
 }
 // check: EXECUTED
+//
+// //# run --signers SwapAdmin
+// script {
+//     use SwapAdmin::TokenSwapGov;
+//
+//     fun TokenSwapGov_genesis_initialized(signer: signer) {
+//         TokenSwapGov::genesis_initialize(&signer);
+//     }
+// }
+// // check: EXECUTED
+//
+// //# run --signers SwapAdmin
+// script {
+//     use SwapAdmin::UpgradeScripts;
+//     use SwapAdmin::TokenSwapConfig;
+//
+//     fun UpgradeScripts_initialize_global_pool_info(signer: signer) {
+//         TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
+//         UpgradeScripts::initialize_global_pool_info(
+//             signer,
+//             1000000000
+//         );
+//     }
+// }
+// // check: EXECUTED
+//
+// //# run --signers SwapAdmin
+// script {
+//     use SwapAdmin::UpgradeScripts;
+//
+//     /// Initialize for VESTAR
+//     fun UpgradeScripts_initialize_global_syrup_info(signer: signer) {
+//         UpgradeScripts::initialize_global_syrup_info(
+//             signer,
+//             1000000000
+//         );
+//     }
+// }
+// // check: EXECUTED
+//
+// //# run --signers SwapAdmin
+// script {
+//     use SwapAdmin::TokenSwapFarmScript;
+//
+//     /// Initialize for VESTAR
+//     fun TokenSwapFarmScript_initialize_boost_event(signer: signer) {
+//         TokenSwapFarmScript::initialize_boost_event(signer);
+//     }
+// }
+// // check: EXECUTED
 
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::UpgradeScripts;
-
-    /// Initialize for VESTAR
-    fun UpgradeScripts_initialize_global_syrup_info(signer: signer) {
-        UpgradeScripts::initialize_global_syrup_info(
-            signer,
-            1000000000
-        );
-    }
-}
-// check: EXECUTED
-
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapFarmScript;
-
-    /// Initialize for VESTAR
-    fun TokenSwapFarmScript_initialize_boost_event(signer: signer) {
-        TokenSwapFarmScript::initialize_boost_event(signer);
-    }
-}
-// check: EXECUTED
-
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapGov;
-
-    fun TokenSwapGov_upgrade_dao_treasury_genesis(signer: signer) {
-        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
-    }
-}
-// check: EXECUTED
-
-//# run --signers SwapAdmin
-script {
-
-    use SwapAdmin::TokenSwapGov;
-
-    fun TokenSwapGov_linear_initialize(signer: signer) {
-        TokenSwapGov::linear_initialize(&signer);
-    }
-}
-// check: EXECUTED
+// //# run --signers SwapAdmin
+// script {
+//     use SwapAdmin::TokenSwapGov;
+//
+//     fun TokenSwapGov_upgrade_dao_treasury_genesis(signer: signer) {
+//         TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+//     }
+// }
+// // check: EXECUTED
+//
+// //# run --signers SwapAdmin
+// script {
+//
+//     use SwapAdmin::TokenSwapGov;
+//
+//     fun TokenSwapGov_linear_initialize(signer: signer) {
+//         TokenSwapGov::linear_initialize(&signer);
+//     }
+// }
+// // check: EXECUTED
 
 //# run --signers SwapAdmin
 script {

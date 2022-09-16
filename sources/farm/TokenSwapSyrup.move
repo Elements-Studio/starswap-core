@@ -230,6 +230,27 @@ module TokenSwapSyrup {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
+    /// Set the each stepwise pool for statistical APR
+    /// and subsequent calculations
+    public fun put_stepwise_multiplier<TokenT: store>(
+        signer: &signer,
+        interval_sec: u64,
+        multiplier: u64
+    ) acquires SyrupExtInfoV2 {
+        STAR::assert_genesis_address(signer);
+
+        let broker_addr = broker_addr();
+        let ext_v2  = borrow_global<SyrupExtInfoV2<TokenT>>(broker_addr);
+
+        // TokenSwapConfig::put_stepwise_multiplier(signer, interval_sec, multiplier);
+        TokenSwapSyrupMultiplierPool::add_pool<PoolTypeSyrup, Token::Token<TokenT>>(
+            &ext_v2.multiplier_pool_cap,
+            broker_addr(),
+            &pledge_time_to_key(interval_sec),
+            multiplier,
+        );
+    }
+
     /// Update pool allocation point
     /// Only called by admin
     public fun update_allocation_point<TokenT: store>(
@@ -299,7 +320,7 @@ module TokenSwapSyrup {
         };
 
         let stake_token = Account::withdraw<TokenT>(signer, amount);
-        let stepwise_multiplier = pledage_time_to_multiplier(pledge_time_sec);
+        let stepwise_multiplier = pledge_time_to_mulitplier<TokenT>(pledge_time_sec);
         let now_seconds = Timestamp::now_seconds();
         let start_time = now_seconds;
         let end_time = start_time + pledge_time_sec;
@@ -460,9 +481,10 @@ module TokenSwapSyrup {
     }
 
     /// query info for syrup pool
-    public fun query_release_per_second<TokenT: store>(): u128 acquires Syrup {
-        let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
-        syrup.release_per_second
+    public fun query_release_per_second<TokenT: store>(): u128 {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // let syrup = borrow_global<Syrup<TokenT>>(STAR::token_address());
+        // syrup.release_per_second
     }
 
     /// Queyry global pool info
@@ -482,13 +504,31 @@ module TokenSwapSyrup {
         YieldFarming::get_global_stake_id<PoolTypeSyrup, Token::Token<TokenT>>(user_addr)
     }
 
-    public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
-        // 1. Check the time has in config
-        assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
-            Errors::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+    public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // // 1. Check the time has in config
+        // assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
+        //     Errors::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+        //
+        // // 2. return multiplier of time
+        // TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+    }
 
-        // 2. return multiplier of time
-        TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+    /// Query the magnification if the magnification statistics pool cannot be found,
+    /// then go to the configuration to query the old one.
+    public fun pledge_time_to_mulitplier<TokenT>(pledge_time_sec: u64): u64 {
+        let key = pledge_time_to_key(pledge_time_sec);
+        if (TokenSwapSyrupMultiplierPool::has<PoolTypeSyrup, Token::Token<TokenT>>(&key)) {
+            let (multiplier, _, _) = TokenSwapSyrupMultiplierPool::query_pool<
+                PoolTypeSyrup,
+                Token::Token<TokenT>
+            >(&key);
+            multiplier
+        } else {
+            assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
+                Errors::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+            TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+        }
     }
 
     public fun pledge_time_to_key(pledge_time_sec: u64): vector<u8> {

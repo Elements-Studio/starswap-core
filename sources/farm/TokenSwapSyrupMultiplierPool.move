@@ -187,6 +187,15 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         )
     }
 
+    /// Check the key has exists
+    public fun has<PoolType: store, AssetType: store>(
+        key: &vector<u8>
+    ): bool acquires MultiplierPoolsGlobalInfo {
+        let info =
+            borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(@SwapAdmin);
+        Option::is_some(&find_idx_by_id<PoolType, AssetType>(&info.items, key))
+    }
+
     /// Find by key which is from user
     fun find_pool_by_key<PoolType: store, AssetType: store>(
         c: &mut vector<MultiplierPool<PoolType, AssetType>>,

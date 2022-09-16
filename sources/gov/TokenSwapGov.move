@@ -214,7 +214,6 @@ module TokenSwapGov {
         let syrup_genesis_token = Account::withdraw<STAR::STAR>(account, syrup_genesis);
         TokenSwapSyrup::initialize(account, syrup_genesis_token);
 
-
         //Release 5% for community. genesis release 2%.
         let community_total = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, community_total);
@@ -505,19 +504,19 @@ module TokenSwapGov {
     }
 
 
-    public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
-        STAR::assert_genesis_address(&signer);
+    public fun upgrade_dao_treasury_genesis(signer: &signer) {
+        STAR::assert_genesis_address(signer);
         //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(&signer))){
+        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(signer))){
             let precision = STAR::precision();
             let scaling_factor = Math::pow(10, (precision as u64));
             let now_timestamp = Timestamp::now_seconds();
 
             //  Release 24% for dao treasury. genesis release 2%.
             let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
-            STAR::mint(&signer, dao_treasury_genesis);
-            move_to(&signer, GovTreasury<PoolTypeProtocolTreasury>{
-                treasury: Account::withdraw<STAR::STAR>(&signer, dao_treasury_genesis),
+            STAR::mint(signer, dao_treasury_genesis);
+            move_to(signer, GovTreasury<PoolTypeProtocolTreasury>{
+                treasury: Account::withdraw<STAR::STAR>(signer, dao_treasury_genesis),
                 locked_start_timestamp : now_timestamp,
                 locked_total_timestamp : 0,
             });

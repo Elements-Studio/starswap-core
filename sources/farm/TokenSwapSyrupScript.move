@@ -9,7 +9,6 @@ module TokenSwapSyrupScript {
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
     use SwapAdmin::TokenSwapGov;
@@ -84,10 +83,12 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::stake_hook_with_id<TokenT>(&signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
     }
 
-    public(script) fun put_stepwise_multiplier(signer: signer,
-                                               interval_sec: u64,
-                                               multiplier: u64) {
-        TokenSwapConfig::put_stepwise_multiplier(&signer, interval_sec, multiplier);
+    public(script) fun put_stepwise_multiplier<TokenT: store>(
+        signer: signer,
+        interval_sec: u64,
+        multiplier: u64
+    ) {
+        TokenSwapSyrup::put_stepwise_multiplier<TokenT>(&signer, interval_sec, multiplier);
     }
 
     public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {

@@ -170,8 +170,8 @@ module TokenSwapConfig {
     public fun put_stepwise_multiplier(
         signer: &signer,
         interval_sec: u64,
-        multiplier: u64) {
-        
+        multiplier: u64
+    ) {
         assert_admin(signer);
         
         if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
