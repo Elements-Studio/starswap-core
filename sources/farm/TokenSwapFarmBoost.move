@@ -177,7 +177,6 @@ module TokenSwapFarmBoost {
         };
 
         user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
-
         
         // Emit unboost event
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());

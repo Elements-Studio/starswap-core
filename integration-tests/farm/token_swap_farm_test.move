@@ -11,18 +11,57 @@
 script {
     use SwapAdmin::TokenSwapGov;
 
-    fun genesis_initialized(signer: signer) {
+    fun TokenSwapGov_genesis_initialized(signer: signer) {
         TokenSwapGov::genesis_initialize(&signer);
     }
 }
 // check: EXECUTED
 
 //# run --signers SwapAdmin
+script {
+    use SwapAdmin::UpgradeScripts;
+    use SwapAdmin::TokenSwapConfig;
 
+    fun UpgradeScripts_initialize_global_pool_info(signer: signer) {
+        TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
+        UpgradeScripts::initialize_global_pool_info(
+            signer,
+            1000000000
+        );
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::UpgradeScripts;
+
+    /// Initialize for VESTAR
+    fun UpgradeScripts_initialize_global_syrup_info(signer: signer) {
+        UpgradeScripts::initialize_global_syrup_info(
+            signer,
+            1000000000
+        );
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::TokenSwapFarmScript;
+
+    /// Initialize for VESTAR
+    fun TokenSwapFarmScript_initialize_boost_event(signer: signer) {
+        TokenSwapFarmScript::initialize_boost_event(signer);
+    }
+}
+// check: EXECUTED
+
+//# run --signers SwapAdmin
 script {
     use SwapAdmin::TokenSwapGov;
 
-    fun upgrade_dao_treasury_genesis(signer: signer) {
+    fun TokenSwapGov_upgrade_dao_treasury_genesis(signer: signer) {
         TokenSwapGov::upgrade_dao_treasury_genesis(signer);
     }
 }
@@ -33,7 +72,7 @@ script {
 
     use SwapAdmin::TokenSwapGov;
 
-    fun linear_initialize(signer: signer) {
+    fun TokenSwapGov_linear_initialize(signer: signer) {
         TokenSwapGov::linear_initialize(&signer);
     }
 }
@@ -73,7 +112,7 @@ script {
     fun admin_register_token_pair_and_mint(signer: signer) {
         //token pair register must be swap SwapAdmin account
         TokenSwapRouter::register_swap_pair<TokenMock::WBTC, TokenMock::WETH>(&signer);
-        assert!(TokenSwapRouter::swap_pair_exists<TokenMock::WBTC, TokenMock::WETH>(), 1001);
+        assert!(TokenSwapRouter::swap_pair_exists<TokenMock::WBTC, TokenMock::WETH>(), 10010);
 
         let precision: u8 = 9;
         let scaling_factor = Math::pow(10, (precision as u64));
@@ -95,9 +134,10 @@ script {
             amount_btc_desired,
             amount_eth_desired,
             amount_btc_min,
-            amount_eth_min);
+            amount_eth_min
+        );
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<TokenMock::WBTC, TokenMock::WETH>();
-        assert!(total_liquidity > amount_btc_min, 1002);
+        assert!(total_liquidity > amount_btc_min, 10011);
     }
 }
 // check: EXECUTED
@@ -108,8 +148,7 @@ script {
     use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun admin_governance_genesis(signer: signer) {
-        TokenSwapFarmRouter::add_farm_pool<WBTC, WETH>(&signer, 100000000);
-        TokenSwapFarmRouter::reset_farm_activation<WBTC, WETH>(&signer, true);
+        TokenSwapFarmRouter::add_farm_pool_v2<WBTC, WETH>(&signer, 100);
     }
 }
 // check: EXECUTED
@@ -128,10 +167,10 @@ script {
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
         Debug::print(&stake_amount);
-        assert!(stake_amount == liquidity_amount, 1003);
+        assert!(stake_amount == liquidity_amount, 10020);
 
         let total_stake_amount = TokenSwapFarmRouter::query_total_stake<WBTC, WETH>();
-        assert!(total_stake_amount == liquidity_amount, 1004);
+        assert!(total_stake_amount == liquidity_amount, 10021);
     }
 }
 
@@ -148,7 +187,7 @@ script {
     fun admin_harvest(signer: signer) {
         TokenSwapFarmRouter::harvest<WBTC, WETH>(&signer, 0);
         let rewards_amount = Account::balance<STAR::STAR>(Signer::address_of(&signer));
-        assert!(rewards_amount > 0, 1005);
+        assert!(rewards_amount > 0, 10030);
     }
 }
 // check: EXECUTED
@@ -164,14 +203,13 @@ script {
 
     fun admin_unstake(signer: signer) {
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(Signer::address_of(&signer));
-        assert!(stake_amount > 0, 1006);
+        assert!(stake_amount > 0, 10040);
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, stake_amount);
         let after_amount = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert!(after_amount > 0, 1007);
+        assert!(after_amount > 0, 10041);
     }
 }
 // check: EXECUTED
-
 
 //# run --signers alice
 script {
@@ -197,7 +235,7 @@ script {
             amount_eth_min);
 
         let liquidity: u128 = TokenSwapRouter::liquidity<WBTC, WETH>(Signer::address_of(&signer));
-        assert!(liquidity > amount_btc_min, 1008);
+        assert!(liquidity > amount_btc_min, 10050);
     }
 }
 // check: EXECUTED
@@ -215,16 +253,16 @@ script {
     fun alice_stake(signer: signer) {
         let account = Signer::address_of(&signer);
         let liquidity_amount = TokenSwapRouter::liquidity<WBTC, WETH>(account);
-        assert!(liquidity_amount > 0, 1009);
+        assert!(liquidity_amount > 0, 10060);
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
 
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert!(stake_amount == 10000, 1010);
+        assert!(stake_amount == 10000, 10061);
 
         TokenSwapFarmRouter::stake<WBTC, WETH>(&signer, 10000);
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount1);
-        assert!(_stake_amount1 == 20000, 1011);
+        assert!(_stake_amount1 == 20000, 10062);
     }
 }
 // check: EXECUTED
@@ -241,38 +279,18 @@ script {
     fun alice_unstake(signer: signer) {
         let account = Signer::address_of(&signer);
         let stake_amount = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert!(stake_amount == 20000, 1020);
+        assert!(stake_amount == 20000, 10070);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount1 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
-        assert!(_stake_amount1 == 10000, 1021);
+        assert!(_stake_amount1 == 10000, 10072);
 
         TokenSwapFarmRouter::unstake<WBTC, WETH>(&signer, 10000);
 
         let _stake_amount2 = TokenSwapFarmRouter::query_stake<WBTC, WETH>(account);
         Debug::print(&_stake_amount2);
-        assert!(_stake_amount2 == 0, 1022);
-    }
-}
-// check: EXECUTED
-
-//# run --signers SwapAdmin
-script {
-    use StarcoinFramework::Debug;
-    use SwapAdmin::TokenSwapFarmRouter;
-    use SwapAdmin::TokenMock::{WBTC, WETH};
-
-    fun admin_set_release_multi_basic(signer: signer) {
-        // Set to 10x
-        TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 10);
-        let (alive, release_per_sec, _, _) = TokenSwapFarmRouter::query_info<WBTC, WETH>();
-        assert!(alive, 1030);
-        assert!(release_per_sec == 1000000000, 1031); // Check relesase per second
-
-        let mutipler = TokenSwapFarmRouter::get_farm_multiplier<WBTC, WETH>();
-        Debug::print(&mutipler);
-        assert!(mutipler == 10, 1032);
+        assert!(_stake_amount2 == 0, 10073);
     }
 }
 // check: EXECUTED
@@ -297,3 +315,28 @@ script {
     }
 }
 // check: "Keep(ABORTED { code: 26113"
+
+// //# run --signers SwapAdmin
+// script {
+//     use StarcoinFramework::Debug;
+//     use SwapAdmin::TokenSwapFarmRouter;
+//     use SwapAdmin::TokenMock::{WBTC, WETH};
+//
+//     fun admin_set_release_multi_basic(signer: signer) {
+//         // Set to 10x
+//         TokenSwapFarmRouter::set_farm_multiplier<WBTC, WETH>(&signer, 10);
+//         let (
+//             alloc_point,
+//             asset_total_amount,
+//             _,
+//             _
+//         ) = TokenSwapFarmRouter::query_info_v2<WBTC, WETH>();
+//         assert!(alloc_point > 0, 10080);
+//         assert!(asset_total_amount == 1000000000, 10081); // Check relesase per second
+//
+//         let mutipler = TokenSwapFarmRouter::get_farm_multiplier<WBTC, WETH>();
+//         Debug::print(&mutipler);
+//         assert!(mutipler == 10, 10082);
+//     }
+// }
+// // check: EXECUTED

@@ -20,7 +20,6 @@ module TokenSwapFarm {
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwapFarmBoost;
 
-
     const ERR_DEPRECATED: u64 = 1;
 
     const ERR_FARM_PARAM_ERROR: u64 = 101;
@@ -134,7 +133,7 @@ module TokenSwapFarm {
         YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
     }
 
-    /// Deprecated call
+    /// DEPRECATED call
     /// Initialize Liquidity pair gov pool, only called by token issuer
     public fun add_farm<X: copy + drop + store,
                         Y: copy + drop + store>(
@@ -245,31 +244,32 @@ module TokenSwapFarm {
     }
 
 
-    /// Deprecated call
+    /// DEPRECATED call
     /// Set farm mutiplier of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(
-        signer: &signer,
-        multiplier: u64
-    ) acquires FarmPoolCapability, FarmMultiplier {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        let broker = Signer::address_of(signer);
-        let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
-        let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(broker);
-
-        let (alive, _, _, _, ) =
-            YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(broker);
-
-        let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
-        YieldFarming::modify_parameter<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
-            &cap.cap,
-            broker,
-            relese_per_sec_mul,
-            alive,
-        );
-        farm_mult.multiplier = multiplier;
+        _signer: &signer,
+        _multiplier: u64
+    ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // // Only called by the genesis
+        // STAR::assert_genesis_address(signer);
+        //
+        // let broker = Signer::address_of(signer);
+        // let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
+        // let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(broker);
+        //
+        // let (alive, _, _, _, ) =
+        //     YieldFarming::query_info<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(broker);
+        //
+        // let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
+        // YieldFarming::modify_parameter<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
+        //     &cap.cap,
+        //     broker,
+        //     relese_per_sec_mul,
+        //     alive,
+        // );
+        // farm_mult.multiplier = multiplier;
     }
 
     /// Get farm multiplier of second per releasing
@@ -291,13 +291,14 @@ module TokenSwapFarm {
                                     Y: copy + drop + store>(
         signer: &signer,
         alloc_point: u128
-    ) acquires FarmPoolCapability, FarmPoolInfo {
+    ) acquires FarmPoolCapability, FarmPoolInfo, FarmPoolEvent {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = Signer::address_of(signer);
         let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
         let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
+        let last_alloc_point = farm_pool_info.alloc_point;
 
         YieldFarming::update_pool<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X, Y>>>(
             &cap.cap,
@@ -306,6 +307,20 @@ module TokenSwapFarm {
             farm_pool_info.alloc_point,
         );
         farm_pool_info.alloc_point = alloc_point;
+
+        if (alloc_point == 0 || last_alloc_point == 0) {
+            let farm_pool_event = borrow_global_mut<FarmPoolEvent>(broker);
+            Event::emit_event(
+                &mut farm_pool_event.activation_state_event_handler,
+                ActivationStateEvent {
+                    y_token_code: Token::token_code<X>(),
+                    x_token_code: Token::token_code<Y>(),
+                    signer: broker,
+                    admin: broker,
+                    activation_state: (alloc_point > 0),
+                }
+            );
+        };
     }
 
     /// DEPRECATED call
@@ -625,7 +640,6 @@ module TokenSwapFarm {
             Token::zero<LiquidityToken<X, Y>>()
         };
 
-
         // Withdraw addtion token. Addtionally, combine addtion token and own token.
         let addition_token = TokenSwapRouter::withdraw_liquidity_token<X, Y>(account, amount);
         let total_token = Token::join<LiquidityToken<X, Y>>(own_token, addition_token);
@@ -648,6 +662,7 @@ module TokenSwapFarm {
         } else {
             // predict boost factor
             let new_weight_factor = TokenSwapFarmBoost::predict_boost_factor<X, Y>(account_addr, total_amount);
+
             let asset_weight = TokenSwapFarmBoost::calculate_boost_weight(total_amount, new_weight_factor);
             TokenSwapFarmBoost::set_boost_factor<X, Y>(&farm_cap.cap, account, new_weight_factor);
 

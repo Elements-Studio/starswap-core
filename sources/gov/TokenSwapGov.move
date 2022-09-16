@@ -208,7 +208,6 @@ module TokenSwapGov {
         let farm_genesis_token = Account::withdraw<STAR::STAR>(account, farm_genesis);
         TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
 
-
         // Release 10% for syrup token stake. genesis release 5%.
         let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, syrup_genesis);
