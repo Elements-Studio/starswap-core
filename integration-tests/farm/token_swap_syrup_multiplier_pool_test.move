@@ -57,11 +57,7 @@ module SwapAdmin::MultiplierPoolHelper {
         );
     }
 
-    public fun query_pool(): (
-        u64,
-        u128,
-        u128
-    ) {
+    public fun query_pool(): (u64, u128, u128) {
         TokenSwapSyrupMultiplierPool::query_pool<MockPoolType, MockAssetType>(&BCS::to_bytes<u64>(&10))
     }
 }

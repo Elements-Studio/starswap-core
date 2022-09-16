@@ -1,4 +1,6 @@
-//# init -n test
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+
+//# faucet --addr SwapAdmin --amount 10000000000000000
 
 //# faucet --addr alice --amount 10000000000000000
 
@@ -9,8 +11,6 @@
 //# faucet --addr davied --amount 10000000000000000
 
 //# block --author 0x1 --timestamp 10000000
-
-//# publish
 
 //# publish
 module SwapAdmin::YieldFarmingWrapper {
@@ -51,22 +51,29 @@ module SwapAdmin::YieldFarmingWrapper {
         TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
         YieldFarming::initialize<MockPoolType, MockTokenType>(account, treasury);
 
-        let asset_cap = YieldFarming::add_asset_v2<MockPoolType, MockAssetType>(account, 50, 0);
+        let asset_cap = YieldFarming::add_asset_v2<MockPoolType, MockAssetType>(account, 0, 0);
         move_to(account, GovModfiyParamCapability {
             cap: asset_cap,
         });
     }
 
-    public fun reset_release_per_second(
-        account: &signer,
-        amount: u128
-    ) acquires GovModfiyParamCapability {
-        let account_addr = Signer::address_of(account);
-        let cap = borrow_global_mut<GovModfiyParamCapability>(account_addr);
-        YieldFarmingV3::modify_global_release_per_second<MockPoolType, MockAssetType>(
+    public fun set_alloc_point(
+        alloc_point: u128,
+    )  acquires GovModfiyParamCapability {
+        Debug::print(&b"11111111");
+        let cap = borrow_global_mut<GovModfiyParamCapability>(broker_addr());
+        let (
+            last_alloc_point,
+            _
+        ) = query_global_pool_info();
+
+        Debug::print(&b"22222222");
+
+        YieldFarmingV3::update_pool<MockPoolType, MockTokenType, MockAssetType>(
             &cap.cap,
-            Signer::address_of(account),
-            amount
+            broker_addr(),
+            alloc_point,
+            last_alloc_point,
         );
     }
 
@@ -198,15 +205,33 @@ module SwapAdmin::YieldFarmingWrapper {
 
 //# block --author 0x1 --timestamp 10001000
 
+//# run --signers SwapAdmin
+script {
+    use StarcoinFramework::Token;
+    use SwapAdmin::YieldFarmingWrapper;
+
+    fun swap_admin_register_token(account: signer) {
+        Token::register_token<YieldFarmingWrapper::MockTokenType>(&account, 9u8);
+    }
+}
+// check: EXECUTED
+
+//# run --signers alice
+script {
+    use StarcoinFramework::Account;
+    use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
+
+    fun alice_accept(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
+}
+// check: EXECUTED
+
+
 //# run --signers bob
 script {
     use StarcoinFramework::Account;
     use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
 
-    /// Inital token into yield farming treasury
-    fun bob_accept(signer: signer) {
-        Account::do_accept_token<MockTokenType>(&signer);
-    }
+    fun bob_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
 // check: EXECUTED
 
@@ -215,50 +240,49 @@ script {
     use StarcoinFramework::Account;
     use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
 
-    /// Inital token into yield farming treasury
-    fun cindy_accept(signer: signer) {
-        Account::do_accept_token<MockTokenType>(&signer);
-    }
+    fun cindy_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
 // check: EXECUTED
+
 
 //# run --signers davied
 script {
     use StarcoinFramework::Account;
     use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
 
-    /// Inital token into yield farming treasury
-    fun davied_accept(signer: signer) {
-        Account::do_accept_token<MockTokenType>(&signer);
-    }
+    fun davied_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
 // check: EXECUTED
 
-//# run --signers alice
+//# run --signers SwapAdmin
 script {
     use StarcoinFramework::Account;
     use StarcoinFramework::Token;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
-    /// Inital token into yield farming treasury
-    fun alice_init_token_into_treasury(signer: signer) {
-        // Accept token
-        Token::register_token<MockTokenType>(&signer, 9u8);
-        Account::do_accept_token<MockTokenType>(&signer);
+    /// Initial reward token, registered and mint it
+    fun admin_init_treasury(account: signer) {
+        Account::deposit_to_self(
+            &account,
+            Token::mint<YieldFarmingWrapper::MockTokenType>(
+                &account,
+                CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(100000000)
+            )
+        );
 
-        let usdx_token = Token::mint<MockTokenType>(&signer, CommonHelper::pow_amount<MockTokenType>(100000000));
-        Account::deposit_to_self(&signer, usdx_token);
+        let tresury = Account::withdraw(
+            &account,
+            CommonHelper::pow_amount<MockTokenType>(100000)
+        );
 
-        Account::deposit<MockTokenType>(@bob, Token::mint<MockTokenType>(&signer, CommonHelper::pow_amount<MockTokenType>(1000000)));
-        Account::deposit<MockTokenType>(@cindy, Token::mint<MockTokenType>(&signer, CommonHelper::pow_amount<MockTokenType>(1000000)));
-        Account::deposit<MockTokenType>(@davied, Token::mint<MockTokenType>(&signer, CommonHelper::pow_amount<MockTokenType>(1000000)));
+        YieldFarmingWrapper::initialize_global_pool(&account, tresury, CommonHelper::pow_amount<MockTokenType>(1));
 
-        let usdx_amount = CommonHelper::pow_amount<MockTokenType>(1000);
-
-        let tresury = Account::withdraw(&signer, usdx_amount);
-        YieldFarmingWrapper::initialize_global_pool(&signer, tresury, );
-        YieldFarmingWrapper::reset_release_per_second(&signer, 0);
+        Account::deposit(@alice, Token::mint<MockTokenType>(&account, CommonHelper::pow_amount<MockTokenType>(5000)));
+        Account::deposit(@bob, Token::mint<MockTokenType>(&account, CommonHelper::pow_amount<MockTokenType>(5000)));
+        Account::deposit(@cindy, Token::mint<MockTokenType>(&account, CommonHelper::pow_amount<MockTokenType>(5000)));
+        Account::deposit(@davied, Token::mint<MockTokenType>(&account, CommonHelper::pow_amount<MockTokenType>(5000)));
     }
 }
 // check: EXECUTED
@@ -269,11 +293,16 @@ script {
     use SwapAdmin::CommonHelper;
 
     fun bob_stake_1x_token_to_pool_failed(signer: signer) {
-        let stake_id = YieldFarmingWrapper::stake(&signer, CommonHelper::pow_amount<MockTokenType>(1), 1, 0);
-        assert!(stake_id == 1, 100001);
+        let stake_id = YieldFarmingWrapper::stake(
+            &signer,
+            CommonHelper::pow_amount<MockTokenType>(1),
+            1,
+            0
+        );
+        assert!(stake_id == 1, 10010);
     }
 }
-// check: "Keep(ABORTED { code: 28929"
+// check: ABORTED 28929
 
 //# block --author 0x1 --timestamp 10002000
 
@@ -284,17 +313,17 @@ script {
     // Except harvest_index is 0 because of pool not aliving.
     fun after_10_second_check_harvest_index(_signer: signer) {
         let (_, _, _, harvest_index) = YieldFarmingWrapper::query_info();
-        assert!(harvest_index == 0, 100002);
+        assert!(harvest_index == 0, 10020);
     }
 }
 // check: EXECUTED
 
-//# run --signers alice
+//# run --signers SwapAdmin
 script {
     use SwapAdmin::YieldFarmingWrapper;
 
-    fun alice_switch_to_alive(signer: signer) {
-        YieldFarmingWrapper::set_alive(&signer, true);
+    fun alice_switch_to_alive(_signer: signer) {
+        YieldFarmingWrapper::set_alloc_point(100);
     }
 }
 // check: EXECUTED
@@ -312,7 +341,7 @@ script {
 
     fun bob_stake_1x_token_to_pool(signer: signer) {
         let stake_id = YieldFarmingWrapper::stake(&signer, CommonHelper::pow_amount<MockTokenType>(1), 1, 0);
-        assert!(stake_id == 1, 10004);
+        assert!(stake_id == 1, 10030);
 
         // get header rewards
         let header_rewards = YieldFarmingWrapper::harvest(&signer, 1);
@@ -320,7 +349,7 @@ script {
 
         Debug::print(&amount);
         Debug::print(&CommonHelper::pow_amount<MockTokenType>(1));
-        assert!(amount == CommonHelper::pow_amount<MockTokenType>(1), 10005);
+        assert!(amount == CommonHelper::pow_amount<MockTokenType>(1), 10031);
         Account::deposit_to_self(&signer, header_rewards);
 
         let (
@@ -330,32 +359,32 @@ script {
             harvest_index
         ) = YieldFarmingWrapper::query_info();
 
-        assert!(asset_total_weight == CommonHelper::pow_amount<MockTokenType>(1), 10006);
-        assert!(harvest_index == 0, 10006); // Bob get first gain
+        assert!(asset_total_weight == CommonHelper::pow_amount<MockTokenType>(1), 10032);
+        assert!(harvest_index == 0, 10033); // Bob get first gain
     }
 }
 // check: EXECUTED
 
 //# block --author 0x1 --timestamp 10004000
 
-//# run --signers alice
+//# run --signers SwapAdmin
 script {
     use SwapAdmin::YieldFarmingWrapper;
 
-    fun alice_switch_to_unalive(signer: signer) {
-        YieldFarmingWrapper::set_alive(&signer, false);
+    fun alice_switch_to_unalive(_signer: signer) {
+        YieldFarmingWrapper::set_alloc_point(0);
     }
 }
 // check: EXECUTED
 
 //# block --author 0x1 --timestamp 10005000
 
-//# run --signers alice
+//# run --signers SwapAdmin
 script {
     use SwapAdmin::YieldFarmingWrapper;
 
-    fun alice_switch_to_alive(signer: signer) {
-        YieldFarmingWrapper::set_alive(&signer, true);
+    fun alice_switch_to_alive(_signer: signer) {
+        YieldFarmingWrapper::set_alloc_point(100);
     }
 }
 // check: EXECUTED
@@ -376,17 +405,18 @@ script {
         let amount = Token::value<MockTokenType>(&harvest_token);
 
         Debug::print(&amount);
-        assert!(amount == CommonHelper::pow_amount<MockTokenType>(2), 10011);
+        assert!(amount == CommonHelper::pow_amount<MockTokenType>(2), 10040);
 
         Account::deposit_to_self(&signer, harvest_token);
 
         // Unstake from pool
         let (asset_val, token_val) =  YieldFarmingWrapper::unstake(&signer, 1);
-        assert!(asset_val == CommonHelper::pow_amount<MockTokenType>(1), 10012);
-        assert!(token_val == 0, 10013);
+        assert!(asset_val == CommonHelper::pow_amount<MockTokenType>(1), 10041);
+        assert!(token_val == 0, 10042);
     }
 }
 // check: EXECUTED
+
 
 //# block --author 0x1 --timestamp 10007000
 
@@ -402,17 +432,15 @@ script {
 }
 // check: EXECUTED
 
-
-//# run --signers alice
+//# run --signers SwapAdmin
 script {
     use SwapAdmin::YieldFarmingWrapper;
 
-    fun alice_switch_to_unalive(signer: signer) {
-        YieldFarmingWrapper::set_alive(&signer, false);
+    fun alice_switch_to_unalive(_signer: signer) {
+        YieldFarmingWrapper::set_alloc_point(0);
     }
 }
 // check: EXECUTED
-
 
 //# run --signers cindy
 script {

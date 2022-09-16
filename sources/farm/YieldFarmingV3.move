@@ -477,6 +477,7 @@ module YieldFarmingV3 {
         let now_seconds = Timestamp::now_seconds();
 
         intra_pool_state_check_v2<PoolType, AssetT>(now_seconds, farming_asset);
+        assert!(farming_asset_extend.alloc_point > 0, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
 
         let user_addr = Signer::address_of(signer);
         if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
@@ -496,7 +497,6 @@ module YieldFarmingV3 {
                 }
             );
         };
-
 
         let (harvest_index, gain) = if (farming_asset.asset_total_weight <= 0) {
             let golbal_pool_info =
@@ -604,9 +604,14 @@ module YieldFarmingV3 {
         assert!(stake_id == out_stake_id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
         assert_check_maybe_deadline(now_seconds, deadline);
 
-
         //TODO can be clean up after pool alloc mode upgrade
-        let (new_harvest_index, now_seconds, period_gain, asset_weight, asset_amount) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        let (
+            new_harvest_index,
+            now_seconds,
+            period_gain,
+            asset_weight,
+            asset_amount
+        ) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let (new_harvest_index, now_seconds) = if (farming_asset.alive) {
                 (calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds), now_seconds)
             } else {
@@ -634,7 +639,6 @@ module YieldFarmingV3 {
             let period_gain = calculate_withdraw_amount_v2(new_harvest_index, staked_latest_harvest_index, staked_asset_weight);
             (new_harvest_index, now_seconds, period_gain, staked_asset_weight, staked_asset_amount)
         };
-
 
         let withdraw_token = Token::withdraw<RewardTokenT>(&mut farming.treasury_token, staked_gain + period_gain);
         assert!(farming_asset.asset_total_weight >= asset_weight, Errors::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
@@ -864,7 +868,9 @@ module YieldFarmingV3 {
 
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_pool_info_v2<PoolType: store, AssetT: store>(broker: address): (u128, u128, u128, u128)
+    public fun query_pool_info_v2<PoolType: store, AssetT: store>(
+        broker: address
+    ): (u128, u128, u128, u128)
     acquires FarmingAsset, FarmingAssetExtend {
         let asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
         let asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
@@ -916,6 +922,12 @@ module YieldFarmingV3 {
         assert!(farming_asset.last_update_timestamp <= now_seconds, Errors::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
         let golbal_pool_info = borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(@SwapAdmin);
+
+        // Not any pool have alloc point
+        if (golbal_pool_info.total_alloc_point <= 0) {
+            return farming_asset.harvest_index
+        };
+
         let time_period = now_seconds - farming_asset.last_update_timestamp;
         let global_pool_reward = golbal_pool_info.pool_release_per_second * (time_period as u128);
         let pool_reward = BigExponential::exp(
@@ -929,6 +941,7 @@ module YieldFarmingV3 {
         } else {
             BigExponential::mantissa(BigExponential::div_exp(pool_reward, BigExponential::exp_direct(farming_asset.asset_total_weight)))
         };
+
         let index_accumulated = U256::add(
             U256::from_u128(farming_asset.harvest_index),
             harvest_index_period
@@ -963,17 +976,19 @@ module YieldFarmingV3 {
         };
     }
 
+    /// DEPRECATED
     /// Pool state check function
     fun intra_pool_state_check<PoolType: store,
                                AssetT: store>(
-        now_seconds: u64,
-        farming_asset: &FarmingAsset<PoolType, AssetT>
+        _now_seconds: u64,
+        _farming_asset: &FarmingAsset<PoolType, AssetT>
     ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
         // Check is alive
-        assert!(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
+        // assert!(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
 
         // Pool Start state check
-        assert!(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
+        // assert!(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
     }
 
     /// Pool state check function
@@ -981,9 +996,6 @@ module YieldFarmingV3 {
         now_seconds: u64,
         farming_asset: &FarmingAsset<PoolType, AssetT>
     ) {
-        // Check is alive
-        //        assert!(farming_asset.alive, Errors::invalid_state(ERR_FARMING_NOT_ALIVE));
-
         // Pool Start state check
         assert!(now_seconds >= farming_asset.start_time, Errors::invalid_state(ERR_FARMING_NOT_READY));
     }
