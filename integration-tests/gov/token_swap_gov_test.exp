@@ -7,20 +7,10 @@ task 8 'run'. lines 17-26:
 }
 
 task 9 'run'. lines 28-52:
-Error: error[E04007]: incompatible types
-   ┌─ /var/folders/yl/1jwdcrx91p96yh8c0yw03x280000gn/T/.tmpHSHrbO:32:9
-   │
-31 │     fun upgrade_dao_treasury_genesis(signer: signer) {
-   │                                              ------ Given: 'signer'
-32 │         TokenSwapGov::upgrade_dao_treasury_genesis(signer);
-   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Invalid call of 'SwapAdmin::TokenSwapGov::upgrade_dao_treasury_genesis'. Invalid argument for parameter 'a0'
-   │
-   ┌─ /var/folders/yl/1jwdcrx91p96yh8c0yw03x280000gn/T/.tmp4qy4JM:56:56
-   │
-56 │     native public fun upgrade_dao_treasury_genesis(a0: &signer);
-   │                                                        ------- Expected: '&signer'
-
-
+{
+  "gas_used": 196634,
+  "status": "Executed"
+}
 
 task 11 'run'. lines 57-65:
 {
@@ -30,306 +20,128 @@ task 11 'run'. lines 57-65:
 
 task 12 'run'. lines 67-76:
 {
-  "gas_used": 899106,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 10,
-      "code_offset": 150
-    }
-  }
+  "gas_used": 967941,
+  "status": "Executed"
 }
 
 task 13 'run'. lines 78-91:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 32067,
+  "status": "Executed"
 }
 
 task 14 'run'. lines 93-111:
 {
-  "gas_used": 29254,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 4,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 229473,
+  "status": "Executed"
 }
 
 task 16 'run'. lines 119-143:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 191244,
+  "status": "Executed"
 }
 
 task 17 'run'. lines 145-169:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 191244,
+  "status": "Executed"
 }
 
 task 18 'run'. lines 171-198:
 {
-  "gas_used": 12014,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 238334,
+  "status": "Executed"
 }
 
 task 19 'run'. lines 200-227:
 {
-  "gas_used": 12078,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 238398,
+  "status": "Executed"
 }
 
 task 20 'run'. lines 229-238:
 {
-  "gas_used": 31371,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 75626,
+  "status": "Executed"
 }
 
 task 21 'run'. lines 240-255:
 {
-  "gas_used": 11462,
+  "gas_used": 77342,
   "status": {
-    "ExecutionFailure": {
+    "MoveAbort": {
       "location": {
         "Module": {
           "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapGov"
         }
       },
-      "function": 9,
-      "code_offset": 1
+      "abort_code": "51719"
     }
   }
 }
 
 task 22 'run'. lines 257-265:
 {
-  "gas_used": 31371,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 75626,
+  "status": "Executed"
 }
 
 task 23 'run'. lines 267-275:
 {
-  "gas_used": 33766,
+  "gas_used": 53748,
   "status": {
-    "ExecutionFailure": {
+    "MoveAbort": {
       "location": {
         "Module": {
           "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapGov"
         }
       },
-      "function": 5,
-      "code_offset": 1
+      "abort_code": "51975"
     }
   }
 }
 
 task 24 'run'. lines 277-289:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 32197,
+  "status": "Executed"
 }
 
 task 25 'run'. lines 291-303:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 32197,
+  "status": "Executed"
 }
 
 task 27 'run'. lines 307-320:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 31819,
+  "status": "Executed"
 }
 
 task 28 'run'. lines 322-335:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 31819,
+  "status": "Executed"
 }
 
 task 29 'run'. lines 338-354:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 3,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 150411,
+  "status": "Executed"
 }
 
 task 30 'run'. lines 356-369:
 {
-  "gas_used": 33766,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 5,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 147219,
+  "status": "Executed"
 }
 
 task 32 'run'. lines 376-395:
 {
-  "gas_used": 11462,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 3,
-      "code_offset": 1
-    }
-  }
+  "gas_used": 178595,
+  "status": "Executed"
 }

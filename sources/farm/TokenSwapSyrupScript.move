@@ -12,6 +12,9 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
     use SwapAdmin::TokenSwapGov;
+    use StarcoinFramework::Errors;
+
+    const ERR_DEPRECATED: u64 = 1;
 
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
@@ -128,25 +131,34 @@ module TokenSwapSyrupScript {
     }
 
     ///TODO: Turn over capability from script to syrup boost on barnard
-    public(script) fun turnover_vestar_mintcap_for_barnard(signer: signer) acquires VestarMintCapabilityWrapper {
-        STAR::assert_genesis_address(&signer);
+    public(script) fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // STAR::assert_genesis_address(&signer);
+        //
+        // let broker = Signer::address_of(&signer);
+        //
+        // TokenSwapVestarMinter::maybe_init_event_handler_barnard(&signer);
+        //
+        // if (exists<VestarRouterCapabilityWrapper>(broker) ||
+        //     !exists<VestarMintCapabilityWrapper>(broker)) {
+        //     return
+        // };
+        //
+        // let VestarMintCapabilityWrapper {
+        //     cap: mint_cap
+        // } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
+        //
+        // move_to(&signer, VestarRouterCapabilityWrapper {
+        //     cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
+        // });
+    }
 
-        let broker = Signer::address_of(&signer);
-
-        TokenSwapVestarMinter::maybe_init_event_handler_barnard(&signer);
-
-        if (exists<VestarRouterCapabilityWrapper>(broker) ||
-            !exists<VestarMintCapabilityWrapper>(broker)) {
-            return
-        };
-
-        let VestarMintCapabilityWrapper {
-            cap: mint_cap
-        } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
-
-        move_to(&signer, VestarRouterCapabilityWrapper {
-            cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
-        });
+    public(script) fun addtion_pool_amount<TokenT: store>(
+        account: signer,
+        key: vector<u8>,
+        amount: u128
+    ) {
+        TokenSwapSyrup::addtion_pool_amount<TokenT>(&account, &key, amount);
     }
 }
 }

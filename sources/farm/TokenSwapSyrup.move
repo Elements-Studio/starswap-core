@@ -518,11 +518,11 @@ module TokenSwapSyrup {
     /// then go to the configuration to query the old one.
     public fun pledge_time_to_mulitplier<TokenT>(pledge_time_sec: u64): u64 {
         let key = pledge_time_to_key(pledge_time_sec);
-        if (TokenSwapSyrupMultiplierPool::has<PoolTypeSyrup, Token::Token<TokenT>>(&key)) {
+        if (TokenSwapSyrupMultiplierPool::has<PoolTypeSyrup, Token::Token<TokenT>>(broker_addr(), &key)) {
             let (multiplier, _, _) = TokenSwapSyrupMultiplierPool::query_pool<
                 PoolTypeSyrup,
                 Token::Token<TokenT>
-            >(&key);
+            >(broker_addr(), &key);
             multiplier
         } else {
             assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
@@ -673,6 +673,24 @@ module TokenSwapSyrup {
             alloc_point,
             multiplier_pool_cap: new_cap
         });
+    }
+
+    /// Initial Addtion multiplier amount for upgrade
+    public fun addtion_pool_amount<TokenT: store>(
+        account: &signer,
+        key: &vector<u8>,
+        amount: u128
+    ) acquires SyrupExtInfoV2 {
+        STAR::assert_genesis_address(account);
+
+        let ext_v2 =
+            borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
+        TokenSwapSyrupMultiplierPool::addtion_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
+            broker_addr(),
+            &ext_v2.multiplier_pool_cap,
+            key,
+            amount,
+        );
     }
 
     fun broker_addr(): address {

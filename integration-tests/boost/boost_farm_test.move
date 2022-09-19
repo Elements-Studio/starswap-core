@@ -139,7 +139,6 @@ script {
     use SwapAdmin::TokenMock::{WBTC, WETH, WDAI};
     use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::CommonHelper;
-    use StarcoinFramework::Debug;
 
     fun add_liquidity(signer: signer) {
         let amount_btc_desired: u128 = CommonHelper::pow_amount<WBTC>(2000);

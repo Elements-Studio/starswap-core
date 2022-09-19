@@ -482,6 +482,7 @@ module TokenSwapVestarMinter {
             staked_amount: 200,
             pledge_time_sec: 200,
         });
+
         move_to(&signer, MintRecordList{
             items,
         });
@@ -491,9 +492,13 @@ module TokenSwapVestarMinter {
 
         let user_addr = Signer::address_of(&signer);
 
+        let token_amount = value_of_id_by_token<STAR::STAR>(user_addr, 1);
+        Debug::print(&token_amount);
+
         // query new record and old record in new record list
-        assert!(value_of_id_by_token<STAR::STAR>(user_addr, 1) == 100, 10006);
+        assert!(token_amount == 100, 10006);
         assert!(!exists_record<STAR::STAR>(user_addr, 2), 10007);
+
     }
 }
 }

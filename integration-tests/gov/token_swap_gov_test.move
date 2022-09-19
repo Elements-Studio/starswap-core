@@ -31,7 +31,7 @@ script {
     use SwapAdmin::TokenSwapGov;
 
     fun upgrade_dao_treasury_genesis(signer: signer) {
-        TokenSwapGov::upgrade_dao_treasury_genesis(signer);
+        TokenSwapGov::upgrade_dao_treasury_genesis(&signer);
     }
 }
 // check: EXECUTED
