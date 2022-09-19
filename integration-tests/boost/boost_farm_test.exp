@@ -2,7 +2,7 @@ processed 15 tasks
 
 task 4 'run'. lines 10-21:
 {
-  "gas_used": 2779773,
+  "gas_used": 2944767,
   "status": "Executed"
 }
 
@@ -14,7 +14,7 @@ task 5 'run'. lines 23-34:
 
 task 6 'run'. lines 37-132:
 {
-  "gas_used": 3457629,
+  "gas_used": 3500483,
   "status": "Executed"
 }
 
@@ -26,19 +26,19 @@ task 7 'run'. lines 134-218:
 
 task 9 'run'. lines 222-231:
 {
-  "gas_used": 81039,
+  "gas_used": 101752,
   "status": "Executed"
 }
 
 task 10 'run'. lines 234-243:
 {
-  "gas_used": 569862,
+  "gas_used": 569159,
   "status": "Executed"
 }
 
 task 12 'run'. lines 247-266:
 {
-  "gas_used": 1663251,
+  "gas_used": 1662548,
   "status": "Executed"
 }
 

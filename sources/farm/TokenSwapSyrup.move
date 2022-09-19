@@ -19,6 +19,7 @@ module TokenSwapSyrup {
     use SwapAdmin::TokenSwapSyrupMultiplierPool;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::EventUtil;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -71,6 +72,7 @@ module TokenSwapSyrup {
         end_time: u64,
     }
 
+    /// TODO: DEPRECATED Call
     /// Event emitted when farm been added
     struct AddPoolEvent has drop, store {
         /// token code of X type
@@ -81,6 +83,7 @@ module TokenSwapSyrup {
         admin: address,
     }
 
+    /// TODO: DEPRECATED Call
     /// Event emitted when farm been added
     struct ActivationStateEvent has drop, store {
         /// token code of X type
@@ -93,6 +96,7 @@ module TokenSwapSyrup {
         activation_state: bool,
     }
 
+    /// TODO: DEPRECATED Call
     /// Event emitted when stake been called
     struct StakeEvent has drop, store {
         /// token code of X type
@@ -105,6 +109,7 @@ module TokenSwapSyrup {
         admin: address,
     }
 
+    /// TODO: DEPRECATED Call
     /// Event emitted when unstake been called
     struct UnstakeEvent has drop, store {
         /// token code of X type
@@ -115,6 +120,7 @@ module TokenSwapSyrup {
         admin: address,
     }
 
+    /// TODO: DEPRECATED Call
     struct SyrupEvent has key, store {
         add_pool_event: Event::EventHandle<AddPoolEvent>,
         activation_state_event_handler: Event::EventHandle<ActivationStateEvent>,
@@ -122,19 +128,107 @@ module TokenSwapSyrup {
         unstake_event_handler: Event::EventHandle<UnstakeEvent>,
     }
 
-    /// Initialize for Syrup pool
-    public fun initialize(signer: &signer, token: Token::Token<STAR::STAR>) {
-        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(signer, token);
-
-        move_to(signer, SyrupEvent {
-            add_pool_event: Event::new_event_handle<AddPoolEvent>(signer),
-            activation_state_event_handler: Event::new_event_handle<ActivationStateEvent>(signer),
-            stake_event_handler: Event::new_event_handle<StakeEvent>(signer),
-            unstake_event_handler: Event::new_event_handle<UnstakeEvent>(signer),
-        });
+    struct AddPoolEventV2 has drop, store {
+        /// token code of X type
+        token_code: Token::TokenCode,
+        /// admin address
+        admin: address,
+        /// Alloc point
+        alloc_point: u128,
+        /// delay
+        delay: u64,
     }
 
-    /// TODO: Deprecated call
+    struct AddPoolStepwiseEvent has drop, store {
+        /// token code of X type
+        token_code: Token::TokenCode,
+        /// admin address
+        admin: address,
+        /// alloc point
+        pledge_time: u64,
+        /// multiplier
+        multiplier: u64,
+    }
+
+    struct ModifyReleasePerSecondEvent has drop, store {
+        /// token code of X type
+        token_code: Token::TokenCode,
+        /// admin address
+        admin: address,
+        /// release per second
+        pool_release_per_second: u128,
+    }
+
+    struct UpdateAllocPointEvent has drop, store {
+        /// token code of X type
+        token_code: Token::TokenCode,
+        /// admin address
+        admin: address,
+        /// alloc point
+        alloc_point: u128,
+    }
+
+    /// Event emitted when stake been called
+    struct StakeEventV2 has drop, store {
+        /// token code of X type
+        token_code: Token::TokenCode,
+        /// signer of stake user
+        signer: address,
+        // value of stake user
+        amount: u128,
+        // admin address
+        admin: address,
+        // Amount
+        pledge_time: u64,
+        // Amount
+        multiplier: u64,
+    }
+
+    /// Event emitted when unstake been called
+    struct UnstakeEventV2 has drop, store {
+        // token code of X type
+        token_code: Token::TokenCode,
+        // signer of stake user
+        signer: address,
+        // admin address
+        admin: address,
+        amount: u128,
+        pledge_time: u64,
+        multiplier: u64,
+    }
+
+    struct AddStepwiseEvent has drop, store {
+        token_code: Token::TokenCode,
+        admin: address,
+        pledge_time: u64,
+        multiplier: u64,
+    }
+
+    /// Initialize for Syrup pool
+    public fun initialize(
+        account: &signer,
+        token: Token::Token<STAR::STAR>
+    ) {
+        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(account, token);
+
+        EventUtil::init_event_with_T<AddPoolEventV2>(account);
+        EventUtil::init_event_with_T<UpdateAllocPointEvent>(account);
+        EventUtil::init_event_with_T<StakeEventV2>(account);
+        EventUtil::init_event_with_T<UnstakeEventV2>(account);
+        EventUtil::init_event_with_T<AddStepwiseEvent>(account);
+        EventUtil::init_event_with_T<AddPoolStepwiseEvent>(account);
+        EventUtil::init_event_with_T<ModifyReleasePerSecondEvent>(account);
+    }
+
+    /// Initialized global pool
+    public fun initialize_global_pool_info(
+        account: &signer,
+        pool_release_per_second: u128
+    ) {
+        YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(account, pool_release_per_second);
+    }
+
+    /// TODO: DEPRECATED call
     /// Add syrup pool for token type
     public fun add_pool<TokenT: store>(
         _signer: &signer,
@@ -176,7 +270,7 @@ module TokenSwapSyrup {
         signer: &signer,
         alloc_point: u128,
         delay: u64
-    ) acquires SyrupEvent {
+    ) {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -200,13 +294,15 @@ module TokenSwapSyrup {
         });
 
         // Publish event
-        let event = borrow_global_mut<SyrupEvent>(account);
-        Event::emit_event(&mut event.add_pool_event,
-            AddPoolEvent {
+        EventUtil::emit_event(
+            broker_addr(),
+            AddPoolEventV2 {
                 token_code: Token::token_code<TokenT>(),
-                signer: Signer::address_of(signer),
                 admin: account,
-            });
+                alloc_point,
+                delay,
+            }
+        );
     }
 
     /// Set release per second for token type pool
@@ -221,7 +317,19 @@ module TokenSwapSyrup {
         syrup.release_per_second = release_per_second;
 
         YieldFarming::modify_global_release_per_second<PoolTypeSyrup, Token::Token<TokenT>>(
-            &syrup.param_cap, broker_addr(), release_per_second);
+            &syrup.param_cap,
+            broker_addr(),
+            release_per_second
+        );
+
+        EventUtil::emit_event(
+            broker_addr(),
+            ModifyReleasePerSecondEvent {
+                token_code: Token::token_code<TokenT>(),
+                admin: broker_addr(),
+                pool_release_per_second: release_per_second,
+            }
+        );
     }
 
     /// TODO: DEPRECATED call
@@ -248,6 +356,16 @@ module TokenSwapSyrup {
             broker_addr(),
             &pledge_time_to_key(interval_sec),
             multiplier,
+        );
+
+        EventUtil::emit_event<AddPoolStepwiseEvent>(
+            broker_addr,
+            AddPoolStepwiseEvent {
+                token_code: Token::token_code<TokenT>(),
+                admin: broker_addr,
+                pledge_time: interval_sec,
+                multiplier,
+            }
         );
     }
 
@@ -280,6 +398,15 @@ module TokenSwapSyrup {
             syrup_ext_info.alloc_point
         );
         syrup_ext_info.alloc_point = alloc_point;
+
+        EventUtil::emit_event<UpdateAllocPointEvent>(
+            broker,
+            UpdateAllocPointEvent {
+                token_code: Token::token_code<TokenT>(),
+                admin: broker,
+                alloc_point,
+            }
+        );
     }
 
 
@@ -301,7 +428,7 @@ module TokenSwapSyrup {
         signer: &signer,
         pledge_time_sec: u64,
         amount: u128
-    ) acquires Syrup, SyrupStakeList, SyrupEvent, SyrupExtInfoV2 {
+    ) acquires Syrup, SyrupStakeList, SyrupExtInfoV2 {
         TokenSwapConfig::assert_global_freeze();
         assert!(pledge_time_sec > 0, Errors::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
 
@@ -376,13 +503,14 @@ module TokenSwapSyrup {
         });
 
         // Publish stake event to chain
-        let event = borrow_global_mut<SyrupEvent>(broker_addr());
-        Event::emit_event(&mut event.stake_event_handler,
-            StakeEvent {
+        EventUtil::emit_event(broker_addr,
+            StakeEventV2 {
                 token_code: Token::token_code<TokenT>(),
                 signer: user_addr,
                 amount,
-                admin: broker_addr(),
+                admin: broker_addr,
+                pledge_time: pledge_time_sec,
+                multiplier: stepwise_multiplier,
             });
     }
 
@@ -391,7 +519,7 @@ module TokenSwapSyrup {
     public fun unstake<TokenT: store>(signer: &signer, id: u64): (
         Token::Token<TokenT>,
         Token::Token<STAR::STAR>
-    ) acquires SyrupStakeList, SyrupEvent, Syrup, SyrupExtInfoV2 {
+    ) acquires SyrupStakeList, Syrup, SyrupExtInfoV2 {
         TokenSwapConfig::assert_global_freeze();
 
         let user_addr = Signer::address_of(signer);
@@ -414,7 +542,7 @@ module TokenSwapSyrup {
         let SyrupStake<TokenT> {
             id: _,
             harvest_cap,
-            stepwise_multiplier: _,
+            stepwise_multiplier,
             start_time,
             end_time,
             token_amount,
@@ -438,14 +566,17 @@ module TokenSwapSyrup {
             token_amount,
         );
 
-        let event = borrow_global_mut<SyrupEvent>(broker_addr);
-        Event::emit_event(&mut event.unstake_event_handler,
-            UnstakeEvent {
+        EventUtil::emit_event(
+            broker_addr,
+            UnstakeEventV2 {
                 signer: user_addr,
                 token_code: Token::token_code<TokenT>(),
                 admin: broker_addr,
-            });
-
+                amount: token_amount,
+                pledge_time: end_time - start_time,
+                multiplier: stepwise_multiplier,
+            }
+        );
         (unstaken_token, reward_token)
     }
 
@@ -491,6 +622,14 @@ module TokenSwapSyrup {
     /// return value: (total_alloc_point, pool_release_per_second)
     public fun query_syrup_info(): (u128, u128) {
         YieldFarming::query_global_pool_info<PoolTypeSyrup>(STAR::token_address())
+    }
+
+    /// Query the information of a certain pledge time in the multiplier pool
+    public fun query_multiplier_pool_info<TokenT: store>(pledge_time: u64): (u64, u128, u128) {
+        TokenSwapSyrupMultiplierPool::query_pool<PoolTypeSyrup, Token::Token<TokenT>>(
+            broker_addr(),
+            &pledge_time_to_key(pledge_time),
+        )
     }
 
     /// Query pool info from pool type v2
@@ -565,12 +704,14 @@ module TokenSwapSyrup {
         }
     }
 
+    /// TODO DEPRECATED
     /// Syrup global information
-    public fun upgrade_syrup_global(signer: &signer, pool_release_per_second: u128) {
-        YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(signer, pool_release_per_second);
+    public fun upgrade_syrup_global(_signer: &signer, _pool_release_per_second: u128) {
+        // YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(signer, pool_release_per_second);
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    /// DEPRECATED
+    /// TODO DEPRECATED
     /// Extend syrup pool for type
     public fun extend_syrup_pool<TokenT: store>(_signer: &signer, _override_update: bool) {
         abort Errors::invalid_state(ERR_DEPRECATED)
@@ -627,23 +768,66 @@ module TokenSwapSyrup {
         }
     }
 
-    public fun upgrade_from_v1_0_11_to_v1_0_12(account: &signer) acquires SyrupExtInfo {
+    /// Initial Addtion multiplier amount for upgrade
+    public fun addtion_pool_amount<TokenT: store>(
+        account: &signer,
+        pledge_time: u64,
+        amount: u128
+    ) acquires SyrupExtInfoV2 {
         STAR::assert_genesis_address(account);
-        let broker_addr = broker_addr();
 
-        let SyrupExtInfo<STAR::STAR> {
-            multiplier_cap,
-            alloc_point,
-        } = move_from<SyrupExtInfo<STAR::STAR>>(broker_addr);
+        let ext_v2 =
+            borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
+        TokenSwapSyrupMultiplierPool::addtion_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
+            broker_addr(),
+            &ext_v2.multiplier_pool_cap,
+            &pledge_time_to_key(pledge_time),
+            amount,
+        );
+    }
 
-        // Convert to new capability
-        YieldFarmingMultiplier::uninitialize(multiplier_cap);
 
-        let new_cap = TokenSwapSyrupMultiplierPool::initialize<
-            PoolTypeSyrup,
-            Token::Token<STAR::STAR>
-        >(account);
+    public fun upgrade_from_v1_0_11_to_v1_0_12<TokenT: store>(
+        account: &signer
+    ) acquires SyrupExtInfo, SyrupEvent, SyrupExtInfoV2 {
+        STAR::assert_genesis_address(account);
+        let broker_addr = Signer::address_of(account);
 
+        //------------------------------------------//
+        let alloc_point = if (exists<SyrupExtInfo<TokenT>>(broker_addr)) {
+            let SyrupExtInfo<TokenT> {
+                multiplier_cap,
+                alloc_point,
+            } = move_from<SyrupExtInfo<TokenT>>(broker_addr);
+
+            // Convert to new capability
+            YieldFarmingMultiplier::uninitialize(multiplier_cap);
+            alloc_point
+        } else {
+            50
+        };
+        //------------------------------------------//
+
+        //------------------------------------------//
+        // Process syrup ext info
+        if (!exists<SyrupExtInfoV2<TokenT>>(broker_addr)) {
+            let new_cap =
+                TokenSwapSyrupMultiplierPool::initialize<
+                    PoolTypeSyrup,
+                    Token::Token<TokenT>
+                >(account);
+            // Construct new struct of syrup info
+            move_to(account, SyrupExtInfoV2<TokenT> {
+                alloc_point,
+                multiplier_pool_cap: new_cap
+            });
+        };
+        let cap =
+            &borrow_global_mut<SyrupExtInfoV2<TokenT>>(
+                Signer::address_of(account)
+            ).multiplier_pool_cap;
+
+        //------------------------------------------//
         // Add pools from config
         let (
             time_list,
@@ -661,37 +845,43 @@ module TokenSwapSyrup {
             };
             let time = Vector::pop_back(&mut time_list);
             let multiplier = Vector::pop_back(&mut multiplier_list);
-            TokenSwapSyrupMultiplierPool::add_pool(
-                &new_cap,
+
+            TokenSwapSyrupMultiplierPool::add_pool<PoolTypeSyrup, Token::Token<TokenT>>(
+                cap,
                 broker_addr,
                 &pledge_time_to_key(time),
-                multiplier);
+                multiplier
+            );
+        };
+        //------------------------------------------//
+
+        //------------------------------------------//
+        // process event
+        if (exists<SyrupEvent>(broker_addr)) {
+            let SyrupEvent{
+                add_pool_event,
+                activation_state_event_handler,
+                stake_event_handler,
+                unstake_event_handler,
+            } = move_from<SyrupEvent>(broker_addr);
+
+            Event::destroy_handle(add_pool_event);
+            Event::destroy_handle(activation_state_event_handler);
+            Event::destroy_handle(stake_event_handler);
+            Event::destroy_handle(unstake_event_handler);
         };
 
-        // Construct new struct of syrup info
-        move_to(account, SyrupExtInfoV2<STAR::STAR> {
-            alloc_point,
-            multiplier_pool_cap: new_cap
-        });
+        // upgrade event
+        EventUtil::init_event_with_T<AddPoolEventV2>(account);
+        EventUtil::init_event_with_T<UpdateAllocPointEvent>(account);
+        EventUtil::init_event_with_T<StakeEventV2>(account);
+        EventUtil::init_event_with_T<UnstakeEventV2>(account);
+        EventUtil::init_event_with_T<AddStepwiseEvent>(account);
+        EventUtil::init_event_with_T<AddPoolStepwiseEvent>(account);
+        EventUtil::init_event_with_T<ModifyReleasePerSecondEvent>(account);
+        //------------------------------------------//
     }
 
-    /// Initial Addtion multiplier amount for upgrade
-    public fun addtion_pool_amount<TokenT: store>(
-        account: &signer,
-        key: &vector<u8>,
-        amount: u128
-    ) acquires SyrupExtInfoV2 {
-        STAR::assert_genesis_address(account);
-
-        let ext_v2 =
-            borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
-        TokenSwapSyrupMultiplierPool::addtion_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
-            broker_addr(),
-            &ext_v2.multiplier_pool_cap,
-            key,
-            amount,
-        );
-    }
 
     fun broker_addr(): address {
         @SwapAdmin

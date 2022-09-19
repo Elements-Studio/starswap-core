@@ -181,7 +181,6 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         multiplier_pool.asset_weight = multiplier_pool.asset_amount * (multiplier_pool.multiplier as u128);
     }
 
-
     /// Find by key which is from user
     fun find_pool_by_key<PoolType: store, AssetType: store>(
         c: &mut vector<MultiplierPool<PoolType, AssetType>>,

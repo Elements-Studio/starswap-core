@@ -16,7 +16,7 @@ module TokenSwapSyrupScript {
 
     const ERR_DEPRECATED: u64 = 1;
 
-    ///  TODO: Deprecated on mainnet
+    ///  TODO: DEPRECATED on mainnet
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
     }
@@ -124,6 +124,8 @@ module TokenSwapSyrupScript {
     }
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
+        TokenSwapSyrup::initialize_global_pool_info(signer, pool_release_per_second);
+
         let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
         move_to(signer, VestarRouterCapabilityWrapper {
             cap
@@ -155,10 +157,10 @@ module TokenSwapSyrupScript {
 
     public(script) fun addtion_pool_amount<TokenT: store>(
         account: signer,
-        key: vector<u8>,
+        pledge_time: u64,
         amount: u128
     ) {
-        TokenSwapSyrup::addtion_pool_amount<TokenT>(&account, &key, amount);
+        TokenSwapSyrup::addtion_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 }
 }
