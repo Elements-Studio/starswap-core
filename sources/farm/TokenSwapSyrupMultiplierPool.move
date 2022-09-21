@@ -8,6 +8,8 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     const ERROR_POOL_NOT_FOUND: u64 = 102;
     const ERROR_POOL_HAS_EXISTS: u64 = 103;
     const ERROR_POOL_WEIGHT_NOT_ZERO: u64 = 104;
+    const ERROR_POOL_EMPTY: u64 = 105;
+    const ERROR_POOL_PARAMETER_INVALID: u64 = 106;
 
     struct MultiplierPoolsGlobalInfo<phantom PoolType, phantom AssetType> has key, store {
         items: vector<MultiplierPool<PoolType, AssetType>>,
@@ -138,11 +140,10 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
 
     /// Query pool by key
     /// @return (multiplier, asset_weight, asset_amount)
-    public fun query_pool<PoolType: store, AssetType: store>(broker: address, key: &vector<u8>): (
-        u64,
-        u128,
-        u128
-    ) acquires MultiplierPoolsGlobalInfo {
+    public fun query_pool<PoolType: store, AssetType: store>(
+        broker: address,
+        key: &vector<u8>
+    ): (u64, u128, u128) acquires MultiplierPoolsGlobalInfo {
         let info =
             borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
         let multiplier_pool = find_pool_by_key(&mut info.items, key);
@@ -151,6 +152,80 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
             multiplier_pool.asset_weight,
             multiplier_pool.asset_amount
         )
+    }
+
+    /// Query all multiplier type of type pledge time
+    /// @return (key_list, multiplier_list, asset_amount_list)
+    /// key_list split by `|`
+    public fun query_all_pools<PoolType: store, AssetType: store>(
+        broker: address,
+    ): (
+        vector<u8>,
+        vector<u64>,
+        vector<u128>
+    ) acquires MultiplierPoolsGlobalInfo {
+        let info =
+            borrow_global<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
+        let key_list = Vector::empty<u8>();
+        let multiplier_list = Vector::empty<u64>();
+        let asset_amount_list = Vector::empty<u128>();
+
+        if (!Vector::is_empty<>(&info.items)) {
+            let idx = 0;
+            let len = Vector::length(&info.items);
+            loop {
+                if (idx > len) {
+                    break
+                };
+                let item =
+                    Vector::borrow(&info.items, idx);
+                Vector::append(&mut key_list, *&item.key);
+                Vector::append(&mut key_list, b"|");
+                Vector::push_back(&mut multiplier_list, item.multiplier);
+                Vector::push_back(&mut asset_amount_list, item.asset_amount);
+
+                idx = idx + 1;
+            };
+        };
+        (key_list, multiplier_list, asset_amount_list)
+    }
+
+    /// Query total staked amounts from multiplier pool
+    /// @return (total_amount, total_weight)
+    public fun query_total_amount<PoolType: store, AssetType: store>(
+        broker: address,
+    ): (u128, u128, ) acquires MultiplierPoolsGlobalInfo {
+        let (
+            _,
+            multiplier_list,
+            amount_list
+        ) = query_all_pools<PoolType, AssetType>(broker);
+        assert!(
+            Vector::is_empty(&multiplier_list) ||
+                Vector::is_empty(&amount_list),
+            Errors::invalid_state(ERROR_POOL_EMPTY)
+        );
+        assert!(
+            Vector::length(&multiplier_list) == Vector::is_empty(&amount_list),
+            Errors::invalid_state(ERROR_POOL_PARAMETER_INVALID)
+        );
+
+        let total_amount: u128 = 0;
+        let total_weight: u128 = 0;
+        let idx = 0;
+        let len = Vector::length(&amount_list);
+        loop {
+            if (idx > len) {
+                break
+            };
+
+            let stepwise_amount = Vector::borrow(&amount_list, idx);
+            total_amount = total_amount + stepwise_amount;
+            total_weight = total_weight + stepwise_amount * Vector::borrow(&multiplier_list, idx);
+
+            idx = idx + 1;
+        };
+        (total_amount, total_weight)
     }
 
     /// Check the key has exists
@@ -163,10 +238,10 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         Option::is_some(&find_idx_by_id<PoolType, AssetType>(&info.items, key))
     }
 
-    /// Set mulitplier pool amount with adddtion amount
+    /// Set mulitplier pool amount with amount
     /// @param key: The key name of pool
     /// @param amount: amount need to be set
-    public fun addtion_pool_amount<PoolType: store, AssetType: store>(
+    public fun set_pool_amount<PoolType: store, AssetType: store>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>,
         key: &vector<u8>,
@@ -177,7 +252,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         let info =
             borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
         let multiplier_pool = find_pool_by_key(&mut info.items, key);
-        multiplier_pool.asset_amount = multiplier_pool.asset_amount + amount;
+        multiplier_pool.asset_amount = amount;
         multiplier_pool.asset_weight = multiplier_pool.asset_amount * (multiplier_pool.multiplier as u128);
     }
 

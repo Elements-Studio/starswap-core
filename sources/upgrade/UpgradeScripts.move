@@ -60,8 +60,13 @@ module UpgradeScripts {
     }
 
     /// extend farm pool
-    public(script) fun extend_farm_pool<X: copy + drop + store,
-                                        Y: copy + drop + store>(_signer: signer, _override_update: bool) {
+    public(script) fun extend_farm_pool<
+        X: copy + drop + store,
+        Y: copy + drop + store
+    >(
+        _signer: signer,
+        _override_update: bool
+    ) {
         abort Errors::invalid_state(ERR_DEPRECATED)
         // TokenSwapConfig::assert_admin(&signer);
         // TokenSwapFarm::extend_farm_pool<X, Y>(&signer, override_update);
@@ -82,13 +87,16 @@ module UpgradeScripts {
     }
 
     // Must called by buyback account
-    public(script) fun upgrade_from_v1_0_10_to_v1_0_11(buyback_account: signer,
-                                                       deposit_amount: u128,
-                                                       begin_time: u64,
-                                                       interval: u64,
-                                                       release_per_time: u128) {
-        assert!(Signer::address_of(&buyback_account) == @BuyBackAccount, Errors::invalid_argument(ERROR_INVALID_PARAMETER));
-        BuyBackSTAR::init(buyback_account, deposit_amount, begin_time, interval, release_per_time);
+    public(script) fun upgrade_from_v1_0_10_to_v1_0_11(
+        _buyback_account: signer,
+        _deposit_amount: u128,
+        _begin_time: u64,
+        _interval: u64,
+        _release_per_time: u128
+    ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // assert!(Signer::address_of(&buyback_account) == @BuyBackAccount, Errors::invalid_argument(ERROR_INVALID_PARAMETER));
+        // BuyBackSTAR::init(buyback_account, deposit_amount, begin_time, interval, release_per_time);
     }
 
 

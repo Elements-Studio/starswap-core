@@ -581,7 +581,10 @@ module TokenSwapSyrup {
     }
 
 
-    public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) acquires SyrupStakeList {
+    public fun get_stake_info<TokenT: store>(
+        user_addr: address,
+        id: u64
+    ): (u64, u64, u64, u128) acquires SyrupStakeList {
         let stake_list = borrow_global<SyrupStakeList<TokenT>>(user_addr);
         let stake = get_stake(&stake_list.items, id);
         (
@@ -629,6 +632,20 @@ module TokenSwapSyrup {
         TokenSwapSyrupMultiplierPool::query_pool<PoolTypeSyrup, Token::Token<TokenT>>(
             broker_addr(),
             &pledge_time_to_key(pledge_time),
+        )
+    }
+
+    /// Query all multiplier pools information
+    public fun query_all_multiplier_pools<TokenT: store>(): (
+        vector<u8>,
+        vector<u64>,
+        vector<u128>
+    ) {
+        TokenSwapSyrupMultiplierPool::query_all_pools<
+            PoolTypeSyrup,
+            Token::Token<TokenT>
+        >(
+            broker_addr(),
         )
     }
 
@@ -768,8 +785,38 @@ module TokenSwapSyrup {
         }
     }
 
-    /// Initial Addtion multiplier amount for upgrade
-    public fun addtion_pool_amount<TokenT: store>(
+    /// Calculate the Total Weight and Total Amount from the multiplier pool and
+    /// update them to YieldFarming
+    ///
+    public fun update_total_from_multiplier_pool<TokenT: store>(
+        account: &signer,
+    ) acquires Syrup {
+        STAR::assert_genesis_address(account);
+        let broker_addr = broker_addr();
+        let (
+            total_amount,
+            total_weight
+        ) = TokenSwapSyrupMultiplierPool::query_total_amount<
+            PoolTypeSyrup,
+            Token::Token<TokenT>
+        >(
+            broker_addr
+        );
+
+        let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
+        YieldFarming::adjust_total_amount<
+            PoolTypeSyrup,
+            Token::Token<TokenT>
+        >(
+            &syrup.param_cap,
+            broker_addr,
+            total_amount,
+            total_weight
+        );
+    }
+
+    /// Set amount for every Pledge time in multiplier pool
+    public fun set_multiplier_pool_amount<TokenT: store>(
         account: &signer,
         pledge_time: u64,
         amount: u128
@@ -778,7 +825,7 @@ module TokenSwapSyrup {
 
         let ext_v2 =
             borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
-        TokenSwapSyrupMultiplierPool::addtion_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
+        TokenSwapSyrupMultiplierPool::set_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
             broker_addr(),
             &ext_v2.multiplier_pool_cap,
             &pledge_time_to_key(pledge_time),

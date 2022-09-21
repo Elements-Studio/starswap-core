@@ -375,6 +375,22 @@ module YieldFarmingV3 {
         stake_extend.weight_factor = new_weight_factor;
     }
 
+    /// Adjust total amount and total weight
+    public fun adjust_total_amount<PoolType: store, AssetT: store>(
+        _cap: &ParameterModifyCapability<PoolType, AssetT>,
+        broker: address,
+        total_amount: u128,
+        total_weight: u128,
+    ) acquires FarmingAsset, FarmingAssetExtend {
+        let asset =
+            borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        let asset_ext =
+            borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
+
+        asset.asset_total_weight = total_weight;
+        asset_ext.asset_total_amount = total_amount;
+    }
+
 
     /// DEPRECATED call
     /// Call by stake user, staking amount of asset in order to get yield farming token

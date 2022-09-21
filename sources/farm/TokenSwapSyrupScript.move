@@ -155,12 +155,12 @@ module TokenSwapSyrupScript {
         // });
     }
 
-    public(script) fun addtion_pool_amount<TokenT: store>(
+    public(script) fun set_multiplier_pool_amount<TokenT: store>(
         account: signer,
         pledge_time: u64,
         amount: u128
     ) {
-        TokenSwapSyrup::addtion_pool_amount<TokenT>(&account, pledge_time, amount);
+        TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 }
 }
