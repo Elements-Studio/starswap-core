@@ -1,12 +1,16 @@
 // token holder address, not admin address
-address SwapAdmin {
-module TokenMock {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
+module SwapAdmin::TokenMock {
+    use SwapAdmin::WrapperUtil;
 
-    struct TokenSharedCapability<phantom TokenType> has key, store {
-        mint: Token::MintCapability<TokenType>,
-        burn: Token::BurnCapability<TokenType>,
+    use aptos_framework::coin::{Self, Coin};
+    use aptos_std::type_info;
+    use std::signer;
+    use std::string;
+
+    struct TokenSharedCapability<phantom CoinType> has key, store {
+        mint: coin::MintCapability<CoinType>,
+        burn: coin::BurnCapability<CoinType>,
+        freeze: coin::FreezeCapability<CoinType>,
     }
 
     // mock ETH token
@@ -25,27 +29,33 @@ module TokenMock {
     struct WDOT has copy, drop, store {}
 
 
-    public fun register_token<TokenType: store>(account: &signer, precision: u8){
-        Token::register_token<TokenType>(account, precision);
-        Account::do_accept_token<TokenType>(account);
+    public fun register_token<CoinType: store>(account: &signer, precision: u8){
+        let token_type_info = type_info::type_of<CoinType>();
+        let token_symbol = type_info::struct_name(&token_type_info);
+        let token_name = string::utf8(copy token_symbol);
+        string::append_utf8(&mut token_name, b" Coin");
 
-        let mint_capability = Token::remove_mint_capability<TokenType>(account);
-        let burn_capability = Token::remove_burn_capability<TokenType>(account);
-        move_to(account, TokenSharedCapability { mint: mint_capability, burn: burn_capability });
+        let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinType>(
+            signer,
+            token_name,
+            string::utf8(token_symbol),
+            precision,
+            false,
+        );
+        coin::register<CoinType>(account);
+
+        move_to(account, TokenSharedCapability { mint: mint_cap, burn: burn_cap, freeze: freeze_cap });
     }
 
-    public fun mint_token<TokenType: store>(amount: u128): Token::Token<TokenType> acquires TokenSharedCapability{
+    public fun mint_token<CoinType: store>(amount: u128): Coin<CoinType> acquires TokenSharedCapability{
         //token holder address
-        let cap = borrow_global<TokenSharedCapability<TokenType>>(Token::token_address<TokenType>());
-        Token::mint_with_capability<TokenType>(&cap.mint, amount)
+        let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
+        coin::mint<CoinType>((amount as u64), &cap.mint)
     }
 
-    public fun burn_token<TokenType: store>(tokens: Token::Token<TokenType>) acquires TokenSharedCapability{
+    public fun burn_token<CoinType: store>(tokens: Coin<CoinType>) acquires TokenSharedCapability{
         //token holder address
-        let cap = borrow_global<TokenSharedCapability<TokenType>>(Token::token_address<TokenType>());
-        Token::burn_with_capability<TokenType>(&cap.burn, tokens);
+        let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
+        coin::burn<CoinType>(tokens, &cap.burn, );
     }
 }
-
-}
-

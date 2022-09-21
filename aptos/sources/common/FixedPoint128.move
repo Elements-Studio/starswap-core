@@ -1,7 +1,6 @@
-address SwapAdmin {
-module FixedPoint128 {
-    use StarcoinFramework::Errors;
-    use StarcoinFramework::U256::{Self, U256};
+module SwapAdmin::FixedPoint128 {
+    use std::error;
+    use SwapAdmin::U256Wrapper::{Self, U256};
 
     const RESOLUTION: u8 = 128;
     const Q128: u128 = 340282366920938463463374607431768211455u128; // 2**128
@@ -25,14 +24,14 @@ module FixedPoint128 {
 
 
     public fun Q256(): U256 {
-        U256::from_big_endian(Q256_HEX)
+        U256Wrapper::from_big_endian(Q256_HEX)
     }
 
     // encode a u128 as a UQ128x128
     // U256 type has no bitwise shift operators yet, instead of realize by mul Q128
     public fun encode(x: u128): UQ128x128 {
         // never overflow
-        let v: U256 = U256::mul(U256::from_u128(x), U256::from_u128(Q128));
+        let v: U256 = U256Wrapper::mul(U256Wrapper::from_u128(x), U256Wrapper::from_u128(Q128));
         UQ128x128 {
             v: v
         }
@@ -41,7 +40,7 @@ module FixedPoint128 {
     // encode a u256 as a UQ128x128
     public fun encode_u256(v: U256, is_scale: bool): UQ128x128 {
         if (is_scale) {
-            v = U256::mul(v, U256::from_u128(Q128));
+            v = U256Wrapper::mul(v, U256Wrapper::from_u128(Q128));
         };
         UQ128x128 {
             v: v
@@ -50,7 +49,7 @@ module FixedPoint128 {
 
     // decode a UQ128x128 into a u128 by truncating after the radix point
     public fun decode(uq: UQ128x128): u128 {
-        U256::to_u128(&U256::div(*&uq.v, U256::from_u128(Q128)))
+        U256Wrapper::to_u128(&U256Wrapper::div(*&uq.v, U256Wrapper::from_u128(Q128)))
     }
 
 
@@ -58,7 +57,7 @@ module FixedPoint128 {
     // abort on overflow
     public fun mul(uq: UQ128x128, y: u128): UQ128x128 {
         // vm would direct abort when overflow occured
-        let v: U256 = U256::mul(*&uq.v, U256::from_u128(y));
+        let v: U256 = U256Wrapper::mul(*&uq.v, U256Wrapper::from_u128(y));
         UQ128x128 {
             v: v
         }
@@ -68,9 +67,9 @@ module FixedPoint128 {
     /// U128_MAX * U128_MAX < U256_MAX
     public fun test_u256_mul_not_overflow() {
         let u256_max:U256 = Q256();
-        let u128_max = U256::from_u128(U128_MAX);
-        let u128_mul_u128_max = U256::mul(copy u128_max, copy u128_max);
-        let order = U256::compare(&u256_max, &u128_mul_u128_max);
+        let u128_max = U256Wrapper::from_u128(U128_MAX);
+        let u128_mul_u128_max = U256Wrapper::mul(copy u128_max, copy u128_max);
+        let order = U256Wrapper::compare(&u256_max, &u128_mul_u128_max);
         assert!(order == GREATER_THAN, 1100);
 
     }
@@ -78,9 +77,9 @@ module FixedPoint128 {
     // divide a UQ128x128 by a u128, returning a UQ128x128
     public fun div(uq: UQ128x128, y: u128): UQ128x128 {
         if ( y == 0) {
-            abort Errors::invalid_argument(ERR_DIVIDE_BY_ZERO)
+            abort error::invalid_argument(ERR_DIVIDE_BY_ZERO)
         };
-        let v: U256 = U256::div(*&uq.v, U256::from_u128(y));
+        let v: U256 = U256Wrapper::div(*&uq.v, U256Wrapper::from_u128(y));
         UQ128x128 {
             v: v
         }
@@ -93,28 +92,28 @@ module FixedPoint128 {
 
     // returns a UQ128x128 which represents the ratio of the numerator to the denominator
     public fun fraction(numerator: u128, denominator: u128): UQ128x128 {
-        let r: U256 = U256::mul(U256::from_u128(numerator), U256::from_u128(Q128));
-        let v: U256 = U256::div(r, U256::from_u128(denominator));
+        let r: U256 = U256Wrapper::mul(U256Wrapper::from_u128(numerator), U256Wrapper::from_u128(Q128));
+        let v: U256 = U256Wrapper::div(r, U256Wrapper::from_u128(denominator));
         UQ128x128 {
             v: v
         }
     }
 
     public fun to_safe_u128(x: U256): u128 {
-        let u128_max = U256::from_u128(U128_MAX);
-        let cmp_order = U256::compare(&x, &u128_max);
+        let u128_max = U256Wrapper::from_u128(U128_MAX);
+        let cmp_order = U256Wrapper::compare(&x, &u128_max);
         if (cmp_order == GREATER_THAN) {
-            abort Errors::invalid_argument(ERR_U128_OVERFLOW)
+            abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
-        U256::to_u128(&x)
+        U256Wrapper::to_u128(&x)
     }
 
     public fun compare(left: UQ128x128, right: UQ128x128): u8 {
-        U256::compare(&left.v, &right.v)
+        U256Wrapper::compare(&left.v, &right.v)
     }
 
     public fun is_zero(uq: UQ128x128): bool {
-        let r = U256::compare(&uq.v, &U256::zero());
+        let r = U256Wrapper::compare(&uq.v, &U256Wrapper::zero());
         if (r == 0) {
             true
         } else {
@@ -122,6 +121,5 @@ module FixedPoint128 {
         }
     }
 
-}
 }
 

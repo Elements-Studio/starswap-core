@@ -1,10 +1,10 @@
-address SwapAdmin {
 /// STAR is a governance token of Starswap DAPP.
 /// It uses apis defined in the `Token` module.
-module STAR {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
+module SwapAdmin::STAR {
+    use aptos_framework::managed_coin;
+    use std::signer;
+
+    use SwapAdmin::WrapperUtil;
 
     /// STAR token marker.
     struct STAR has copy, drop, store {}
@@ -16,27 +16,32 @@ module STAR {
 
     /// STAR initialization.
     public fun init(account: &signer) {
-        Token::register_token<STAR>(account, PRECISION);
-        Account::do_accept_token<STAR>(account);
+        managed_coin::initialize<STAR>(
+            account,
+            b"STAR Coin",
+            b"STAR",
+            PRECISION,
+            false,
+        );
     }
 
-    public fun mint(account: &signer, amount: u128) {
-        let token = Token::mint<STAR>(account, amount);
-        Account::deposit_to_self<STAR>(account, token);
+    public entry fun mint(account: &signer, amount: u128) {
+        let dst_addr = signer::address_of(account);
+        managed_coin::mint<STAR>(account, dst_addr, (amount as u64))
     }
 
-    /// Returns true if `TokenType` is `STAR::STAR`
-    public fun is_star<TokenType: store>(): bool {
-        Token::is_same_token<STAR, TokenType>()
+    /// Returns true if `CoinType` is `STAR::STAR`
+    public fun is_star<CoinType: store>(): bool {
+        WrapperUtil::is_same_token<STAR, CoinType>()
     }
 
     public fun assert_genesis_address(account : &signer) {
-        assert!(Signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
+        assert!(signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
     }
 
     /// Return STAR token address.
     public fun token_address(): address {
-        Token::token_address<STAR>()
+        WrapperUtil::coin_address<STAR>()
     }
 
 
@@ -44,5 +49,4 @@ module STAR {
     public fun precision(): u8 {
         PRECISION
     }
-}
 }

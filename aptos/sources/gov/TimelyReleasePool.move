@@ -1,10 +1,9 @@
-address SwapAdmin {
-module TimelyReleasePool {
+module SwapAdmin::TimelyReleasePool {
+    use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::timestamp;
 
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Errors;
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Timestamp;
+    use std::signer;
+    use std::error;
 
     const ERROR_LINEAR_RELEASE_EXISTS: u64 = 2001;
     const ERROR_LINEAR_NOT_READY_YET: u64 = 2002;
@@ -16,7 +15,7 @@ module TimelyReleasePool {
         // Total treasury amount
         total_treasury_amount: u128,
         // Treasury total amount
-        treasury: Token::Token<TokenT>,
+        treasury: Coin<TokenT>,
         // Release amount in each time
         release_per_time: u128,
         // Begin of release time
@@ -33,14 +32,14 @@ module TimelyReleasePool {
 
 
     public fun init<PoolT: store, TokenT: store>(sender: &signer,
-                                                 init_token: Token::Token<TokenT>,
+                                                 init_token: Coin<TokenT>,
                                                  begin_time: u64,
                                                  interval: u64,
                                                  release_per_time: u128): WithdrawCapability<PoolT, TokenT> {
-        let sender_addr = Signer::address_of(sender);
-        assert!(!exists<TimelyReleasePool<PoolT, TokenT>>(sender_addr), Errors::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
+        let sender_addr = signer::address_of(sender);
+        assert!(!exists<TimelyReleasePool<PoolT, TokenT>>(sender_addr), error::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
 
-        let total_treasury_amount = Token::value<TokenT>(&init_token);
+        let total_treasury_amount = (coin::value<TokenT>(&init_token) as u128);
         move_to(sender, TimelyReleasePool<PoolT, TokenT> {
             treasury: init_token,
             total_treasury_amount,
@@ -56,7 +55,7 @@ module TimelyReleasePool {
 
     /// Uninitialize a timely pool
     public fun uninit<PoolT: store, TokenT: store>(cap: WithdrawCapability<PoolT, TokenT>, broker: address)
-    : Token::Token<TokenT> acquires TimelyReleasePool {
+    : Coin<TokenT> acquires TimelyReleasePool {
         let WithdrawCapability<PoolT, TokenT> {} = cap;
         let TimelyReleasePool<PoolT, TokenT> {
             total_treasury_amount: _,
@@ -73,10 +72,10 @@ module TimelyReleasePool {
 
     /// Deposit token to treasury
     public fun deposit<PoolT: store, TokenT: store>(broker: address,
-                                                    token: Token::Token<TokenT>) acquires TimelyReleasePool {
+                                                    token: Coin<TokenT>) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        pool.total_treasury_amount = pool.total_treasury_amount + Token::value(&token);
-        Token::deposit<TokenT>(&mut pool.treasury, token);
+        pool.total_treasury_amount = pool.total_treasury_amount + coin::value(&token);
+        coin::merge<TokenT>(&mut pool.treasury, token);
     }
 
     /// Set release per time
@@ -100,23 +99,23 @@ module TimelyReleasePool {
 
     /// Withdraw from treasury
     public fun withdraw<PoolT: store, TokenT: store>(broker: address, _cap: &WithdrawCapability<PoolT, TokenT>)
-    : Token::Token<TokenT> acquires TimelyReleasePool {
-        let now_time = Timestamp::now_seconds();
+    : Coin<TokenT> acquires TimelyReleasePool {
+        let now_time = timestamp::now_seconds();
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        assert!(Token::value(&pool.treasury) > 0, Errors::invalid_state(ERROR_TRESURY_IS_EMPTY));
-        assert!(now_time > pool.begin_time, Errors::invalid_state(ERROR_EVENT_NOT_START_YET));
+        assert!(coin::value(&pool.treasury) > 0, error::invalid_state(ERROR_TRESURY_IS_EMPTY));
+        assert!(now_time > pool.begin_time, error::invalid_state(ERROR_EVENT_NOT_START_YET));
 
         let time_interval = now_time - pool.latest_release_time;
-        assert!(time_interval >= pool.interval, Errors::invalid_state(ERROR_LINEAR_NOT_READY_YET));
+        assert!(time_interval >= pool.interval, error::invalid_state(ERROR_LINEAR_NOT_READY_YET));
         let times = time_interval / pool.interval;
 
         let withdraw_amount = (times as u128) * pool.release_per_time;
-        let treasury_balance = Token::value(&pool.treasury);
+        let treasury_balance = coin::value(&pool.treasury);
         if (withdraw_amount > treasury_balance) {
             withdraw_amount = treasury_balance;
         };
 
-        let token = Token::withdraw(&mut pool.treasury, withdraw_amount);
+        let token = coin::extract(&mut pool.treasury, (withdraw_amount as u64));
 
         // Update latest release time and latest withdraw time
         pool.latest_withdraw_time = now_time;
@@ -130,7 +129,7 @@ module TimelyReleasePool {
     acquires TimelyReleasePool {
         let pool = borrow_global<TimelyReleasePool<PoolT, TokenT>>(broker);
 
-        let now = Timestamp::now_seconds();
+        let now = timestamp::now_seconds();
         let (current_time_amount, current_time_stamp)= if (pool.latest_release_time < now) {// The pool has started
             let time = (((now - pool.latest_release_time) / pool.interval) as u128);
             if (time == 0) { time = 1 }; // One time minimized
@@ -139,7 +138,7 @@ module TimelyReleasePool {
             let current_time_stamp = pool.latest_release_time + ((diff_times + 1) * pool.interval);
 
             let ret = time * pool.release_per_time;
-            let treasury_balance = Token::value(&pool.treasury);
+            let treasury_balance = (coin::value(&pool.treasury) as u128);
             if (ret > treasury_balance) {
                 (treasury_balance, current_time_stamp)
             } else {
@@ -150,7 +149,7 @@ module TimelyReleasePool {
         };
 
         (
-            Token::value<TokenT>(&pool.treasury),
+            (coin::value<TokenT>(&pool.treasury) as u128),
             pool.total_treasury_amount,
             pool.release_per_time,
             pool.begin_time,
@@ -160,6 +159,5 @@ module TimelyReleasePool {
             current_time_amount,
         )
     }
-}
 }
 

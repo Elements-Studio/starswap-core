@@ -1,38 +1,38 @@
-address SwapAdmin {
-module CommonHelper {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
+module SwapAdmin::CommonHelper {
     use SwapAdmin::TokenMock;
 
+    use aptos_framework::coin::{Self, Coin};
+    use aptos_std::math64;
+
+    use std::signer;
 
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
 
     public fun safe_accept_token<TokenType: store>(account: &signer) {
-        if (!Account::is_accepts_token<TokenType>(Signer::address_of(account))) {
-            Account::do_accept_token<TokenType>(account);
+        if (!coin::is_account_registered<TokenType>(signer::address_of(account))) {
+            coin::register<TokenType>(account);
         };
     }
 
     public fun safe_mint<TokenType: store>(account: &signer, token_amount: u128) {
-        let is_accept_token = Account::is_accepts_token<TokenType>(Signer::address_of(account));
-        if (!is_accept_token) {
-            Account::do_accept_token<TokenType>(account);
+        let is_account_registered = coin::is_account_registered<TokenType>(signer::address_of(account));
+        if (!is_account_registered) {
+            coin::register<TokenType>(account);
         };
         let token = TokenMock::mint_token<TokenType>(token_amount);
-        Account::deposit<TokenType>(Signer::address_of(account), token);
+        coin::deposit<TokenType>(signer::address_of(account), token);
     }
 
     public fun transfer<TokenType: store>(account: &signer, token_address: address, token_amount: u128){
-        let token = Account::withdraw<TokenType>(account, token_amount);
-         Account::deposit(token_address, token);
+        let token = coin::withdraw<TokenType>(account, (token_amount as u64));
+         coin::deposit(token_address, token);
     }
 
     public fun get_safe_balance<TokenType: store>(token_address: address): u128{
         let token_balance: u128 = 0;
-        if (Account::is_accepts_token<TokenType>(token_address)) {
-            token_balance = Account::balance<TokenType>(token_address);
+        if (coin::is_account_registered<TokenType>(token_address)) {
+            token_balance = coin::balance<TokenType>(token_address);
         };
         token_balance
     }
@@ -43,7 +43,10 @@ module CommonHelper {
     }
 
     public fun pow_amount<Token: store>(amount: u128): u128 {
-        amount * Token::scaling_factor<Token>()
+        let coin_precision = coin::decimals<Token>();
+        let scaling_factor = math64::pow(10, (coin_precision as u64));
+
+        amount * scaling_factor
     }
 
     public fun pow_10(exp: u8): u128 {
@@ -60,5 +63,4 @@ module CommonHelper {
         result_val
     }
 
-}
 }

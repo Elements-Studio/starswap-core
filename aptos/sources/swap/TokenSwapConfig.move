@@ -1,14 +1,13 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address SwapAdmin {
+module SwapAdmin::TokenSwapConfig {
+    use std::signer;
+    use std::vector;
+    use std::option::{Self, Option};
+    use std::error;
 
-module TokenSwapConfig {
-    use StarcoinFramework::Config;
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Errors;
-    use StarcoinFramework::Vector;
-    use StarcoinFramework::Option;
+    use SwapAdmin::Config;
 
     // Numerator and denumerator default fixed value
     const DEFAULT_OPERATION_NUMERATOR: u64 = 10;
@@ -79,8 +78,8 @@ module TokenSwapConfig {
     }
     
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
-    public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
-                                              Y: copy + drop + store>(): (u64, u64) {
+    public fun get_swap_fee_operation_rate_v2<X: store,
+                                              Y: store>(): (u64, u64) {
 
         if (Config::config_exist_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address())) {
             let conf = Config::get_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address());
@@ -94,8 +93,8 @@ module TokenSwapConfig {
 
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     /// Poundage number of liquidity token pair
-    public fun get_poundage_rate<X: copy + drop + store,
-                                 Y: copy + drop + store>(): (u64, u64) {
+    public fun get_poundage_rate<X: store,
+                                 Y: store>(): (u64, u64) {
 
         if (Config::config_exist_by_address<SwapFeePoundageConfig<X, Y>>(admin_address())) {
             let conf = Config::get_by_address<SwapFeePoundageConfig<X, Y>>(admin_address());
@@ -132,8 +131,8 @@ module TokenSwapConfig {
     }
 
     /// Set fee rate for operation_v2 rate, only admin can call
-    public fun set_swap_fee_operation_rate_v2<X: copy + drop + store,
-                                              Y: copy + drop + store>(signer: &signer,
+    public fun set_swap_fee_operation_rate_v2<X: store,
+                                              Y: store>(signer: &signer,
                                                                       num: u64,
                                                                       denum: u64) {
         assert_admin(signer);
@@ -150,8 +149,8 @@ module TokenSwapConfig {
     }
 
     /// Set fee rate for poundage rate, only admin can call
-    public fun set_poundage_rate<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer,
+    public fun set_poundage_rate<X: store,
+                                 Y: store>(signer: &signer,
                                                          num: u64,
                                                          denum: u64) {
         assert_admin(signer);
@@ -178,11 +177,11 @@ module TokenSwapConfig {
             let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
             let idx = find_mulitplier_idx(&mut conf.list, interval_sec);
 
-            if (Option::is_some(&idx)) {
-                let step_mutiplier = Vector::borrow_mut<StepwiseMutiplier>(&mut conf.list, Option::destroy_some<u64>(idx));
+            if (option::is_some(&idx)) {
+                let step_mutiplier = vector::borrow_mut<StepwiseMutiplier>(&mut conf.list, option::destroy_some<u64>(idx));
                 step_mutiplier.multiplier = multiplier;
             } else {
-                Vector::push_back(&mut conf.list, StepwiseMutiplier {
+                vector::push_back(&mut conf.list, StepwiseMutiplier {
                     interval_sec,
                     multiplier,
                 });
@@ -193,8 +192,8 @@ module TokenSwapConfig {
             });
 
         } else {
-            let step_mutiplier = Vector::empty<StepwiseMutiplier>();
-            Vector::push_back(&mut step_mutiplier, StepwiseMutiplier {
+            let step_mutiplier = vector::empty<StepwiseMutiplier>();
+            vector::push_back(&mut step_mutiplier, StepwiseMutiplier {
                 interval_sec,
                 multiplier,
             });
@@ -208,8 +207,8 @@ module TokenSwapConfig {
         if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
             let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
             let idx = find_mulitplier_idx(&conf.list, interval_sec);
-            if (Option::is_some(&idx)) {
-                let item = Vector::borrow<StepwiseMutiplier>(&conf.list, Option::destroy_some<u64>(idx));
+            if (option::is_some(&idx)) {
+                let item = vector::borrow<StepwiseMutiplier>(&conf.list, option::destroy_some<u64>(idx));
                 return item.multiplier
             } else {
                 1
@@ -227,22 +226,22 @@ module TokenSwapConfig {
 
         let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
         let idx = find_mulitplier_idx(&conf.list, time_sec);
-        Option::is_some<u64>(&idx)
+        option::is_some<u64>(&idx)
     }
 
-    fun find_mulitplier_idx(c: &vector<StepwiseMutiplier>, interval_sec: u64): Option::Option<u64> {
-        let len = Vector::length(c);
+    fun find_mulitplier_idx(c: &vector<StepwiseMutiplier>, interval_sec: u64): Option<u64> {
+        let len = vector::length(c);
         if (len == 0) {
-            return Option::none()
+            return option::none()
         };
         let idx = len - 1;
         loop {
-            let el = Vector::borrow(c, idx);
+            let el = vector::borrow(c, idx);
             if (el.interval_sec == interval_sec) {
-                return Option::some<u64>(idx)
+                return option::some<u64>(idx)
             };
             if (idx == 0) {
-                return Option::none<u64>()
+                return option::none<u64>()
             };
             idx = idx - 1;
         }
@@ -343,11 +342,11 @@ module TokenSwapConfig {
     }
 
     public fun assert_admin(signer: &signer) {
-        assert!(Signer::address_of(signer) == admin_address(), Errors::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
+        assert!(signer::address_of(signer) == admin_address(), error::invalid_state(ERROR_NOT_HAS_PRIVILEGE));
     }
 
     public fun assert_global_freeze() {
-        assert!(!get_global_freeze_switch(), Errors::invalid_state(ERROR_GLOBAL_FREEZE));
+        assert!(!get_global_freeze_switch(), error::invalid_state(ERROR_GLOBAL_FREEZE));
     }
 
     public fun get_swap_fee_switch(): bool {
@@ -355,5 +354,4 @@ module TokenSwapConfig {
     }
 
 
-}
 }

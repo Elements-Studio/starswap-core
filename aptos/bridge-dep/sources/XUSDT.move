@@ -1,37 +1,31 @@
 
-address Bridge {
-module XUSDT {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
+module Bridge::XUSDT {
+    use aptos_framework::managed_coin;
+    use std::signer;
 
     /// XUSDT token marker.
     struct XUSDT has copy, drop, store {}
 
     /// precision of XUSDT token.
-    const PRECISION: u8 = 9;
+    const PRECISION: u8 = 6;
 
     /// XUSDT initialization.
-    public fun init(account: &signer) {
-        Token::register_token<XUSDT>(account, PRECISION);
-        Account::do_accept_token<XUSDT>(account);
+    public entry fun init(account: &signer) {
+//        Token::register_token<XUSDT>(account, PRECISION);
+//        Account::do_accept_token<XUSDT>(account);
+
+        managed_coin::initialize<XUSDT>(
+            account,
+            b"XUSDT Coin",
+            b"XUSDT",
+            PRECISION,
+            false,
+        );
     }
 
-    public fun mint(account: &signer, amount: u128) {
-        let token = Token::mint<XUSDT>(account, amount);
-        Account::deposit_to_self<XUSDT>(account, token)
+    public entry fun mint(account: &signer, amount: u128) {
+        let dst_addr = signer::address_of(account);
+        managed_coin::mint<XUSDT>(account, dst_addr, (amount as u64))
     }
-}
-
-module XUSDTScripts {
-    use Bridge::XUSDT;
-
-    public(script) fun init(account: signer) {
-        XUSDT::init(&account);
-    }
-
-    public(script) fun mint(account: signer, amount: u128) {
-        XUSDT::mint(&account, amount);
-    }
-}
 
 }
