@@ -1,24 +1,24 @@
 # Starswap-core
 
-Starswap is a general purpose DEX on Starcoin. 
+Starswap is a general purpose DEX on Move-based multi chain, include Starcoin/Aptos/Sui 
 
 
-## Move Package Manager
+## Aptos Move CLI
 
 ### Compile Contract
 ```commandline
-mpm package build
+aptos move compile
 ```
 
-### Run Functional Tests
+### Run Transactional Tests
 ```commandline
-mpm spectest 
+aptos move transactional-test 
 ```
 
 ### Run Unit Tests
 
 ```commandline
-mpm package test
+aptos move test
 ```
 
 
@@ -36,7 +36,7 @@ Contributions in the following are welcome:
 
 1. Add New Move module to `sources` dir, such as `MyModule.move`.
 2. Write Move code and add unit test in the module file.
-3. Add an integration test to [integration-tests](../integration-tests) dir, such as: `test_my_module.move`.
-4. Run the integration test `mpm integration-test test_my_module.move `.
+3. Add an transactional test to [transactional-tests](../transactional-tests) dir, such as: `test_my_module.move`.
+4. Run the transactional test `mpm transactional-test test_my_module.move `.
 5. Run script `./script/build.sh` for build and generate documents.
 

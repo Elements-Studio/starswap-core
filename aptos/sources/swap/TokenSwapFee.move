@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapFee {
-    use Bridge::XUSDT::XUSDT;
-
     use aptos_framework::coin::{Self, Coin};
     use aptos_framework::account;
 
     use aptos_std::type_info::{Self, TypeInfo};
     use aptos_std::event;
+    #[test_only]
     use aptos_std::math64;
 
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwap::{Self};
     use SwapAdmin::WrapperUtil;
+
+    use UsdtIssuer::XUSDT::XUSDT;
 
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;

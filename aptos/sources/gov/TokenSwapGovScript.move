@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapGovScript {
-
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFee;
 

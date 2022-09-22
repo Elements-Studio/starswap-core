@@ -4,11 +4,10 @@
 /// library with helper methods for oracles that are concerned with computing average prices
 module SwapAdmin::TokenSwapOracleLibrary {
     use aptos_framework::timestamp;
+
     use SwapAdmin::U256Wrapper::{Self, U256};
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::FixedPoint128;
-
-    use aptos_framework::timestamp;
 
     /// helper function that returns the current block timestamp within the range of u64, i.e. [0, 2**32 - 1]
     public fun current_block_timestamp(): u64 {

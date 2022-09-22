@@ -3,14 +3,6 @@
 
 /// Token Swap
 module SwapAdmin::TokenSwap {
-
-    use SwapAdmin::SafeMath;
-    use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::FixedPoint128;
-
-    use SwapAdmin::U256Wrapper::{Self, U256};
-
-
     use aptos_framework::coin::{Self, Coin};
     use aptos_framework::account;
     use aptos_framework::timestamp;
@@ -23,6 +15,12 @@ module SwapAdmin::TokenSwap {
     use std::string;
     use std::option;
     use std::bcs;
+
+    use SwapAdmin::SafeMath;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::FixedPoint128;
+
+    use SwapAdmin::U256Wrapper::{Self, U256};
 
     struct LiquidityToken<phantom X, phantom Y> has key, store, copy, drop {}
 
@@ -258,7 +256,7 @@ module SwapAdmin::TokenSwap {
     ): Coin<LiquidityToken<X, Y>> acquires TokenSwapPair, LiquidityTokenCapability {
         TokenSwapConfig::assert_global_freeze();
 
-        let total_supply: u128 = coin::supply<LiquidityToken<X, Y>>();
+        let total_supply: u128 = option::get_with_default(&coin::supply<LiquidityToken<X, Y>>(), 0u128);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
         let x_value = (coin::value<X>(&x) as u128);
         let y_value = (coin::value<Y>(&y) as u128);
@@ -348,8 +346,8 @@ module SwapAdmin::TokenSwap {
     ): (Coin<X>, Coin<Y>, Coin<X>, Coin<Y>) acquires TokenSwapPair {
         TokenSwapConfig::assert_global_freeze();
 
-        let x_in_value = coin::value(&x_in);
-        let y_in_value = coin::value(&y_in);
+        let x_in_value = (coin::value(&x_in) as u128);
+        let y_in_value = (coin::value(&y_in) as u128);
         assert!(x_in_value > 0 || y_in_value > 0, ERROR_SWAP_TOKEN_INSUFFICIENT);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
         let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
@@ -358,8 +356,8 @@ module SwapAdmin::TokenSwap {
         let x_swapped = coin::extract(&mut token_pair.token_x_reserve, (x_out as u64));
         let y_swapped = coin::extract(&mut token_pair.token_y_reserve, (y_out as u64));
             {
-                let x_reserve_new = coin::value(&token_pair.token_x_reserve);
-                let y_reserve_new = coin::value(&token_pair.token_y_reserve);
+                let x_reserve_new = (coin::value(&token_pair.token_x_reserve) as u128);
+                let y_reserve_new = (coin::value(&token_pair.token_y_reserve) as u128);
                 let (x_adjusted, y_adjusted);
                 let (fee_numerator, fee_denominator) = TokenSwapConfig::get_poundage_rate<X, Y>();
                 //                x_adjusted = x_reserve_new * 1000 - x_in_value * 3;
@@ -375,8 +373,8 @@ module SwapAdmin::TokenSwap {
         // cacl and handle swap fee, default fee rate is 3/1000
         if (TokenSwapConfig::get_swap_fee_switch()) {
             let (actual_fee_operation_numerator, actual_fee_operation_denominator) = cacl_actual_swap_fee_operation_rate<X, Y>();
-            x_swap_fee = coin::extract(&mut token_pair.token_x_reserve, (SafeMath::safe_mul_div_u128((x_in_value as u128), actual_fee_operation_numerator, actual_fee_operation_denominator)) as u64);
-            y_swap_fee = coin::extract(&mut token_pair.token_y_reserve, (SafeMath::safe_mul_div_u128((y_in_value as u128), actual_fee_operation_numerator, actual_fee_operation_denominator)) as u64);
+            x_swap_fee = coin::extract(&mut token_pair.token_x_reserve, (SafeMath::safe_mul_div_u128((x_in_value as u128), actual_fee_operation_numerator, actual_fee_operation_denominator) as u64));
+            y_swap_fee = coin::extract(&mut token_pair.token_y_reserve, (SafeMath::safe_mul_div_u128((y_in_value as u128), actual_fee_operation_numerator, actual_fee_operation_denominator) as u64));
         } else {
             x_swap_fee = coin::zero();
             y_swap_fee = coin::zero();
@@ -405,7 +403,14 @@ module SwapAdmin::TokenSwap {
     public fun compare_token<X: store, Y: store>(): u8 {
         let x_bytes = bcs::to_bytes<type_info::TypeInfo>(&type_info::type_of<X>());
         let y_bytes = bcs::to_bytes<type_info::TypeInfo>(&type_info::type_of<Y>());
-        let ret: u8 = comparator::compare_u8_vector(x_bytes, y_bytes);
+        let result = comparator::compare_u8_vector(x_bytes, y_bytes);
+        let ret = if (comparator::is_equal(&result)) {
+            0u8
+        } else if (comparator::is_smaller_than(&result)) {
+            1u8
+        } else {
+            2u8
+        };
         ret
     }
 

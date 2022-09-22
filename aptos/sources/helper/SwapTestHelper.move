@@ -1,19 +1,18 @@
 module SwapAdmin::SwapTestHelper {
-    use SwapAdmin::TokenSwapRouter;
-    use Bridge::XUSDT::XUSDT;
-    use SwapAdmin::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
-
     use aptos_framework::coin::{Self};
-    use std::signer;
     use aptos_framework::aptos_coin::{AptosCoin as APT};
+    use std::signer;
 
+    use SwapAdmin::TokenSwapRouter;
+    use UsdtIssuer::XUSDT::XUSDT;
+    use SwapAdmin::TokenMock::{Self, WETH, WUSDT, WDAI, WBTC};
 
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
     //    const GENESIS_ADDRESS : address = @0x4fe7BBbFcd97987b966415F01995a229;
     const TOKEN_HOLDER_ADDRESS : address = @SwapAdmin;
     const ADMIN_ADDRESS : address = @SwapAdmin;
-    const XUSDT_ADDRESS : address = @Bridge;
+    const XUSDT_ADDRESS : address = @UsdtIssuer;
     const FEE_ADDRESS : address = @0x9572abb16f9d9e9b009cc1751727129e;
 
     public fun get_admin_address(): address {

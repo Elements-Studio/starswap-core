@@ -1,11 +1,10 @@
 // token holder address, not admin address
 module SwapAdmin::TokenMock {
-    use SwapAdmin::WrapperUtil;
-
     use aptos_framework::coin::{Self, Coin};
     use aptos_std::type_info;
-    use std::signer;
     use std::string;
+
+    use SwapAdmin::WrapperUtil;
 
     struct TokenSharedCapability<phantom CoinType> has key, store {
         mint: coin::MintCapability<CoinType>,
@@ -36,7 +35,7 @@ module SwapAdmin::TokenMock {
         string::append_utf8(&mut token_name, b" Coin");
 
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinType>(
-            signer,
+            account,
             token_name,
             string::utf8(token_symbol),
             precision,

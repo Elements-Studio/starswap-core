@@ -1,5 +1,5 @@
 
-module Bridge::XUSDT {
+module UsdtIssuer::XUSDT {
     use aptos_framework::managed_coin;
     use std::signer;
 

@@ -1,15 +1,9 @@
 [package]
-name = "Starswap-Core-Aptos"
-version = "0.0.1"
-#upgrade_policy = "immutable"
+name = "USDTRepo"
+version = "0.1.0"
 
 [addresses]
-#liquidswap_lp = "0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9"
-#StarcoinFramework = "0x1"
-SwapAdmin = "0x4a0caec13e8d1a25b87405f5edf6cbfd30bd36b6f331888c8f950e425bf6b9c7"
-SwapFeeAdmin = "0x8936f011db15a6042d6424f8fac5c2a847af573f590adacd6a854066ffa5d077"
 UsdtIssuer = "0x70f7070b07046c4eb6d0288a77c9dd8f829e09d797b8492e343dd360324ffe0b"
-#BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 move_std = "0x1"
 aptos_framework = "0x1"
 aptos_std = "0x1"
@@ -17,8 +11,6 @@ aptos_token = "0x3"
 
 [dependencies]
 #StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
-#Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "b2116064ef85f278ac2e1eba2fc6893e72d5f6f2" }
-USDTRepo = { local = "./usdt-dep" }
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-framework"}
 AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-stdlib"}
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/move-stdlib"}

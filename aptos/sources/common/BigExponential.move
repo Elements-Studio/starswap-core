@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::BigExponential {
-
-//    use StarcoinFramework::error;
     use std::error;
     use SwapAdmin::U256Wrapper::{Self, U256};
 

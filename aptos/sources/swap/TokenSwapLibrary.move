@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapLibrary {
-    use SwapAdmin::SafeMath;
     use std::error;
+    use SwapAdmin::SafeMath;
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_SWAP_FEE_ALGORITHM_INVALID: u64 = 1002;

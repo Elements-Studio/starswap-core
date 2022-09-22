@@ -1,5 +1,4 @@
 module SwapAdmin::U256Wrapper {
-
     use std::vector;
     use std::error;
     use aptos_std::from_bcs;
@@ -34,9 +33,9 @@ module SwapAdmin::U256Wrapper {
         from_bytes(&data, false)
     }
 
-    fun from_bytes(data: &vector<u8>, be: bool): U256 {
+    fun from_bytes(data: &vector<u8>, _be: bool): U256 {
         //TODO handler little endian and big endian
-        //TODO need trim ？
+        //TODO need trim ?
         let v = from_bcs::to_u128(*data);
         from_u128(v)
     }

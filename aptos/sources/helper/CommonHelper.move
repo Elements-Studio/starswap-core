@@ -1,10 +1,10 @@
 module SwapAdmin::CommonHelper {
-    use SwapAdmin::TokenMock;
-
-    use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::coin::{Self};
     use aptos_std::math64;
 
     use std::signer;
+
+    use SwapAdmin::TokenMock;
 
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
@@ -32,7 +32,7 @@ module SwapAdmin::CommonHelper {
     public fun get_safe_balance<TokenType: store>(token_address: address): u128{
         let token_balance: u128 = 0;
         if (coin::is_account_registered<TokenType>(token_address)) {
-            token_balance = coin::balance<TokenType>(token_address);
+            token_balance = (coin::balance<TokenType>(token_address) as u128);
         };
         token_balance
     }
@@ -46,7 +46,7 @@ module SwapAdmin::CommonHelper {
         let coin_precision = coin::decimals<Token>();
         let scaling_factor = math64::pow(10, (coin_precision as u64));
 
-        amount * scaling_factor
+        amount * (scaling_factor as u128)
     }
 
     public fun pow_10(exp: u8): u128 {

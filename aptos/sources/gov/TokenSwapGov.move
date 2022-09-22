@@ -15,6 +15,7 @@ module SwapAdmin::TokenSwapGov {
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapConfig;
+    #[test_only]
     use SwapAdmin::SafeMath;
     use SwapAdmin::TokenSwapGovPoolType::{
         PoolTypeCommunity,
@@ -231,7 +232,7 @@ module SwapAdmin::TokenSwapGov {
         let initial_liquidity_total = calculate_amount_from_percent(GOV_PERCENT_IDO) * (scaling_factor as u128);
         STAR::mint(account, initial_liquidity_total);
         move_to(account, GovTreasury<PoolTypeIDO>{
-            treasury: coin::withdraw<STAR::STAR>(account, (initial_liquidity_total) as u64),
+            treasury: coin::withdraw<STAR::STAR>(account, (initial_liquidity_total as u64)),
             locked_start_timestamp : now_timestamp,
             locked_total_timestamp : 0,
         });
@@ -509,7 +510,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
 
-    public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
+    public entry fun upgrade_dao_treasury_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
         //upgrade dao treasury genesis can only be execute once
         if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(&signer))){
@@ -544,7 +545,7 @@ module SwapAdmin::TokenSwapGov {
         });
     }
 
-    public(script) fun upgrade_pool_type_genesis(signer: signer) {
+    public entry fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
     }
 }

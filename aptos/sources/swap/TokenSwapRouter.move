@@ -49,8 +49,8 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Register swap pair by comparing sort
-    public fun register_swap_pair<X: drop + store,
-                                  Y: drop + store>(signer: &signer) {
+    public fun register_swap_pair<X: store,
+                                  Y: store>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -133,7 +133,7 @@ module SwapAdmin::TokenSwapRouter {
             coin::register<LiquidityToken<X, Y>>(signer);
         };
 
-        let liquidity: u128 = coin::value<LiquidityToken<X, Y>>(&liquidity_token);
+        let liquidity: u128 = (coin::value<LiquidityToken<X, Y>>(&liquidity_token) as u128);
         assert!(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
         coin::deposit(signer::address_of(signer), liquidity_token);
     }
@@ -184,8 +184,8 @@ module SwapAdmin::TokenSwapRouter {
     ) {
         let liquidity_token = coin::withdraw<LiquidityToken<X, Y>>(signer, (liquidity as u64));
         let (token_x, token_y) = TokenSwap::burn_and_emit_event(signer, liquidity_token, amount_x_min, amount_y_min);
-        assert!(coin::value(&token_x) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
-        assert!(coin::value(&token_y) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
+        assert!((coin::value(&token_x) as u128) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
+        assert!((coin::value(&token_y) as u128) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
         coin::deposit(signer::address_of(signer), token_x);
         coin::deposit(signer::address_of(signer), token_y);
         // TokenSwap::emit_remove_liquidity_event<X, Y>(signer, liquidity, amount_x_min, amount_y_min);
@@ -366,7 +366,7 @@ module SwapAdmin::TokenSwapRouter {
         };
     }
 
-    public(script) fun upgrade_tokenpair_to_tokenswappair<X: store,
+    public entry fun upgrade_tokenpair_to_tokenswappair<X: store,
                                                           Y: store>(signer: signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);

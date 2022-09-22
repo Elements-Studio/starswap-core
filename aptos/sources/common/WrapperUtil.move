@@ -1,5 +1,4 @@
 module SwapAdmin::WrapperUtil {
-
     use aptos_std::type_info;
 
     public fun is_same_token<CoinType1: store, CoinType2: store>(): bool {

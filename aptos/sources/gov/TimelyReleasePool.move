@@ -74,7 +74,7 @@ module SwapAdmin::TimelyReleasePool {
     public fun deposit<PoolT: store, TokenT: store>(broker: address,
                                                     token: Coin<TokenT>) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        pool.total_treasury_amount = pool.total_treasury_amount + coin::value(&token);
+        pool.total_treasury_amount = pool.total_treasury_amount + (coin::value(&token) as u128);
         coin::merge<TokenT>(&mut pool.treasury, token);
     }
 
@@ -110,7 +110,7 @@ module SwapAdmin::TimelyReleasePool {
         let times = time_interval / pool.interval;
 
         let withdraw_amount = (times as u128) * pool.release_per_time;
-        let treasury_balance = coin::value(&pool.treasury);
+        let treasury_balance = (coin::value(&pool.treasury) as u128);
         if (withdraw_amount > treasury_balance) {
             withdraw_amount = treasury_balance;
         };

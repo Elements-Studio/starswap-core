@@ -1,4 +1,5 @@
 module SwapAdmin::SafeMath {
+    #[test_only]
     use aptos_std::math64;
     use std::error;
     use SwapAdmin::U256Wrapper::{Self, U256};
