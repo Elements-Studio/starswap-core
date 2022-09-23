@@ -140,7 +140,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
 
     /// Query pool by key
     /// @return (multiplier, asset_weight, asset_amount)
-    public fun query_pool<PoolType: store, AssetType: store>(
+    public fun query_pool_by_key<PoolType: store, AssetType: store>(
         broker: address,
         key: &vector<u8>
     ): (u64, u128, u128) acquires MultiplierPoolsGlobalInfo {
@@ -174,9 +174,10 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
             let idx = 0;
             let len = Vector::length(&info.items);
             loop {
-                if (idx > len) {
+                if (idx >= len) {
                     break
                 };
+
                 let item =
                     Vector::borrow(&info.items, idx);
                 Vector::append(&mut key_list, *&item.key);
@@ -195,16 +196,18 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     public fun query_total_amount<PoolType: store, AssetType: store>(
         broker: address,
     ): (u128, u128, ) acquires MultiplierPoolsGlobalInfo {
+
         let (
             _,
             multiplier_list,
             amount_list
         ) = query_all_pools<PoolType, AssetType>(broker);
+
         assert!(
-            Vector::is_empty(&multiplier_list) ||
-                Vector::is_empty(&amount_list),
+            !Vector::is_empty(&multiplier_list) && !Vector::is_empty(&amount_list),
             Errors::invalid_state(ERROR_POOL_EMPTY)
         );
+
         assert!(
             Vector::length(&multiplier_list) == Vector::length(&amount_list),
             Errors::invalid_state(ERROR_POOL_PARAMETER_INVALID)
@@ -215,7 +218,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         let idx = 0;
         let len = Vector::length(&amount_list);
         loop {
-            if (idx > len) {
+            if (idx >= len) {
                 break
             };
 

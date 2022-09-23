@@ -628,8 +628,9 @@ module TokenSwapSyrup {
     }
 
     /// Query the information of a certain pledge time in the multiplier pool
+    /// (multiplier, asset_weight, asset_amount)
     public fun query_multiplier_pool_info<TokenT: store>(pledge_time: u64): (u64, u128, u128) {
-        TokenSwapSyrupMultiplierPool::query_pool<PoolTypeSyrup, Token::Token<TokenT>>(
+        TokenSwapSyrupMultiplierPool::query_pool_by_key<PoolTypeSyrup, Token::Token<TokenT>>(
             broker_addr(),
             &pledge_time_to_key(pledge_time),
         )
@@ -675,7 +676,7 @@ module TokenSwapSyrup {
     public fun pledge_time_to_mulitplier<TokenT>(pledge_time_sec: u64): u64 {
         let key = pledge_time_to_key(pledge_time_sec);
         if (TokenSwapSyrupMultiplierPool::has<PoolTypeSyrup, Token::Token<TokenT>>(broker_addr(), &key)) {
-            let (multiplier, _, _) = TokenSwapSyrupMultiplierPool::query_pool<
+            let (multiplier, _, _) = TokenSwapSyrupMultiplierPool::query_pool_by_key<
                 PoolTypeSyrup,
                 Token::Token<TokenT>
             >(broker_addr(), &key);
