@@ -209,7 +209,7 @@ script {
     fun admin_test_param_in_addtion_pool_amount(account: signer) {
         let pledge_time = 1000;
         let amount = CommonHelper::pow_amount<WETH>(2000);
-        TokenSwapSyrup::set_pool_amount<WETH>(
+        TokenSwapSyrup::set_multiplier_pool_amount<WETH>(
             &account,
             pledge_time,
             CommonHelper::pow_amount<WETH>(2000),

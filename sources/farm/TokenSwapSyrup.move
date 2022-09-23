@@ -919,13 +919,33 @@ module TokenSwapSyrup {
         };
 
         // upgrade event
-        EventUtil::init_event<AddPoolEventV2>(account);
-        EventUtil::init_event<UpdateAllocPointEvent>(account);
-        EventUtil::init_event<StakeEventV2>(account);
-        EventUtil::init_event<UnstakeEventV2>(account);
-        EventUtil::init_event<AddStepwiseEvent>(account);
-        EventUtil::init_event<AddPoolStepwiseEvent>(account);
-        EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
+        if (!EventUtil::exist_event<AddPoolEventV2>(broker_addr)) {
+            EventUtil::init_event<AddPoolEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<UpdateAllocPointEvent>(broker_addr)) {
+            EventUtil::init_event<UpdateAllocPointEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<StakeEventV2>(broker_addr)) {
+            EventUtil::init_event<StakeEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<UnstakeEventV2>(broker_addr)) {
+            EventUtil::init_event<UnstakeEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<AddStepwiseEvent>(broker_addr)) {
+            EventUtil::init_event<AddStepwiseEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<AddPoolStepwiseEvent>(broker_addr)) {
+            EventUtil::init_event<AddPoolStepwiseEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<ModifyReleasePerSecondEvent>(broker_addr)) {
+            EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
+        };
         //------------------------------------------//
     }
 

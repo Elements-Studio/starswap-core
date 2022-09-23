@@ -54,34 +54,21 @@ task 11 'run'. lines 141-172:
 
 task 12 'run'. lines 174-183:
 {
-  "gas_used": 296945,
-  "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x00000000000000000000000000000001",
-          "name": "EventUtil"
-        }
-      },
-      "abort_code": "25857"
-    }
-  }
+  "gas_used": 309819,
+  "status": "Executed"
 }
 
 task 13 'run'. lines 185-199:
 {
-  "gas_used": 642650,
+  "gas_used": 520205,
   "status": "Executed"
 }
 
 task 14 'run'. lines 202-228:
-Error: error[E03003]: unbound module member
-    ┌─ /var/folders/yl/1jwdcrx91p96yh8c0yw03x280000gn/T/.tmpIl2Oab:211:9
-    │
-211 │         TokenSwapSyrup::set_pool_amount<WETH>(
-    │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Invalid module access. Unbound function 'set_pool_amount' in module 'SwapAdmin::TokenSwapSyrup'
-
-
+{
+  "gas_used": 209501,
+  "status": "Executed"
+}
 
 task 15 'run'. lines 230-245:
 {
