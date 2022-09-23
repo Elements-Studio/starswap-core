@@ -1,6 +1,6 @@
 module SwapAdmin::SwapTestHelper {
     use aptos_framework::coin::{Self};
-    use aptos_framework::aptos_coin::{AptosCoin as APT};
+//    use aptos_framework::aptos_coin::{AptosCoin as APT};
     use std::signer;
 
     use SwapAdmin::TokenSwapRouter;
@@ -41,14 +41,14 @@ module SwapAdmin::SwapTestHelper {
         TokenSwapRouter::register_swap_pair<WDAI, WBTC>(account);
         assert!(TokenSwapRouter::swap_pair_exists<WDAI, WBTC>(), 113);
 
-        TokenSwapRouter::register_swap_pair<APT, WETH>(account);
-        assert!(TokenSwapRouter::swap_pair_exists<APT, WETH>(), 114);
+//        TokenSwapRouter::register_swap_pair<APT, WETH>(account);
+//        assert!(TokenSwapRouter::swap_pair_exists<APT, WETH>(), 114);
 
         TokenSwapRouter::register_swap_pair<WBTC, WETH>(account);
         assert!(TokenSwapRouter::swap_pair_exists<WBTC, WETH>(), 115);
 
-        TokenSwapRouter::register_swap_pair<APT, XUSDT>(account);
-        assert!(TokenSwapRouter::swap_pair_exists<APT, XUSDT>(), 116);
+//        TokenSwapRouter::register_swap_pair<APT, XUSDT>(account);
+//        assert!(TokenSwapRouter::swap_pair_exists<APT, XUSDT>(), 116);
 
         TokenSwapRouter::register_swap_pair<WETH, XUSDT>(account);
         assert!(TokenSwapRouter::swap_pair_exists<WETH, XUSDT>(), 117);
@@ -58,9 +58,9 @@ module SwapAdmin::SwapTestHelper {
         TokenSwapRouter::add_liquidity<WETH, WUSDT>(account, 5000, 100000, 100, 100);
         TokenSwapRouter::add_liquidity<WUSDT, WDAI>(account, 20000, 30000, 100, 100);
         TokenSwapRouter::add_liquidity<WDAI, WBTC>(account, 100000, 4000, 100, 100);
-        TokenSwapRouter::add_liquidity<APT, WETH>(account, 200000, 10000, 100, 100);
+//        TokenSwapRouter::add_liquidity<APT, WETH>(account, 200000, 10000, 100, 100);
         TokenSwapRouter::add_liquidity<WETH, WBTC>(account, 60000, 5000, 100, 100);
-        TokenSwapRouter::add_liquidity<APT, XUSDT>(account, 160000, 5000, 100, 100);
+//        TokenSwapRouter::add_liquidity<APT, XUSDT>(account, 160000, 5000, 100, 100);
         TokenSwapRouter::add_liquidity<WETH, XUSDT>(account, 6000, 20000, 100, 100);
     }
 

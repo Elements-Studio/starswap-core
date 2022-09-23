@@ -11,6 +11,7 @@ module SwapAdmin::TokenSwapRouter {
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapFee;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::WrapperUtil;
 
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
@@ -66,9 +67,9 @@ module SwapAdmin::TokenSwapRouter {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            (coin::balance<LiquidityToken<X, Y>>(signer) as u128)
+            WrapperUtil::coin_balance<LiquidityToken<X, Y>>(signer)
         } else {
-            (coin::balance<LiquidityToken<Y, X>>(signer) as u128)
+            WrapperUtil::coin_balance<LiquidityToken<Y, X>>(signer)
         }
     }
 
@@ -133,7 +134,7 @@ module SwapAdmin::TokenSwapRouter {
             coin::register<LiquidityToken<X, Y>>(signer);
         };
 
-        let liquidity: u128 = (coin::value<LiquidityToken<X, Y>>(&liquidity_token) as u128);
+        let liquidity: u128 = WrapperUtil::coin_value<LiquidityToken<X, Y>>(&liquidity_token);
         assert!(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
         coin::deposit(signer::address_of(signer), liquidity_token);
     }
@@ -184,8 +185,8 @@ module SwapAdmin::TokenSwapRouter {
     ) {
         let liquidity_token = coin::withdraw<LiquidityToken<X, Y>>(signer, (liquidity as u64));
         let (token_x, token_y) = TokenSwap::burn_and_emit_event(signer, liquidity_token, amount_x_min, amount_y_min);
-        assert!((coin::value(&token_x) as u128) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
-        assert!((coin::value(&token_y) as u128) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
+        assert!(WrapperUtil::coin_value(&token_x) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
+        assert!(WrapperUtil::coin_value(&token_y) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
         coin::deposit(signer::address_of(signer), token_x);
         coin::deposit(signer::address_of(signer), token_y);
         // TokenSwap::emit_remove_liquidity_event<X, Y>(signer, liquidity, amount_x_min, amount_y_min);

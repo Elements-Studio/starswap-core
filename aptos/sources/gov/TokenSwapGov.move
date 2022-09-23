@@ -15,6 +15,8 @@ module SwapAdmin::TokenSwapGov {
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::WrapperUtil;
+
     #[test_only]
     use SwapAdmin::SafeMath;
     use SwapAdmin::TokenSwapGovPoolType::{
@@ -254,8 +256,8 @@ module SwapAdmin::TokenSwapGov {
         
         let treasury_event = borrow_global_mut<GovTreasuryEvent<PoolType>>(signer::address_of(account));
         event::emit_event(&mut treasury_event.withdraw_genesisGovTreasury_event_handler, GenesisGovTreasuryWithdrawEvent<PoolType> {
-            amount:amount,
-            remainder: (coin::value<STAR::STAR>(&treasury.genesis_treasury) as u128),
+            amount,
+            remainder: WrapperUtil::coin_value<STAR::STAR>(&treasury.genesis_treasury) ,
             signer:signer::address_of(account),
             receiver:acceptor,
         });
@@ -397,7 +399,7 @@ module SwapAdmin::TokenSwapGov {
         let treasury_event = borrow_global_mut<GovTreasuryEvent<PoolType>>(signer::address_of(account));
         event::emit_event(&mut treasury_event.withdraw_linearGovTreasury_event_handler, LinearGovTreasuryWithdrawEvent<PoolType> {
             amount:amount,
-            remainder:(coin::value<STAR::STAR>(&treasury.linear_treasury) as u128),
+            remainder:WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury) ,
             signer:signer::address_of(account),
             receiver:to,
         });
@@ -427,7 +429,7 @@ module SwapAdmin::TokenSwapGov {
 
             event::emit_event(&mut treasury_event.withdraw_linearGovTreasury_event_handler, LinearGovTreasuryWithdrawEvent<PoolType> {
                 amount:can_withdraw_amount,
-                remainder:(coin::value<STAR::STAR>(&treasury.linear_treasury) as u128),
+                remainder:WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury) ,
                 signer:signer::address_of(account),
                 receiver:STAR::token_address(),
             });
@@ -449,7 +451,7 @@ module SwapAdmin::TokenSwapGov {
     //Amount to get linear treasury
     public fun get_balance_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());
-        (coin::value<STAR::STAR>(&treasury.linear_treasury) as u128)
+        WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury)
     }
     //Get the total number of locks in the linear treasury
     public fun get_total_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
@@ -472,19 +474,19 @@ module SwapAdmin::TokenSwapGov {
         let now_timestamp = timestamp::now_seconds();
 
         if (now_timestamp >= (treasury.locked_start_timestamp + treasury.locked_total_timestamp)){
-            return (coin::value<STAR::STAR>(&treasury.linear_treasury) as u128)
+            return WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury)
         };
         let second_release =  treasury.linear_total / (treasury.locked_total_timestamp as u128);
 
         let amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
 
-        (coin::value<STAR::STAR>(&treasury.linear_treasury) as u128) - (treasury.linear_total - amount)
+        WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury)  - (treasury.linear_total - amount)
     }
 
     /// Get balance of treasury
     public fun get_balance_of_treasury<PoolType: store>(): u128 acquires GovTreasuryV2 {
         let treasury = borrow_global_mut<GovTreasuryV2<PoolType>>(STAR::token_address());
-        (coin::value<STAR::STAR>(&treasury.genesis_treasury) as u128)
+        WrapperUtil::coin_value<STAR::STAR>(&treasury.genesis_treasury)
     }
 
 

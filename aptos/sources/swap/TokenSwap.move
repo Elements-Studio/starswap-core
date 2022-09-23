@@ -19,7 +19,7 @@ module SwapAdmin::TokenSwap {
     use SwapAdmin::SafeMath;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::FixedPoint128;
-
+    use SwapAdmin::WrapperUtil;
     use SwapAdmin::U256Wrapper::{Self, U256};
 
     struct LiquidityToken<phantom X, phantom Y> has key, store, copy, drop {}
@@ -258,8 +258,8 @@ module SwapAdmin::TokenSwap {
 
         let total_supply: u128 = option::get_with_default(&coin::supply<LiquidityToken<X, Y>>(), 0u128);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
-        let x_value = (coin::value<X>(&x) as u128);
-        let y_value = (coin::value<Y>(&y) as u128);
+        let x_value = WrapperUtil::coin_value<X>(&x) ;
+        let y_value = WrapperUtil::coin_value<Y>(&y) ;
         let liquidity = if (total_supply == 0) {
             // 1000 is the MINIMUM_LIQUIDITY
             // sqrt(x*y) - 1000
@@ -292,10 +292,10 @@ module SwapAdmin::TokenSwap {
     ): (Coin<X>, Coin<Y>) acquires TokenSwapPair, LiquidityTokenCapability {
         TokenSwapConfig::assert_global_freeze();
 
-        let to_burn_value = (coin::value(&to_burn) as u128);
+        let to_burn_value = WrapperUtil::coin_value(&to_burn) ;
         let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
-        let x_reserve = (coin::value(&token_pair.token_x_reserve) as u128);
-        let y_reserve = (coin::value(&token_pair.token_y_reserve) as u128);
+        let x_reserve = WrapperUtil::coin_value(&token_pair.token_x_reserve) ;
+        let y_reserve = WrapperUtil::coin_value(&token_pair.token_y_reserve) ;
         let total_supply = option::get_with_default(&coin::supply<LiquidityToken<X, Y>>(), 0u128);
         let x = SafeMath::safe_mul_div_u128(to_burn_value, x_reserve, total_supply);
         let y = SafeMath::safe_mul_div_u128(to_burn_value, y_reserve, total_supply);
@@ -321,10 +321,10 @@ module SwapAdmin::TokenSwap {
     /// The order of type args should be sorted.
     public fun get_reserves<X: store, Y: store>(): (u128, u128) acquires TokenSwapPair {
         let token_pair = borrow_global<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
-        let x_reserve = coin::value(&token_pair.token_x_reserve);
-        let y_reserve = coin::value(&token_pair.token_y_reserve);
+        let x_reserve = WrapperUtil::coin_value(&token_pair.token_x_reserve);
+        let y_reserve = WrapperUtil::coin_value(&token_pair.token_y_reserve);
         //        let last_block_timestamp = token_pair.last_block_timestamp;
-        ((x_reserve as u128), (y_reserve as u128))
+        (x_reserve, y_reserve)
     }
 
     /// Get cumulative info of a token pair.
@@ -346,8 +346,8 @@ module SwapAdmin::TokenSwap {
     ): (Coin<X>, Coin<Y>, Coin<X>, Coin<Y>) acquires TokenSwapPair {
         TokenSwapConfig::assert_global_freeze();
 
-        let x_in_value = (coin::value(&x_in) as u128);
-        let y_in_value = (coin::value(&y_in) as u128);
+        let x_in_value = WrapperUtil::coin_value(&x_in) ;
+        let y_in_value = WrapperUtil::coin_value(&y_in) ;
         assert!(x_in_value > 0 || y_in_value > 0, ERROR_SWAP_TOKEN_INSUFFICIENT);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
         let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
@@ -356,8 +356,8 @@ module SwapAdmin::TokenSwap {
         let x_swapped = coin::extract(&mut token_pair.token_x_reserve, (x_out as u64));
         let y_swapped = coin::extract(&mut token_pair.token_y_reserve, (y_out as u64));
             {
-                let x_reserve_new = (coin::value(&token_pair.token_x_reserve) as u128);
-                let y_reserve_new = (coin::value(&token_pair.token_y_reserve) as u128);
+                let x_reserve_new = WrapperUtil::coin_value(&token_pair.token_x_reserve) ;
+                let y_reserve_new = WrapperUtil::coin_value(&token_pair.token_y_reserve) ;
                 let (x_adjusted, y_adjusted);
                 let (fee_numerator, fee_denominator) = TokenSwapConfig::get_poundage_rate<X, Y>();
                 //                x_adjusted = x_reserve_new * 1000 - x_in_value * 3;
@@ -479,7 +479,7 @@ module SwapAdmin::TokenSwap {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
             signer: signer::address_of(signer),
-            liquidity: (coin::value<LiquidityToken<X, Y>>(&liquidity_token) as u128),
+            liquidity: WrapperUtil::coin_value<LiquidityToken<X, Y>>(&liquidity_token) ,
             amount_x_desired,
             amount_y_desired,
             amount_x_min,
@@ -495,7 +495,7 @@ module SwapAdmin::TokenSwap {
                                                            amount_x_min: u128,
                                                            amount_y_min: u128)
     : (Coin<X>, Coin<Y>) acquires TokenSwapPair, LiquidityTokenCapability, TokenSwapEventHandle {
-        let liquidity = (coin::value<LiquidityToken<X, Y>>(&to_burn) as u128);
+        let liquidity = WrapperUtil::coin_value<LiquidityToken<X, Y>>(&to_burn) ;
         let (x_token, y_token) = burn<X, Y>(to_burn);
 
         let event_handle = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
@@ -524,8 +524,8 @@ module SwapAdmin::TokenSwap {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
             signer: signer::address_of(signer),
-            x_in: (coin::value<X>(&token_x_out)  as u128),
-            y_out: (coin::value<Y>(&token_y_out) as u128),
+            x_in: WrapperUtil::coin_value<X>(&token_x_out),
+            y_out: WrapperUtil::coin_value<Y>(&token_y_out),
         });
         (token_x_out, token_y_out, token_x_fee, token_y_fee)
     }

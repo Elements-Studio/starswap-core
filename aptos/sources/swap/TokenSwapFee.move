@@ -113,7 +113,7 @@ module SwapAdmin::TokenSwapFee {
     fun swap_fee_direct_deposit<X: store, Y: store>(token_x: Coin<X>): (bool, u128, u128) {
         let fee_address = TokenSwapConfig::fee_address();
         if (coin::is_account_registered<X>(fee_address)) {
-            let x_value = (coin::value(&token_x) as u128);
+            let x_value = WrapperUtil::coin_value(&token_x);
             coin::deposit(fee_address, token_x);
             (true, x_value, x_value)
             //if swap fee deposit to fee address fail, return back to lp pool
@@ -130,7 +130,7 @@ module SwapAdmin::TokenSwapFee {
     }
 
     fun swap_fee_swap<X: store, FeeToken: store>(token_x: Coin<X>): (bool, u128, u128) {
-        let x_value = (coin::value(&token_x) as u128);
+        let x_value = WrapperUtil::coin_value(&token_x);
         // just return, not assert error
         if (x_value == 0) {
             coin::destroy_zero(token_x);

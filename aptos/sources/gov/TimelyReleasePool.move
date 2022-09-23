@@ -5,6 +5,8 @@ module SwapAdmin::TimelyReleasePool {
     use std::signer;
     use std::error;
 
+    use SwapAdmin::WrapperUtil;
+
     const ERROR_LINEAR_RELEASE_EXISTS: u64 = 2001;
     const ERROR_LINEAR_NOT_READY_YET: u64 = 2002;
     const ERROR_EVENT_INIT_REPEATE: u64 = 3003;
@@ -39,7 +41,7 @@ module SwapAdmin::TimelyReleasePool {
         let sender_addr = signer::address_of(sender);
         assert!(!exists<TimelyReleasePool<PoolT, TokenT>>(sender_addr), error::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
 
-        let total_treasury_amount = (coin::value<TokenT>(&init_token) as u128);
+        let total_treasury_amount = WrapperUtil::coin_value<TokenT>(&init_token);
         move_to(sender, TimelyReleasePool<PoolT, TokenT> {
             treasury: init_token,
             total_treasury_amount,
@@ -74,7 +76,7 @@ module SwapAdmin::TimelyReleasePool {
     public fun deposit<PoolT: store, TokenT: store>(broker: address,
                                                     token: Coin<TokenT>) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        pool.total_treasury_amount = pool.total_treasury_amount + (coin::value(&token) as u128);
+        pool.total_treasury_amount = pool.total_treasury_amount + WrapperUtil::coin_value(&token);
         coin::merge<TokenT>(&mut pool.treasury, token);
     }
 
@@ -102,7 +104,7 @@ module SwapAdmin::TimelyReleasePool {
     : Coin<TokenT> acquires TimelyReleasePool {
         let now_time = timestamp::now_seconds();
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
-        assert!(coin::value(&pool.treasury) > 0, error::invalid_state(ERROR_TRESURY_IS_EMPTY));
+        assert!(WrapperUtil::coin_value(&pool.treasury) > 0, error::invalid_state(ERROR_TRESURY_IS_EMPTY));
         assert!(now_time > pool.begin_time, error::invalid_state(ERROR_EVENT_NOT_START_YET));
 
         let time_interval = now_time - pool.latest_release_time;
@@ -110,7 +112,7 @@ module SwapAdmin::TimelyReleasePool {
         let times = time_interval / pool.interval;
 
         let withdraw_amount = (times as u128) * pool.release_per_time;
-        let treasury_balance = (coin::value(&pool.treasury) as u128);
+        let treasury_balance = WrapperUtil::coin_value(&pool.treasury);
         if (withdraw_amount > treasury_balance) {
             withdraw_amount = treasury_balance;
         };
@@ -138,7 +140,7 @@ module SwapAdmin::TimelyReleasePool {
             let current_time_stamp = pool.latest_release_time + ((diff_times + 1) * pool.interval);
 
             let ret = time * pool.release_per_time;
-            let treasury_balance = (coin::value(&pool.treasury) as u128);
+            let treasury_balance = WrapperUtil::coin_value(&pool.treasury);
             if (ret > treasury_balance) {
                 (treasury_balance, current_time_stamp)
             } else {
@@ -149,7 +151,7 @@ module SwapAdmin::TimelyReleasePool {
         };
 
         (
-            (coin::value<TokenT>(&pool.treasury) as u128),
+            WrapperUtil::coin_value<TokenT>(&pool.treasury),
             pool.total_treasury_amount,
             pool.release_per_time,
             pool.begin_time,
