@@ -12,6 +12,7 @@ module TokenSwapSyrup {
     use StarcoinFramework::Vector;
     use StarcoinFramework::Option;
     use StarcoinFramework::BCS;
+    use StarcoinFramework::EventUtil;
 
     use SwapAdmin::YieldFarmingMultiplier;
     use SwapAdmin::STAR;
@@ -19,7 +20,6 @@ module TokenSwapSyrup {
     use SwapAdmin::TokenSwapSyrupMultiplierPool;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::EventUtil;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -211,13 +211,13 @@ module TokenSwapSyrup {
     ) {
         YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(account, token);
 
-        EventUtil::init_event_with_T<AddPoolEventV2>(account);
-        EventUtil::init_event_with_T<UpdateAllocPointEvent>(account);
-        EventUtil::init_event_with_T<StakeEventV2>(account);
-        EventUtil::init_event_with_T<UnstakeEventV2>(account);
-        EventUtil::init_event_with_T<AddStepwiseEvent>(account);
-        EventUtil::init_event_with_T<AddPoolStepwiseEvent>(account);
-        EventUtil::init_event_with_T<ModifyReleasePerSecondEvent>(account);
+        EventUtil::init_event<AddPoolEventV2>(account);
+        EventUtil::init_event<UpdateAllocPointEvent>(account);
+        EventUtil::init_event<StakeEventV2>(account);
+        EventUtil::init_event<UnstakeEventV2>(account);
+        EventUtil::init_event<AddStepwiseEvent>(account);
+        EventUtil::init_event<AddPoolStepwiseEvent>(account);
+        EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
     }
 
     /// Initialized global pool
@@ -919,13 +919,13 @@ module TokenSwapSyrup {
         };
 
         // upgrade event
-        EventUtil::init_event_with_T<AddPoolEventV2>(account);
-        EventUtil::init_event_with_T<UpdateAllocPointEvent>(account);
-        EventUtil::init_event_with_T<StakeEventV2>(account);
-        EventUtil::init_event_with_T<UnstakeEventV2>(account);
-        EventUtil::init_event_with_T<AddStepwiseEvent>(account);
-        EventUtil::init_event_with_T<AddPoolStepwiseEvent>(account);
-        EventUtil::init_event_with_T<ModifyReleasePerSecondEvent>(account);
+        EventUtil::init_event<AddPoolEventV2>(account);
+        EventUtil::init_event<UpdateAllocPointEvent>(account);
+        EventUtil::init_event<StakeEventV2>(account);
+        EventUtil::init_event<UnstakeEventV2>(account);
+        EventUtil::init_event<AddStepwiseEvent>(account);
+        EventUtil::init_event<AddPoolStepwiseEvent>(account);
+        EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
         //------------------------------------------//
     }
 

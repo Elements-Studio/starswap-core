@@ -170,7 +170,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         let multiplier_list = Vector::empty<u64>();
         let asset_amount_list = Vector::empty<u128>();
 
-        if (!Vector::is_empty<>(&info.items)) {
+        if (!Vector::is_empty<MultiplierPool<PoolType, AssetType>>(&info.items)) {
             let idx = 0;
             let len = Vector::length(&info.items);
             loop {
@@ -206,7 +206,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
             Errors::invalid_state(ERROR_POOL_EMPTY)
         );
         assert!(
-            Vector::length(&multiplier_list) == Vector::is_empty(&amount_list),
+            Vector::length(&multiplier_list) == Vector::length(&amount_list),
             Errors::invalid_state(ERROR_POOL_PARAMETER_INVALID)
         );
 
@@ -219,9 +219,10 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
                 break
             };
 
-            let stepwise_amount = Vector::borrow(&amount_list, idx);
+            let stepwise_amount = *Vector::borrow(&amount_list, idx);
+            let stepwise_mulitplier = *Vector::borrow(&multiplier_list, idx);
             total_amount = total_amount + stepwise_amount;
-            total_weight = total_weight + stepwise_amount * Vector::borrow(&multiplier_list, idx);
+            total_weight = total_weight + stepwise_amount * (stepwise_mulitplier as u128);
 
             idx = idx + 1;
         };

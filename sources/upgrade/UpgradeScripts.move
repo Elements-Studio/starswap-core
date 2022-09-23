@@ -12,7 +12,6 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapSyrupScript;
-    use SwapAdmin::BuyBackSTAR;
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::STAR::STAR;
