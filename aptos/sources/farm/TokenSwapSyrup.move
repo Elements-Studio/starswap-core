@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapSyrup {
-    use aptos_framework::coin;
-    use aptos_std::event;
+    use aptos_framework::coin;    
     use aptos_framework::account;
     use aptos_framework::timestamp;
 
+    use aptos_std::event;
     use aptos_std::type_info;
 
     use std::error;
