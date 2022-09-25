@@ -1005,7 +1005,7 @@ module YieldFarmingV3 {
         }
     }
 
-    /// Check the Farming of TokenT is exists.
+    /// Check the Farming of CoinT is exists.
     public fun exists_at<PoolType: store, RewardTokenT: store>(broker: address): bool {
         exists<Farming<PoolType, RewardTokenT>>(broker)
     }

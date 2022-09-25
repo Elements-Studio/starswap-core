@@ -313,15 +313,15 @@ module SwapAdmin::TokenSwapFarm {
     }
 
     //Deposit Token into the pool
-    public fun deposit<PoolType: store, TokenT: copy + drop + store>(
+    public fun deposit<PoolType: store, CoinT: copy + drop + store>(
         account: &signer,
-        token: coin::Coin<TokenT>) {
-        YieldFarming::deposit<PoolType, TokenT>(account, token);
+        token: coin::Coin<CoinT>) {
+        YieldFarming::deposit<PoolType, CoinT>(account, token);
     }
 
     //View Treasury Remaining
-    public fun get_treasury_balance<PoolType: store, TokenT: copy + drop + store>(): u128 {
-        YieldFarming::get_treasury_balance<PoolType, TokenT>(STAR::token_address())
+    public fun get_treasury_balance<PoolType: store, CoinT: copy + drop + store>(): u128 {
+        YieldFarming::get_treasury_balance<PoolType, CoinT>(STAR::token_address())
     }
 
     /// Stake liquidity Token pair
