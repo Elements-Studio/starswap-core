@@ -107,7 +107,7 @@ module SwapAdmin::TokenSwapSyrup {
     }
 
     struct SyrupEvent has key, store {
-        add_pool_event: event::EventHandle<AddPoolEvent>,
+        add_pool_event_handler: event::EventHandle<AddPoolEvent>,
         activation_state_event_handler: event::EventHandle<ActivationStateEvent>,
         stake_event_handler: event::EventHandle<StakeEvent>,
         unstake_event_handler: event::EventHandle<UnstakeEvent>,
@@ -118,7 +118,7 @@ module SwapAdmin::TokenSwapSyrup {
         YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(signer, token);
 
         move_to(signer, SyrupEvent{
-            add_pool_event: account::new_event_handle<AddPoolEvent>(signer),
+            add_pool_event_handler: account::new_event_handle<AddPoolEvent>(signer),
             activation_state_event_handler: account::new_event_handle<ActivationStateEvent>(signer),
             stake_event_handler: account::new_event_handle<StakeEvent>(signer),
             unstake_event_handler: account::new_event_handle<UnstakeEvent>(signer),
@@ -152,7 +152,7 @@ module SwapAdmin::TokenSwapSyrup {
         });
 
         let event = borrow_global_mut<SyrupEvent>(account);
-        event::emit_event(&mut event.add_pool_event,
+        event::emit_event(&mut event.add_pool_event_handler,
             AddPoolEvent{
                 type_info: type_info::type_of<CoinT>(),
                 signer: signer::address_of(signer),
@@ -186,7 +186,7 @@ module SwapAdmin::TokenSwapSyrup {
 
         // Publish event
         let event = borrow_global_mut<SyrupEvent>(account);
-        event::emit_event(&mut event.add_pool_event,
+        event::emit_event(&mut event.add_pool_event_handler,
             AddPoolEvent{
                 type_info: type_info::type_of<CoinT>(),
                 signer: signer::address_of(signer),
@@ -271,7 +271,7 @@ module SwapAdmin::TokenSwapSyrup {
     }
 
     /// Stake token type to syrup
-    /// @param: pledege_time per second
+    /// @param: pledge_time per second
     public fun stake<CoinT: store>(signer: &signer, pledge_time_sec: u64, amount: u128)
     acquires Syrup, SyrupStakeList, SyrupEvent {
         TokenSwapConfig::assert_global_freeze();

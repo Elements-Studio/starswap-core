@@ -781,7 +781,7 @@ module YieldFarmingV3 {
         ret_list
     }
 
-    /// Queyry pool info from pool type
+    /// Query pool info from pool type
     /// return value: (alive, release_per_second, asset_total_weight, harvest_index)
     public fun query_info<PoolType: store, AssetT: store>(broker: address): (bool, u128, u128, u128) acquires FarmingAsset {
         let asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
@@ -807,7 +807,7 @@ module YieldFarmingV3 {
         )
     }
 
-    /// Queyry global pool info
+    /// Query global pool info
     /// return value: (total_alloc_point, pool_release_per_second)
     public fun query_global_pool_info<PoolType: store>(broker: address): (u128, u128)
     acquires YieldFarmingGlobalPoolInfo {
@@ -1037,7 +1037,7 @@ module YieldFarmingV3 {
         return exists<StakeListExtend<PoolType, AssetT>>(account)
     }
 
-    /// Check stake list extend at address exists.
+    /// Check stake extend at address exists.
     public fun exists_stake_extend<PoolType: store, AssetT: store>(account: address): bool {
         return exists<StakeExtend<PoolType, AssetT>>(account)
     }

@@ -61,7 +61,7 @@ module YieldFarmingLibrary {
                                        last_update_timestamp: u64,
                                        now_seconds: u64,
                                        release_per_second: u128): u128 {
-        let addtion_harvest_index =
+        let additional_harvest_index =
             calculate_addtion_harvest_index(
                 asset_total_weight,
                 last_update_timestamp,
@@ -70,7 +70,7 @@ module YieldFarmingLibrary {
 
         let index_u256 = U256Wrapper::add(
             U256Wrapper::from_u128(harvest_index),
-            addtion_harvest_index,
+            additional_harvest_index,
         );
         BigExponential::to_safe_u128(index_u256)
     }
