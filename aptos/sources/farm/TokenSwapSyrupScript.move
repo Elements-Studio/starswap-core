@@ -11,7 +11,7 @@ module TokenSwapSyrupScript {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
-    // use SwapAdmin::TokenSwapGov;
+    use SwapAdmin::TokenSwapGov;
 
     ///  TODO: Deprecated on mainnet
     struct VestarMintCapabilityWrapper has key, store {
@@ -53,8 +53,7 @@ module TokenSwapSyrupScript {
 
     public entry fun unstake<CoinT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = signer::address_of(&signer);
-        // TODO: uncomment this once TokenSwapGov::linear_withdraw_syrup is available.
-        // TokenSwapGov::linear_withdraw_syrup(&signer, 0);
+        TokenSwapGov::linear_withdraw_syrup(&signer, 0);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<CoinT>(&signer, id);
         coin::deposit<CoinT>(user_addr, asset_token);
         coin::deposit<STAR::STAR>(user_addr, reward_token);
