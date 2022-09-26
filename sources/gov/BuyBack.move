@@ -6,7 +6,7 @@ module BuyBack {
     use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
     use StarcoinFramework::Errors;
-    use StarcoinFramework::EventUtil;
+    use SwapAdmin::EventUtil;
     use StarcoinFramework::Event;
 
     use SwapAdmin::TimelyReleasePool;

@@ -12,7 +12,6 @@ module TokenSwapSyrup {
     use StarcoinFramework::Vector;
     use StarcoinFramework::Option;
     use StarcoinFramework::BCS;
-    use StarcoinFramework::EventUtil;
 
     use SwapAdmin::YieldFarmingMultiplier;
     use SwapAdmin::STAR;
@@ -20,6 +19,7 @@ module TokenSwapSyrup {
     use SwapAdmin::TokenSwapSyrupMultiplierPool;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::EventUtil;
 
     const ERR_DEPRECATED: u64 = 1;
 
