@@ -126,7 +126,12 @@ module TokenSwapSyrupScript {
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
         TokenSwapSyrup::initialize_global_pool_info(signer, pool_release_per_second);
 
-        let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
+        let cap =
+            TokenSwapVestarRouter::initialize_global_syrup_info(
+                signer,
+                pool_release_per_second
+            );
+
         move_to(signer, VestarRouterCapabilityWrapper {
             cap
         });

@@ -196,7 +196,6 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     public fun query_total_amount<PoolType: store, AssetType: store>(
         broker: address,
     ): (u128, u128, ) acquires MultiplierPoolsGlobalInfo {
-
         let (
             _,
             multiplier_list,

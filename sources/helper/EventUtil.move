@@ -3,11 +3,32 @@ module SwapAdmin::EventUtil {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Errors;
 
+    const ERR_DEPRECATED: u64 = 1;
     const ERR_INIT_REPEATE: u64 = 101;
-    const ERR_RESOURCE_NOT_EXISTS: u64 = 101;
+    const ERR_RESOURCE_NOT_EXISTS: u64 = 102;
 
     struct EventHandleWrapper<phantom EventT: store + drop> has key {
         handle: Event::EventHandle<EventT>,
+    }
+
+    // DEPRECATED
+    public fun init_event_with_T<EventT: store + drop>(_sender: &signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+    }
+
+    // DEPRECATED
+    public fun uninit_event_with_T<EventT: store + drop>(_sender: &signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+    }
+
+    // DEPRECATED
+    public fun emit_event_with_T<EventT: store + drop>(_broker: address, _event: EventT) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+    }
+
+    // DEPRECATED
+    public fun exist_event_with_T<EventT: store + drop>(_broker: address): bool {
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     public fun init_event<EventT: store + drop>(sender: &signer) {
