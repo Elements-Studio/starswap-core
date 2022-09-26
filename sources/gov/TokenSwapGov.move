@@ -68,6 +68,7 @@ module TokenSwapGov {
     const GOV_PERCENT_DEVELOPER_FUND_LOCK_TIME : u64 = 2 * 365 * 86400;
 
 
+    const ERR_DEPRECATED: u64 = 1;
     const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
     const ERR_WITHDRAW_AMOUNT_TOO_MANY: u64 = 202;
     const ERR_WITHDRAW_AMOUNT_IS_ZERO: u64 = 203;
@@ -504,23 +505,30 @@ module TokenSwapGov {
     }
 
 
-    public fun upgrade_dao_treasury_genesis(signer: &signer) {
+    public fun upgrade_dao_treasury_genesis_func(signer: &signer) {
         STAR::assert_genesis_address(signer);
         //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(signer))){
+        if (!exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(signer))) {
             let precision = STAR::precision();
             let scaling_factor = Math::pow(10, (precision as u64));
             let now_timestamp = Timestamp::now_seconds();
 
             //  Release 24% for dao treasury. genesis release 2%.
-            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
+            let dao_treasury_genesis =
+                calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
             STAR::mint(signer, dao_treasury_genesis);
-            move_to(signer, GovTreasury<PoolTypeProtocolTreasury>{
+            move_to(signer, GovTreasury<PoolTypeProtocolTreasury> {
                 treasury: Account::withdraw<STAR::STAR>(signer, dao_treasury_genesis),
-                locked_start_timestamp : now_timestamp,
-                locked_total_timestamp : 0,
+                locked_start_timestamp: now_timestamp,
+                locked_total_timestamp: 0,
             });
         };
+    }
+
+
+    /// DEPRECATED
+    public(script) fun upgrade_dao_treasury_genesis(_signer: signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {

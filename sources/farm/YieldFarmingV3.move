@@ -805,7 +805,8 @@ module YieldFarmingV3 {
     }
 
 
-    /// Query total stake count from yield farming resource
+    /// Get the total pledge amount under the specified Token type pool
+    /// @return farming_asset_extend.asset_total_amount
     public fun query_total_stake<
         PoolType: store,
         AssetT: store

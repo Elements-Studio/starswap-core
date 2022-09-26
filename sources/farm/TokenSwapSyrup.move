@@ -348,7 +348,7 @@ module TokenSwapSyrup {
         STAR::assert_genesis_address(signer);
 
         let broker_addr = broker_addr();
-        let ext_v2  = borrow_global<SyrupExtInfoV2<TokenT>>(broker_addr);
+        let ext_v2 = borrow_global<SyrupExtInfoV2<TokenT>>(broker_addr);
 
         // TokenSwapConfig::put_stepwise_multiplier(signer, interval_sec, multiplier);
         TokenSwapSyrupMultiplierPool::add_pool<PoolTypeSyrup, Token::Token<TokenT>>(
@@ -581,6 +581,9 @@ module TokenSwapSyrup {
     }
 
 
+    /// Get the pledge information represented by the specified id under the specified user in the pool
+    /// @return (stake.start_time, stake.end_time, stake.stepwise_multiplier, stake.token_amount)
+    ///
     public fun get_stake_info<TokenT: store>(
         user_addr: address,
         id: u64
@@ -817,6 +820,7 @@ module TokenSwapSyrup {
     }
 
     /// Set amount for every Pledge time in multiplier pool
+    /// This function will be forbidden in next version
     public fun set_multiplier_pool_amount<TokenT: store>(
         account: &signer,
         pledge_time: u64,
@@ -826,6 +830,7 @@ module TokenSwapSyrup {
 
         let ext_v2 =
             borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
+
         TokenSwapSyrupMultiplierPool::set_pool_amount<PoolTypeSyrup, Token::Token<TokenT>>(
             broker_addr(),
             &ext_v2.multiplier_pool_cap,
@@ -835,6 +840,12 @@ module TokenSwapSyrup {
     }
 
 
+    /// Upgrade from 1.0.11 to 1.0.12 Added the implementation of Multiplierpool,
+    /// which is convenient for off-chain query values to calculate APR
+    /// 1. Due to the addition of Multiplierpool,
+    ///     all the pledge multipliers need to be transferred from Config to Multiplierpool
+    /// 2. In addition, some event strcut have been transfered in to the `EventUtil` module
+    ///     to ensure the extensibility of its code
     public fun upgrade_from_v1_0_11_to_v1_0_12<TokenT: store>(
         account: &signer
     ) acquires SyrupExtInfo, SyrupEvent, SyrupExtInfoV2 {
@@ -906,7 +917,7 @@ module TokenSwapSyrup {
         //------------------------------------------//
         // process event
         if (exists<SyrupEvent>(broker_addr)) {
-            let SyrupEvent{
+            let SyrupEvent {
                 add_pool_event,
                 activation_state_event_handler,
                 stake_event_handler,

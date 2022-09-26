@@ -115,7 +115,7 @@ module UpgradeScripts {
         TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
 
         TokenSwapGov::genesis_initialize(account);
-        TokenSwapGov::upgrade_dao_treasury_genesis(account);
+        TokenSwapGov::upgrade_dao_treasury_genesis_func(account);
         TokenSwapGov::linear_initialize(account);
 
         TokenSwapFarmBoost::initialize_boost_event(account);

@@ -27,9 +27,10 @@ module SwapAdmin::EventUtil {
     }
 
     // DEPRECATED
-    public fun exist_event_with_T<EventT: store + drop>(_broker: address): bool {
+    public fun exist_event_T<EventT: store + drop>(_broker: address): bool {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
+    
 
     public fun init_event<EventT: store + drop>(sender: &signer) {
         let broker = Signer::address_of(sender);
