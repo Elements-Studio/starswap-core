@@ -531,21 +531,21 @@ module TokenSwapGov {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {
-        STAR::assert_genesis_address(signer);
-        let account = Signer::address_of(signer);
-
-        let GovTreasury<PoolTypeOld> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        } = move_from<GovTreasury<PoolTypeOld>>(account);
-        move_to(signer, GovTreasury<PoolTypeNew> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        });
-    }
+    // fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {
+    //     STAR::assert_genesis_address(signer);
+    //     let account = Signer::address_of(signer);
+    //
+    //     let GovTreasury<PoolTypeOld> {
+    //         treasury,
+    //         locked_start_timestamp,
+    //         locked_total_timestamp,
+    //     } = move_from<GovTreasury<PoolTypeOld>>(account);
+    //     move_to(signer, GovTreasury<PoolTypeNew> {
+    //         treasury,
+    //         locked_start_timestamp,
+    //         locked_total_timestamp,
+    //     });
+    // }
 
     public(script) fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
