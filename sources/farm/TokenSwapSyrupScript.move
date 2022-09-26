@@ -25,28 +25,43 @@ module TokenSwapSyrupScript {
         cap: TokenSwapVestarRouter::VestarRouterCapability,
     }
 
-    public(script) fun add_pool<TokenT: store>(signer: signer,
-                                               release_per_second: u128,
-                                               delay: u64) {
-        TokenSwapSyrup::add_pool<TokenT>(&signer, release_per_second, delay);
+    public(script) fun add_pool<TokenT: store>(
+        signer: signer,
+        alloc_point: u128,
+        delay: u64
+    ) {
+        TokenSwapSyrup::add_pool_v2<TokenT>(&signer, alloc_point, delay);
+    }
+
+    public(script) fun update_allocation_point<TokenT: store>(
+        signer: signer,
+        alloc_point: u128
+    ) {
+        TokenSwapSyrup::update_allocation_point<TokenT>(&signer, alloc_point);
     }
 
     /// Set release per second for token type pool
-    public(script) fun set_release_per_second<
-        TokenT: copy + drop + store>(signer: signer,
-                                     release_per_second: u128) {
+    public(script) fun set_release_per_second<TokenT: copy + drop + store>(
+        signer: signer,
+        release_per_second: u128
+    ) {
         TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
     }
 
     /// Set alivestate for token type pool
-    public(script) fun set_alive<
-        TokenT: copy + drop + store>(signer: signer, alive: bool) {
-        TokenSwapSyrup::set_alive<TokenT>(&signer, alive);
+    public(script) fun set_alive<TokenT: copy + drop + store>(
+        _signer: signer,
+        _alive: bool
+    ) {
+        //TokenSwapSyrup::set_alive<TokenT>(&signer, alive);
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    public(script) fun stake<TokenT: store>(signer: signer,
-                                            pledge_time_sec: u64,
-                                            amount: u128) acquires VestarRouterCapabilityWrapper {
+    public(script) fun stake<TokenT: store>(
+        signer: signer,
+        pledge_time_sec: u64,
+        amount: u128
+    ) acquires VestarRouterCapabilityWrapper {
         TokenSwapSyrup::stake<TokenT>(&signer, pledge_time_sec, amount);
 
         let broker = @SwapAdmin;
