@@ -26,8 +26,14 @@ module SwapAdmin::Config {
         cap: Option<ModifyConfigCapability<ConfigValue>>,
     }
 
+//    /// Event emitted when config value is changed.
+//    struct ConfigChangeEvent<ConfigValue: store> has drop, store {
+//        account_address: address,
+//        value: ConfigValue,
+//    }
+
     /// Event emitted when config value is changed.
-    struct ConfigChangeEvent<ConfigValue: store> has drop, store {
+    struct ConfigChangeEvent<ConfigValue: store> has store, drop {
         account_address: address,
         value: ConfigValue,
     }
@@ -65,8 +71,9 @@ module SwapAdmin::Config {
     }
 
     /// Set a config item to a new value with capability stored under signer
-    public fun set<ConfigValue: store+copy+drop>(
-        account: &signer, 
+//    public fun set<ConfigValue: store>(
+    public fun set<ConfigValue: store+drop+copy>(
+        account: &signer,
         payload: ConfigValue,
     ) acquires Config, ModifyConfigCapabilityHolder {
         let signer_address = signer::address_of(account);
@@ -108,7 +115,8 @@ module SwapAdmin::Config {
 
 
     /// Set a config item to a new value with cap.
-    public fun set_with_capability<ConfigValue: store+copy+drop>(
+    public fun set_with_capability<ConfigValue: store+drop+copy>(
+//    public fun set_with_capability<ConfigValue: store+copy+drop>(
         cap: &mut ModifyConfigCapability<ConfigValue>,
         payload: ConfigValue,
     ) acquires Config {

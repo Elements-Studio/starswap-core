@@ -2,6 +2,10 @@ module SwapAdmin::U256Wrapper {
     use std::vector;
     use std::error;
     use aptos_std::from_bcs;
+    use std::bcs;
+    use aptos_std::debug;
+
+    use SwapAdmin::WrapperUtil;
 
     const WORD: u8 = 4;
     const ERR_INVALID_LENGTH: u64 = 100;
@@ -33,12 +37,36 @@ module SwapAdmin::U256Wrapper {
         from_bytes(&data, false)
     }
 
+    //TODO just for test code
     fun from_bytes(data: &vector<u8>, _be: bool): U256 {
         //TODO handler little endian and big endian
-        //TODO need trim ?
-        let v = from_bcs::to_u128(*data);
+        //clip a u128 bytes from U256 bcs bytes
+        let u128_data = WrapperUtil::slice(data, 1 , 17);
+        let v = from_bcs::to_u128(u128_data);
         from_u128(v)
     }
+
+    #[test]
+    fun test_from_bytes() {
+        let v = Self::from_u128(102);
+        debug::print(&v);
+        let data = bcs::to_bytes(&v);
+        debug::print(&data);
+
+        //clip a u128 bytes from U256 bcs bytes
+        let u128_data = WrapperUtil::slice(&data, 1 , 17);
+        debug::print(&u128_data);
+        let a:u128 = 102;
+        debug::print(&bcs::to_bytes(&a));
+
+        let vv = from_bcs::to_u128(u128_data);
+        debug::print(&vv);
+
+        let nv = from_bytes(&data, true);
+        debug::print(&nv);
+        assert!(compare(&v, &nv) == EQUAL, 1);
+    }
+
 
     public fun from_u64(v: u64): U256 {
         from_u128((v as u128))

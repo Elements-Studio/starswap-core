@@ -160,7 +160,7 @@ module SwapAdmin::TokenSwapFee {
     #[test]
     fun test_get_amount_out_without_fee() {
         let precision_9: u8 = 9;
-        let scaling_factor_9 = math64::pow(10, (precision_9 as u64));
+        let scaling_factor_9 = (math64::pow(10, (precision_9 as u64)) as u128);
         let amount_x: u128 = 1 * scaling_factor_9;
         let reserve_x: u128 = 10000000 * scaling_factor_9;
         let reserve_y: u128 = 100000000 * scaling_factor_9;

@@ -22,3 +22,4 @@ USDTRepo = { local = "./usdt-dep" }
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-framework"}
 AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-stdlib"}
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/move-stdlib"}
+U256 = {git = "https://github.com/pontem-network/U256.git", rev = "v0.3.7"}

@@ -3,7 +3,7 @@
 
 module SwapAdmin::BigExponential {
     use std::error;
-    use SwapAdmin::U256Wrapper::{Self, U256};
+    use u256::u256::{Self, U256};
 
     // e18
     const EQUAL: u8 = 0;
@@ -32,7 +32,7 @@ module SwapAdmin::BigExponential {
 
     public fun exp_direct(num: u128): Exp {
         Exp{
-            mantissa: U256Wrapper::from_u128(num)
+            mantissa: u256::from_u128(num)
         }
     }
 
@@ -55,7 +55,7 @@ module SwapAdmin::BigExponential {
     public fun exp(num: u128, denom: u128): Exp {
         // if overflow move will abort
         let scaledNumerator: U256 = mul_u128(num, EXP_SCALE);
-        let rational = U256Wrapper::div(scaledNumerator, U256Wrapper::from_u128(denom));
+        let rational = u256::div(scaledNumerator, u256::from_u128(denom));
         Exp{
             mantissa: rational
         }
@@ -67,13 +67,13 @@ module SwapAdmin::BigExponential {
 
     public fun add_exp(a: Exp, b: Exp): Exp {
         Exp{
-            mantissa: U256Wrapper::add(*&a.mantissa, *&b.mantissa)
+            mantissa: u256::add(*&a.mantissa, *&b.mantissa)
         }
     }
 
     public fun div_exp(a: Exp, b: Exp): Exp {
         Exp{
-            mantissa: U256Wrapper::div(*&a.mantissa, *&b.mantissa)
+            mantissa: u256::div(*&a.mantissa, *&b.mantissa)
         }
     }
 
@@ -83,11 +83,11 @@ module SwapAdmin::BigExponential {
 
     public fun mul_u128(a: u128, b: u128): U256 {
         if (a == 0 || b == 0) {
-            return U256Wrapper::zero()
+            return u256::zero()
         };
-        let a_u256 = U256Wrapper::from_u128(a);
-        let b_u256 = U256Wrapper::from_u128(b);
-        U256Wrapper::mul(a_u256, b_u256)
+        let a_u256 = u256::from_u128(a);
+        let b_u256 = u256::from_u128(b);
+        u256::mul(a_u256, b_u256)
     }
 
     public fun div_u128(a: u128, b: u128): u128 {
@@ -102,21 +102,21 @@ module SwapAdmin::BigExponential {
 
     public fun truncate(exp: Exp): u128 {
         //  return exp.mantissa / EXP_SCALE
-        let r_u256 = U256Wrapper::div(*&exp.mantissa, U256Wrapper::from_u128(EXP_SCALE));
-        let u128_max = U256Wrapper::from_u128(U128_MAX);
-        let cmp_order = U256Wrapper::compare(&r_u256, &u128_max);
+        let r_u256 = u256::div(*&exp.mantissa, u256::from_u128(EXP_SCALE));
+        let u128_max = u256::from_u128(U128_MAX);
+        let cmp_order = u256::compare(&r_u256, &u128_max);
         if (cmp_order == GREATER_THAN) {
             abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
-        U256Wrapper::to_u128(&r_u256)
+        u256::as_u128(r_u256)
     }
 
     public fun to_safe_u128(x: U256): u128 {
-        let u128_max = U256Wrapper::from_u128(U128_MAX);
-        let cmp_order = U256Wrapper::compare(&x, &u128_max);
+        let u128_max = u256::from_u128(U128_MAX);
+        let cmp_order = u256::compare(&x, &u128_max);
         if (cmp_order == GREATER_THAN) {
             abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
-        U256Wrapper::to_u128(&x)
+        u256::as_u128(x)
     }
 }

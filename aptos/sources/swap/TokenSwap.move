@@ -16,11 +16,13 @@ module SwapAdmin::TokenSwap {
     use std::option;
     use std::bcs;
 
+    use u256::u256::{Self, U256};
+
     use SwapAdmin::SafeMath;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::FixedPoint128;
     use SwapAdmin::WrapperUtil;
-    use SwapAdmin::U256Wrapper::{Self, U256};
+//    use SwapAdmin::U256Wrapper::{Self, U256};
 
     struct LiquidityToken<phantom X, phantom Y> has key, store, copy, drop {}
 
@@ -226,9 +228,9 @@ module SwapAdmin::TokenSwap {
             token_x_reserve: coin::zero<X>(),
             token_y_reserve: coin::zero<Y>(),
             last_block_timestamp: 0,
-            last_price_x_cumulative: U256Wrapper::zero(),
-            last_price_y_cumulative: U256Wrapper::zero(),
-            last_k: U256Wrapper::zero(),
+            last_price_x_cumulative: u256::zero(),
+            last_price_y_cumulative: u256::zero(),
+            last_k: u256::zero(),
             // token_pair_register_event: event::new_event_handle<TokenPairRegisterEvent>(signer),
             add_liquidity_event: account::new_event_handle<AddLiquidityEvent>(signer),
             remove_liquidity_event: account::new_event_handle<RemoveLiquidityEvent>(signer),
@@ -242,9 +244,9 @@ module SwapAdmin::TokenSwap {
             token_x_reserve: coin::zero<X>(),
             token_y_reserve: coin::zero<Y>(),
             last_block_timestamp: 0,
-            last_price_x_cumulative: U256Wrapper::zero(),
-            last_price_y_cumulative: U256Wrapper::zero(),
-            last_k: U256Wrapper::zero(),
+            last_price_x_cumulative: u256::zero(),
+            last_price_y_cumulative: u256::zero(),
+            last_k: u256::zero(),
         }
     }
 
@@ -435,10 +437,10 @@ module SwapAdmin::TokenSwap {
         let block_timestamp = timestamp::now_seconds() % (1u64 << 32);
         let time_elapsed: u64 = block_timestamp - last_block_timestamp;
         if (time_elapsed > 0 && x_reserve != 0 && y_reserve != 0) {
-            let last_price_x_cumulative = U256Wrapper::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(y_reserve), x_reserve)), U256Wrapper::from_u64(time_elapsed));
-            let last_price_y_cumulative = U256Wrapper::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(x_reserve), y_reserve)), U256Wrapper::from_u64(time_elapsed));
-            token_pair.last_price_x_cumulative = U256Wrapper::add(*&token_pair.last_price_x_cumulative, last_price_x_cumulative);
-            token_pair.last_price_y_cumulative = U256Wrapper::add(*&token_pair.last_price_y_cumulative, last_price_y_cumulative);
+            let last_price_x_cumulative = u256::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(y_reserve), x_reserve)), u256::from_u64(time_elapsed));
+            let last_price_y_cumulative = u256::mul(FixedPoint128::to_u256(FixedPoint128::div(FixedPoint128::encode(x_reserve), y_reserve)), u256::from_u64(time_elapsed));
+            token_pair.last_price_x_cumulative = u256::add(*&token_pair.last_price_x_cumulative, last_price_x_cumulative);
+            token_pair.last_price_y_cumulative = u256::add(*&token_pair.last_price_y_cumulative, last_price_y_cumulative);
         };
 
         token_pair.last_block_timestamp = block_timestamp;
