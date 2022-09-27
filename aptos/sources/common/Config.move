@@ -13,27 +13,21 @@ module SwapAdmin::Config {
     }
 
     /// A generic singleton resource that holds a value of a specific type.
-    struct Config<ConfigValue: store> has key { payload: ConfigValue }
+    struct Config<ConfigValue: copy + drop + store> has key { payload: ConfigValue }
 
     /// Accounts with this privilege can modify config of type ConfigValue under account_address
-    struct ModifyConfigCapability<ConfigValue: store> has store {
+    struct ModifyConfigCapability<ConfigValue: copy + drop + store> has store {
         account_address: address,
         events: event::EventHandle<ConfigChangeEvent<ConfigValue>>,
     }
 
     /// A holder for ModifyConfigCapability, for extraction and restoration of ModifyConfigCapability.
-    struct ModifyConfigCapabilityHolder<ConfigValue: store> has key, store {
+    struct ModifyConfigCapabilityHolder<ConfigValue: copy + drop + store> has key, store {
         cap: Option<ModifyConfigCapability<ConfigValue>>,
     }
 
-//    /// Event emitted when config value is changed.
-//    struct ConfigChangeEvent<ConfigValue: store> has drop, store {
-//        account_address: address,
-//        value: ConfigValue,
-//    }
-
     /// Event emitted when config value is changed.
-    struct ConfigChangeEvent<ConfigValue: store> has store, drop {
+    struct ConfigChangeEvent<ConfigValue: copy + drop + store> has store, drop {
         account_address: address,
         value: ConfigValue,
     }
@@ -49,7 +43,7 @@ module SwapAdmin::Config {
 
 
     /// Get a copy of `ConfigValue` value stored under `addr`.
-    public fun get_by_address<ConfigValue: store+copy>(addr: address): ConfigValue acquires Config {
+    public fun get_by_address<ConfigValue: store+drop+copy>(addr: address): ConfigValue acquires Config {
         assert!(exists<Config<ConfigValue>>(addr), error::invalid_state(ECONFIG_VALUE_DOES_NOT_EXIST));
         *&borrow_global<Config<ConfigValue>>(addr).payload
     }
@@ -61,7 +55,7 @@ module SwapAdmin::Config {
     }
 
     /// Check whether the config of `ConfigValue` type exists under `addr`.
-    public fun config_exist_by_address<ConfigValue: store>(addr: address): bool {
+    public fun config_exist_by_address<ConfigValue: copy + drop + store>(addr: address): bool {
         exists<Config<ConfigValue>>(addr)
     }
 
@@ -72,7 +66,7 @@ module SwapAdmin::Config {
 
     /// Set a config item to a new value with capability stored under signer
 //    public fun set<ConfigValue: store>(
-    public fun set<ConfigValue: store+drop+copy>(
+    public fun set<ConfigValue: copy + drop + store>(
         account: &signer,
         payload: ConfigValue,
     ) acquires Config, ModifyConfigCapabilityHolder {
@@ -89,7 +83,7 @@ module SwapAdmin::Config {
     spec set {
         let addr = signer::address_of(account);
         let cap_opt = spec_cap<ConfigValue>(addr);
-        let cap = option::borrow(spec_cap<ConfigValue>(signer::address_of(account)));
+        let _cap = option::borrow(spec_cap<ConfigValue>(signer::address_of(account)));
 
         aborts_if !exists<ModifyConfigCapabilityHolder<ConfigValue>>(addr);
         aborts_if option::is_none<ModifyConfigCapability<ConfigValue>>(cap_opt);
@@ -115,7 +109,7 @@ module SwapAdmin::Config {
 
 
     /// Set a config item to a new value with cap.
-    public fun set_with_capability<ConfigValue: store+drop+copy>(
+    public fun set_with_capability<ConfigValue: copy + drop + store>(
 //    public fun set_with_capability<ConfigValue: store+copy+drop>(
         cap: &mut ModifyConfigCapability<ConfigValue>,
         payload: ConfigValue,
@@ -123,6 +117,7 @@ module SwapAdmin::Config {
         let addr = cap.account_address;
         assert!(exists<Config<ConfigValue>>(addr), error::invalid_state(ECONFIG_VALUE_DOES_NOT_EXIST));
         let config = borrow_global_mut<Config<ConfigValue>>(addr);
+        config.payload = payload;
         config.payload = copy payload;
         emit_config_change_event(cap, payload);
     }
@@ -135,7 +130,7 @@ module SwapAdmin::Config {
 
     /// Publish a new config item. The caller will use the returned ModifyConfigCapability to specify the access control
     /// policy for who can modify the config.
-    public fun publish_new_config_with_capability<ConfigValue: store+drop>(
+    public fun publish_new_config_with_capability<ConfigValue: copy + drop + store>(
         account: &signer,
         payload: ConfigValue,
     ): ModifyConfigCapability<ConfigValue> acquires ModifyConfigCapabilityHolder{
@@ -154,7 +149,7 @@ module SwapAdmin::Config {
     }
 
     /// Publish a new config item under account address.
-    public fun publish_new_config<ConfigValue: store+drop>(account: &signer, payload: ConfigValue) {
+    public fun publish_new_config<ConfigValue: copy + drop + store>(account: &signer, payload: ConfigValue) {
         move_to(account, Config<ConfigValue>{ payload });
         let cap = ModifyConfigCapability<ConfigValue> {
             account_address: signer::address_of(account),
@@ -207,7 +202,7 @@ module SwapAdmin::Config {
     }
 
     /// Extract account's ModifyConfigCapability for ConfigValue type
-    public fun extract_modify_config_capability<ConfigValue: store>(
+    public fun extract_modify_config_capability<ConfigValue: copy + drop + store>(
         account: &signer,
     ): ModifyConfigCapability<ConfigValue> acquires ModifyConfigCapabilityHolder {
         let signer_address = signer::address_of(account);
@@ -231,7 +226,7 @@ module SwapAdmin::Config {
     }
 
     /// Restore account's ModifyConfigCapability
-    public fun restore_modify_config_capability<ConfigValue: store>(
+    public fun restore_modify_config_capability<ConfigValue: copy + drop + store>(
         cap: ModifyConfigCapability<ConfigValue>,
     ) acquires ModifyConfigCapabilityHolder {
         let cap_holder = borrow_global_mut<ModifyConfigCapabilityHolder<ConfigValue>>(cap.account_address);
@@ -248,7 +243,7 @@ module SwapAdmin::Config {
     }
 
     /// Destroy the given ModifyConfigCapability
-    public fun destroy_modify_config_capability<ConfigValue: store+drop>(
+    public fun destroy_modify_config_capability<ConfigValue: copy + drop + store>(
         cap: ModifyConfigCapability<ConfigValue>,
     ) {
         let ModifyConfigCapability{account_address:_, events} = cap;
@@ -260,7 +255,7 @@ module SwapAdmin::Config {
     }
 
     /// Return the address of the given ModifyConfigCapability
-    public fun account_address<ConfigValue: store>(cap: &ModifyConfigCapability<ConfigValue>): address {
+    public fun account_address<ConfigValue: copy + drop + store>(cap: &ModifyConfigCapability<ConfigValue>): address {
         cap.account_address
     }
 
@@ -270,7 +265,7 @@ module SwapAdmin::Config {
     }
 
     /// Emit a config change event.
-    fun emit_config_change_event<ConfigValue: store+drop>(
+    fun emit_config_change_event<ConfigValue: copy + drop + store>(
         cap: &mut ModifyConfigCapability<ConfigValue>,
         value: ConfigValue,
     ) {
