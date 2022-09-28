@@ -6,9 +6,9 @@ module BuyBack {
     use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
     use StarcoinFramework::Errors;
-    use SwapAdmin::EventUtil;
     use StarcoinFramework::Event;
 
+    use SwapAdmin::EventUtil;
     use SwapAdmin::TimelyReleasePool;
     use SwapAdmin::TokenSwapRouter;
 
@@ -40,8 +40,17 @@ module BuyBack {
         user: address,
     }
 
+    /// DEPRECRATED
     struct EventHandleWrapper<phantom EventT: store + drop> has key {
         handle: Event::EventHandle<EventT>,
+    }
+
+    /// DEPRECRATED
+    struct EventStore has key {
+        /// event stream for withdraw
+        accept_event_handle: Event::EventHandle<AcceptEvent>,
+        /// event stream for deposit
+        payback_event_handle: Event::EventHandle<BuyBackEvent>,
     }
 
     public fun init_event(sender: &signer) {
@@ -183,6 +192,11 @@ module BuyBack {
     public fun extract_cap<PoolT: store, TokenT: store>(sender: &signer): BuyBackCap<PoolT, TokenT> acquires BuyBackCap {
         let cap = move_from<BuyBackCap<PoolT, TokenT>>(Signer::address_of(sender));
         cap
+    }
+
+    /// DEPRECRETED
+    public fun upgrade_event_struct(_account: &signer) {
+        abort Errors::invalid_state(1)
     }
 }
 }

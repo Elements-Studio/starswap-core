@@ -8,16 +8,18 @@ module BuyBackSTAR {
     use SwapAdmin::STAR;
     use SwapAdmin::TimelyReleasePool;
     use SwapAdmin::TokenSwapRouter;
+    use StarcoinFramework::Errors;
 
     struct BuyBackSTAR has store {}
 
-    public fun init(sender: signer,
-                    total_amount: u128,
-                    begin_time: u64,
-                    interval: u64,
-                    release_per_time: u128) {
-        BuyBack::init_event(&sender);
-        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, total_amount, begin_time, interval, release_per_time);
+    public(script) fun init(
+        sender: signer,
+        total_amount: u128,
+        begin_time: u64,
+        interval: u64,
+        release_per_time: u128
+    ) {
+        init_func(&sender, total_amount, begin_time, interval, release_per_time);
     }
 
     public(script) fun uninit(sender: signer) {
@@ -32,6 +34,24 @@ module BuyBackSTAR {
         let token = Account::withdraw<STC::STC>(&sender, amount);
         BuyBack::deposit<BuyBackSTAR, STC::STC>(@BuyBackAccount, token);
     }
+
+    public fun init_func(
+        sender: &signer,
+        total_amount: u128,
+        begin_time: u64,
+        interval: u64,
+        release_per_time: u128
+    ) {
+        BuyBack::init_event(sender);
+        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(
+            sender,
+            total_amount,
+            begin_time,
+            interval,
+            release_per_time
+        );
+    }
+
 
     public fun query_info(): (u128, u128, u128, u64, u64, u64, u64, u128, u128) {
         let (
@@ -64,7 +84,7 @@ module BuyBackSTAR {
         )
     }
 
-    public fun pool_exists() : bool {
+    public fun pool_exists(): bool {
         BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
     }
 
@@ -74,6 +94,11 @@ module BuyBackSTAR {
 
     public(script) fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
+    }
+
+    /// DEPRECRATED
+    public (script) fun upgrade_event_store_for_barnard(_account: signer) {
+        abort Errors::invalid_state(1)
     }
 }
 }
