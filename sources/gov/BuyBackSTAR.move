@@ -1,104 +1,61 @@
 address SwapAdmin {
+
+/// Deprecrated module, see instead module `BuyBackSTARScript`
 module BuyBackSTAR {
 
-    use StarcoinFramework::STC;
-    use StarcoinFramework::Account;
-
-    use SwapAdmin::BuyBack;
-    use SwapAdmin::STAR;
-    use SwapAdmin::TimelyReleasePool;
-    use SwapAdmin::TokenSwapRouter;
     use StarcoinFramework::Errors;
 
     struct BuyBackSTAR has store {}
 
+    const ERR_DEPRECRATED: u64 = 1;
+
     public(script) fun init(
-        sender: signer,
-        total_amount: u128,
-        begin_time: u64,
-        interval: u64,
-        release_per_time: u128
+        _sender: signer,
+        _total_amount: u128,
+        _begin_time: u64,
+        _interval: u64,
+        _release_per_time: u128
     ) {
-        init_func(&sender, total_amount, begin_time, interval, release_per_time);
+        //init_func(&sender, total_amount, begin_time, interval, release_per_time);
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
-    public(script) fun uninit(sender: signer) {
-        BuyBack::dismiss<BuyBackSTAR, STC::STC>(&sender);
+    public(script) fun uninit(_sender: signer) {
+        // BuyBack::dismiss<BuyBackSTAR, STC::STC>(&sender);
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
-    public(script) fun buy_back(sender: signer) {
-        BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
+    public(script) fun buy_back(_sender: signer) {
+        // BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
-    public(script) fun deposit(sender: signer, amount: u128) {
-        let token = Account::withdraw<STC::STC>(&sender, amount);
-        BuyBack::deposit<BuyBackSTAR, STC::STC>(@BuyBackAccount, token);
-    }
-
-    public fun init_func(
-        sender: &signer,
-        total_amount: u128,
-        begin_time: u64,
-        interval: u64,
-        release_per_time: u128
-    ) {
-        BuyBack::init_event(sender);
-        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(
-            sender,
-            total_amount,
-            begin_time,
-            interval,
-            release_per_time
-        );
+    public(script) fun deposit(_sender: signer, _amount: u128) {
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
 
     public fun query_info(): (u128, u128, u128, u64, u64, u64, u64, u128, u128) {
-        let (
-            treasury_balance,
-            total_treasury_amount,
-            release_per_time,
-            begin_time,
-            latest_withdraw_time,
-            interval,
-            current_time_stamp,
-            current_time_amount,
-        ) = TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
-
-        let amount_y_out = if (current_time_amount > 0) {
-            TokenSwapRouter::compute_y_out<STC::STC, STAR::STAR>(current_time_amount)
-        } else {
-            0
-        };
-
-        (
-            treasury_balance,
-            total_treasury_amount,
-            release_per_time,
-            begin_time,
-            latest_withdraw_time,
-            interval,
-            current_time_stamp,
-            current_time_amount,
-            amount_y_out,
-        )
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
     public fun pool_exists(): bool {
-        BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
+        //BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
-    public(script) fun set_release_per_time(sender: signer, release_per_time: u128) {
-        BuyBack::set_release_per_time<BuyBackSTAR, STC::STC>(&sender, release_per_time);
+    public(script) fun set_release_per_time(_sender: signer, _release_per_time: u128) {
+        //BuyBack::set_release_per_time<BuyBackSTAR, STC::STC>(&sender, release_per_time);
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
-    public(script) fun set_interval(sender: signer, interval: u64) {
-        BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
+    public(script) fun set_interval(_sender: signer, _interval: u64) {
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 
     /// DEPRECRATED
     public (script) fun upgrade_event_store_for_barnard(_account: signer) {
-        abort Errors::invalid_state(1)
+        abort Errors::invalid_state(ERR_DEPRECRATED)
     }
 }
 }
