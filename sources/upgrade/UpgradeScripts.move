@@ -15,6 +15,7 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::STAR::STAR;
+    use SwapAdmin::TokenSwapRouter;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -125,6 +126,20 @@ module UpgradeScripts {
         TokenSwapFarm::initialize_global_pool_info(account, farm_pool_release_per_second);
         TokenSwapSyrupScript::initialize_global_syrup_info(account, syrup_pool_release_per_second);
 
+        // Token swap init swap fee rate
+        TokenSwapRouter::set_swap_fee_operation_rate(account, 10, 60);
+    }
+
+    public(script) fun genesis_initialize_for_latest_version_entry(
+        account: signer,
+        farm_pool_release_per_second: u128,
+        syrup_pool_release_per_second: u128,
+    ) {
+        genesis_initialize_for_latest_version(
+            &account,
+            farm_pool_release_per_second,
+            syrup_pool_release_per_second
+        );
     }
 }
 }
