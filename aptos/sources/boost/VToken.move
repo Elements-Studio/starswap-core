@@ -1,5 +1,6 @@
 module SwapAdmin::VToken {
     use aptos_framework::coin;
+    use aptos_std::type_info;
 
     use std::string;
     use std::signer;
@@ -17,10 +18,12 @@ module SwapAdmin::VToken {
     }
 
     public fun register_token<CoinT: store>(account: &signer, precision: u8) {
+        let coin_info = type_info::type_of<CoinT>();
+        let coin_name = type_info::struct_name(&coin_info);
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinT>(
             account,
-            string::utf8(b"VToken"),
-            string::utf8(b"VToken"),
+            string::utf8(coin_name),
+            string::utf8(coin_name),
             precision,
             false,
         );
