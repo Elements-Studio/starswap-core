@@ -149,6 +149,24 @@ module YieldFarmingV3 {
         });
     }
 
+
+    /// Called by admin
+    /// this will reset release amount per second
+    public fun modify_global_release_per_second_by_admin<PoolType: store>(
+        account: &signer,
+        pool_release_per_second: u128
+    ) acquires YieldFarmingGlobalPoolInfo {
+        let broker_addr = Signer::address_of(account);
+        assert!(pool_release_per_second > 0, Errors::invalid_state(ERR_INVALID_PARAMETER));
+        assert!(
+            exists<YieldFarmingGlobalPoolInfo<PoolType>>(broker_addr),
+            Errors::invalid_state(ERR_INVALID_PARAMETER)
+        );
+        let pool_info =
+            borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker_addr);
+        pool_info.pool_release_per_second = pool_release_per_second;
+    }
+
     /// Called by admin
     /// this will reset release amount per second
     public fun modify_global_release_per_second<PoolType: store, AssetT: store>(

@@ -316,9 +316,8 @@ module TokenSwapSyrup {
         let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr());
         syrup.release_per_second = release_per_second;
 
-        YieldFarming::modify_global_release_per_second<PoolTypeSyrup, Token::Token<TokenT>>(
-            &syrup.param_cap,
-            broker_addr(),
+        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeSyrup>(
+            signer,
             release_per_second
         );
 

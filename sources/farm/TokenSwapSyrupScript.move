@@ -111,6 +111,7 @@ module TokenSwapSyrupScript {
     }
 
     /// Set the multiplier of each pledge time in the multiplier pool corresponding to TokenT
+    /// It will abort while calling this function if the pool has exists,
     public(script) fun put_stepwise_multiplier_with_token_type<TokenT: store>(
         signer: signer,
         interval_sec: u64,
@@ -119,6 +120,24 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::put_stepwise_multiplier<TokenT>(&signer, interval_sec, multiplier);
     }
 
+    /// Set amount for every Pledge time in multiplier pool
+    /// This function will be forbidden in next version
+    public(script) fun set_multiplier_pool_amount<TokenT: store>(
+        account: signer,
+        pledge_time: u64,
+        amount: u128
+    ) {
+        TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
+    }
+
+    /// Calculate the Total Weight and Total Amount from the multiplier pool and
+    /// update them to YieldFarming
+    ///
+    public(script) fun update_total_from_multiplier_pool<TokenT: store>(
+        account: signer,
+    ) {
+        TokenSwapSyrup::update_total_from_multiplier_pool<TokenT>(&account);
+    }
 
     public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {
         TokenSwapSyrup::get_stake_info<TokenT>(user_addr, id)
@@ -166,14 +185,6 @@ module TokenSwapSyrupScript {
     ///TODO: DEPRECATED, Turn over capability from script to syrup boost on barnard
     public(script) fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
         abort Errors::invalid_state(ERR_DEPRECATED)
-    }
-
-    public(script) fun set_multiplier_pool_amount<TokenT: store>(
-        account: signer,
-        pledge_time: u64,
-        amount: u128
-    ) {
-        TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 }
 }
