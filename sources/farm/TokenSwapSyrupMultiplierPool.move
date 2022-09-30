@@ -181,7 +181,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
                 let item =
                     Vector::borrow(&info.items, idx);
                 Vector::append(&mut key_list, *&item.key);
-                Vector::append(&mut key_list, b"|");
+                // Vector::append(&mut key_list, b"|");
                 Vector::push_back(&mut multiplier_list, item.multiplier);
                 Vector::push_back(&mut asset_amount_list, item.asset_amount);
 
