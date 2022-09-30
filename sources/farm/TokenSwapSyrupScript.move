@@ -6,13 +6,13 @@ module TokenSwapSyrupScript {
 
     use StarcoinFramework::Signer;
     use StarcoinFramework::Account;
+    use StarcoinFramework::Errors;
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
     use SwapAdmin::TokenSwapGov;
-    use StarcoinFramework::Errors;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -41,11 +41,27 @@ module TokenSwapSyrupScript {
     }
 
     /// Set release per second for token type pool
-    public(script) fun set_release_per_second<TokenT: copy + drop + store>(
+    public(script) fun set_pool_release_per_second(
         signer: signer,
         release_per_second: u128
     ) {
-        TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
+        TokenSwapSyrup::set_pool_release_per_second(&signer, release_per_second);
+
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&signer);
+        // TODO: to add other token type except STAR::STAR
+        // Note that it is necessary to enumerate update index operation of all Token type pools here
+        // It should be update harvest index after `pool_release_per_second` changed,
+        // Otherwise, It will cause a calculation errors
+    }
+
+    /// DEPRECATED
+    /// Set release per second for token type pool
+    public(script) fun set_release_per_second<TokenT: copy + drop + store>(
+        _signer: signer,
+        _release_per_second: u128
+    ) {
+        //TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     /// Set alivestate for token type pool

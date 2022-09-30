@@ -33,6 +33,7 @@ module TokenSwapSyrup {
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON: u64 = 108;
     const ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS: u64 = 109;
     const ERROR_CONFIG_ERROR: u64 = 110;
+    const ERROR_TOKEN_POOL_NOT_EXIST: u64 = 111;
 
     /// Syrup pool of token type
     struct Syrup<phantom TokenT> has key, store {
@@ -305,30 +306,70 @@ module TokenSwapSyrup {
         );
     }
 
-    /// Set release per second for token type pool
-    public fun set_release_per_second<TokenT: copy + drop + store>(
+    /// Set release per second for syrup pool
+    public fun set_pool_release_per_second(
         signer: &signer,
-        release_per_second: u128
-    ) acquires Syrup {
-        // Only called by the genesis
+        pool_release_per_second: u128
+    ) {
         STAR::assert_genesis_address(signer);
 
-        let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr());
-        syrup.release_per_second = release_per_second;
-
+        // Updated release per second for `PoolTypeSyrup`
         YieldFarming::modify_global_release_per_second_by_admin<PoolTypeSyrup>(
             signer,
-            release_per_second
+            pool_release_per_second
+        );
+    }
+
+    public fun update_token_pool_index<TokenT>(signer: &signer) acquires Syrup {
+        STAR::assert_genesis_address(signer);
+
+        assert!(
+            exists<Syrup<TokenT>>(broker_addr()),
+            Errors::invalid_state(ERROR_TOKEN_POOL_NOT_EXIST)
         );
 
-        EventUtil::emit_event(
+        // Updated harvest index of token type
+        let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr());
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
             broker_addr(),
-            ModifyReleasePerSecondEvent {
-                token_code: Token::token_code<TokenT>(),
-                admin: broker_addr(),
-                pool_release_per_second: release_per_second,
-            }
         );
+    }
+
+    /// Set release per second for token type pool
+    public fun set_release_per_second<TokenT: copy + drop + store>(
+        _signer: &signer,
+        _release_per_second: u128
+    ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // // Only called by the genesis
+        // STAR::assert_genesis_address(signer);
+        //
+        // let syrup = borrow_global_mut<Syrup<TokenT>>(broker_addr());
+        // syrup.release_per_second = release_per_second;
+        //
+        // YieldFarming::modify_global_release_per_second_by_admin<PoolTypeSyrup>(
+        //     signer,
+        //     release_per_second
+        // );
+        //
+        // let syrup_ext = borrow_global_mut<SyrupExtInfoV2<TokenT>>(broker_addr());
+        // syrup.release_per_second = release_per_second;
+        // YieldFarmingV3::update_pool<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+        //     &syrup.param_cap,
+        //     broker_addr(),
+        //     syrup_ext.alloc_point,
+        //     syrup_ext.alloc_point,
+        // );
+        //
+        // EventUtil::emit_event(
+        //     broker_addr(),
+        //     ModifyReleasePerSecondEvent {
+        //         token_code: Token::token_code<TokenT>(),
+        //         admin: broker_addr(),
+        //         pool_release_per_second: release_per_second,
+        //     }
+        // );
     }
 
     /// TODO: DEPRECATED call

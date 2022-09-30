@@ -234,11 +234,15 @@ script {
     use SwapAdmin::CommonHelper;
 
     fun admin_test_param_in_set_release_per_second(account: signer) {
-        TokenSwapSyrup::set_release_per_second<WETH>(
+        TokenSwapSyrup::set_pool_release_per_second(
             &account,
             CommonHelper::pow_amount<WETH>(20)
         );
-        let (_, pool_release_per_second) = TokenSwapSyrup::query_syrup_info();
+        TokenSwapSyrup::update_token_pool_index<WETH>(&account);
+        let (
+            _,
+            pool_release_per_second
+        ) = TokenSwapSyrup::query_syrup_info();
         assert!(pool_release_per_second == CommonHelper::pow_amount<WETH>(20), 10060);
     }
 }

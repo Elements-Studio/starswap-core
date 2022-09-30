@@ -17,11 +17,10 @@ module SwapAdmin::YieldFarmingWrapper {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Vector;
     use StarcoinFramework::Debug;
+    use StarcoinFramework::Option;
 
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
-    use SwapAdmin::YieldFarmingV3;
     use SwapAdmin::TokenSwapConfig;
-    use StarcoinFramework::Option;
 
     struct MockTokenType has copy, drop, store {}
 
@@ -44,7 +43,8 @@ module SwapAdmin::YieldFarmingWrapper {
     ) {
         YieldFarming::initialize_global_pool_info<MockPoolType>(
             account,
-            release_per_second);
+            release_per_second
+        );
 
         TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
         YieldFarming::initialize<MockPoolType, MockTokenType>(account, treasury);
@@ -59,13 +59,19 @@ module SwapAdmin::YieldFarmingWrapper {
         account: &signer,
         amount: u128
     ) acquires GovModfiyParamCapability {
-        let account_addr = Signer::address_of(account);
-        let cap = borrow_global_mut<GovModfiyParamCapability>(account_addr);
-        YieldFarmingV3::modify_global_release_per_second<MockPoolType, MockAssetType>(
-            &cap.cap,
-            Signer::address_of(account),
+        YieldFarming::modify_global_release_per_second_by_admin<MockPoolType>(
+            account,
             amount
         );
+
+        let broker = Signer::address_of(account);
+        let cap =
+            borrow_global_mut<GovModfiyParamCapability>(broker);
+        YieldFarming::update_pool_index<MockPoolType, MockTokenType, MockAssetType>(
+            &cap.cap,
+            broker
+        );
+
     }
 
     public fun stake(
@@ -108,7 +114,7 @@ module SwapAdmin::YieldFarmingWrapper {
         let i = 0;
         while (i < Vector::length(items)) {
             let cap = Vector::borrow(items, i);
-            let (stake_id, _) = YieldFarmingV3::get_info_from_cap(cap);
+            let (stake_id, _) = YieldFarming::get_info_from_cap(cap);
             if (stake_id == id) {
                 return Option::some(i)
             };
@@ -544,7 +550,9 @@ script {
 
     fun swap_admin_reset_release_per_second(signer: signer) {
         YieldFarmingWrapper::reset_release_per_second(
-            &signer, CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(10));
+            &signer,
+            CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(10)
+        );
     }
 }
 // check: EXECUTED

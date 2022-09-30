@@ -164,20 +164,21 @@ module YieldFarmingV3 {
         );
         let pool_info =
             borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker_addr);
+
         pool_info.pool_release_per_second = pool_release_per_second;
     }
 
-    /// Called by admin
-    /// this will reset release amount per second
+    /// DEPRECATED call
     public fun modify_global_release_per_second<PoolType: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
-        broker: address,
-        pool_release_per_second: u128
-    ) acquires YieldFarmingGlobalPoolInfo {
-        assert!(pool_release_per_second > 0, Errors::invalid_state(ERR_INVALID_PARAMETER));
-        let pool_info =
-            borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
-        pool_info.pool_release_per_second = pool_release_per_second;
+        _broker: address,
+        _pool_release_per_second: u128
+    ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // assert!(pool_release_per_second > 0, Errors::invalid_state(ERR_INVALID_PARAMETER));
+        // let pool_info =
+        //     borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
+        // pool_info.pool_release_per_second = pool_release_per_second;
     }
 
     /// Add asset pools, DEPRECATED call
@@ -391,6 +392,27 @@ module YieldFarmingV3 {
         stake.asset_weight = new_asset_weight;
 
         stake_extend.weight_factor = new_weight_factor;
+    }
+
+    /// Update the harvesting index of the pool for outside update some parameters
+    public fun update_pool_index<PoolType: store, RewardTokenT: store, AssetT: store>(
+        _cap: &ParameterModifyCapability<PoolType, AssetT>,
+        broker: address,
+    ) acquires YieldFarmingGlobalPoolInfo, FarmingAsset, FarmingAssetExtend {
+        let now_seconds = Timestamp::now_seconds();
+        let farming_asset =
+            borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
+        let farming_asset_extend =
+            borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
+
+        // Calculate the index that has occurred first, and then update the pool info
+        farming_asset.harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
+            farming_asset,
+            farming_asset_extend,
+            now_seconds
+        );
+        // Update pool harvest index
+        farming_asset.last_update_timestamp = now_seconds;
     }
 
     /// Adjust total amount and total weight
