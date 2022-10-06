@@ -16,6 +16,7 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapRouter;
+    use SwapAdmin::STAR;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -103,6 +104,8 @@ module UpgradeScripts {
     public(script) fun upgrade_from_v1_0_11_to_v1_0_12(account: signer) {
         TokenSwapConfig::assert_admin(&account);
         TokenSwapSyrup::upgrade_from_v1_0_11_to_v1_0_12<STAR>(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, 23000000);
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
     }
 
     /// This function initializes all structures for the latest version,
