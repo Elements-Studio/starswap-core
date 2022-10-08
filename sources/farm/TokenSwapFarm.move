@@ -168,8 +168,8 @@ module TokenSwapFarm {
         // Event::emit_event(
         //     &mut farm_pool_event.add_farm_event_handler,
         //     AddFarmEvent {
-        //         y_token_code: Token::token_code<X>(),
-        //         x_token_code: Token::token_code<Y>(),
+        //         x_token_code: Token::token_code<X>(),
+        //         y_token_code: Token::token_code<Y>(),
         //         signer: Signer::address_of(signer),
         //         admin,
         //     });
@@ -210,8 +210,8 @@ module TokenSwapFarm {
         Event::emit_event(
             &mut farm_pool_event.add_farm_event_handler,
             AddFarmEvent{
-                y_token_code: Token::token_code<X>(),
-                x_token_code: Token::token_code<Y>(),
+                x_token_code: Token::token_code<X>(),
+                y_token_code: Token::token_code<Y>(),
                 signer: Signer::address_of(signer),
                 admin,
             }
@@ -313,8 +313,8 @@ module TokenSwapFarm {
             Event::emit_event(
                 &mut farm_pool_event.activation_state_event_handler,
                 ActivationStateEvent {
-                    y_token_code: Token::token_code<X>(),
-                    x_token_code: Token::token_code<Y>(),
+                    x_token_code: Token::token_code<X>(),
+                    y_token_code: Token::token_code<Y>(),
                     signer: broker,
                     admin: broker,
                     activation_state: (alloc_point > 0),
@@ -402,8 +402,8 @@ module TokenSwapFarm {
         let farm_stake_event = borrow_global_mut<FarmPoolEvent>(STAR::token_address());
         Event::emit_event(&mut farm_stake_event.stake_event_handler,
             StakeEvent{
-                y_token_code: Token::token_code<X>(),
-                x_token_code: Token::token_code<Y>(),
+                x_token_code: Token::token_code<X>(),
+                y_token_code: Token::token_code<Y>(),
                 signer: account_addr,
                 admin: STAR::token_address(),
                 amount,
@@ -475,8 +475,8 @@ module TokenSwapFarm {
         let farm_stake_event = borrow_global_mut<FarmPoolEvent>(STAR::token_address());
         Event::emit_event(&mut farm_stake_event.unstake_event_handler,
             UnstakeEvent{
-                y_token_code: Token::token_code<X>(),
-                x_token_code: Token::token_code<Y>(),
+                x_token_code: Token::token_code<X>(),
+                y_token_code: Token::token_code<Y>(),
                 signer: account_addr,
                 admin: STAR::token_address(),
             });
