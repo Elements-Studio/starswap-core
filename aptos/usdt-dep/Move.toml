@@ -11,6 +11,6 @@ aptos_token = "0x3"
 
 [dependencies]
 #StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-framework"}
-AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-stdlib"}
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/move-stdlib"}
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/aptos-framework"}
+AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/aptos-stdlib"}
+MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/move-stdlib"}

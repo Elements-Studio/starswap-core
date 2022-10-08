@@ -19,7 +19,8 @@ aptos_token = "0x3"
 #StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
 #Poly-STC-Bridge = { git = "https://github.com/Elements-Studio/poly-stc-contracts.git", rev = "b2116064ef85f278ac2e1eba2fc6893e72d5f6f2" }
 USDTRepo = { local = "./usdt-dep" }
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-framework"}
-AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-stdlib"}
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/move-stdlib"}
+#AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "7d58019a9ce08ca5242bda16e221047cb82ff7b9", subdir = "aptos-move/framework/aptos-framework"}
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/aptos-framework"}
+AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/aptos-stdlib"}
+MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "02e41b3eb12df24103412630d20d72db8bcca2ed", subdir = "aptos-move/framework/move-stdlib"}
 U256 = {git = "https://github.com/pontem-network/U256.git", rev = "v0.3.7"}
