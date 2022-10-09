@@ -9,6 +9,10 @@ module SwapAdmin::CommonHelper {
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
 
+    public entry fun accept_token_entry<TokenType: store>(account: &signer) {
+        safe_accept_token<TokenType>(account);
+    }
+
     public fun safe_accept_token<TokenType: store>(account: &signer) {
         if (!coin::is_account_registered<TokenType>(signer::address_of(account))) {
             coin::register<TokenType>(account);

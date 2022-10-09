@@ -12,7 +12,7 @@ module SwapAdmin::TokenSwap {
     use aptos_std::event;
 
     use std::signer;
-    use std::string;
+    use std::string::{Self, String};
     use std::option;
     use std::bcs;
 
@@ -160,6 +160,7 @@ module SwapAdmin::TokenSwap {
     const GREATER_THAN: u8 = 2;
 
     const LIQUIDITY_TOKEN_SCALE: u8 = 9;
+    const MAX_COIN_SYMBOL_LENGTH: u64 = 10;
 
     public fun maybe_init_event_handle(signer: &signer) {
         assert_admin(signer);
@@ -207,13 +208,13 @@ module SwapAdmin::TokenSwap {
         assert_admin(signer);
 //        Token::register_token<LiquidityToken<X, Y>>(signer, LIQUIDITY_TOKEN_SCALE);
 
-        let lp_token_type_info = type_info::type_of<LiquidityToken<X, Y>>();
-        let token_symbol = type_info::struct_name(&lp_token_type_info);
+        // let lp_token_type_info = type_info::type_of<LiquidityToken<X, Y>>();
+        let token_symbol = generate_liquidity_token_symbol<X, Y>();
 
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<LiquidityToken<X, Y>>(
             signer,
             string::utf8(b"STARSWAP LP Coin"),
-            string::utf8(token_symbol),
+            token_symbol,
             LIQUIDITY_TOKEN_SCALE,
             false,
         );
@@ -221,6 +222,23 @@ module SwapAdmin::TokenSwap {
 //        let mint_capability = Token::remove_mint_capability<LiquidityToken<X, Y>>(signer);
 //        let burn_capability = Token::remove_burn_capability<LiquidityToken<X, Y>>(signer);
         move_to(signer, LiquidityTokenCapability{ mint: mint_cap, burn: burn_cap, freeze: freeze_cap });
+    }
+
+    // lp token symbol maybe duplicate
+    fun generate_liquidity_token_symbol<X: store, Y: store>():String{
+        let x_type_info = type_info::type_of<X>();
+        let x_struct_name = type_info::struct_name(&x_type_info);
+        let y_type_info = type_info::type_of<Y>();
+        let y_struct_name = type_info::struct_name(&y_type_info);
+
+        let lp_token_symbol = string::utf8(b"LP");
+        string::append_utf8(&mut lp_token_symbol, x_struct_name);
+        string::append_utf8(&mut lp_token_symbol, y_struct_name);
+
+        if(string::length(&lp_token_symbol) > MAX_COIN_SYMBOL_LENGTH){
+            lp_token_symbol = string::sub_string(&lp_token_symbol, 0 , MAX_COIN_SYMBOL_LENGTH);
+        };
+        lp_token_symbol
     }
 
     fun make_token_pair<X: store, Y: store>(signer: &signer): TokenPair<X, Y> {

@@ -3,7 +3,7 @@ name = "USDTRepo"
 version = "0.1.0"
 
 [addresses]
-UsdtIssuer = "0x70f7070b07046c4eb6d0288a77c9dd8f829e09d797b8492e343dd360324ffe0b"
+UsdtIssuer = "0x41422f5825e00c009a86ad42bc104228ac5f841313d8417ce69287e36776d1ee"
 move_std = "0x1"
 aptos_framework = "0x1"
 aptos_std = "0x1"

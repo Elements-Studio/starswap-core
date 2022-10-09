@@ -368,13 +368,13 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     public entry fun upgrade_tokenpair_to_tokenswappair<X: store,
-                                                          Y: store>(signer: signer) {
+                                                          Y: store>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<X, Y>(&signer);
+            TokenSwap::upgrade_tokenpair_to_tokenswappair<X, Y>(signer);
         } else {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<Y, X>(&signer);
+            TokenSwap::upgrade_tokenpair_to_tokenswappair<Y, X>(signer);
         };
     }
 

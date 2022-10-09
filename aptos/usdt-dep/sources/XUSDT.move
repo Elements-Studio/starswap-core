@@ -1,5 +1,6 @@
 
 module UsdtIssuer::XUSDT {
+    use aptos_framework::coin::{Self};
     use aptos_framework::managed_coin;
     use std::signer;
 
@@ -21,6 +22,7 @@ module UsdtIssuer::XUSDT {
             PRECISION,
             false,
         );
+        coin::register<XUSDT>(account);
     }
 
     public entry fun mint(account: &signer, amount: u128) {

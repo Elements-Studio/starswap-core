@@ -27,6 +27,7 @@ module SwapAdmin::TokenSwapGov {
         PoolTypeSyrup ,
         PoolTypeDeveloperFund,
     };
+    use SwapAdmin::CommonHelper;
 
     //2022-03-05 10:00:00 UTC+8
     const GENESIS_TIMESTAMP:u64 = 1646445600;
@@ -202,6 +203,7 @@ module SwapAdmin::TokenSwapGov {
     public fun genesis_initialize(account: &signer) {
         STAR::assert_genesis_address(account);
         STAR::init(account);
+        CommonHelper::safe_accept_token<STAR::STAR>(account);
 
         let precision = STAR::precision();
         let scaling_factor = math64::pow(10, (precision as u64));
@@ -235,6 +237,15 @@ module SwapAdmin::TokenSwapGov {
         STAR::mint(account, initial_liquidity_total);
         move_to(account, GovTreasury<PoolTypeIDO>{
             treasury: coin::withdraw<STAR::STAR>(account, (initial_liquidity_total as u64)),
+            locked_start_timestamp : now_timestamp,
+            locked_total_timestamp : 0,
+        });
+
+        // Release 24% for protocol treasury. genesis release 2%.
+        let protocol_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
+        STAR::mint(account, protocol_treasury_genesis);
+        move_to(account, GovTreasury<PoolTypeProtocolTreasury>{
+            treasury: coin::withdraw<STAR::STAR>(account, (protocol_treasury_genesis as u64)),
             locked_start_timestamp : now_timestamp,
             locked_total_timestamp : 0,
         });
@@ -512,19 +523,19 @@ module SwapAdmin::TokenSwapGov {
     }
 
 
-    public entry fun upgrade_dao_treasury_genesis(signer: signer) {
-        STAR::assert_genesis_address(&signer);
+    public entry fun upgrade_dao_treasury_genesis(signer: &signer) {
+        STAR::assert_genesis_address(signer);
         //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(&signer))){
+        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(signer))){
             let precision = STAR::precision();
             let scaling_factor = math64::pow(10, (precision as u64));
             let now_timestamp = timestamp::now_seconds();
 
             //  Release 24% for dao treasury. genesis release 2%.
             let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
-            STAR::mint(&signer, dao_treasury_genesis);
-            move_to(&signer, GovTreasury<PoolTypeProtocolTreasury>{
-                treasury: coin::withdraw<STAR::STAR>(&signer, (dao_treasury_genesis as u64)),
+            STAR::mint(signer, dao_treasury_genesis);
+            move_to(signer, GovTreasury<PoolTypeProtocolTreasury>{
+                treasury: coin::withdraw<STAR::STAR>(signer, (dao_treasury_genesis as u64)),
                 locked_start_timestamp : now_timestamp,
                 locked_total_timestamp : 0,
             });
@@ -547,7 +558,7 @@ module SwapAdmin::TokenSwapGov {
         });
     }
 
-    public entry fun upgrade_pool_type_genesis(signer: signer) {
-        STAR::assert_genesis_address(&signer);
+    public entry fun upgrade_pool_type_genesis(signer: &signer) {
+        STAR::assert_genesis_address(signer);
     }
 }
