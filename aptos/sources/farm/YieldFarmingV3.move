@@ -18,7 +18,7 @@ module YieldFarmingV3 {
     use SwapAdmin::YieldFarmingLibrary;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::STAR;
-    use SwapAdmin::U256Wrapper;
+    use u256::u256;
     use SwapAdmin::WrapperUtil;
 
     const ERR_FARMING_INIT_REPEATE: u64 = 101;
@@ -854,8 +854,8 @@ module YieldFarmingV3 {
         } else {
             BigExponential::mantissa(BigExponential::div_exp(pool_reward, BigExponential::exp_direct(farming_asset.asset_total_weight)))
         };
-        let index_accumulated = U256Wrapper::add(
-            U256Wrapper::from_u128(farming_asset.harvest_index),
+        let index_accumulated = u256::add(
+            u256::from_u128(farming_asset.harvest_index),
             harvest_index_period
         );
         BigExponential::to_safe_u128(index_accumulated)
@@ -868,7 +868,7 @@ module YieldFarmingV3 {
                                             last_harvest_index: u128,
                                             user_asset_weight: u128): u128 {
         assert!(harvest_index >= last_harvest_index, error::invalid_argument(ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW));
-        let amount_u256 = U256Wrapper::mul(U256Wrapper::from_u128(user_asset_weight), U256Wrapper::from_u128(harvest_index - last_harvest_index));
+        let amount_u256 = u256::mul(u256::from_u128(user_asset_weight), u256::from_u128(harvest_index - last_harvest_index));
         BigExponential::truncate(BigExponential::exp_from_u256(amount_u256))
     }
 

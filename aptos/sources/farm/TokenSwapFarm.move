@@ -687,6 +687,8 @@ module SwapAdmin::TokenSwapFarm {
         if(is_white_list_boost){
             let sig = ed25519::new_signature_from_bytes(*signature);
             let pub_key = ed25519::new_unvalidated_public_key_from_bytes(white_list_pubkey);
+            // TODO: the behavior to bcs::to_bytes is different with that in Starcoin.
+            // bsc::to_byptes will serialize address to fixed length bytes, with padding 0 in prefix.
             assert!(
                 ed25519::signature_verify_strict(&sig, &pub_key, bcs::to_bytes(&user_addr)),
                 ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER
@@ -719,8 +721,18 @@ module SwapAdmin::TokenSwapFarm {
 
         let sig = ed25519::new_signature_from_bytes(signature);
         let pub_key = ed25519::new_unvalidated_public_key_from_bytes(public_key);
+
+        let msg = bcs::to_bytes(&message);
+        loop {
+            if (*vector::borrow(&msg, 0) == 0) {
+                vector::remove(&mut msg, 0);
+            } else {
+                break
+            }
+        };
+
         assert!(
-            ed25519::signature_verify_strict(&sig, &pub_key, bcs::to_bytes(&message)),
+            ed25519::signature_verify_strict(&sig, &pub_key, msg),
             1001
         );
     }
