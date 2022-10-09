@@ -9,7 +9,7 @@ module BuyBackSTAR {
 
     const ERR_DEPRECRATED: u64 = 1;
 
-    public(script) fun init(
+    public fun init(
         _sender: signer,
         _total_amount: u128,
         _begin_time: u64,
