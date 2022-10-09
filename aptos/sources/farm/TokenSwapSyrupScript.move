@@ -48,7 +48,7 @@ module TokenSwapSyrupScript {
 
         let broker = @SwapAdmin;
         let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
-        TokenSwapVestarRouter::stake_hook<CoinT>(&signer, pledge_time_sec, amount, &cap_wrapper.cap);
+        TokenSwapVestarRouter::stake_hook<CoinT>(signer, pledge_time_sec, amount, &cap_wrapper.cap);
     }
 
     public entry fun unstake<CoinT: store>(signer: &signer, id: u64) acquires VestarRouterCapabilityWrapper {
@@ -80,7 +80,7 @@ module TokenSwapSyrupScript {
         let cap_wrapper = borrow_global<VestarRouterCapabilityWrapper>(broker);
 
         // if the stake has staked hook vestar then report error
-        TokenSwapVestarRouter::stake_hook_with_id<CoinT>(&signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
+        TokenSwapVestarRouter::stake_hook_with_id<CoinT>(signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
     }
 
     public entry fun put_stepwise_multiplier(signer: &signer,
