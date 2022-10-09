@@ -15,7 +15,7 @@ module YieldFarmingLibrary {
     const ERR_FARMING_TOTAL_WEIGHT_IS_ZERO : u64 = 103;
 
     /// Update farming asset
-    public fun calculate_harvest_index_with_asse_info(
+    public fun calculate_harvest_index_with_asset_info(
         asset_total_weight: u128,
         asset_harvest_index: u128,
         asset_last_update_timestamp: u64,

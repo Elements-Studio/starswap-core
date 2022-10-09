@@ -824,7 +824,7 @@ module YieldFarmingV3 {
         now_seconds: u64): u128 {
         // Debug::print(farming_asset);
         // Debug::print(&now_seconds);
-        YieldFarmingLibrary::calculate_harvest_index_with_asse_info(
+        YieldFarmingLibrary::calculate_harvest_index_with_asset_info(
             farming_asset.asset_total_weight,
             farming_asset.harvest_index,
             farming_asset.last_update_timestamp,

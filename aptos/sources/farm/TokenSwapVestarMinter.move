@@ -410,7 +410,6 @@ module TokenSwapVestarMinter {
 
     #[test_only] use aptos_std::debug;
     #[test_only] use SwapAdmin::STAR;
-    #[test_only] use SwapAdmin::VToken;
 
     #[test]
     fun test_convert_minter_record() {
