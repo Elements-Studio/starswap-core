@@ -38,9 +38,9 @@ module SwapAdmin::TokenSwapFarmBoost {
     /// Event emitted when unboost been called
     struct UnBoostEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of stake user
         signer: address,
         ///  boost unstake amount
@@ -50,9 +50,9 @@ module SwapAdmin::TokenSwapFarmBoost {
     /// Event emitted when boost been called
     struct BoostEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of stake user
         signer: address,
         //  boost unstake amount
@@ -149,8 +149,8 @@ module SwapAdmin::TokenSwapFarmBoost {
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
         event::emit_event(&mut boost_event.boost_event_handler,
             BoostEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: user_addr,
                 amount:boost_amount
             });
@@ -185,8 +185,8 @@ module SwapAdmin::TokenSwapFarmBoost {
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
         event::emit_event(&mut boost_event.unboost_event_handler,
             UnBoostEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: user_addr,
                 amount:vestar_value
             });

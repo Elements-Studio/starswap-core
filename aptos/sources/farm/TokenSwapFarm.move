@@ -32,9 +32,9 @@ module SwapAdmin::TokenSwapFarm {
     /// Event emitted when farm been added
     struct AddFarmEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of farm add
         signer: address,
         /// admin address
@@ -44,9 +44,9 @@ module SwapAdmin::TokenSwapFarm {
     /// Event emitted when farm been added
     struct ActivationStateEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of farm add
         signer: address,
         /// admin address
@@ -58,9 +58,9 @@ module SwapAdmin::TokenSwapFarm {
     /// Event emitted when stake been called
     struct StakeEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of stake user
         signer: address,
         // value of stake user
@@ -72,9 +72,9 @@ module SwapAdmin::TokenSwapFarm {
     /// Event emitted when unstake been called
     struct UnstakeEvent has drop, store {
         /// token code of X type
-        x_token_code: type_info::TypeInfo,
+        x_type_info: type_info::TypeInfo,
         /// token code of X type
-        y_token_code: type_info::TypeInfo,
+        y_type_info: type_info::TypeInfo,
         /// signer of stake user
         signer: address,
         /// admin address
@@ -158,8 +158,8 @@ module SwapAdmin::TokenSwapFarm {
         let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin);
         event::emit_event(&mut farm_pool_event.add_farm_event_handler,
             AddFarmEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: signer::address_of(signer),
                 admin,
             });
@@ -194,8 +194,8 @@ module SwapAdmin::TokenSwapFarm {
         let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin);
         event::emit_event(&mut farm_pool_event.add_farm_event_handler,
             AddFarmEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: signer::address_of(signer),
                 admin,
             });
@@ -304,8 +304,8 @@ module SwapAdmin::TokenSwapFarm {
         let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin_addr);
         event::emit_event(&mut farm_pool_event.activation_state_event_handler,
             ActivationStateEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: signer::address_of(account),
                 admin: admin_addr,
                 activation_state: active,
@@ -354,8 +354,8 @@ module SwapAdmin::TokenSwapFarm {
         let farm_stake_event = borrow_global_mut<FarmPoolEvent>(STAR::token_address());
         event::emit_event(&mut farm_stake_event.stake_event_handler,
             StakeEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: account_addr,
                 admin: STAR::token_address(),
                 amount,
@@ -417,8 +417,8 @@ module SwapAdmin::TokenSwapFarm {
         let farm_stake_event = borrow_global_mut<FarmPoolEvent>(STAR::token_address());
         event::emit_event(&mut farm_stake_event.unstake_event_handler,
             UnstakeEvent{
-                y_token_code: type_info::type_of<X>(),
-                x_token_code: type_info::type_of<Y>(),
+                y_type_info: type_info::type_of<X>(),
+                x_type_info: type_info::type_of<Y>(),
                 signer: account_addr,
                 admin: STAR::token_address(),
             });
