@@ -145,13 +145,15 @@ module TokenSwapFarmBoost {
 
         // Emit boost event
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());
-        Event::emit_event(&mut boost_event.boost_event_handler,
+        Event::emit_event(
+            &mut boost_event.boost_event_handler,
             BoostEvent{
                 y_token_code: Token::token_code<X>(),
                 x_token_code: Token::token_code<Y>(),
                 signer: user_addr,
                 amount:boost_amount
-            });
+            }
+        );
     }
 
     /// unboost for farm unstake
@@ -177,7 +179,6 @@ module TokenSwapFarmBoost {
         };
 
         user_info.boost_factor = get_default_boost_factor_scale(); // reset to 1
-
         
         // Emit unboost event
         let boost_event = borrow_global_mut<BoostEventStruct>(STAR::token_address());

@@ -6,10 +6,23 @@
 
 //# block --author 0x1 --timestamp 10000000
 
+//# run --signers SwapAdmin
+script {
+    use SwapAdmin::UpgradeScripts;
+
+    fun UpgradeScript_genesis_initialize_for_latest_version(signer: signer) {
+        UpgradeScripts::genesis_initialize_for_latest_version(
+            &signer,
+            1000000000,
+            10000000000,
+        );
+    }
+}
+
 //# run --signers alice
 script {
     use StarcoinFramework::Account;
-    use SwapAdmin::TokenMock::WETH;
+    use SwapAdmin::TokenMock::{WETH};
 
     fun alice_accept_token(signer: signer) {
         Account::do_accept_token<WETH>(&signer);
@@ -19,93 +32,60 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use StarcoinFramework::Account;
+    //use StarcoinFramework::Account;
 
     use SwapAdmin::TokenMock;
     use SwapAdmin::CommonHelper;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::STAR;
+    use SwapAdmin::TokenMock::{WUSDT, WETH};
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Account;
 
     fun admin_initialize(signer: signer) {
-        TokenMock::register_token<STAR::STAR>(&signer, 9u8);
-        TokenMock::register_token<TokenMock::WETH>(&signer, 9u8);
-        TokenMock::register_token<TokenMock::WUSDT>(&signer, 9u8);
+        TokenMock::register_token<WETH>(&signer, 9u8);
+        TokenMock::register_token<WUSDT>(&signer, 9u8);
 
         let powed_mint_aount = CommonHelper::pow_amount<STAR::STAR>(100000000);
 
-        // Initialize pool
-        TokenSwapSyrup::initialize(&signer, TokenMock::mint_token<STAR::STAR>(powed_mint_aount));
-
-        let release_per_second_amount = CommonHelper::pow_amount<TokenMock::WETH>(10);
-
         // Release 100 amount for one second
-        TokenSwapSyrup::add_pool<TokenMock::WETH>(&signer, release_per_second_amount, 0);
-        TokenSwapSyrup::set_alive<TokenMock::WETH>(&signer, true);
+        TokenSwapSyrup::add_pool_v2<WETH>(&signer, 100, 0);
 
-        let release_per_second = TokenSwapSyrup::query_release_per_second<TokenMock::WETH>();
-        assert!(release_per_second == release_per_second_amount, 10001);
-        assert!(TokenSwapSyrup::query_total_stake<TokenMock::WETH>() == 0, 10002);
-
-        // Initialize asset such as WETH to alice's account
-        CommonHelper::safe_mint<TokenMock::WETH>(&signer, powed_mint_aount);
-        Account::deposit<TokenMock::WETH>(@alice, TokenMock::mint_token<TokenMock::WETH>(powed_mint_aount));
-        assert!(Account::balance<TokenMock::WETH>(@alice) == powed_mint_aount, 10003);
+        let (total_alloc_point, pool_release_per_second) = TokenSwapSyrup::query_syrup_info();
+        Debug::print(&pool_release_per_second);
+        assert!(pool_release_per_second == 10000000000, 10001);
+        assert!(total_alloc_point == 100, 10002);
+        assert!(TokenSwapSyrup::query_total_stake<WETH>() == 0, 10003);
 
         // Initialize asset such as WETH to alice's account
-        CommonHelper::safe_mint<TokenMock::WUSDT>(&signer, powed_mint_aount);
-        Account::deposit<TokenMock::WUSDT>(@alice, TokenMock::mint_token<TokenMock::WUSDT>(powed_mint_aount));
-        assert!(Account::balance<TokenMock::WUSDT>(@alice) == powed_mint_aount, 10004);
+        CommonHelper::safe_mint<WETH>(&signer, powed_mint_aount);
+        Account::deposit<WETH>(@alice, TokenMock::mint_token<WETH>(powed_mint_aount));
+        assert!(Account::balance<WETH>(@alice) == powed_mint_aount, 10004);
 
-        TokenSwapConfig::put_stepwise_multiplier(&signer, 1u64, 1u64);
-        TokenSwapConfig::put_stepwise_multiplier(&signer, 2u64, 1u64);
+        // Initialize asset such as WETH to alice's account
+        CommonHelper::safe_mint<WUSDT>(&signer, powed_mint_aount);
+        Account::deposit<WUSDT>(@alice, TokenMock::mint_token<WUSDT>(powed_mint_aount));
+        assert!(Account::balance<WUSDT>(@alice) == powed_mint_aount, 10005);
+
+        TokenSwapSyrup::put_stepwise_multiplier<WETH>(&signer, 1u64, 1u64);
+        TokenSwapSyrup::put_stepwise_multiplier<WETH>(&signer, 2u64, 1u64);
     }
 }
 // check: EXECUTED
 
-
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapSyrupScript;
-    use SwapAdmin::CommonHelper;
-    use SwapAdmin::TokenSwapFarmBoost;
-    use SwapAdmin::STAR;
-    use SwapAdmin::TokenMock;
-
-    fun admin_turned_on_alloc_mode_and_init_upgrade(signer: signer) {
-        // open the upgrade switch
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(&signer, true);
-        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), 100011);
-
-        TokenSwapFarmBoost::initialize_boost_event(&signer);
-
-        // upgrade for global init
-        TokenSwapSyrupScript::initialize_global_syrup_info(&signer, CommonHelper::pow_amount<STAR::STAR>(10));
-
-        // extend weth
-        TokenSwapSyrup::extend_syrup_pool<TokenMock::WETH>(&signer, false);
-
-        let (alloc_point, asset_total_amount, asset_total_weight, harvest_index) =
-            TokenSwapSyrup::query_pool_info_v2<TokenMock::WETH>();
-
-        assert!(alloc_point == 50, 100012);
-        assert!(asset_total_weight == 0, 100013);
-        assert!(asset_total_amount == 0, 100014);
-        assert!(harvest_index == 0, 100015);
-    }
-}
-// check: EXECUTED
 
 //# run --signers alice
 script {
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WETH};
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::CommonHelper;
 
     fun alice_stake(signer: signer) {
-        TokenSwapSyrupScript::stake<TokenMock::WETH>(signer, 1, CommonHelper::pow_amount<TokenMock::WETH>(100));
+        TokenSwapSyrupScript::stake<WETH>(
+            signer,
+            1,
+            CommonHelper::pow_amount<WETH>(100)
+        );
     }
 }
 // check: EXECUTED
@@ -120,12 +100,16 @@ script {
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WETH};
 
     fun check_amount_after_1_second(signer: signer) {
-        let except_amount = TokenSwapSyrup::query_expect_gain<TokenMock::WETH>(Signer::address_of(&signer), 1);
+        let except_amount =
+            TokenSwapSyrup::query_expect_gain<WETH>(
+                Signer::address_of(&signer),
+                1
+            );
         Debug::print(&except_amount);
-        assert!(except_amount == CommonHelper::pow_amount<STAR::STAR>(10), 100016);
+        assert!(except_amount == CommonHelper::pow_amount<STAR::STAR>(10), 10010);
     }
 }
 // check: EXECUTED
@@ -134,17 +118,25 @@ script {
 
 //# run --signers SwapAdmin
 script {
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::TokenSwapSyrup;
 
     fun append_new_pool(signer: signer) {
-        TokenSwapSyrup::add_pool_v2<TokenMock::WUSDT>(&signer, 50, 0);
+        TokenSwapSyrup::add_pool_v2<WUSDT>(&signer, 100, 0);
+        TokenSwapSyrup::put_stepwise_multiplier<WUSDT>(&signer, 1u64, 1u64);
+        TokenSwapSyrup::put_stepwise_multiplier<WUSDT>(&signer, 2u64, 1u64);
 
-        let (alloc_point, asset_total_amount, asset_total_weight, harvest_index) = TokenSwapSyrup::query_pool_info_v2<TokenMock::WUSDT>();
-        assert!(alloc_point == 50, 100016);
-        assert!(asset_total_weight == 0, 100017);
-        assert!(asset_total_amount == 0, 100018);
-        assert!(harvest_index == 0, 100019);
+        let (
+            alloc_point,
+            asset_total_amount,
+            asset_total_weight,
+            harvest_index
+        ) = TokenSwapSyrup::query_pool_info_v2<WUSDT>();
+
+        assert!(alloc_point == 100, 10020);
+        assert!(asset_total_weight == 0, 10021);
+        assert!(asset_total_amount == 0, 10022);
+        assert!(harvest_index == 0, 10023);
     }
 }
 // check: EXECUTED
@@ -158,11 +150,15 @@ script {
 
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WETH};
     use SwapAdmin::STAR;
 
     fun check_amount_after_4_second(signer: signer) {
-        let except_amount = TokenSwapSyrup::query_expect_gain<TokenMock::WETH>(Signer::address_of(&signer), 1);
+        let except_amount =
+            TokenSwapSyrup::query_expect_gain<WETH>(
+                Signer::address_of(&signer),
+                1
+            );
         Debug::print(&except_amount);
         assert!(except_amount == CommonHelper::pow_amount<STAR::STAR>(20), 100020);
     }
@@ -171,12 +167,16 @@ script {
 
 //# run --signers alice
 script {
-    use SwapAdmin::TokenMock;
+    use SwapAdmin::TokenMock::{WUSDT};
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::CommonHelper;
 
     fun alice_stake(signer: signer) {
-        TokenSwapSyrupScript::stake<TokenMock::WUSDT>(signer, 1, CommonHelper::pow_amount<TokenMock::WUSDT>(100));
+        TokenSwapSyrupScript::stake<WUSDT>(
+            signer,
+            1,
+            CommonHelper::pow_amount<WUSDT>(100)
+        );
     }
 }
 // check: EXECUTED
