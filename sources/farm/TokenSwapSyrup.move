@@ -829,6 +829,27 @@ module TokenSwapSyrup {
         }
     }
 
+    public fun adjust_total_amount<TokenT: store>(
+        account: &signer,
+        total_amount: u128,
+        total_weight: u128,
+    ) acquires Syrup {
+        STAR::assert_genesis_address(account);
+
+        let syrup = borrow_global<Syrup<TokenT>>(broker_addr());
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
+
+        YieldFarming::adjust_total_amount<PoolTypeSyrup, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr(),
+            total_amount,
+            total_weight
+        );
+    }
+
     /// Calculate the Total Weight and Total Amount from the multiplier pool and
     /// update them to YieldFarming
     ///
@@ -848,6 +869,10 @@ module TokenSwapSyrup {
         );
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
         YieldFarming::adjust_total_amount<
             PoolTypeSyrup,
             Token::Token<TokenT>
