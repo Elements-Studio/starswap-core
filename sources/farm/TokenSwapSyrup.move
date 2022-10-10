@@ -837,6 +837,11 @@ module TokenSwapSyrup {
         STAR::assert_genesis_address(account);
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr());
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
+
         YieldFarming::adjust_total_amount<PoolTypeSyrup, Token::Token<TokenT>>(
             &syrup.param_cap,
             broker_addr(),
@@ -864,6 +869,10 @@ module TokenSwapSyrup {
         );
 
         let syrup = borrow_global<Syrup<TokenT>>(broker_addr);
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, Token::Token<TokenT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
         YieldFarming::adjust_total_amount<
             PoolTypeSyrup,
             Token::Token<TokenT>
