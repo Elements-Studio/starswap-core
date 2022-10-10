@@ -146,6 +146,14 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 
+    public(script) fun adjust_total_amount_entry<TokenT: store>(
+        account: signer,
+        total_amount: u128,
+        total_weight: u128,
+    ) {
+        TokenSwapSyrup::adjust_total_amount<TokenT>(&account, total_amount, total_weight);
+    }
+
     /// Calculate the Total Weight and Total Amount from the multiplier pool and
     /// update them to YieldFarming
     ///
