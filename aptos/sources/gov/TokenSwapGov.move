@@ -13,8 +13,10 @@ module SwapAdmin::TokenSwapGov {
     use std::option;
     use std::error;
 
+    use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::WrapperUtil;
 
     #[test_only]
@@ -448,16 +450,16 @@ module SwapAdmin::TokenSwapGov {
             disp_token
     }
 
-//    //Farm Linear Treasury Extraction Function
-//    public fun linear_withdraw_farm(account:&signer,_amount :u128) acquires GovTreasuryV2,GovTreasuryEvent{
-//        let disp_token = linear_withdraw_farm_syrup<PoolTypeFarmPool>(account);
-//        TokenSwapFarm::deposit<PoolTypeFarmPool,STAR::STAR>(account,disp_token);
-//    }
-//    //Syrup Linear Treasury Extraction Function
-//    public fun linear_withdraw_syrup(account:&signer,_amount :u128) acquires GovTreasuryV2,GovTreasuryEvent{
-//        let disp_token = linear_withdraw_farm_syrup<PoolTypeSyrup>(account);
-//        TokenSwapSyrup::deposit<PoolTypeSyrup,STAR::STAR>(account,disp_token);
-//    }
+    //Farm Linear Treasury Extraction Function
+    public fun linear_withdraw_farm(account:&signer,_amount :u128) acquires GovTreasuryV2,GovTreasuryEvent{
+        let disp_token = linear_withdraw_farm_syrup<PoolTypeFarmPool>(account);
+        TokenSwapFarm::deposit<PoolTypeFarmPool,STAR::STAR>(account,disp_token);
+    }
+    //Syrup Linear Treasury Extraction Function
+    public fun linear_withdraw_syrup(account:&signer,_amount :u128) acquires GovTreasuryV2,GovTreasuryEvent{
+        let disp_token = linear_withdraw_farm_syrup<PoolTypeSyrup>(account);
+        TokenSwapSyrup::deposit<PoolTypeSyrup,STAR::STAR>(account,disp_token);
+    }
 
     //Amount to get linear treasury
     public fun get_balance_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
