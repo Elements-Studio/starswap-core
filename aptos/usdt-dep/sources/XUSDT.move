@@ -20,7 +20,7 @@ module UsdtIssuer::XUSDT {
             b"XUSDT Coin",
             b"XUSDT",
             PRECISION,
-            false,
+            true,
         );
         coin::register<XUSDT>(account);
     }

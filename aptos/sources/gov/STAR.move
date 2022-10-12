@@ -21,7 +21,7 @@ module SwapAdmin::STAR {
             b"STAR Coin",
             b"STAR",
             PRECISION,
-            false,
+            true,
         );
     }
 

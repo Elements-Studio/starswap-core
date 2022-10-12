@@ -216,7 +216,7 @@ module SwapAdmin::TokenSwap {
             string::utf8(b"STARSWAP LP Coin"),
             token_symbol,
             LIQUIDITY_TOKEN_SCALE,
-            false,
+            true,
         );
 
 //        let mint_capability = Token::remove_mint_capability<LiquidityToken<X, Y>>(signer);
