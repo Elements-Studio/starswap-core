@@ -211,18 +211,18 @@ module SwapAdmin::TokenSwapGov {
         let scaling_factor = math64::pow(10, (precision as u64));
         let now_timestamp = timestamp::now_seconds();
 
-//        // Release 60% for farm. genesis release 5%.
-//        let farm_genesis = calculate_amount_from_percent(GOV_PERCENT_FARM_GENESIS) * (scaling_factor as u128);
-//        STAR::mint(account, farm_genesis);
-//        let farm_genesis_token = coin::withdraw<STAR::STAR>(account, farm_genesis);
-//        TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
-//
-//
-//        // Release 10% for syrup token stake. genesis release 5%.
-//        let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
-//        STAR::mint(account, syrup_genesis);
-//        let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, syrup_genesis);
-//        TokenSwapSyrup::initialize(account, syrup_genesis_token);
+       // Release 60% for farm. genesis release 5%.
+       let farm_genesis = calculate_amount_from_percent(GOV_PERCENT_FARM_GENESIS) * (scaling_factor as u128);
+       STAR::mint(account, farm_genesis);
+       let farm_genesis_token = coin::withdraw<STAR::STAR>(account, (farm_genesis as u64));
+       TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
+
+
+       // Release 10% for syrup token stake. genesis release 5%.
+       let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
+       STAR::mint(account, syrup_genesis);
+       let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, (syrup_genesis as u64));
+       TokenSwapSyrup::initialize(account, syrup_genesis_token);
 
 
         //Release 5% for community. genesis release 2%.
@@ -354,8 +354,6 @@ module SwapAdmin::TokenSwapGov {
             withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeDeveloperFund>>(account),
         });
 
-
-        
         //  ido.
         let GovTreasury{ 
             treasury:ido_genesis_token,
@@ -515,8 +513,8 @@ module SwapAdmin::TokenSwapGov {
               - get_balance_of_treasury<PoolTypeCommunity>()
               - get_balance_of_linear_treasury<PoolTypeFarmPool>()
               - get_balance_of_linear_treasury<PoolTypeSyrup>()
-//              - TokenSwapFarm::get_treasury_balance<PoolTypeFarmPool,STAR::STAR>()
-//              - TokenSwapSyrup::get_treasury_balance<PoolTypeSyrup,STAR::STAR>()
+             - TokenSwapFarm::get_treasury_balance<PoolTypeFarmPool,STAR::STAR>()
+             - TokenSwapSyrup::get_treasury_balance<PoolTypeSyrup,STAR::STAR>()
               - get_balance_of_treasury<PoolTypeIDO>()
               - get_balance_of_linear_treasury<PoolTypeProtocolTreasury>()
               - get_balance_of_treasury<PoolTypeProtocolTreasury>()

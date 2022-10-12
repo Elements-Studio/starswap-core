@@ -9,41 +9,41 @@ module SwapAdmin::CommonHelper {
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
 
-    public entry fun accept_token_entry<TokenType: store>(account: &signer) {
-        safe_accept_token<TokenType>(account);
+    public entry fun accept_token_entry<CoinType: store>(account: &signer) {
+        safe_accept_token<CoinType>(account);
     }
 
-    public fun safe_accept_token<TokenType: store>(account: &signer) {
-        if (!coin::is_account_registered<TokenType>(signer::address_of(account))) {
-            coin::register<TokenType>(account);
+    public fun safe_accept_token<CoinType: store>(account: &signer) {
+        if (!coin::is_account_registered<CoinType>(signer::address_of(account))) {
+            coin::register<CoinType>(account);
         };
     }
 
-    public fun safe_mint<TokenType: store>(account: &signer, token_amount: u128) {
-        let is_account_registered = coin::is_account_registered<TokenType>(signer::address_of(account));
+    public fun safe_mint<CoinType: store>(account: &signer, token_amount: u128) {
+        let is_account_registered = coin::is_account_registered<CoinType>(signer::address_of(account));
         if (!is_account_registered) {
-            coin::register<TokenType>(account);
+            coin::register<CoinType>(account);
         };
-        let token = TokenMock::mint_token<TokenType>(token_amount);
-        coin::deposit<TokenType>(signer::address_of(account), token);
+        let token = TokenMock::mint_token<CoinType>(token_amount);
+        coin::deposit<CoinType>(signer::address_of(account), token);
     }
 
-    public fun transfer<TokenType: store>(account: &signer, token_address: address, token_amount: u128){
-        let token = coin::withdraw<TokenType>(account, (token_amount as u64));
+    public fun transfer<CoinType: store>(account: &signer, token_address: address, token_amount: u128){
+        let token = coin::withdraw<CoinType>(account, (token_amount as u64));
          coin::deposit(token_address, token);
     }
 
-    public fun get_safe_balance<TokenType: store>(token_address: address): u128{
+    public fun get_safe_balance<CoinType: store>(token_address: address): u128{
         let token_balance: u128 = 0;
-        if (coin::is_account_registered<TokenType>(token_address)) {
-            token_balance = (coin::balance<TokenType>(token_address) as u128);
+        if (coin::is_account_registered<CoinType>(token_address)) {
+            token_balance = (coin::balance<CoinType>(token_address) as u128);
         };
         token_balance
     }
 
-    public fun register_and_mint<TokenType: store>(account: &signer, precision: u8, token_amount: u128) {
-        TokenMock::register_token<TokenType>(account, precision);
-        safe_mint<TokenType>(account, token_amount);
+    public fun register_and_mint<CoinType: store>(account: &signer, precision: u8, token_amount: u128) {
+        TokenMock::register_token<CoinType>(account, precision);
+        safe_mint<CoinType>(account, token_amount);
     }
 
     public fun pow_amount<Token: store>(amount: u128): u128 {

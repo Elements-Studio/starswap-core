@@ -4,7 +4,6 @@
 address SwapAdmin {
 
 module YieldFarmingLibrary {
-
     use std::error;
 
     use SwapAdmin::BigExponential;

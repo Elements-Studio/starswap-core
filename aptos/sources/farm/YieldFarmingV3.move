@@ -41,9 +41,9 @@ module YieldFarmingV3 {
     const ERR_YIELD_FARMING_GLOBAL_POOL_INFO_ALREADY_EXIST: u64 = 120;
 
     /// The object of yield farming
-    /// RewardTokenT meaning token of yield farming
-    struct Farming<phantom PoolType, phantom RewardTokenT> has key, store {
-        treasury_token: coin::Coin<RewardTokenT>,
+    /// RewardCoinT meaning token of yield farming
+    struct Farming<phantom PoolType, phantom RewardCoinT> has key, store {
+        treasury_token: coin::Coin<RewardCoinT>,
     }
 
     struct FarmingAsset<phantom PoolType, phantom AssetT> has key, store {
@@ -122,15 +122,15 @@ module YieldFarmingV3 {
     /// this will declare a yield farming pool
     public fun initialize<
         PoolType: store,
-        RewardTokenT: store>(account: &signer, treasury_token: coin::Coin<RewardTokenT>) {
+        RewardCoinT: store>(account: &signer, treasury_token: coin::Coin<RewardCoinT>) {
         let scaling_factor = math64::pow(10, BigExponential::exp_scale_limition());
-        let coin_precision = coin::decimals<RewardTokenT>();
+        let coin_precision = coin::decimals<RewardCoinT>();
         let token_scale = math64::pow(10, (coin_precision as u64));
 
         assert!(token_scale <= scaling_factor, error::out_of_range(ERR_FARMING_TOKEN_SCALE_OVERFLOW));
-        assert!(!exists_at<PoolType, RewardTokenT>(signer::address_of(account)), error::invalid_state(ERR_FARMING_INIT_REPEATE));
+        assert!(!exists_at<PoolType, RewardCoinT>(signer::address_of(account)), error::invalid_state(ERR_FARMING_INIT_REPEATE));
 
-        move_to(account, Farming<PoolType, RewardTokenT>{
+        move_to(account, Farming<PoolType, RewardCoinT>{
             treasury_token,
         });
     }
@@ -231,15 +231,15 @@ module YieldFarmingV3 {
         }
     }
 
-    public fun deposit<PoolType: store, RewardTokenT: store>(
+    public fun deposit<PoolType: store, RewardCoinT: store>(
         _account: &signer,
-        treasury_token: coin::Coin<RewardTokenT>) acquires Farming {
-        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(STAR::token_address());
-        coin::merge<RewardTokenT>(&mut farming.treasury_token, treasury_token);
+        treasury_token: coin::Coin<RewardCoinT>) acquires Farming {
+        let farming = borrow_global_mut<Farming<PoolType, RewardCoinT>>(STAR::token_address());
+        coin::merge<RewardCoinT>(&mut farming.treasury_token, treasury_token);
     }
 
     /// deprecated call
-    public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
+    public fun modify_parameter<PoolType: store, RewardCoinT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,
         release_per_second: u128,
@@ -288,7 +288,7 @@ module YieldFarmingV3 {
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );
     /// gain = (current_index - last_index) * user_amount * boost_factor;
     /// asset_total_weight = Sigma (per user lp_amount *  user boost_factor)
-    public fun update_pool<PoolType: store, RewardTokenT: store, AssetT: store>(
+    public fun update_pool<PoolType: store, RewardCoinT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,
         alloc_point: u128, //new pool alloc point
@@ -354,7 +354,7 @@ module YieldFarmingV3 {
 
     /// deprecated call
     /// Call by stake user, staking amount of asset in order to get yield farming token
-    public fun stake<PoolType: store, RewardTokenT: store, AssetT: store>(
+    public fun stake<PoolType: store, RewardCoinT: store, AssetT: store>(
         signer: &signer,
         broker_addr: address,
         asset: AssetT,
@@ -429,7 +429,7 @@ module YieldFarmingV3 {
     }
 
     /// Call by stake user, staking amount of asset in order to get yield farming token
-    public fun stake_v2<PoolType: store, RewardTokenT: store, AssetT: store>(
+    public fun stake_v2<PoolType: store, RewardCoinT: store, AssetT: store>(
         signer: &signer,
         broker_addr: address,
         asset: AssetT,
@@ -522,16 +522,16 @@ module YieldFarmingV3 {
 
 
     /// Unstake asset from farming pool
-    public fun unstake<PoolType: store, RewardTokenT: store, AssetT: store>(
+    public fun unstake<PoolType: store, RewardCoinT: store, AssetT: store>(
         signer: &signer,
         broker: address,
         cap: HarvestCapability<PoolType, AssetT>)
-    : (AssetT, coin::Coin<RewardTokenT>)
+    : (AssetT, coin::Coin<RewardCoinT>)
     acquires Farming, FarmingAsset, FarmingAssetExtend, StakeList, StakeListExtend, YieldFarmingGlobalPoolInfo {
         // Destroy capability
         let HarvestCapability<PoolType, AssetT>{ stake_id, deadline } = cap;
 
-        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker);
+        let farming = borrow_global_mut<Farming<PoolType, RewardCoinT>>(broker);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
         let now_seconds = timestamp::now_seconds();
 
@@ -583,7 +583,7 @@ module YieldFarmingV3 {
         };
 
 
-        let withdraw_token = coin::extract<RewardTokenT>(&mut farming.treasury_token, ((staked_gain + period_gain) as u64));
+        let withdraw_token = coin::extract<RewardCoinT>(&mut farming.treasury_token, ((staked_gain + period_gain) as u64));
         assert!(farming_asset.asset_total_weight >= asset_weight, error::invalid_state(ERR_FARMING_NOT_ENOUGH_ASSET));
 
         // Update farm asset
@@ -603,14 +603,14 @@ module YieldFarmingV3 {
 
     /// Harvest yield farming token from stake
     public fun harvest<PoolType: store,
-                       RewardTokenT: store,
+                       RewardCoinT: store,
                        AssetT: store>(
         user_addr: address,
         broker_addr: address,
         amount: u128,
-        cap: &HarvestCapability<PoolType, AssetT>): coin::Coin<RewardTokenT>
+        cap: &HarvestCapability<PoolType, AssetT>): coin::Coin<RewardCoinT>
     acquires Farming, FarmingAsset, FarmingAssetExtend, StakeList, StakeListExtend, YieldFarmingGlobalPoolInfo {
-        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker_addr);
+        let farming = borrow_global_mut<Farming<PoolType, RewardCoinT>>(broker_addr);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
 
         // Start check
@@ -661,7 +661,7 @@ module YieldFarmingV3 {
         };
 
         // Update stake
-        let withdraw_token = coin::extract<RewardTokenT>(&mut farming.treasury_token, (withdraw_amount as u64));
+        let withdraw_token = coin::extract<RewardCoinT>(&mut farming.treasury_token, (withdraw_amount as u64));
         stake.gain = total_gain - withdraw_amount;
         stake.last_harvest_index = new_harvest_index;
 
@@ -675,7 +675,7 @@ module YieldFarmingV3 {
 
     /// The user can quering all yield farming amount in any time and scene
     public fun query_expect_gain<PoolType: store,
-                                 RewardTokenT: store,
+                                 RewardCoinT: store,
                                  AssetT: store>(user_addr: address,
                                                 broker_addr: address,
                                                 cap: &HarvestCapability<PoolType, AssetT>)
@@ -989,9 +989,9 @@ module YieldFarmingV3 {
     }
 
     /// View Treasury Remaining
-    public fun get_treasury_balance<PoolType: store, RewardTokenT: store>(broker: address): u128 acquires Farming {
-        let farming = borrow_global<Farming<PoolType, RewardTokenT>>(broker);
-        WrapperUtil::coin_value<RewardTokenT>(&farming.treasury_token)
+    public fun get_treasury_balance<PoolType: store, RewardCoinT: store>(broker: address): u128 acquires Farming {
+        let farming = borrow_global<Farming<PoolType, RewardCoinT>>(broker);
+        WrapperUtil::coin_value<RewardCoinT>(&farming.treasury_token)
     }
 
     /// Get global stake id
@@ -1006,8 +1006,8 @@ module YieldFarmingV3 {
     }
 
     /// Check the Farming of CoinT is exists.
-    public fun exists_at<PoolType: store, RewardTokenT: store>(broker: address): bool {
-        exists<Farming<PoolType, RewardTokenT>>(broker)
+    public fun exists_at<PoolType: store, RewardCoinT: store>(broker: address): bool {
+        exists<Farming<PoolType, RewardCoinT>>(broker)
     }
 
     /// Check the Farming of AsssetT is exists.

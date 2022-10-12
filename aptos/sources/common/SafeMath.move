@@ -88,7 +88,7 @@ module SwapAdmin::SafeMath {
     public fun sqrt_u256(y: U256): u128 {
         let u128_max = u256::from_u128(U128_MAX);
         let cmp_order = u256::compare(&y, &u128_max);
-        if (cmp_order == LESS_THAN || LESS_THAN == EQUAL){
+        if (cmp_order == LESS_THAN || cmp_order == EQUAL){
             let z = sqrt(u256::as_u128(y));
             (z as u128)
         } else {

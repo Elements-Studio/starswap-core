@@ -18,6 +18,11 @@ module TokenSwapVestarMinter {
     use SwapAdmin::VESTAR;
     use SwapAdmin::WrapperUtil;
 
+    #[test_only]
+    use aptos_std::debug;
+    #[test_only]
+    use SwapAdmin::STAR;
+
     const ERROR_TREASURY_NOT_EXISTS: u64 = 101;
     const ERROR_INSUFFICIENT_BURN_AMOUNT: u64 = 102;
     const ERROR_ADD_RECORD_ID_INVALID: u64 = 103;
@@ -46,7 +51,7 @@ module TokenSwapVestarMinter {
         items: vector<MintRecord>
     }
 
-    struct MintRecordT<phantom StakeTokenT> has key, store, copy, drop {
+    struct MintRecordT<phantom StakeCoinT> has key, store, copy, drop {
         id: u64,
         minted_amount: u128,
         // Vestar amount
@@ -54,8 +59,8 @@ module TokenSwapVestarMinter {
         pledge_time_sec: u64,
     }
 
-    struct MintRecordListT<phantom StakeTokenT> has key, store {
-        items: vector<MintRecordT<StakeTokenT>>
+    struct MintRecordListT<phantom StakeCoinT> has key, store {
+        items: vector<MintRecordT<StakeCoinT>>
     }
 
     struct MintEvent has store, drop {
@@ -407,9 +412,6 @@ module TokenSwapVestarMinter {
         let idx = find_idx_by_id(&list.items, id);
         option::is_some(&idx)
     }
-
-    #[test_only] use aptos_std::debug;
-    #[test_only] use SwapAdmin::STAR;
 
     #[test]
     fun test_convert_minter_record() {

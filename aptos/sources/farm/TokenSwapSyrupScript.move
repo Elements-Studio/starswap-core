@@ -28,6 +28,12 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::add_pool<CoinT>(signer, release_per_second, delay);
     }
 
+    public entry fun add_pool_v2<CoinT: store>(signer: &signer,
+                                            alloc_point: u128,
+                                            delay: u64) {
+        TokenSwapSyrup::add_pool_v2<CoinT>(signer, alloc_point, delay);
+    }
+
     /// Set release per second for token type pool
     public entry fun set_release_per_second<
         CoinT: copy + drop + store>(signer: &signer,

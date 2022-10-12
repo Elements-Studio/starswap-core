@@ -13,11 +13,11 @@ module SwapAdmin::TimelyReleasePool {
     const ERROR_EVENT_NOT_START_YET: u64 = 3004;
     const ERROR_TRESURY_IS_EMPTY: u64 = 3005;
 
-    struct TimelyReleasePool<phantom PoolT, phantom TokenT> has key {
+    struct TimelyReleasePool<phantom PoolT, phantom  CoinT> has key {
         // Total treasury amount
         total_treasury_amount: u128,
         // Treasury total amount
-        treasury: Coin<TokenT>,
+        treasury: Coin< CoinT>,
         // Release amount in each time
         release_per_time: u128,
         // Begin of release time
@@ -30,19 +30,19 @@ module SwapAdmin::TimelyReleasePool {
         interval: u64,
     }
 
-    struct WithdrawCapability<phantom PoolT, phantom TokenT> has key, store {}
+    struct WithdrawCapability<phantom PoolT, phantom CoinT> has key, store {}
 
 
-    public fun init<PoolT: store, TokenT: store>(sender: &signer,
-                                                 init_token: Coin<TokenT>,
+    public fun init<PoolT: store, CoinT: store>(sender: &signer,
+                                                 init_token: Coin<CoinT>,
                                                  begin_time: u64,
                                                  interval: u64,
-                                                 release_per_time: u128): WithdrawCapability<PoolT, TokenT> {
+                                                 release_per_time: u128): WithdrawCapability<PoolT, CoinT> {
         let sender_addr = signer::address_of(sender);
-        assert!(!exists<TimelyReleasePool<PoolT, TokenT>>(sender_addr), error::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
+        assert!(!exists<TimelyReleasePool<PoolT, CoinT>>(sender_addr), error::invalid_state(ERROR_LINEAR_RELEASE_EXISTS));
 
-        let total_treasury_amount = WrapperUtil::coin_value<TokenT>(&init_token);
-        move_to(sender, TimelyReleasePool<PoolT, TokenT> {
+        let total_treasury_amount = WrapperUtil::coin_value<CoinT>(&init_token);
+        move_to(sender, TimelyReleasePool<PoolT, CoinT> {
             treasury: init_token,
             total_treasury_amount,
             release_per_time,
@@ -52,14 +52,14 @@ module SwapAdmin::TimelyReleasePool {
             interval,
         });
 
-        WithdrawCapability<PoolT, TokenT> {}
+        WithdrawCapability<PoolT, CoinT> {}
     }
 
     /// Uninitialize a timely pool
-    public fun uninit<PoolT: store, TokenT: store>(cap: WithdrawCapability<PoolT, TokenT>, broker: address)
-    : Coin<TokenT> acquires TimelyReleasePool {
-        let WithdrawCapability<PoolT, TokenT> {} = cap;
-        let TimelyReleasePool<PoolT, TokenT> {
+    public fun uninit<PoolT: store, CoinT: store>(cap: WithdrawCapability<PoolT, CoinT>, broker: address)
+    : Coin<CoinT> acquires TimelyReleasePool {
+        let WithdrawCapability<PoolT, CoinT> {} = cap;
+        let TimelyReleasePool<PoolT, CoinT> {
             total_treasury_amount: _,
             treasury,
             release_per_time: _,
@@ -67,43 +67,43 @@ module SwapAdmin::TimelyReleasePool {
             latest_withdraw_time: _,
             latest_release_time: _,
             interval: _,
-        } = move_from<TimelyReleasePool<PoolT, TokenT>>(broker);
+        } = move_from<TimelyReleasePool<PoolT, CoinT>>(broker);
 
         treasury
     }
 
     /// Deposit token to treasury
-    public fun deposit<PoolT: store, TokenT: store>(broker: address,
-                                                    token: Coin<TokenT>) acquires TimelyReleasePool {
-        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+    public fun deposit<PoolT: store, CoinT: store>(broker: address,
+                                                    token: Coin<CoinT>) acquires TimelyReleasePool {
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, CoinT>>(broker);
         pool.total_treasury_amount = pool.total_treasury_amount + WrapperUtil::coin_value(&token);
-        coin::merge<TokenT>(&mut pool.treasury, token);
+        coin::merge<CoinT>(&mut pool.treasury, token);
     }
 
     /// Set release per time
-    public fun set_release_per_time<PoolT: store, TokenT: store>(
+    public fun set_release_per_time<PoolT: store, CoinT: store>(
         broker: address,
         release_per_time: u128,
-        _cap: &WithdrawCapability<PoolT, TokenT>
+        _cap: &WithdrawCapability<PoolT, CoinT>
     ) acquires TimelyReleasePool {
-        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, CoinT>>(broker);
         pool.release_per_time = release_per_time;
     }
 
-    public fun set_interval<PoolT: store, TokenT: store>(
+    public fun set_interval<PoolT: store, CoinT: store>(
         broker: address,
         interval: u64,
-        _cap: &WithdrawCapability<PoolT, TokenT>
+        _cap: &WithdrawCapability<PoolT, CoinT>
     ) acquires TimelyReleasePool {
-        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, CoinT>>(broker);
         pool.interval = interval;
     }
 
     /// Withdraw from treasury
-    public fun withdraw<PoolT: store, TokenT: store>(broker: address, _cap: &WithdrawCapability<PoolT, TokenT>)
-    : Coin<TokenT> acquires TimelyReleasePool {
+    public fun withdraw<PoolT: store, CoinT: store>(broker: address, _cap: &WithdrawCapability<PoolT, CoinT>)
+    : Coin<CoinT> acquires TimelyReleasePool {
         let now_time = timestamp::now_seconds();
-        let pool = borrow_global_mut<TimelyReleasePool<PoolT, TokenT>>(broker);
+        let pool = borrow_global_mut<TimelyReleasePool<PoolT, CoinT>>(broker);
         assert!(WrapperUtil::coin_value(&pool.treasury) > 0, error::invalid_state(ERROR_TRESURY_IS_EMPTY));
         assert!(now_time > pool.begin_time, error::invalid_state(ERROR_EVENT_NOT_START_YET));
 
@@ -127,9 +127,9 @@ module SwapAdmin::TimelyReleasePool {
     }
 
     /// query pool info
-    public fun query_pool_info<PoolT: store, TokenT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128)
+    public fun query_pool_info<PoolT: store, CoinT: store>(broker: address): (u128, u128, u128, u64, u64, u64, u64, u128)
     acquires TimelyReleasePool {
-        let pool = borrow_global<TimelyReleasePool<PoolT, TokenT>>(broker);
+        let pool = borrow_global<TimelyReleasePool<PoolT, CoinT>>(broker);
 
         let now = timestamp::now_seconds();
         let (current_time_amount, current_time_stamp)= if (pool.latest_release_time < now) {// The pool has started
@@ -151,7 +151,7 @@ module SwapAdmin::TimelyReleasePool {
         };
 
         (
-            WrapperUtil::coin_value<TokenT>(&pool.treasury),
+            WrapperUtil::coin_value<CoinT>(&pool.treasury),
             pool.total_treasury_amount,
             pool.release_per_time,
             pool.begin_time,
