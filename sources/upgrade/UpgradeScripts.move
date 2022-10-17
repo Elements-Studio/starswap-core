@@ -108,6 +108,15 @@ module UpgradeScripts {
         TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
     }
 
+    public(script) fun upgrade_from_v1_0_12_to_v1_1_0(account: signer){
+        TokenSwapConfig::assert_admin(&account);
+        TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
+        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
+        TokenSwapGov::aptos_genesis_burn(&account);
+    }
+
+
     /// This function initializes all structures for the latest version,
     /// And is only used for integration tests
     public fun genesis_initialize_for_latest_version(

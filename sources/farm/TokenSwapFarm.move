@@ -244,6 +244,16 @@ module TokenSwapFarm {
     }
 
 
+    public fun set_pool_release_per_second(signer: &signer, pool_release_per_second: u128){
+        STAR::assert_genesis_address(signer);
+
+        // Updated release per second for `PoolTypeFarmPool`
+        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeFarmPool>(
+            signer,
+            pool_release_per_second
+        );
+    }
+
     /// DEPRECATED call
     /// Set farm mutiplier of second per releasing
     public fun set_farm_multiplier<X: copy + drop + store,

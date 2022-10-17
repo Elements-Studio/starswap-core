@@ -550,5 +550,25 @@ module TokenSwapGov {
     public(script) fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
     }
+
+    public fun aptos_genesis_burn(signer: &signer)acquires  GovTreasuryV2{
+        STAR::assert_genesis_address(signer);
+        let precision = STAR::precision();
+        let scaling_factor = Math::pow(10, (precision as u64));
+
+        let farm_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeFarmPool>>(STAR::token_address());
+        assert!(farm_treasury.linear_total == calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128) , 100);
+        let farm_treasury_amount = Token::value(&farm_treasury.linear_treasury);
+        let farm_treasury_burn = Token::withdraw(&mut farm_treasury.linear_treasury, farm_treasury_amount / 3);
+        Token::burn(signer, farm_treasury_burn);
+        farm_treasury.linear_total = ( farm_treasury_amount * 2 ) / 3;
+
+        let syrup_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeSyrup>>(STAR::token_address());
+        assert!(syrup_treasury.linear_total == calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) * (scaling_factor as u128) , 100);
+        let syrup_treasury_amount = Token::value(&syrup_treasury.linear_treasury);
+        let syrup_treasury_burn = Token::withdraw(&mut syrup_treasury.linear_treasury, syrup_treasury_amount / 3);
+        Token::burn(signer, syrup_treasury_burn);
+        syrup_treasury.linear_total = ( syrup_treasury_amount * 2 ) / 3;
+    }
 }
 }
