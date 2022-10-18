@@ -1,5 +1,4 @@
 module SwapAdmin::UpgradeScripts {
-    use SwapAdmin::TokenSwapFee;
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapSyrup;
@@ -8,12 +7,6 @@ module SwapAdmin::UpgradeScripts {
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
     const ERROR_INVALID_PARAMETER: u64 = 101;
-
-    //two phase upgrade compatible
-    public entry fun initialize_token_swap_fee(signer: &signer) {
-        TokenSwapConfig::assert_admin(signer);
-        TokenSwapFee::initialize_token_swap_fee(signer);
-    }
 
     /// this will config yield farming global pool info
     public entry fun initialize_global_pool_info(signer: &signer, pool_release_per_second: u128) {
