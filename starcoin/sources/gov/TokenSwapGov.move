@@ -68,6 +68,7 @@ module TokenSwapGov {
     const GOV_PERCENT_DEVELOPER_FUND_LOCK_TIME : u64 = 2 * 365 * 86400;
 
 
+    const ERR_DEPRECATED: u64 = 1;
     const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
     const ERR_WITHDRAW_AMOUNT_TOO_MANY: u64 = 202;
     const ERR_WITHDRAW_AMOUNT_IS_ZERO: u64 = 203;
@@ -208,13 +209,11 @@ module TokenSwapGov {
         let farm_genesis_token = Account::withdraw<STAR::STAR>(account, farm_genesis);
         TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
 
-
         // Release 10% for syrup token stake. genesis release 5%.
         let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
         STAR::mint(account, syrup_genesis);
         let syrup_genesis_token = Account::withdraw<STAR::STAR>(account, syrup_genesis);
         TokenSwapSyrup::initialize(account, syrup_genesis_token);
-
 
         //Release 5% for community. genesis release 2%.
         let community_total = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY_GENESIS) * (scaling_factor as u128);
@@ -506,40 +505,47 @@ module TokenSwapGov {
     }
 
 
-    public(script) fun upgrade_dao_treasury_genesis(signer: signer) {
-        STAR::assert_genesis_address(&signer);
+    public fun upgrade_dao_treasury_genesis_func(signer: &signer) {
+        STAR::assert_genesis_address(signer);
         //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(&signer))){
+        if (!exists<GovTreasury<PoolTypeProtocolTreasury>>(Signer::address_of(signer))) {
             let precision = STAR::precision();
             let scaling_factor = Math::pow(10, (precision as u64));
             let now_timestamp = Timestamp::now_seconds();
 
             //  Release 24% for dao treasury. genesis release 2%.
-            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
-            STAR::mint(&signer, dao_treasury_genesis);
-            move_to(&signer, GovTreasury<PoolTypeProtocolTreasury>{
-                treasury: Account::withdraw<STAR::STAR>(&signer, dao_treasury_genesis),
-                locked_start_timestamp : now_timestamp,
-                locked_total_timestamp : 0,
+            let dao_treasury_genesis =
+                calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
+            STAR::mint(signer, dao_treasury_genesis);
+            move_to(signer, GovTreasury<PoolTypeProtocolTreasury> {
+                treasury: Account::withdraw<STAR::STAR>(signer, dao_treasury_genesis),
+                locked_start_timestamp: now_timestamp,
+                locked_total_timestamp: 0,
             });
         };
     }
 
-    fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {
-        STAR::assert_genesis_address(signer);
-        let account = Signer::address_of(signer);
 
-        let GovTreasury<PoolTypeOld> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        } = move_from<GovTreasury<PoolTypeOld>>(account);
-        move_to(signer, GovTreasury<PoolTypeNew> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        });
+    /// DEPRECATED
+    public(script) fun upgrade_dao_treasury_genesis(_signer: signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
+
+    // fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {
+    //     STAR::assert_genesis_address(signer);
+    //     let account = Signer::address_of(signer);
+    //
+    //     let GovTreasury<PoolTypeOld> {
+    //         treasury,
+    //         locked_start_timestamp,
+    //         locked_total_timestamp,
+    //     } = move_from<GovTreasury<PoolTypeOld>>(account);
+    //     move_to(signer, GovTreasury<PoolTypeNew> {
+    //         treasury,
+    //         locked_start_timestamp,
+    //         locked_total_timestamp,
+    //     });
+    // }
 
     public(script) fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);

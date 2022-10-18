@@ -60,6 +60,7 @@ module TokenSwapVestarRouter {
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128): VestarRouterCapability {
         STAR::assert_genesis_address(signer);
 
+        // DEPRECATED
         TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
 
         let (

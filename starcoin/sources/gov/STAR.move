@@ -1,7 +1,6 @@
-address SwapAdmin {
 /// STAR is a governance token of Starswap DAPP.
 /// It uses apis defined in the `Token` module.
-module STAR {
+module SwapAdmin::STAR {
     use StarcoinFramework::Token;
     use StarcoinFramework::Account;
     use StarcoinFramework::Signer;
@@ -25,6 +24,11 @@ module STAR {
         Account::deposit_to_self<STAR>(account, token);
     }
 
+    /// Burn STAR with account signer
+    public fun burn(account: &signer, amount: u128) {
+        Token::burn<STAR>(account, Account::withdraw<STAR>(account, amount));
+    }
+
     /// Returns true if `TokenType` is `STAR::STAR`
     public fun is_star<TokenType: store>(): bool {
         Token::is_same_token<STAR, TokenType>()
@@ -39,10 +43,17 @@ module STAR {
         Token::token_address<STAR>()
     }
 
-
     /// Return STAR precision.
     public fun precision(): u8 {
         PRECISION
     }
 }
+
+module SwapAdmin::STARScript {
+    use SwapAdmin::STAR;
+
+    /// Only called with someone who have burn capability
+    public(script) fun burn(account: signer, amount: u128) {
+        STAR::burn(&account, amount);
+    }
 }

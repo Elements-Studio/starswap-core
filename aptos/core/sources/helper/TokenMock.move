@@ -39,7 +39,7 @@ module SwapAdmin::TokenMock {
             token_name,
             string::utf8(token_symbol),
             precision,
-            false,
+            true,
         );
         coin::register<CoinType>(account);
 

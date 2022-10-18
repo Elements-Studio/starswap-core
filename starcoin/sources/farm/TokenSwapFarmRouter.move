@@ -3,21 +3,26 @@
 
 address SwapAdmin {
 module TokenSwapFarmRouter {
+    use StarcoinFramework::Errors;
+
     use SwapAdmin::TokenSwap;
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapGov;
 
+    const ERR_DEPRECATED: u64 = 1;
+
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
-    public fun add_farm_pool<X: copy + drop + store, Y: copy + drop + store>(account: &signer, release_per_second: u128) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::add_farm<X, Y>(account, release_per_second);
-        } else {
-            TokenSwapFarm::add_farm<Y, X>(account, release_per_second);
-        };
+    public fun add_farm_pool<X: copy + drop + store, Y: copy + drop + store>(_account: &signer, _release_per_second: u128) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // let order = TokenSwap::compare_token<X, Y>();
+        // assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        // if (order == 1) {
+        //     TokenSwapFarm::add_farm<X, Y>(account, release_per_second);
+        // } else {
+        //     TokenSwapFarm::add_farm<Y, X>(account, release_per_second);
+        // };
     }
 
     public fun add_farm_pool_v2<X: copy + drop + store, Y: copy + drop + store>(account: &signer, alloc_point: u128) {
@@ -31,15 +36,16 @@ module TokenSwapFarmRouter {
     }
 
 
-    public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: &signer,
-                                                                                     active: bool) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::reset_farm_activation<X, Y>(account, active);
-        } else {
-            TokenSwapFarm::reset_farm_activation<Y, X>(account, active);
-        };
+    public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(_account: &signer,
+                                                                                     _active: bool) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // let order = TokenSwap::compare_token<X, Y>();
+        // assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        // if (order == 1) {
+        //     TokenSwapFarm::reset_farm_activation<X, Y>(account, active);
+        // } else {
+        //     TokenSwapFarm::reset_farm_activation<Y, X>(account, active);
+        // };
     }
 
     public fun stake<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
@@ -110,13 +116,14 @@ module TokenSwapFarmRouter {
     }
 
     public fun query_info<X: copy + drop + store, Y: copy + drop + store>(): (bool, u128, u128, u128) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::query_info<X, Y>()
-        } else {
-            TokenSwapFarm::query_info<Y, X>()
-        }
+        abort Errors::invalid_state(ERR_DEPRECATED)
+        // let order = TokenSwap::compare_token<X, Y>();
+        // assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        // if (order == 1) {
+        //     TokenSwapFarm::query_info<X, Y>()
+        // } else {
+        //     TokenSwapFarm::query_info<Y, X>()
+        // }
     }
 
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)

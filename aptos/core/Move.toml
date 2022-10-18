@@ -4,8 +4,8 @@ version = "0.0.1"
 #upgrade_policy = "immutable"
 
 [addresses]
-SwapAdmin = "0xee1f1439e9423f2c537e775d4cb92ea2cacdf0886165b7945db8262702c07049"
-SwapFeeAdmin = "0xee1f1439e9423f2c537e775d4cb92ea2cacdf0886165b7945db8262702c07049"
+SwapAdmin = "bda17e76b3c4d6c2c004a4dfdf5046e384facedab3e65134a5e1439373df0602"
+SwapFeeAdmin = "bda17e76b3c4d6c2c004a4dfdf5046e384facedab3e65134a5e1439373df0602"
 #UsdtIssuer = "0x70f7070b07046c4eb6d0288a77c9dd8f829e09d797b8492e343dd360324ffe0b"
 move_std = "0x1"
 aptos_framework = "0x1"

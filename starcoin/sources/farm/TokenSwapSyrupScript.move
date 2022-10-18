@@ -6,15 +6,17 @@ module TokenSwapSyrupScript {
 
     use StarcoinFramework::Signer;
     use StarcoinFramework::Account;
+    use StarcoinFramework::Errors;
 
     use SwapAdmin::STAR;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
     use SwapAdmin::TokenSwapGov;
 
-    ///  TODO: Deprecated on mainnet
+    const ERR_DEPRECATED: u64 = 1;
+
+    ///  TODO: DEPRECATED on mainnet
     struct VestarMintCapabilityWrapper has key, store {
         cap: TokenSwapVestarMinter::MintCapability,
     }
@@ -23,28 +25,59 @@ module TokenSwapSyrupScript {
         cap: TokenSwapVestarRouter::VestarRouterCapability,
     }
 
-    public(script) fun add_pool<TokenT: store>(signer: signer,
-                                               release_per_second: u128,
-                                               delay: u64) {
-        TokenSwapSyrup::add_pool<TokenT>(&signer, release_per_second, delay);
+    public(script) fun add_pool<TokenT: store>(
+        signer: signer,
+        alloc_point: u128,
+        delay: u64
+    ) {
+        TokenSwapSyrup::add_pool_v2<TokenT>(&signer, alloc_point, delay);
+    }
+
+    public(script) fun update_allocation_point<TokenT: store>(
+        signer: signer,
+        alloc_point: u128
+    ) {
+        TokenSwapSyrup::update_allocation_point<TokenT>(&signer, alloc_point);
     }
 
     /// Set release per second for token type pool
-    public(script) fun set_release_per_second<
-        TokenT: copy + drop + store>(signer: signer,
-                                     release_per_second: u128) {
-        TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
+    public(script) fun set_pool_release_per_second(
+        signer: signer,
+        release_per_second: u128
+    ) {
+        TokenSwapSyrup::set_pool_release_per_second(&signer, release_per_second);
+
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&signer);
+        // TODO: to add other token type except STAR::STAR
+        // Note that it is necessary to enumerate update index operation of all Token type pools here
+        // It should be update harvest index after `pool_release_per_second` changed,
+        // Otherwise, It will cause a calculation errors
+    }
+
+    /// DEPRECATED
+    /// Set release per second for token type pool
+    public(script) fun set_release_per_second<TokenT: copy + drop + store>(
+        _signer: signer,
+        _release_per_second: u128
+    ) {
+        //TokenSwapSyrup::set_release_per_second<TokenT>(&signer, release_per_second);
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     /// Set alivestate for token type pool
-    public(script) fun set_alive<
-        TokenT: copy + drop + store>(signer: signer, alive: bool) {
-        TokenSwapSyrup::set_alive<TokenT>(&signer, alive);
+    public(script) fun set_alive<TokenT: copy + drop + store>(
+        _signer: signer,
+        _alive: bool
+    ) {
+        //TokenSwapSyrup::set_alive<TokenT>(&signer, alive);
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    public(script) fun stake<TokenT: store>(signer: signer,
-                                            pledge_time_sec: u64,
-                                            amount: u128) acquires VestarRouterCapabilityWrapper {
+    public(script) fun stake<TokenT: store>(
+        signer: signer,
+        pledge_time_sec: u64,
+        amount: u128
+    ) acquires VestarRouterCapabilityWrapper {
         TokenSwapSyrup::stake<TokenT>(&signer, pledge_time_sec, amount);
 
         let broker = @SwapAdmin;
@@ -84,10 +117,50 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::stake_hook_with_id<TokenT>(&signer, id, pledge_time_sec, token_amount, &cap_wrapper.cap);
     }
 
-    public(script) fun put_stepwise_multiplier(signer: signer,
-                                               interval_sec: u64,
-                                               multiplier: u64) {
-        TokenSwapConfig::put_stepwise_multiplier(&signer, interval_sec, multiplier);
+    /// TODO: DEPRECATED on mainnet
+    public(script) fun put_stepwise_multiplier(
+        _signer: signer,
+        _interval_sec: u64,
+        _multiplier: u64
+    ) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
+    }
+
+    /// Set the multiplier of each pledge time in the multiplier pool corresponding to TokenT
+    /// It will abort while calling this function if the pool has exists,
+    public(script) fun put_stepwise_multiplier_with_token_type<TokenT: store>(
+        signer: signer,
+        interval_sec: u64,
+        multiplier: u64
+    ) {
+        TokenSwapSyrup::put_stepwise_multiplier<TokenT>(&signer, interval_sec, multiplier);
+    }
+
+    /// Set amount for every Pledge time in multiplier pool
+    /// This function will be forbidden in next version
+    public(script) fun set_multiplier_pool_amount<TokenT: store>(
+        account: signer,
+        pledge_time: u64,
+        amount: u128
+    ) {
+        TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
+    }
+
+    public(script) fun adjust_total_amount_entry<TokenT: store>(
+        account: signer,
+        total_amount: u128,
+        total_weight: u128,
+    ) {
+        TokenSwapSyrup::adjust_total_amount<TokenT>(&account, total_amount, total_weight);
+    }
+
+    /// Calculate the Total Weight and Total Amount from the multiplier pool and
+    /// update them to YieldFarming
+    ///
+    public(script) fun update_total_from_multiplier_pool<TokenT: store>(
+        account: signer,
+    ) {
+        TokenSwapSyrup::update_total_from_multiplier_pool<TokenT>(&account);
     }
 
     public fun get_stake_info<TokenT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {
@@ -120,32 +193,22 @@ module TokenSwapSyrupScript {
     }
 
     public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
-        let cap = TokenSwapVestarRouter::initialize_global_syrup_info(signer, pool_release_per_second);
+        TokenSwapSyrup::initialize_global_pool_info(signer, pool_release_per_second);
+
+        let cap =
+            TokenSwapVestarRouter::initialize_global_syrup_info(
+                signer,
+                pool_release_per_second
+            );
+
         move_to(signer, VestarRouterCapabilityWrapper {
             cap
         });
     }
 
-    ///TODO: Turn over capability from script to syrup boost on barnard
-    public(script) fun turnover_vestar_mintcap_for_barnard(signer: signer) acquires VestarMintCapabilityWrapper {
-        STAR::assert_genesis_address(&signer);
-
-        let broker = Signer::address_of(&signer);
-
-        TokenSwapVestarMinter::maybe_init_event_handler_barnard(&signer);
-
-        if (exists<VestarRouterCapabilityWrapper>(broker) ||
-            !exists<VestarMintCapabilityWrapper>(broker)) {
-            return
-        };
-
-        let VestarMintCapabilityWrapper {
-            cap: mint_cap
-        } = move_from<VestarMintCapabilityWrapper>(Signer::address_of(&signer));
-
-        move_to(&signer, VestarRouterCapabilityWrapper {
-            cap: TokenSwapVestarRouter::turnover_vestar_mintcap_for_barnard(mint_cap),
-        });
+    ///TODO: DEPRECATED, Turn over capability from script to syrup boost on barnard
+    public(script) fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 }
 }
