@@ -18,11 +18,11 @@ module UpgradeScripts {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR;
     use SwapAdmin::MultiChain::genesis_aptos_burn;
-    use StarcoinFramework::STC::STC;
-    use WEN::WEN::WEN;
-    use FAI::FAI::FAI;
-    use XETH::XETH::XETH;
-    use XUSDT::XUSDT::XUSDT;
+    // use StarcoinFramework::STC::STC;
+    // use WEN::WEN::WEN;
+    // use FAI::FAI::FAI;
+    // use XETH::XETH::XETH;
+    // use XUSDT::XUSDT::XUSDT;
 
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
@@ -118,12 +118,12 @@ module UpgradeScripts {
     public(script) fun upgrade_from_v1_0_12_to_v2_0_0(account: signer){
         TokenSwapConfig::assert_admin(&account);
 
-        TokenSwapFarm::update_token_pool_index<STC,XETH>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
-        TokenSwapFarm::update_token_pool_index<FAI,XUSDT>(&account);
+        // TokenSwapFarm::update_token_pool_index<STC,XETH>(&account);
+        // TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
+        // TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
+        // TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
+        // TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
+        // TokenSwapFarm::update_token_pool_index<FAI,XUSDT>(&account);
 
 
         TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
