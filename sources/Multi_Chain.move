@@ -32,7 +32,7 @@ module StarcoinFramework::Multi_Chain {
         STAR::assert_genesis_address(sender);
         assert!(TokenSwapGov::get_total_of_linear_treasury<PoolTypeFarmPool>() == 55000000000000000,ERR_APTOS_GENESISED);
 
-        if(exists<MultiChainEvent>(address_of(sender))){
+        if(!exists<MultiChainEvent>(address_of(sender))){
           move_to(sender, MultiChainEvent{
               event: new_event_handle<GenesisEvent>(sender)
           })

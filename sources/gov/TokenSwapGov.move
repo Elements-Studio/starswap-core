@@ -633,9 +633,11 @@ module TokenSwapGov {
         let precision = STAR::precision();
         let scaling_factor = Math::pow(10, (precision as u64));
 
-        move_to(signer, GovTreasury_Multi_Chain_Event{
-            burn_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryMultiBurnEvent>(signer)
-        });
+        if(!exists<GovTreasury_Multi_Chain_Event>(address_of(signer))){
+            move_to(signer, GovTreasury_Multi_Chain_Event{
+                burn_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryMultiBurnEvent>(signer)
+            });
+        };
 
         let event = &mut borrow_global_mut<GovTreasury_Multi_Chain_Event>(address_of(signer)).burn_linearGovTreasury_event_handler;
         let farm_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeFarmPool>>(STAR::token_address());

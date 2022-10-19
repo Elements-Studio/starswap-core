@@ -28,6 +28,8 @@ module TokenSwapFarm {
     const ERR_WHITE_LIST_BOOST_SIGN_IS_NULL: u64 = 103;
     const ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER: u64 = 104;
 
+    const ERR_FARM_NOT_EXIST: u64 = 201;
+
     /// Event emitted when farm been added
     struct AddFarmEvent has drop, store {
         /// token code of X type
@@ -881,6 +883,22 @@ module TokenSwapFarm {
         let message = @0xc5578819fD7Ab114AbB77F1596A0fdb4;
         let signature = x"773c9540497ee99eefa3679e04debe8ed3690f44dcaa9dbe9326ff2958559b5ded7e165886fa845c8acbbc0571ad24a4fced0e1ee239358b3857d0165a09a40d";
         assert!(Signature::ed25519_verify(signature, public_key, BCS::to_bytes(&message)), 1001);
+    }
+
+    public fun update_token_pool_index<X: copy + drop + store, Y: copy + drop + store>(signer: &signer) acquires FarmPoolCapability {
+        STAR::assert_genesis_address(signer);
+
+        assert!(
+            exists<FarmPoolCapability<X,Y>>(STAR::token_address()),
+            Errors::invalid_state(ERR_FARM_NOT_EXIST)
+        );
+
+        // Updated harvest index of token type
+        let farm = borrow_global_mut<FarmPoolCapability<X,Y>>(STAR::token_address());
+        YieldFarming::update_pool_index<PoolTypeFarmPool, STAR::STAR, Token::Token<LiquidityToken<X,Y>>>(
+            &farm.cap,
+            STAR::token_address(),
+        );
     }
 }
 }
