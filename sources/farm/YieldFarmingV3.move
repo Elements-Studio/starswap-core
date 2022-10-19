@@ -279,9 +279,6 @@ module YieldFarmingV3 {
         Token::deposit<RewardTokenT>(&mut farming.treasury_token, treasury_token);
     }
 
-    friend SwapAdmin::TokenSwapFarm;
-    friend SwapAdmin::TokenSwapSyrup;
-
     public fun withdraw<PoolType: store, RewardTokenT: store>(
         account: &signer,
         amount: u128
