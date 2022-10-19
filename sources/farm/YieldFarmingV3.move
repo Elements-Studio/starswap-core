@@ -282,10 +282,11 @@ module YieldFarmingV3 {
     friend SwapAdmin::TokenSwapFarm;
     friend SwapAdmin::TokenSwapSyrup;
 
-    public (friend) fun withdraw<PoolType: store, RewardTokenT: store>(
-        _account: &signer,
+    public fun withdraw<PoolType: store, RewardTokenT: store>(
+        account: &signer,
         amount: u128
     ):Token::Token<RewardTokenT> acquires Farming {
+        STAR::assert_genesis_address(account);
         let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(STAR::token_address());
         Token::withdraw<RewardTokenT>(&mut farming.treasury_token, amount)
     }

@@ -17,7 +17,7 @@ module UpgradeScripts {
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR;
-    use SwapAdmin::Multi_Chain::genesis_aptos_burn;
+    use SwapAdmin::MultiChain::genesis_aptos_burn;
     use StarcoinFramework::STC::STC;
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;

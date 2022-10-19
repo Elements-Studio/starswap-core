@@ -314,7 +314,7 @@ script {
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::Multi_Chain::genesis_aptos_burn;
+    use SwapAdmin::MultiChain::genesis_aptos_burn;
     use SwapAdmin::TokenMock::{WBTC, WETH};
 
     fun main(account: signer){
