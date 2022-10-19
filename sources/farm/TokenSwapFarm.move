@@ -385,7 +385,7 @@ module TokenSwapFarm {
         account: &signer,
         token: Token::Token<TokenT>
     ) {
-        YieldFarming::deposit<PoolType, TokenT>(account, token)
+        YieldFarming::deposit<PoolType, TokenT>(account, token);
     }
 
     //withdraw Toke the pool
