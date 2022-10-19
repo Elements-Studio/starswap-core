@@ -16,10 +16,12 @@ module TokenSwapVestarRouter {
         cap: TokenSwapVestarMinter::MintCapability,
     }
 
-    public fun stake_hook<TokenT: store>(signer: &signer,
-                                         pledge_time_sec: u64,
-                                         amount: u128,
-                                         cap: &VestarRouterCapability) {
+    public fun stake_hook<TokenT: store>(
+        signer: &signer,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
         };
@@ -32,11 +34,13 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun stake_hook_with_id<TokenT: store>(signer: &signer,
-                                                 id: u64,
-                                                 pledge_time_sec: u64,
-                                                 amount: u128,
-                                                 cap: &VestarRouterCapability) {
+    public fun stake_hook_with_id<TokenT: store>(
+        signer: &signer,
+        id: u64,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), Errors::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
 
         TokenSwapVestarMinter::mint_with_cap_T<TokenT>(signer,
@@ -57,10 +61,11 @@ module TokenSwapVestarRouter {
         TokenSwapVestarMinter::exists_record<TokenT>(user_addr, id)
     }
 
-    public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128): VestarRouterCapability {
+    public fun initialize_global_syrup_info(signer: &signer, _pool_release_per_second: u128): VestarRouterCapability {
         STAR::assert_genesis_address(signer);
 
-        TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
+        // DEPRECATED
+        // TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
 
         let (
             issuer_cap,

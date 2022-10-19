@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapSyrup {
-    use aptos_framework::coin;    
-    use aptos_framework::account;
+    use aptos_framework::coin;
     use aptos_framework::timestamp;
 
     use aptos_std::event;
@@ -13,6 +12,7 @@ module SwapAdmin::TokenSwapSyrup {
     use std::vector;
     use std::signer;
     use std::option;
+    use std::bcs;
 
     use SwapAdmin::STAR;
     use SwapAdmin::YieldFarmingV3 as YieldFarming;
@@ -20,6 +20,10 @@ module SwapAdmin::TokenSwapSyrup {
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::CommonHelper;
+    use SwapAdmin::TokenSwapSyrupMultiplierPool;
+    use SwapAdmin::EventUtil;
+
+    const ERR_DEPRECATED: u64 = 1;
 
     const ERROR_ADD_POOL_REPEATE: u64 = 101;
     const ERROR_PLEDAGE_TIME_INVALID: u64 = 102;
@@ -30,6 +34,8 @@ module SwapAdmin::TokenSwapSyrup {
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON: u64 = 107;
     const ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON: u64 = 108;
     const ERROR_UPGRADE_EXTEND_INFO_HAS_EXISTS: u64 = 109;
+    const ERROR_CONFIG_ERROR: u64 = 110;
+    const ERROR_TOKEN_POOL_NOT_EXIST: u64 = 111;
 
     /// Syrup pool of token type
     struct Syrup<phantom CoinT> has key, store {
@@ -38,9 +44,16 @@ module SwapAdmin::TokenSwapSyrup {
         release_per_second: u128,
     }
 
-    /// Syrup pool extend information
+    /// DEPRECATED
+    /// Syrup pool extend information,
     struct SyrupExtInfo<phantom CoinT> has key, store {
         multiplier_cap: YieldFarmingMultiplier::PoolCapability<PoolTypeSyrup, coin::Coin<CoinT>>,
+        alloc_point: u128,
+    }
+
+    /// Syrup pool extend information
+    struct SyrupExtInfoV2<phantom CoinT> has key, store {
+        multiplier_pool_cap: TokenSwapSyrupMultiplierPool::PoolCapability<PoolTypeSyrup, coin::Coin<CoinT>>,
         alloc_point: u128,
     }
 
@@ -106,6 +119,7 @@ module SwapAdmin::TokenSwapSyrup {
         admin: address,
     }
 
+    /// TODO: DEPRECATED Call
     struct SyrupEvent has key, store {
         add_pool_event_handler: event::EventHandle<AddPoolEvent>,
         activation_state_event_handler: event::EventHandle<ActivationStateEvent>,
@@ -113,55 +127,115 @@ module SwapAdmin::TokenSwapSyrup {
         unstake_event_handler: event::EventHandle<UnstakeEvent>,
     }
 
-    /// Initialize for Syrup pool
-    public fun initialize(signer: &signer, token: coin::Coin<STAR::STAR>) {
-        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(signer, token);
+    struct AddPoolEventV2 has drop, store {
+        /// token code of X type
+        token_type_info: type_info::TypeInfo,
+        /// admin address
+        admin: address,
+        /// Alloc point
+        alloc_point: u128,
+        /// delay
+        delay: u64,
+    }
 
-        move_to(signer, SyrupEvent{
-            add_pool_event_handler: account::new_event_handle<AddPoolEvent>(signer),
-            activation_state_event_handler: account::new_event_handle<ActivationStateEvent>(signer),
-            stake_event_handler: account::new_event_handle<StakeEvent>(signer),
-            unstake_event_handler: account::new_event_handle<UnstakeEvent>(signer),
-        });
+    struct AddPoolStepwiseEvent has drop, store {
+        /// token code of X type
+        token_type_info: type_info::TypeInfo,
+        /// admin address
+        admin: address,
+        /// alloc point
+        pledge_time: u64,
+        /// multiplier
+        multiplier: u64,
+    }
+
+    struct ModifyReleasePerSecondEvent has drop, store {
+        /// token code of X type
+        token_type_info: type_info::TypeInfo,
+        /// admin address
+        admin: address,
+        /// release per second
+        pool_release_per_second: u128,
+    }
+
+    struct UpdateAllocPointEvent has drop, store {
+        /// token code of X type
+        token_type_info: type_info::TypeInfo,
+        /// admin address
+        admin: address,
+        /// alloc point
+        alloc_point: u128,
+    }
+
+    /// Event emitted when stake been called
+    struct StakeEventV2 has drop, store {
+        /// token code of X type
+        token_type_info: type_info::TypeInfo,
+        /// signer of stake user
+        signer: address,
+        // value of stake user
+        amount: u128,
+        // admin address
+        admin: address,
+        // Amount
+        pledge_time: u64,
+        // Amount
+        multiplier: u64,
+    }
+
+    /// Event emitted when unstake been called
+    struct UnstakeEventV2 has drop, store {
+        // token code of X type
+        token_type_info: type_info::TypeInfo,
+        // signer of stake user
+        signer: address,
+        // admin address
+        admin: address,
+        amount: u128,
+        pledge_time: u64,
+        multiplier: u64,
+    }
+
+    struct AddStepwiseEvent has drop, store {
+        token_type_info: type_info::TypeInfo,
+        admin: address,
+        pledge_time: u64,
+        multiplier: u64,
+    }
+
+    /// Initialize for Syrup pool
+    public fun initialize(account: &signer, token: coin::Coin<STAR::STAR>) {
+        YieldFarming::initialize<PoolTypeSyrup, STAR::STAR>(account, token);
+
+        EventUtil::init_event<AddPoolEventV2>(account);
+        EventUtil::init_event<UpdateAllocPointEvent>(account);
+        EventUtil::init_event<StakeEventV2>(account);
+        EventUtil::init_event<UnstakeEventV2>(account);
+        EventUtil::init_event<AddStepwiseEvent>(account);
+        EventUtil::init_event<AddPoolStepwiseEvent>(account);
+        EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
+    }
+
+    /// Initialized global pool
+    public fun initialize_global_pool_info(
+        account: &signer,
+        pool_release_per_second: u128
+    ) {
+        YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(account, pool_release_per_second);
     }
 
     /// TODO: Deprecated call
     /// Add syrup pool for token type
-    public fun add_pool<CoinT: store>(signer: &signer,
-                                       release_per_second: u128,
-                                       delay: u64)
-    acquires SyrupEvent {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        let account = signer::address_of(signer);
-        assert!(!exists<Syrup<CoinT>>(account), ERROR_ADD_POOL_REPEATE);
-
-        // Check alloc mode not turn on
-        assert!(!TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON));
-
-        let param_cap = YieldFarming::add_asset<PoolTypeSyrup, coin::Coin<CoinT>>(
-            signer,
-            release_per_second,
-            delay);
-
-        move_to(signer, Syrup<CoinT>{
-            param_cap,
-            release_per_second,
-        });
-
-        let event = borrow_global_mut<SyrupEvent>(account);
-        event::emit_event(&mut event.add_pool_event_handler,
-            AddPoolEvent{
-                type_info: type_info::type_of<CoinT>(),
-                signer: signer::address_of(signer),
-                admin: account,
-            });
+    public fun add_pool<CoinT: store>(
+        _signer: &signer,
+        _release_per_second: u128,
+        _delay: u64
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Add syrup pool for token type v2
-    public fun add_pool_v2<CoinT: store>(signer: &signer, alloc_point: u128, delay: u64) acquires SyrupEvent {
+    public fun add_pool_v2<CoinT: store>(signer: &signer, alloc_point: u128, delay: u64) {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -171,7 +245,7 @@ module SwapAdmin::TokenSwapSyrup {
         let param_cap =
             YieldFarming::add_asset_v2<PoolTypeSyrup, coin::Coin<CoinT>>(signer, alloc_point, delay);
 
-        move_to(signer, Syrup<CoinT>{
+        move_to(signer, Syrup<CoinT> {
             param_cap,
             release_per_second: 0,
         });
@@ -179,69 +253,105 @@ module SwapAdmin::TokenSwapSyrup {
         // Extend multiplier
         let multiplier_cap =
             YieldFarmingMultiplier::init<PoolTypeSyrup, coin::Coin<CoinT>>(signer);
-        move_to(signer, SyrupExtInfo<CoinT>{
+        move_to(signer, SyrupExtInfo<CoinT> {
             alloc_point,
             multiplier_cap
         });
 
         // Publish event
-        let event = borrow_global_mut<SyrupEvent>(account);
-        event::emit_event(&mut event.add_pool_event_handler,
-            AddPoolEvent{
-                type_info: type_info::type_of<CoinT>(),
-                signer: signer::address_of(signer),
+        EventUtil::emit_event(
+            broker_addr(),
+            AddPoolEventV2 {
+                token_type_info: type_info::type_of<CoinT>(),
                 admin: account,
-            });
-    }
-
-    /// Set release per second for token type pool
-    public fun set_release_per_second<CoinT: copy + drop + store>(signer: &signer,
-                                                                   release_per_second: u128) acquires Syrup {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        // Check alloc mode has turn on
-        assert!(!TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON));
-
-        let broker_addr = signer::address_of(signer);
-        let syrup = borrow_global_mut<Syrup<CoinT>>(broker_addr);
-
-        let (alive, _, _, _, ) =
-            YieldFarming::query_info<PoolTypeSyrup, coin::Coin<CoinT>>(broker_addr);
-
-        YieldFarming::modify_parameter<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
-            &syrup.param_cap,
-            broker_addr,
-            release_per_second,
-            alive,
+                alloc_point,
+                delay,
+            }
         );
-        syrup.release_per_second = release_per_second;
     }
 
-    /// Set alivestate for token type pool
-    public fun set_alive<CoinT: copy + drop + store>(signer: &signer, alive: bool) acquires Syrup {
-        // Only called by the genesis
+    /// Set release per second for syrup pool
+    public fun set_pool_release_per_second(
+        signer: &signer,
+        pool_release_per_second: u128
+    ) {
         STAR::assert_genesis_address(signer);
 
-        // Check alloc mode has turn on
-        assert!(!TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_HAS_TURN_ON));
+        // Updated release per second for `PoolTypeSyrup`
+        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeSyrup>(
+            signer,
+            pool_release_per_second
+        );
+    }
 
-        let broker_addr = signer::address_of(signer);
-        let syrup = borrow_global_mut<Syrup<CoinT>>(broker_addr);
+    public fun update_token_pool_index<CoinT>(signer: &signer) acquires Syrup {
+        STAR::assert_genesis_address(signer);
 
-        YieldFarming::modify_parameter<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
+        assert!(
+            exists<Syrup<CoinT>>(broker_addr()),
+            error::invalid_state(ERROR_TOKEN_POOL_NOT_EXIST)
+        );
+
+        // Updated harvest index of token type
+        let syrup = borrow_global_mut<Syrup<CoinT>>(broker_addr());
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
             &syrup.param_cap,
+            broker_addr(),
+        );
+    }
+
+    /// TODO: DEPRECATED call
+    /// Set release per second for token type pool
+    public fun set_release_per_second<CoinT: copy + drop + store>(
+        _signer: &signer,
+        _release_per_second: u128
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
+    }
+
+    /// TODO: DEPRECATED call
+    /// Set alivestate for token type pool
+    public fun set_alive<CoinT: copy + drop + store>(_signer: &signer, _alive: bool) {
+        abort error::aborted(ERR_DEPRECATED)
+    }
+
+    /// Set the each stepwise pool for statistical APR
+    /// and subsequent calculations
+    public fun put_stepwise_multiplier<CoinT: store>(
+        signer: &signer,
+        interval_sec: u64,
+        multiplier: u64
+    ) acquires SyrupExtInfoV2 {
+        STAR::assert_genesis_address(signer);
+
+        let broker_addr = broker_addr();
+        let ext_v2 = borrow_global<SyrupExtInfoV2<CoinT>>(broker_addr);
+
+        // TokenSwapConfig::put_stepwise_multiplier(signer, interval_sec, multiplier);
+        TokenSwapSyrupMultiplierPool::add_pool<PoolTypeSyrup, coin::Coin<CoinT>>(
+            &ext_v2.multiplier_pool_cap,
+            broker_addr(),
+            &pledge_time_to_key(interval_sec),
+            multiplier,
+        );
+
+        EventUtil::emit_event<AddPoolStepwiseEvent>(
             broker_addr,
-            syrup.release_per_second,
-            alive,
+            AddPoolStepwiseEvent {
+                token_type_info: type_info::type_of<CoinT>(),
+                admin: broker_addr,
+                pledge_time: interval_sec,
+                multiplier,
+            }
         );
     }
 
     /// Update pool allocation point
     /// Only called by admin
-    public fun update_allocation_point<CoinT: store>(signer: &signer, alloc_point: u128) acquires Syrup, SyrupExtInfo {
+    public fun update_allocation_point<CoinT: store>(
+        signer: &signer,
+        alloc_point: u128
+    ) acquires Syrup, SyrupExtInfo {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -255,13 +365,22 @@ module SwapAdmin::TokenSwapSyrup {
         YieldFarming::update_pool<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
             &syrup.param_cap, broker, alloc_point, syrup_ext_info.alloc_point);
         syrup_ext_info.alloc_point = alloc_point;
-    }
 
+        EventUtil::emit_event<UpdateAllocPointEvent>(
+            broker,
+            UpdateAllocPointEvent {
+                token_type_info: type_info::type_of<CoinT>(),
+                admin: broker,
+                alloc_point,
+            }
+        );
+    }
 
     /// Deposit Token into the pool
     public fun deposit<PoolType: store, CoinT: copy + drop + store>(
         account: &signer,
-        token: coin::Coin<CoinT>) {
+        token: coin::Coin<CoinT>
+    ) {
         YieldFarming::deposit<PoolType, CoinT>(account, token);
     }
 
@@ -272,8 +391,11 @@ module SwapAdmin::TokenSwapSyrup {
 
     /// Stake token type to syrup
     /// @param: pledge_time per second
-    public fun stake<CoinT: store>(signer: &signer, pledge_time_sec: u64, amount: u128)
-    acquires Syrup, SyrupStakeList, SyrupEvent {
+    public fun stake<CoinT: store>(
+        signer: &signer,
+        pledge_time_sec: u64,
+        amount: u128
+    ) acquires Syrup, SyrupStakeList, SyrupExtInfoV2 {
         TokenSwapConfig::assert_global_freeze();
         assert!(pledge_time_sec > 0, error::invalid_state(ERROR_PLEDAGE_TIME_INVALID));
 
@@ -283,7 +405,7 @@ module SwapAdmin::TokenSwapSyrup {
         CommonHelper::safe_accept_token<STAR::STAR>(signer);
 
         if (!exists<SyrupStakeList<CoinT>>(user_addr)) {
-            move_to(signer, SyrupStakeList<CoinT>{
+            move_to(signer, SyrupStakeList<CoinT> {
                 items: vector::empty<SyrupStake<CoinT>>(),
             });
         };
@@ -293,6 +415,15 @@ module SwapAdmin::TokenSwapSyrup {
         let now_seconds = timestamp::now_seconds();
         let start_time = now_seconds;
         let end_time = start_time + pledge_time_sec;
+
+        let syrup_ext = borrow_global<SyrupExtInfoV2<CoinT>>(broker_addr);
+        // Add to multiplier pool
+        TokenSwapSyrupMultiplierPool::add_amount<PoolTypeSyrup, coin::Coin<CoinT>>(
+            broker_addr,
+            &syrup_ext.multiplier_pool_cap,
+            &pledge_time_to_key(pledge_time_sec),
+            amount,
+        );
 
         let syrup = borrow_global<Syrup<CoinT>>(broker_addr);
         let (harvest_cap, id) = if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
@@ -321,7 +452,7 @@ module SwapAdmin::TokenSwapSyrup {
 
         // Save stake to list
         let stake_list = borrow_global_mut<SyrupStakeList<CoinT>>(user_addr);
-        vector::push_back<SyrupStake<CoinT>>(&mut stake_list.items, SyrupStake<CoinT>{
+        vector::push_back<SyrupStake<CoinT>>(&mut stake_list.items, SyrupStake<CoinT> {
             id,
             harvest_cap,
             token_amount: amount,
@@ -331,14 +462,17 @@ module SwapAdmin::TokenSwapSyrup {
         });
 
         // Publish stake event to chain
-        let event = borrow_global_mut<SyrupEvent>(broker_addr);
-        event::emit_event(&mut event.stake_event_handler,
-            StakeEvent{
-                type_info: type_info::type_of<CoinT>(),
+        EventUtil::emit_event(broker_addr,
+            StakeEventV2 {
+                token_type_info: type_info::type_of<CoinT>(),
                 signer: user_addr,
                 amount,
                 admin: broker_addr,
-            });
+                pledge_time: pledge_time_sec,
+                multiplier: stepwise_multiplier,
+            }
+        );
+
     }
 
     /// Unstake from list
@@ -346,7 +480,7 @@ module SwapAdmin::TokenSwapSyrup {
     public fun unstake<CoinT: store>(signer: &signer, id: u64): (
         coin::Coin<CoinT>,
         coin::Coin<STAR::STAR>
-    ) acquires SyrupStakeList, SyrupEvent, Syrup {
+    ) acquires SyrupStakeList, SyrupExtInfoV2, Syrup {
         TokenSwapConfig::assert_global_freeze();
 
         let user_addr = signer::address_of(signer);
@@ -366,13 +500,13 @@ module SwapAdmin::TokenSwapSyrup {
             maybe_upgrade_all_stake<CoinT>(signer, &syrup.param_cap);
         };
 
-        let SyrupStake<CoinT>{
+        let SyrupStake<CoinT> {
             id: _,
             harvest_cap,
-            stepwise_multiplier: _,
-            start_time: _,
-            end_time: _,
-            token_amount: _,
+            stepwise_multiplier,
+            start_time,
+            end_time,
+            token_amount,
         } = pop_stake<CoinT>(&mut stake_list.items, id);
 
         let (
@@ -380,19 +514,37 @@ module SwapAdmin::TokenSwapSyrup {
             reward_token
         ) = YieldFarming::unstake<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(signer, broker_addr, harvest_cap);
 
-        let event = borrow_global_mut<SyrupEvent>(broker_addr);
-        event::emit_event(&mut event.unstake_event_handler,
-            UnstakeEvent{
+        let syrup_ext = borrow_global_mut<SyrupExtInfoV2<CoinT>>(broker_addr);
+        let key = pledge_time_to_key(end_time - start_time);
+        TokenSwapSyrupMultiplierPool::remove_amount<PoolTypeSyrup, coin::Coin<CoinT>>(
+            broker_addr,
+            &syrup_ext.multiplier_pool_cap,
+            &key,
+            token_amount,
+        );
+
+        EventUtil::emit_event(
+            broker_addr,
+            UnstakeEventV2 {
                 signer: user_addr,
-                type_info: type_info::type_of<CoinT>(),
+                token_type_info: type_info::type_of<CoinT>(),
                 admin: broker_addr,
-            });
+                amount: token_amount,
+                pledge_time: end_time - start_time,
+                multiplier: stepwise_multiplier,
+            }
+        );
 
         (unstaken_token, reward_token)
     }
 
-
-    public fun get_stake_info<CoinT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) acquires SyrupStakeList {
+    /// Get the pledge information represented by the specified id under the specified user in the pool
+    /// @return (stake.start_time, stake.end_time, stake.stepwise_multiplier, stake.token_amount)
+    ///
+    public fun get_stake_info<CoinT: store>(
+        user_addr: address,
+        id: u64
+    ): (u64, u64, u64, u128) acquires SyrupStakeList {
         let stake_list = borrow_global<SyrupStakeList<CoinT>>(user_addr);
         let stake = get_stake(&stake_list.items, id);
         (
@@ -434,6 +586,29 @@ module SwapAdmin::TokenSwapSyrup {
         YieldFarming::query_global_pool_info<PoolTypeSyrup>(STAR::token_address())
     }
 
+    /// Query the information of a certain pledge time in the multiplier pool
+    /// (multiplier, asset_weight, asset_amount)
+    public fun query_multiplier_pool_info<CoinT: store>(pledge_time: u64): (u64, u128, u128) {
+        TokenSwapSyrupMultiplierPool::query_pool_by_key<PoolTypeSyrup, coin::Coin<CoinT>>(
+            broker_addr(),
+            &pledge_time_to_key(pledge_time),
+        )
+    }
+
+    /// Query all multiplier pools information
+    public fun query_all_multiplier_pools<CoinT: store>(): (
+        vector<u8>,
+        vector<u64>,
+        vector<u128>
+    ) {
+        TokenSwapSyrupMultiplierPool::query_all_pools<
+            PoolTypeSyrup,
+            coin::Coin<CoinT>
+        >(
+            broker_addr(),
+        )
+    }
+
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
     public fun query_pool_info_v2<CoinT: store>(): (u128, u128, u128, u128) {
@@ -445,13 +620,35 @@ module SwapAdmin::TokenSwapSyrup {
         YieldFarming::get_global_stake_id<PoolTypeSyrup, coin::Coin<CoinT>>(user_addr)
     }
 
-    public fun pledage_time_to_multiplier(pledge_time_sec: u64): u64 {
-        // 1. Check the time has in config
-        assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
-            error::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+    public fun pledage_time_to_multiplier(_pledge_time_sec: u64): u64 {
+        abort error::aborted(ERR_DEPRECATED)
+        // // 1. Check the time has in config
+        // assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
+        //     Errors::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+        //
+        // // 2. return multiplier of time
+        // TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+    }
 
-        // 2. return multiplier of time
-        TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+    /// Query the magnification if the magnification statistics pool cannot be found,
+    /// then go to the configuration to query the old one.
+    public fun pledge_time_to_mulitplier<CoinT>(pledge_time_sec: u64): u64 {
+        let key = pledge_time_to_key(pledge_time_sec);
+        if (TokenSwapSyrupMultiplierPool::has<PoolTypeSyrup, coin::Coin<CoinT>>(broker_addr(), &key)) {
+            let (multiplier, _, _) = TokenSwapSyrupMultiplierPool::query_pool_by_key<
+                PoolTypeSyrup,
+                coin::Coin<CoinT>
+            >(broker_addr(), &key);
+            multiplier
+        } else {
+            assert!(TokenSwapConfig::has_in_stepwise(pledge_time_sec),
+                error::invalid_state(ERROR_FARMING_STAKE_TIME_NOT_EXISTS));
+            TokenSwapConfig::get_stepwise_multiplier(pledge_time_sec)
+        }
+    }
+
+    public fun pledge_time_to_key(pledge_time_sec: u64): vector<u8> {
+        bcs::to_bytes<u64>(&pledge_time_sec)
     }
 
     fun get_stake<CoinT: store>(c: &vector<SyrupStake<CoinT>>, id: u64): &SyrupStake<CoinT> {
@@ -490,34 +687,15 @@ module SwapAdmin::TokenSwapSyrup {
     }
 
     /// Extend syrup pool for type
-    public fun extend_syrup_pool<CoinT: store>(signer: &signer, override_update: bool) acquires SyrupExtInfo {
-        STAR::assert_genesis_address(signer);
-
-        let broker = signer::address_of(signer);
-
-        let alloc_point = if (!exists<SyrupExtInfo<CoinT>>(broker)) {
-            let multiplier_cap =
-                YieldFarmingMultiplier::init<PoolTypeSyrup, coin::Coin<CoinT>>(signer);
-
-            let alloc_point = 50;
-            move_to(signer, SyrupExtInfo<CoinT>{
-                alloc_point,
-                multiplier_cap
-            });
-            alloc_point
-        } else {
-            let syrup_ext_info = borrow_global<SyrupExtInfo<CoinT>>(broker);
-            syrup_ext_info.alloc_point
-        };
-
-        YieldFarming::extend_farming_asset<PoolTypeSyrup, coin::Coin<CoinT>>(signer, alloc_point, override_update);
+    public fun extend_syrup_pool<CoinT: store>(_signer: &signer, _override_update: bool) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Upgrade all staking resource that
     /// two condition are matched that
     /// the upgrading switch has opened and new resource doesn't exist
     fun maybe_upgrade_all_stake<CoinT: store>(signer: &signer,
-                                               cap: &YieldFarming::ParameterModifyCapability<PoolTypeSyrup, coin::Coin<CoinT>>) {
+                                              cap: &YieldFarming::ParameterModifyCapability<PoolTypeSyrup, coin::Coin<CoinT>>) {
         let account_addr = signer::address_of(signer);
 
         // Check false if old stakes not exists or new stakes are exist
@@ -540,5 +718,207 @@ module SwapAdmin::TokenSwapSyrup {
 
             idx = idx + 1;
         }
+    }
+
+    public fun adjust_total_amount<CoinT: store>(
+        account: &signer,
+        total_amount: u128,
+        total_weight: u128,
+    ) acquires Syrup {
+        STAR::assert_genesis_address(account);
+
+        let syrup = borrow_global<Syrup<CoinT>>(broker_addr());
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
+
+        YieldFarming::adjust_total_amount<PoolTypeSyrup, coin::Coin<CoinT>>(
+            &syrup.param_cap,
+            broker_addr(),
+            total_amount,
+            total_weight
+        );
+    }
+
+    /// Calculate the Total Weight and Total Amount from the multiplier pool and
+    /// update them to YieldFarming
+    ///
+    public fun update_total_from_multiplier_pool<CoinT: store>(
+        account: &signer,
+    ) acquires Syrup {
+        STAR::assert_genesis_address(account);
+        let broker_addr = broker_addr();
+        let (
+            total_amount,
+            total_weight
+        ) = TokenSwapSyrupMultiplierPool::query_total_amount<
+            PoolTypeSyrup,
+            coin::Coin<CoinT>
+        >(
+            broker_addr
+        );
+
+        let syrup = borrow_global<Syrup<CoinT>>(broker_addr);
+        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
+            &syrup.param_cap,
+            broker_addr()
+        );
+        YieldFarming::adjust_total_amount<
+            PoolTypeSyrup,
+            coin::Coin<CoinT>
+        >(
+            &syrup.param_cap,
+            broker_addr,
+            total_amount,
+            total_weight
+        );
+    }
+
+    /// Set amount for every Pledge time in multiplier pool
+    /// This function will be forbidden in next version
+    public fun set_multiplier_pool_amount<CoinT: store>(
+        account: &signer,
+        pledge_time: u64,
+        amount: u128
+    ) acquires SyrupExtInfoV2 {
+        STAR::assert_genesis_address(account);
+
+        let ext_v2 =
+            borrow_global_mut<SyrupExtInfoV2<CoinT>>(broker_addr());
+
+        TokenSwapSyrupMultiplierPool::set_pool_amount<PoolTypeSyrup, coin::Coin<CoinT>>(
+            broker_addr(),
+            &ext_v2.multiplier_pool_cap,
+            &pledge_time_to_key(pledge_time),
+            amount,
+        );
+    }
+
+
+    /// Upgrade from 1.0.11 to 1.0.12 Added the implementation of Multiplierpool,
+    /// which is convenient for off-chain query values to calculate APR
+    /// 1. Due to the addition of Multiplierpool,
+    ///     all the pledge multipliers need to be transferred from Config to Multiplierpool
+    /// 2. In addition, some event strcut have been transfered in to the `EventUtil` module
+    ///     to ensure the extensibility of its code
+    public fun upgrade_from_v1_0_11_to_v1_0_12<CoinT: store>(
+        account: &signer
+    ) acquires SyrupExtInfo, SyrupEvent, SyrupExtInfoV2 {
+        STAR::assert_genesis_address(account);
+        let broker_addr = signer::address_of(account);
+
+        //------------------------------------------//
+        let alloc_point = if (exists<SyrupExtInfo<CoinT>>(broker_addr)) {
+            let SyrupExtInfo<CoinT> {
+                multiplier_cap,
+                alloc_point,
+            } = move_from<SyrupExtInfo<CoinT>>(broker_addr);
+
+            // Convert to new capability
+            YieldFarmingMultiplier::uninitialiaze(multiplier_cap);
+            alloc_point
+        } else {
+            50
+        };
+        //------------------------------------------//
+
+        //------------------------------------------//
+        // Process syrup ext info
+        if (!exists<SyrupExtInfoV2<CoinT>>(broker_addr)) {
+            let new_cap =
+                TokenSwapSyrupMultiplierPool::initialize<
+                    PoolTypeSyrup,
+                    coin::Coin<CoinT>
+                >(account);
+            // Construct new struct of syrup info
+            move_to(account, SyrupExtInfoV2<CoinT> {
+                alloc_point,
+                multiplier_pool_cap: new_cap
+            });
+        };
+        let cap =
+            &borrow_global_mut<SyrupExtInfoV2<CoinT>>(
+                signer::address_of(account)
+            ).multiplier_pool_cap;
+
+        //------------------------------------------//
+        // Add pools from config
+        let (
+            time_list,
+            multiplier_list
+        ) = TokenSwapConfig::get_stepwise_multiplier_list();
+
+        assert!(
+            vector::length(&time_list) == vector::length(&multiplier_list),
+            error::invalid_state(ERROR_CONFIG_ERROR)
+        );
+
+        loop {
+            if (vector::is_empty(&time_list)) {
+                break
+            };
+            let time = vector::pop_back(&mut time_list);
+            let multiplier = vector::pop_back(&mut multiplier_list);
+
+            TokenSwapSyrupMultiplierPool::add_pool<PoolTypeSyrup, coin::Coin<CoinT>>(
+                cap,
+                broker_addr,
+                &pledge_time_to_key(time),
+                multiplier
+            );
+        };
+        //------------------------------------------//
+
+        //------------------------------------------//
+        // process event
+        if (exists<SyrupEvent>(broker_addr)) {
+            let SyrupEvent {
+                add_pool_event_handler,
+                activation_state_event_handler,
+                stake_event_handler,
+                unstake_event_handler,
+            } = move_from<SyrupEvent>(broker_addr);
+
+            event::destroy_handle(add_pool_event_handler);
+            event::destroy_handle(activation_state_event_handler);
+            event::destroy_handle(stake_event_handler);
+            event::destroy_handle(unstake_event_handler);
+        };
+
+        // upgrade event
+        if (!EventUtil::exist_event<AddPoolEventV2>(broker_addr)) {
+            EventUtil::init_event<AddPoolEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<UpdateAllocPointEvent>(broker_addr)) {
+            EventUtil::init_event<UpdateAllocPointEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<StakeEventV2>(broker_addr)) {
+            EventUtil::init_event<StakeEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<UnstakeEventV2>(broker_addr)) {
+            EventUtil::init_event<UnstakeEventV2>(account);
+        };
+
+        if (!EventUtil::exist_event<AddStepwiseEvent>(broker_addr)) {
+            EventUtil::init_event<AddStepwiseEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<AddPoolStepwiseEvent>(broker_addr)) {
+            EventUtil::init_event<AddPoolStepwiseEvent>(account);
+        };
+
+        if (!EventUtil::exist_event<ModifyReleasePerSecondEvent>(broker_addr)) {
+            EventUtil::init_event<ModifyReleasePerSecondEvent>(account);
+        };
+        //------------------------------------------//
+    }
+
+
+    fun broker_addr(): address {
+        @SwapAdmin
     }
 }

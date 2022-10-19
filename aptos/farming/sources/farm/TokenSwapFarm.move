@@ -24,6 +24,7 @@ module SwapAdmin::TokenSwapFarm {
     use SwapAdmin::CommonHelper;
 
 
+    const ERR_DEPRECATED: u64 = 1;
     const ERR_FARM_PARAM_ERROR: u64 = 101;
     const ERR_WHITE_LIST_BOOST_IS_OPEN: u64 = 102;
     const ERR_WHITE_LIST_BOOST_SIGN_IS_NULL: u64 = 103;
@@ -129,40 +130,14 @@ module SwapAdmin::TokenSwapFarm {
         YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
     }
 
-    /// Deprecated call
+    /// DEPRECATED call
     /// Initialize Liquidity pair gov pool, only called by token issuer
     public fun add_farm<X: copy + drop + store,
                         Y: copy + drop + store>(
-        signer: &signer,
-        release_per_seconds: u128) acquires FarmPoolEvent {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        // To determine how many amount release in every period
-        let cap = YieldFarming::add_asset<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-            signer,
-            release_per_seconds,
-            0);
-
-        move_to(signer, FarmPoolCapability<X, Y>{
-            cap,
-            release_per_seconds,
-        });
-
-        move_to(signer, FarmMultiplier<X, Y>{
-            multiplier: 1
-        });
-
-        // Emit add farm event
-        let admin = signer::address_of(signer);
-        let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin);
-        event::emit_event(&mut farm_pool_event.add_farm_event_handler,
-            AddFarmEvent{
-                y_type_info: type_info::type_of<X>(),
-                x_type_info: type_info::type_of<Y>(),
-                signer: signer::address_of(signer),
-                admin,
-            });
+        _signer: &signer,
+        _release_per_seconds: u128
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
 
@@ -186,7 +161,7 @@ module SwapAdmin::TokenSwapFarm {
         });
 
         move_to(signer, FarmPoolInfo<X, Y>{
-            alloc_point: alloc_point
+            alloc_point
         });
 
         // Emit add farm event
@@ -203,49 +178,21 @@ module SwapAdmin::TokenSwapFarm {
 
 
     /// call only for extend
-    public fun extend_farm_pool<X: copy + drop + store,
-                                 Y: copy + drop + store>(account: &signer, override_update: bool) acquires FarmMultiplier, FarmPoolInfo{
-        STAR::assert_genesis_address(account);
-
-        let broker = signer::address_of(account);
-        let farm_multiplier = borrow_global<FarmMultiplier<X, Y>>(broker);
-        let alloc_point = (farm_multiplier.multiplier as u128);
-        YieldFarming::extend_farming_asset<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account, alloc_point, override_update);
-
-        if(!exists<FarmPoolInfo<X, Y>>(broker)){
-            move_to(account, FarmPoolInfo<X, Y>{
-                alloc_point: alloc_point
-            });
-        }else {
-            let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
-            farm_pool_info.alloc_point = alloc_point;
-        };
+    public fun extend_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
+        _account: &signer,
+        _override_update: bool
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
 
-    /// Deprecated call
+    /// DEPRECATED call
     /// Set farm mutiplier of second per releasing
-    public fun set_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>(signer: &signer, multiplier: u64)
-    acquires FarmPoolCapability, FarmMultiplier {
-        // Only called by the genesis
-        STAR::assert_genesis_address(signer);
-
-        let broker = signer::address_of(signer);
-        let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
-        let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(broker);
-
-        let (alive, _, _, _, ) =
-            YieldFarming::query_info<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(broker);
-
-        let relese_per_sec_mul = cap.release_per_seconds * (multiplier as u128);
-        YieldFarming::modify_parameter<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
-            &cap.cap,
-            broker,
-            relese_per_sec_mul,
-            alive,
-        );
-        farm_mult.multiplier = multiplier;
+    public fun set_farm_multiplier<X: copy + drop + store, Y: copy + drop + store>(
+        _signer: &signer,
+        _multiplier: u64
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Get farm multiplier of second per releasing
@@ -264,13 +211,14 @@ module SwapAdmin::TokenSwapFarm {
 
     public fun set_farm_alloc_point<X: copy + drop + store,
                                     Y: copy + drop + store>(signer: &signer, alloc_point: u128)
-    acquires FarmPoolCapability, FarmPoolInfo {
+    acquires FarmPoolCapability, FarmPoolInfo, FarmPoolEvent {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
         let broker = signer::address_of(signer);
         let cap = borrow_global<FarmPoolCapability<X, Y>>(broker);
         let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
+        let last_alloc_point = farm_pool_info.alloc_point;
 
         YieldFarming::update_pool<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
             &cap.cap,
@@ -279,47 +227,40 @@ module SwapAdmin::TokenSwapFarm {
             farm_pool_info.alloc_point,
         );
         farm_pool_info.alloc_point = alloc_point;
+
+        if (alloc_point == 0 || last_alloc_point == 0) {
+            let farm_pool_event = borrow_global_mut<FarmPoolEvent>(broker);
+            event::emit_event(
+                &mut farm_pool_event.activation_state_event_handler,
+                ActivationStateEvent {
+                    x_type_info: type_info::type_of<X>(),
+                    y_type_info: type_info::type_of<Y>(),
+                    signer: broker,
+                    admin: broker,
+                    activation_state: (alloc_point > 0),
+                }
+            );
+        };
     }
 
-    /// Deprecated call
+    /// DEPRECATED call
     /// Reset activation of farm from token type X and Y
     public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(
-        account: &signer,
-        active: bool) acquires FarmPoolEvent, FarmPoolCapability {
-        STAR::assert_genesis_address(account);
-        let admin_addr = signer::address_of(account);
-        let cap = borrow_global_mut<FarmPoolCapability<X, Y>>(admin_addr);
-
-        YieldFarming::modify_parameter<
-            PoolTypeFarmPool,
-            STAR::STAR,
-            coin::Coin<LiquidityToken<X, Y>>
-        >(
-            &cap.cap,
-            admin_addr,
-            cap.release_per_seconds,
-            active,
-        );
-
-        let farm_pool_event = borrow_global_mut<FarmPoolEvent>(admin_addr);
-        event::emit_event(&mut farm_pool_event.activation_state_event_handler,
-            ActivationStateEvent{
-                y_type_info: type_info::type_of<X>(),
-                x_type_info: type_info::type_of<Y>(),
-                signer: signer::address_of(account),
-                admin: admin_addr,
-                activation_state: active,
-            });
+        _account: &signer,
+        _active: bool
+    ) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
-    //Deposit Token into the pool
+    /// Deposit Token into the pool
     public fun deposit<PoolType: store, CoinT: copy + drop + store>(
         account: &signer,
-        token: coin::Coin<CoinT>) {
+        token: coin::Coin<CoinT>
+    ) {
         YieldFarming::deposit<PoolType, CoinT>(account, token);
     }
 
-    //View Treasury Remaining
+    /// View Treasury Remaining
     public fun get_treasury_balance<PoolType: store, CoinT: copy + drop + store>(): u128 {
         YieldFarming::get_treasury_balance<PoolType, CoinT>(STAR::token_address())
     }

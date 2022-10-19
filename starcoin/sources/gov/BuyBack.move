@@ -8,9 +8,9 @@ module BuyBack {
     use StarcoinFramework::Errors;
     use StarcoinFramework::Event;
 
+    use SwapAdmin::EventUtil;
     use SwapAdmin::TimelyReleasePool;
     use SwapAdmin::TokenSwapRouter;
-    use SwapAdmin::EventUtil;
 
     const ERROR_TREASURY_HAS_EXISTS: u64 = 1001;
     const ERROR_NO_PERMISSION: u64 = 1002;
@@ -40,18 +40,27 @@ module BuyBack {
         user: address,
     }
 
+    /// DEPRECRATED
     struct EventHandleWrapper<phantom EventT: store + drop> has key {
         handle: Event::EventHandle<EventT>,
+    }
+
+    /// DEPRECRATED
+    struct EventStore has key {
+        /// event stream for withdraw
+        accept_event_handle: Event::EventHandle<AcceptEvent>,
+        /// event stream for deposit
+        payback_event_handle: Event::EventHandle<BuyBackEvent>,
     }
 
     public fun init_event(sender: &signer) {
         let sender_addr = Signer::address_of(sender);
         assert!(sender_addr == @BuyBackAccount, Errors::invalid_state(ERROR_NO_PERMISSION));
-        assert!(!EventUtil::exist_event_T<AcceptEvent>(sender_addr), Errors::invalid_state(ERROR_INIT_REPEATE));
+        assert!(!EventUtil::exist_event<AcceptEvent>(sender_addr), Errors::invalid_state(ERROR_INIT_REPEATE));
 
-        EventUtil::init_event_with_T<AcceptEvent>(sender);
-        EventUtil::init_event_with_T<BuyBackEvent>(sender);
-        EventUtil::init_event_with_T<DissmissEvent>(sender);
+        EventUtil::init_event<AcceptEvent>(sender);
+        EventUtil::init_event<BuyBackEvent>(sender);
+        EventUtil::init_event<DissmissEvent>(sender);
     }
 
     /// Check pool has exists
@@ -183,6 +192,11 @@ module BuyBack {
     public fun extract_cap<PoolT: store, TokenT: store>(sender: &signer): BuyBackCap<PoolT, TokenT> acquires BuyBackCap {
         let cap = move_from<BuyBackCap<PoolT, TokenT>>(Signer::address_of(sender));
         cap
+    }
+
+    /// DEPRECRETED
+    public fun upgrade_event_struct(_account: &signer) {
+        abort Errors::invalid_state(1)
     }
 }
 }

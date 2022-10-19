@@ -25,7 +25,7 @@ module SwapAdmin::VToken {
             string::utf8(coin_name),
             string::utf8(coin_name),
             precision,
-            false,
+            true,
         );
         CommonHelper::safe_accept_token<CoinT>(account);
 

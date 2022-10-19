@@ -76,6 +76,7 @@ module SwapAdmin::TokenSwapGov {
     const GOV_PERCENT_DEVELOPER_FUND_LOCK_TIME : u64 = 2 * 365 * 86400;
 
 
+    const ERR_DEPRECATED: u64 = 1;
     const ERR_DEPRECATED_UPGRADE_ERROR: u64 = 201;
     const ERR_WITHDRAW_AMOUNT_TOO_MANY: u64 = 202;
     const ERR_WITHDRAW_AMOUNT_IS_ZERO: u64 = 203;
@@ -523,7 +524,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
 
-    public entry fun upgrade_dao_treasury_genesis(signer: &signer) {
+    public entry fun upgrade_dao_treasury_genesis_func(signer: &signer) {
         STAR::assert_genesis_address(signer);
         //upgrade dao treasury genesis can only be execute once
         if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(signer))){
@@ -542,23 +543,13 @@ module SwapAdmin::TokenSwapGov {
         };
     }
 
-    fun upgrade_pool_type<PoolTypeOld: store, PoolTypeNew: store>(signer: &signer) acquires GovTreasury {
-        STAR::assert_genesis_address(signer);
-        let account = signer::address_of(signer);
-
-        let GovTreasury<PoolTypeOld> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        } = move_from<GovTreasury<PoolTypeOld>>(account);
-        move_to(signer, GovTreasury<PoolTypeNew> {
-            treasury,
-            locked_start_timestamp,
-            locked_total_timestamp,
-        });
+    /// DEPRECATED
+    public entry fun upgrade_dao_treasury_genesis(_signer: &signer) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 
-    public entry fun upgrade_pool_type_genesis(signer: &signer) {
-        STAR::assert_genesis_address(signer);
+    /// DEPRECATED
+    public entry fun upgrade_pool_type_genesis(_signer: &signer) {
+        abort error::aborted(ERR_DEPRECATED)
     }
 }
