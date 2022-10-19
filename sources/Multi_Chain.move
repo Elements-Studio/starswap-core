@@ -1,4 +1,4 @@
-module StarcoinFramework::Multi_Chain {
+module SwapAdmin::Multi_Chain {
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapGov;
     use StarcoinFramework::Timestamp;
@@ -28,7 +28,7 @@ module StarcoinFramework::Multi_Chain {
         amount: u128
     }
 
-    public fun genesis_aptos_burn (sender:&signer)acquires  MultiChainEvent{
+    public fun genesis_aptos_burn (sender:&signer)acquires MultiChainEvent {
         STAR::assert_genesis_address(sender);
         assert!(TokenSwapGov::get_total_of_linear_treasury<PoolTypeFarmPool>() == 55000000000000000,ERR_APTOS_GENESISED);
 
@@ -85,9 +85,8 @@ module StarcoinFramework::Multi_Chain {
         assert!(should_supply_star >= supply_star, 100);
 
         let not_withdraw_star = should_supply_star - supply_star;
-
         let not_release_amount =  treasury - not_withdraw_star ;
-
+        StarcoinFramework::Debug::print(&treasury);
         return ( not_release_amount / 3, linear_treasury / 3)
     }
     public fun aptos_genesis_sryup_treasury_burn_amount(total:u128 ,treasury:u128, linear_treasury:u128,now:u64):(u128,u128){
