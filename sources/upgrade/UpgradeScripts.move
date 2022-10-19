@@ -21,8 +21,8 @@ module UpgradeScripts {
     use StarcoinFramework::STC::STC;
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;
-    use Bridge::XETH::XETH;
-    use Bridge::XUSDT::XUSDT;
+    use XETH::XETH::XETH;
+    use XUSDT::XUSDT::XUSDT;
 
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
