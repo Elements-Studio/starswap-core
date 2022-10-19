@@ -8,9 +8,7 @@ SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
 SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
 BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 FAI = "0xfe125d419811297dfab03c61efec0bc9"
-XUSDT = "0x416b32009fe49fcab1d5f2ba0153838f"
 WEN = "0x88e2677b89841cd4ee7c15535798e1c8"
-XETH = "0x416b32009fe49fcab1d5f2ba0153838f"
 
 
 [dependencies]

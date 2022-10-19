@@ -19,10 +19,10 @@ module UpgradeScripts {
     use SwapAdmin::STAR;
     use StarcoinFramework::Multi_Chain::genesis_aptos_burn;
     use StarcoinFramework::STC::STC;
-    use XETH::XETH::XETH;
-    use XUSDT::XUSDT::XUSDT;
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;
+    use Bridge::XETH::XETH;
+    use Bridge::XUSDT::XUSDT;
 
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day

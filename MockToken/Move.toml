@@ -4,6 +4,4 @@ version = "0.0.1"
 
 [addresses]
 FAI = "0xfe125d419811297dfab03c61efec0bc9"
-XUSDT = "0x416b32009fe49fcab1d5f2ba0153838f"
 WEN = "0x88e2677b89841cd4ee7c15535798e1c8"
-XETH = "0x416b32009fe49fcab1d5f2ba0153838f"
