@@ -110,7 +110,7 @@ module UpgradeScripts {
         TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
     }
 
-    public(script) fun upgrade_from_v1_0_12_to_v1_1_0(account: signer){
+    public(script) fun upgrade_from_v1_0_12_to_v2_0_0(account: signer){
         TokenSwapConfig::assert_admin(&account);
 
         //TokenSwapFarm::update_token_pool_index<STAR::STAR>(&account);
