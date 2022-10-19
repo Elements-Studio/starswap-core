@@ -17,6 +17,8 @@ module UpgradeScripts {
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR;
+    use StarcoinFramework::Multi_Chain::genesis_aptos_burn;
+
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -110,10 +112,14 @@ module UpgradeScripts {
 
     public(script) fun upgrade_from_v1_0_12_to_v1_1_0(account: signer){
         TokenSwapConfig::assert_admin(&account);
+
+        //TokenSwapFarm::update_token_pool_index<STAR::STAR>(&account);
         TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
-        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
+
         TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
-        TokenSwapGov::aptos_genesis_burn(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
+
+        genesis_aptos_burn(&account);
     }
 
 

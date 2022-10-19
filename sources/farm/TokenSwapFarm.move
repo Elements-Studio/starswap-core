@@ -19,6 +19,7 @@ module TokenSwapFarm {
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool};
     use SwapAdmin::TokenSwapFarmBoost;
+    use StarcoinFramework::Signer::address_of;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -85,6 +86,16 @@ module TokenSwapFarm {
         stake_event_handler: Event::EventHandle<StakeEvent>,
         unstake_event_handler: Event::EventHandle<UnstakeEvent>,
     }
+
+    struct FarmPoolMultChainEvent has key, store{
+        burn_farm_event_handler: Event::EventHandle<BurnEvent>
+    }
+
+    struct BurnEvent has drop ,store{
+        amount: u128,
+        token_code: Token::TokenCode
+    }
+
 
     struct FarmPoolCapability<phantom X, phantom Y> has key, store {
         cap: YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>,
@@ -372,8 +383,38 @@ module TokenSwapFarm {
         account: &signer,
         token: Token::Token<TokenT>
     ) {
-        YieldFarming::deposit<PoolType, TokenT>(account, token);
+        YieldFarming::deposit<PoolType, TokenT>(account, token)
     }
+
+    //withdraw Toke the pool
+    public fun withdraw<PoolType: store, TokenT: copy + drop + store>(
+        account: &signer,
+        amount: u128
+    ):Token::Token<TokenT> {
+        STAR::assert_genesis_address(account);
+        YieldFarming::withdraw<PoolType, TokenT>(account, amount)
+    }
+
+    public fun burn<PoolType: store, TokenT: copy + drop + store>(
+        account: &signer,
+        amount: u128
+    )acquires FarmPoolMultChainEvent {
+        STAR::assert_genesis_address(account);
+        if(!exists<FarmPoolMultChainEvent>(address_of(account))){
+            move_to(account, FarmPoolMultChainEvent{
+                burn_farm_event_handler:Event::new_event_handle<BurnEvent>(account)
+            });
+        };
+        let event = &mut borrow_global_mut<FarmPoolMultChainEvent>(address_of(account)).burn_farm_event_handler;
+
+        Event::emit_event(event, BurnEvent{
+            amount,
+            token_code: Token::token_code<TokenT>()
+        });
+
+        Token::burn<TokenT>(account, YieldFarming::withdraw<PoolType, TokenT>(account, amount));
+    }
+
 
     //View Treasury Remaining
     public fun get_treasury_balance<PoolType: store, TokenT: copy + drop + store>(): u128 {

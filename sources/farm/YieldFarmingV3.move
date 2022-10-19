@@ -279,6 +279,17 @@ module YieldFarmingV3 {
         Token::deposit<RewardTokenT>(&mut farming.treasury_token, treasury_token);
     }
 
+    friend SwapAdmin::TokenSwapFarm;
+    friend SwapAdmin::TokenSwapSyrup;
+
+    public (friend) fun withdraw<PoolType: store, RewardTokenT: store>(
+        _account: &signer,
+        amount: u128
+    ):Token::Token<RewardTokenT> acquires Farming {
+        let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(STAR::token_address());
+        Token::withdraw<RewardTokenT>(&mut farming.treasury_token, amount)
+    }
+
     /// DEPRECATED call
     public fun modify_parameter<PoolType: store, RewardTokenT: store, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
