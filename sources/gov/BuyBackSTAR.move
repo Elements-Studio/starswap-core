@@ -12,7 +12,7 @@ module BuyBackSTAR {
 
     struct BuyBackSTAR has store {}
 
-    public(script) fun init(
+    public fun init(
         sender: signer,
         total_amount: u128,
         begin_time: u64,
