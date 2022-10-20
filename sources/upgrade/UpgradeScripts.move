@@ -17,6 +17,12 @@ module UpgradeScripts {
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR;
+    use SwapAdmin::MultiChain::genesis_aptos_burn;
+    use StarcoinFramework::STC::STC;
+    use WEN::WEN::WEN;
+    use FAI::FAI::FAI;
+    use Bridge::XUSDT::XUSDT;
+
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -107,6 +113,24 @@ module UpgradeScripts {
         TokenSwapSyrup::set_pool_release_per_second(&account, 23000000);
         TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
     }
+
+    public(script) fun upgrade_from_v1_0_12_to_v2_0_0(account: signer){
+        TokenSwapConfig::assert_admin(&account);
+
+        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
+
+
+        TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
+
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
+
+        genesis_aptos_burn(&account);
+    }
+
 
     /// This function initializes all structures for the latest version,
     /// And is only used for integration tests

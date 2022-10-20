@@ -20,6 +20,7 @@ module TokenSwapSyrup {
     use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
     use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::EventUtil;
+    use StarcoinFramework::Signer::address_of;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -203,6 +204,15 @@ module TokenSwapSyrup {
         admin: address,
         pledge_time: u64,
         multiplier: u64,
+    }
+
+    struct StakeMultChainEvent has key, store{
+        burn_Stake_event_handler: Event::EventHandle<BurnEvent>
+    }
+
+    struct BurnEvent has drop ,store{
+        amount: u128,
+        token_code: Token::TokenCode
     }
 
     /// Initialize for Syrup pool
@@ -455,6 +465,34 @@ module TokenSwapSyrup {
         account: &signer,
         token: Token::Token<TokenT>) {
         YieldFarming::deposit<PoolType, TokenT>(account, token);
+    }
+
+    public fun burn<PoolType: store, TokenT: copy + drop + store>(
+        account: &signer,
+        amount: u128
+    )acquires StakeMultChainEvent {
+        STAR::assert_genesis_address(account);
+        if(!exists<StakeMultChainEvent>(address_of(account))){
+            move_to(account, StakeMultChainEvent{
+                burn_Stake_event_handler:Event::new_event_handle<BurnEvent>(account)
+            });
+        };
+        let event = &mut borrow_global_mut<StakeMultChainEvent>(address_of(account)).burn_Stake_event_handler;
+
+        Event::emit_event(event, BurnEvent{
+            amount,
+            token_code: Token::token_code<TokenT>()
+        });
+
+        Token::burn<TokenT>(account, YieldFarming::withdraw<PoolType, TokenT>(account, amount));
+    }
+
+    /// withdraw Toke the pool
+    public fun withdraw<PoolType: store, TokenT: copy + drop + store>(
+        account: &signer,
+        amount: u128):Token::Token<TokenT> {
+        STAR::assert_genesis_address(account);
+        YieldFarming::withdraw<PoolType, TokenT>(account, amount)
     }
 
     /// View Treasury Remaining

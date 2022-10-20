@@ -22,6 +22,9 @@ module TokenSwapGov {
         PoolTypeSyrup ,
         PoolTypeDeveloperFund,
     };
+    #[test_only]
+    use StarcoinFramework::Debug;
+    use StarcoinFramework::Signer::address_of;
 
     //2022-03-05 10:00:00 UTC+8
     const GENESIS_TIMESTAMP:u64 = 1646445600;
@@ -193,6 +196,16 @@ module TokenSwapGov {
     struct GovTreasuryEvent<phantom PoolType> has key, store{ 
         withdraw_linearGovTreasury_event_handler:Event::EventHandle<LinearGovTreasuryWithdrawEvent<PoolType>>,
         withdraw_genesisGovTreasury_event_handler:Event::EventHandle<GenesisGovTreasuryWithdrawEvent<PoolType>>,
+    }
+
+    struct GovTreasuryMultiChainEvent has key, store{
+        burn_linearGovTreasury_event_handler:Event::EventHandle<LinearGovTreasuryMultiBurnEvent>,
+    }
+
+    struct LinearGovTreasuryMultiBurnEvent has drop, store{
+        amount: u128,
+        chain: vector<u8>,
+        treasury_type:Token::TokenCode
     }
     /// Initial as genesis that will create pool list by Starswap Ecnomic Model list
     public fun genesis_initialize(account: &signer) {
@@ -476,6 +489,70 @@ module TokenSwapGov {
         Token::value<STAR::STAR>(&treasury.linear_treasury) - (treasury.linear_total - amount)
     }
 
+    #[test]
+    public fun test_get_can_withdraw_of_linear_treasury(){
+        let precision = STAR::precision();
+        let scaling_factor = Math::pow(10, (precision as u64));
+        let total = calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128) - 1263196461020203;
+
+        let second_release =  total / (GOV_PERCENT_FARM_LOCK_TIME as u128);
+
+        Debug::print(&second_release);
+    }
+
+    #[test]
+    public fun test_aptos_genesis(){
+        let scaling_factor = Math::pow(10, 9);
+
+        let farm_gensis = 5 * 1000 * 1000 * scaling_factor;
+        let now_farm_treasury = 9722241185776728;
+        let now_treasury_farm = 37895893830618610;
+        let farm_total = 60 * 1000 * 1000 * scaling_factor;
+
+
+        let farm_supply_star = farm_total - now_farm_treasury - now_treasury_farm ;
+        let (burn_farm_treasury_amount, burn_treasury_farm_amount) = if(farm_supply_star > farm_gensis){
+                            let burn_farm_treasury_amount = now_farm_treasury / 3;
+                            let burn_treasury_farm_amount = now_treasury_farm / 3;
+                            (burn_farm_treasury_amount, burn_treasury_farm_amount)
+                        }else {
+                            let supply_farm_treasury_gensis = farm_gensis - farm_supply_star ;
+                            let farm_treasury = now_farm_treasury - supply_farm_treasury_gensis;
+                            let burn_farm_treasury_amount = farm_treasury / 3;
+                            let burn_treasury_farm_amount = now_treasury_farm / 3;
+                            (burn_farm_treasury_amount, burn_treasury_farm_amount)
+                        };
+        Debug::print(&(farm_supply_star > farm_gensis));
+        Debug::print(&burn_farm_treasury_amount);
+        Debug::print(&burn_treasury_farm_amount);
+        Debug::print(&(burn_farm_treasury_amount + burn_treasury_farm_amount));
+
+
+
+        let stake_gensis = 5 * 1000 * 1000 * scaling_factor;
+        let now_stake_treasury = 8088860717238387;
+        let now_treasury_stake = 1897181968767854;
+        let stake_total = 10 * 1000 * 1000 * scaling_factor;
+
+        let stake_supply_star = stake_total - now_stake_treasury - now_treasury_stake ;
+        let (burn_stake_treasury_amount, burn_treasury_stake_amount) = if(stake_supply_star > stake_gensis){
+            let burn_stake_treasury_amount = now_stake_treasury / 3;
+            let burn_treasury_stake_amount = now_treasury_stake / 3;
+            (burn_stake_treasury_amount, burn_treasury_stake_amount)
+        }else {
+            let stake_treasury_gensis = stake_gensis - stake_supply_star ;
+            let stake_treasury = now_stake_treasury - stake_treasury_gensis;
+            let burn_stake_treasury_amount = stake_treasury / 3;
+            let burn_treasury_stake_amount = now_treasury_stake / 3;
+            (burn_stake_treasury_amount, burn_treasury_stake_amount)
+        };
+
+        Debug::print(&(stake_supply_star > stake_gensis));
+        Debug::print(&burn_stake_treasury_amount);
+        Debug::print(&burn_treasury_stake_amount);
+        Debug::print(&(burn_stake_treasury_amount + burn_treasury_stake_amount));
+    }
+
     /// Get balance of treasury
     public fun get_balance_of_treasury<PoolType: store>(): u128 acquires GovTreasuryV2 {
         let treasury = borrow_global_mut<GovTreasuryV2<PoolType>>(STAR::token_address());
@@ -549,6 +626,44 @@ module TokenSwapGov {
 
     public(script) fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
+    }
+
+    public fun aptos_genesis_burn(signer: &signer, farm_burn_amount:u128, sryup_burn_amount:u128) acquires  GovTreasuryV2,GovTreasuryMultiChainEvent{
+        STAR::assert_genesis_address(signer);
+        let precision = STAR::precision();
+        let scaling_factor = Math::pow(10, (precision as u64));
+
+        if(!exists<GovTreasuryMultiChainEvent>(address_of(signer))){
+            move_to(signer, GovTreasuryMultiChainEvent{
+                burn_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryMultiBurnEvent>(signer)
+            });
+        };
+
+        let event = &mut borrow_global_mut<GovTreasuryMultiChainEvent>(address_of(signer)).burn_linearGovTreasury_event_handler;
+        let farm_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeFarmPool>>(STAR::token_address());
+        assert!(farm_treasury.linear_total == calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128) , 100);
+        let farm_treasury_amount = Token::value(&farm_treasury.linear_treasury);
+        let farm_treasury_burn = Token::withdraw(&mut farm_treasury.linear_treasury, farm_burn_amount);
+        Event::emit_event(event, LinearGovTreasuryMultiBurnEvent{
+            amount: farm_burn_amount,
+            chain: b"Aptos_Multi_Genesis",
+            treasury_type:Token::token_code<PoolTypeFarmPool>()
+        });
+
+        Token::burn(signer, farm_treasury_burn);
+        farm_treasury.linear_total = farm_treasury.linear_total - ( farm_treasury_amount / 3 );
+
+        let syrup_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeSyrup>>(STAR::token_address());
+        assert!(syrup_treasury.linear_total == calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) * (scaling_factor as u128) , 100);
+        let syrup_treasury_amount = Token::value(&syrup_treasury.linear_treasury);
+        let syrup_treasury_burn = Token::withdraw(&mut syrup_treasury.linear_treasury, sryup_burn_amount);
+        Event::emit_event(event, LinearGovTreasuryMultiBurnEvent{
+            amount: sryup_burn_amount,
+            chain: b"Aptos_Multi_Genesis",
+            treasury_type:Token::token_code<PoolTypeSyrup>()
+        });
+        Token::burn(signer, syrup_treasury_burn);
+        syrup_treasury.linear_total = syrup_treasury.linear_total - ( syrup_treasury_amount / 3) ;
     }
 }
 }
