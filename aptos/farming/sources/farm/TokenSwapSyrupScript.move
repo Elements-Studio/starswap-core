@@ -24,7 +24,7 @@ module TokenSwapSyrupScript {
         cap: TokenSwapVestarRouter::VestarRouterCapability,
     }
 
-    public entry fun add_pool<CoinT: store>(
+    public entry fun add_pool<CoinT>(
         _signer: &signer,
         _alloc_point: u128,
         _delay: u64
@@ -33,7 +33,7 @@ module TokenSwapSyrupScript {
         abort error::aborted(ERR_DEPRECATED)
     }
 
-    public entry fun add_pool_v2<CoinT: store>(
+    public entry fun add_pool_v2<CoinT>(
         signer: &signer,
         alloc_point: u128,
         delay: u64
@@ -41,7 +41,7 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::add_pool_v2<CoinT>(signer, alloc_point, delay);
     }
 
-    public entry fun update_allocation_point<CoinT: store>(
+    public entry fun update_allocation_point<CoinT>(
         signer: &signer,
         alloc_point: u128
     ) {
@@ -79,7 +79,7 @@ module TokenSwapSyrupScript {
         abort error::aborted(ERR_DEPRECATED)
     }
 
-    public entry fun stake<CoinT: store>(
+    public entry fun stake<CoinT>(
         signer: &signer,
         pledge_time_sec: u64,
         amount: u128
@@ -91,7 +91,7 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::stake_hook<CoinT>(signer, pledge_time_sec, amount, &cap_wrapper.cap);
     }
 
-    public entry fun unstake<CoinT: store>(signer: &signer, id: u64) acquires VestarRouterCapabilityWrapper {
+    public entry fun unstake<CoinT>(signer: &signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = signer::address_of(signer);
         TokenSwapGov::linear_withdraw_syrup(signer, 0);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<CoinT>(signer, id);
@@ -104,7 +104,7 @@ module TokenSwapSyrupScript {
     }
 
     /// Boost stake that had staked before the boost function online
-    public entry fun take_vestar_by_stake_id<CoinT: store>(signer: &signer, id: u64) acquires VestarRouterCapabilityWrapper {
+    public entry fun take_vestar_by_stake_id<CoinT>(signer: &signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = signer::address_of(signer);
 
         // if there not have stake id then report error
@@ -133,7 +133,7 @@ module TokenSwapSyrupScript {
 
     /// Set the multiplier of each pledge time in the multiplier pool corresponding to TokenT
     /// It will abort while calling this function if the pool has exists,
-    public entry fun put_stepwise_multiplier_with_token_type<CoinT: store>(
+    public entry fun put_stepwise_multiplier_with_token_type<CoinT>(
         signer: signer,
         interval_sec: u64,
         multiplier: u64
@@ -143,7 +143,7 @@ module TokenSwapSyrupScript {
 
     /// Set amount for every Pledge time in multiplier pool
     /// This function will be forbidden in next version
-    public entry fun set_multiplier_pool_amount<TokenT: store>(
+    public entry fun set_multiplier_pool_amount<TokenT>(
         account: signer,
         pledge_time: u64,
         amount: u128
@@ -151,7 +151,7 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 
-    public entry fun adjust_total_amount_entry<TokenT: store>(
+    public entry fun adjust_total_amount_entry<TokenT>(
         account: &signer,
         total_amount: u128,
         total_weight: u128,
@@ -162,21 +162,21 @@ module TokenSwapSyrupScript {
     /// Calculate the Total Weight and Total Amount from the multiplier pool and
     /// update them to YieldFarming
     ///
-    public entry fun update_total_from_multiplier_pool<TokenT: store>(
+    public entry fun update_total_from_multiplier_pool<TokenT>(
         account: signer,
     ) {
         TokenSwapSyrup::update_total_from_multiplier_pool<TokenT>(&account);
     }
 
-    public fun get_stake_info<CoinT: store>(user_addr: address, id: u64): (u64, u64, u64, u128) {
+    public fun get_stake_info<CoinT>(user_addr: address, id: u64): (u64, u64, u64, u128) {
         TokenSwapSyrup::get_stake_info<CoinT>(user_addr, id)
     }
 
-    public fun query_total_stake<CoinT: store>(): u128 {
+    public fun query_total_stake<CoinT>(): u128 {
         TokenSwapSyrup::query_total_stake<CoinT>()
     }
 
-    public fun query_stake_list<CoinT: store>(user_addr: address): vector<u64> {
+    public fun query_stake_list<CoinT>(user_addr: address): vector<u64> {
         TokenSwapSyrup::query_stake_list<CoinT>(user_addr)
     }
 
@@ -188,7 +188,7 @@ module TokenSwapSyrupScript {
         TokenSwapVestarMinter::value_of_id(user_addr, id)
     }
 
-    public fun query_vestar_amount_by_staked_id_tokentype<CoinT: store>(user_addr: address, id: u64): u128 {
+    public fun query_vestar_amount_by_staked_id_tokentype<CoinT>(user_addr: address, id: u64): u128 {
         let old_value = TokenSwapVestarMinter::value_of_id(user_addr, id);
         if (old_value > 0) {
             old_value

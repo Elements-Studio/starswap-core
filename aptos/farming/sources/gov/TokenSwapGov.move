@@ -255,7 +255,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
     /// dispatch to acceptor from governance treasury pool
-    public fun dispatch<PoolType: store>(account: &signer, acceptor: address, amount: u128) acquires GovTreasuryV2 ,GovTreasuryEvent{
+    public fun dispatch<PoolType>(account: &signer, acceptor: address, amount: u128) acquires GovTreasuryV2 ,GovTreasuryEvent{
         TokenSwapConfig::assert_global_freeze();
         
         assert!(amount != 0, error::invalid_argument(ERR_WITHDRAW_AMOUNT_IS_ZERO));
@@ -397,7 +397,7 @@ module SwapAdmin::TokenSwapGov {
 
     }
     //Linear extraction function (because the models of Farm and syrup are different, the function is set to private)
-    fun linear_withdraw<PoolType: store>(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
+    fun linear_withdraw<PoolType>(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
         TokenSwapConfig::assert_global_freeze();
         let can_withdraw_amount = get_can_withdraw_of_linear_treasury<PoolType>();
         assert!(amount != 0, error::invalid_argument(ERR_WITHDRAW_AMOUNT_IS_ZERO));
@@ -425,7 +425,7 @@ module SwapAdmin::TokenSwapGov {
         linear_withdraw<PoolTypeDeveloperFund>(account,to,amount);
     }
     //Farm and syrup linear treasury extraction functions need to pass in generic parameters        PoolTypeFarmPool ,PoolTypeSyrup 
-    fun linear_withdraw_farm_syrup<PoolType: store>(account:&signer):Coin<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
+    fun linear_withdraw_farm_syrup<PoolType>(account:&signer):Coin<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
             TokenSwapConfig::assert_global_freeze();
             
             let can_withdraw_amount = get_can_withdraw_of_linear_treasury<PoolType>();
@@ -461,27 +461,27 @@ module SwapAdmin::TokenSwapGov {
     }
 
     //Amount to get linear treasury
-    public fun get_balance_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
+    public fun get_balance_of_linear_treasury<PoolType>():u128 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());
         WrapperUtil::coin_value<STAR::STAR>(&treasury.linear_treasury)
     }
     //Get the total number of locks in the linear treasury
-    public fun get_total_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
+    public fun get_total_of_linear_treasury<PoolType>():u128 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());    
         treasury.linear_total
     }
     //Get the lockup start time of the linear treasury
-    public fun get_start_of_linear_treasury<PoolType: store>():u64 acquires GovTreasuryV2{
+    public fun get_start_of_linear_treasury<PoolType>():u64 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());    
         treasury.locked_start_timestamp
     }
     //Get the total duration of the linear treasury lock
-    public fun get_hodl_of_linear_treasury<PoolType: store>():u64 acquires GovTreasuryV2{
+    public fun get_hodl_of_linear_treasury<PoolType>():u64 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());    
         treasury.locked_total_timestamp
     }
     //Get the amount you can withdraw from the linear treasury
-    public fun get_can_withdraw_of_linear_treasury<PoolType: store>():u128 acquires GovTreasuryV2{
+    public fun get_can_withdraw_of_linear_treasury<PoolType>():u128 acquires GovTreasuryV2{
         let treasury = borrow_global<GovTreasuryV2<PoolType>>(STAR::token_address());
         let now_timestamp = timestamp::now_seconds();
 
@@ -496,7 +496,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
     /// Get balance of treasury
-    public fun get_balance_of_treasury<PoolType: store>(): u128 acquires GovTreasuryV2 {
+    public fun get_balance_of_treasury<PoolType>(): u128 acquires GovTreasuryV2 {
         let treasury = borrow_global_mut<GovTreasuryV2<PoolType>>(STAR::token_address());
         WrapperUtil::coin_value<STAR::STAR>(&treasury.genesis_treasury)
     }

@@ -31,7 +31,7 @@ module SwapAdmin::STAR {
     }
 
     /// Returns true if `CoinType` is `STAR::STAR`
-    public fun is_star<CoinType: store>(): bool {
+    public fun is_star<CoinType>(): bool {
         WrapperUtil::is_same_token<STAR, CoinType>()
     }
 

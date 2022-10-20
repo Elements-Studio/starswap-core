@@ -9,7 +9,7 @@ module SwapAdmin::TokenSwapFarmRouter {
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
-    public fun add_farm_pool<X: copy + drop + store, Y: copy + drop + store>(account: &signer, release_per_second: u128) {
+    public fun add_farm_pool<X, Y>(account: &signer, release_per_second: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -19,7 +19,7 @@ module SwapAdmin::TokenSwapFarmRouter {
         };
     }
 
-    public fun add_farm_pool_v2<X: copy + drop + store, Y: copy + drop + store>(account: &signer, alloc_point: u128) {
+    public fun add_farm_pool_v2<X, Y>(account: &signer, alloc_point: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -30,7 +30,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
 
-    public fun reset_farm_activation<X: copy + drop + store, Y: copy + drop + store>(account: &signer,
+    public fun reset_farm_activation<X, Y>(account: &signer,
                                                                                      active: bool) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
@@ -41,7 +41,7 @@ module SwapAdmin::TokenSwapFarmRouter {
         };
     }
 
-    public fun stake<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
+    public fun stake<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         TokenSwapGov::linear_withdraw_farm( account , 0 );
@@ -52,7 +52,7 @@ module SwapAdmin::TokenSwapFarmRouter {
         };
     }
 
-    public fun unstake<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
+    public fun unstake<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         TokenSwapGov::linear_withdraw_farm( account , 0 );
@@ -64,7 +64,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Havest governance token from pool
-    public fun harvest<X: copy + drop + store, Y: copy + drop + store>(account: &signer, amount: u128) {
+    public fun harvest<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         TokenSwapGov::linear_withdraw_farm( account , 0 );
@@ -76,7 +76,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Get gain count
-    public fun lookup_gain<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+    public fun lookup_gain<X, Y>(account: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -87,7 +87,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Query all stake amount
-    public fun query_total_stake<X: copy + drop + store, Y: copy + drop + store>(): u128 {
+    public fun query_total_stake<X, Y>(): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -98,7 +98,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Query all stake amount
-    public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+    public fun query_stake<X, Y>(account: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -108,7 +108,7 @@ module SwapAdmin::TokenSwapFarmRouter {
         }
     }
 
-    public fun query_info<X: copy + drop + store, Y: copy + drop + store>(): (bool, u128, u128, u128) {
+    public fun query_info<X, Y>(): (bool, u128, u128, u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -119,7 +119,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_info_v2<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u128, u128) {
+    public fun query_info_v2<X, Y>(): (u128, u128, u128, u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -131,7 +131,7 @@ module SwapAdmin::TokenSwapFarmRouter {
 
 
     /// Query release per second
-    public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 {
+    public fun query_release_per_second<X, Y>(): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -142,8 +142,8 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Set farm mutiple of second per releasing
-    public fun set_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>(signer: &signer, multiplier: u64) {
+    public fun set_farm_multiplier<X,
+                                   Y>(signer: &signer, multiplier: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -154,8 +154,8 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Set farm alloc point
-    public fun set_farm_alloc_point<X: copy + drop + store,
-                                   Y: copy + drop + store>(signer: &signer, alloc_point: u128) {
+    public fun set_farm_alloc_point<X,
+                                   Y>(signer: &signer, alloc_point: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -166,8 +166,8 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>(): u64 {
+    public fun get_farm_multiplier<X,
+                                   Y>(): u64 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -183,7 +183,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// boost for farm
-    public fun boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128) {
+    public fun boost<X, Y>(account: &signer, boost_amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -194,7 +194,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// white list boost for farm
-    public fun wl_boost<X: copy + drop + store, Y: copy + drop + store>(account: &signer, boost_amount: u128,signature:&vector<u8>) {
+    public fun wl_boost<X, Y>(account: &signer, boost_amount: u128,signature:&vector<u8>) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -205,7 +205,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Query user boost factor
-    public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(account: address): u64 {
+    public fun get_boost_factor<X, Y>(account: address): u64 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -216,7 +216,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Query user boost locked vestar amount
-    public fun get_boost_locked_vestar_amount<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+    public fun get_boost_locked_vestar_amount<X, Y>(account: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {

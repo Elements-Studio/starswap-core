@@ -12,7 +12,7 @@ module SwapAdmin::TokenSwapGovScript {
     }
 
     /// Harverst STAR by given pool type, call ed by user
-    public entry fun dispatch<PoolType: store>(account: &signer, acceptor: address, amount: u128) {
+    public entry fun dispatch<PoolType>(account: &signer, acceptor: address, amount: u128) {
         TokenSwapGov::dispatch<PoolType>(account, acceptor, amount);
     }
 

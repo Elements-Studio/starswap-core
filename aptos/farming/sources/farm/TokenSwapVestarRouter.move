@@ -16,7 +16,7 @@ module TokenSwapVestarRouter {
         cap: TokenSwapVestarMinter::MintCapability,
     }
 
-    public fun stake_hook<CoinT: store>(signer: &signer,
+    public fun stake_hook<CoinT>(signer: &signer,
                                          pledge_time_sec: u64,
                                          amount: u128,
                                          cap: &VestarRouterCapability) {
@@ -32,7 +32,7 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun stake_hook_with_id<CoinT: store>(signer: &signer,
+    public fun stake_hook_with_id<CoinT>(signer: &signer,
                                                  id: u64,
                                                  pledge_time_sec: u64,
                                                  amount: u128,
@@ -46,22 +46,22 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun unstake_hook<CoinT: store>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
+    public fun unstake_hook<CoinT>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
         };
         TokenSwapVestarMinter::burn_with_cap_T<CoinT>(signer, id, &cap.cap);
     }
 
-    public fun exists_record<CoinT: store>(user_addr: address, id: u64): bool {
+    public fun exists_record<CoinT>(user_addr: address, id: u64): bool {
         TokenSwapVestarMinter::exists_record<CoinT>(user_addr, id)
     }
 
-    public fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128): VestarRouterCapability {
+    public fun initialize_global_syrup_info(signer: &signer, _pool_release_per_second: u128): VestarRouterCapability {
         STAR::assert_genesis_address(signer);
 
         // DEPRECATED
-        TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
+        // TokenSwapSyrup::upgrade_syrup_global(signer, pool_release_per_second);
 
         let (
             issuer_cap,

@@ -50,16 +50,14 @@ module SwapAdmin::TokenSwapFee {
         TokenSwapConfig::set_swap_fee_operation_rate(signer, 10, 60);
     }
 
-    public fun handle_token_swap_fee<X: store, Y: store>(signer_address: address, token_x: Coin<X>
+    public fun handle_token_swap_fee<X, Y>(signer_address: address, token_x: Coin<X>
     ) acquires TokenSwapFeeEvent {
         intra_handle_token_swap_fee<X, Y, XUSDT>(signer_address, token_x)
     }
 
 
     /// X is token to pay for fee
-    fun intra_handle_token_swap_fee<X: store,
-                                    Y: store,
-                                    FeeToken: store>(signer_address: address, token_x: Coin<X>
+    fun intra_handle_token_swap_fee<X, Y, FeeToken>(signer_address: address, token_x: Coin<X>
     ) acquires TokenSwapFeeEvent {
         let fee_address = TokenSwapConfig::fee_address();
         let (fee_handle, swap_fee, fee_out);
@@ -94,7 +92,7 @@ module SwapAdmin::TokenSwapFee {
 
 
     /// Emit swap fee event
-    fun emit_swap_fee_event<X: store, Y: store>(
+    fun emit_swap_fee_event<X, Y>(
         signer_address: address,
         swap_fee: u128,
         fee_out: u128,
@@ -110,7 +108,7 @@ module SwapAdmin::TokenSwapFee {
         });
     }
 
-    fun swap_fee_direct_deposit<X: store, Y: store>(token_x: Coin<X>): (bool, u128, u128) {
+    fun swap_fee_direct_deposit<X, Y>(token_x: Coin<X>): (bool, u128, u128) {
         let fee_address = TokenSwapConfig::fee_address();
         if (coin::is_account_registered<X>(fee_address)) {
             let x_value = WrapperUtil::coin_value(&token_x);
@@ -129,7 +127,7 @@ module SwapAdmin::TokenSwapFee {
         }
     }
 
-    fun swap_fee_swap<X: store, FeeToken: store>(token_x: Coin<X>): (bool, u128, u128) {
+    fun swap_fee_swap<X, FeeToken>(token_x: Coin<X>): (bool, u128, u128) {
         let x_value = WrapperUtil::coin_value(&token_x);
         // just return, not assert error
         if (x_value == 0) {

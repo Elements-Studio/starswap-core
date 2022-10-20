@@ -118,7 +118,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Mint Vestar with capability
-    public fun mint_with_cap_T<CoinT: store>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
+    public fun mint_with_cap_T<CoinT>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, _cap: &MintCapability)
     acquires VestarOwnerCapability, Treasury, MintRecordListT, VestarEventHandler, MintRecordList {
         let broker = WrapperUtil::coin_address<VESTAR::VESTAR>();
         let cap = borrow_global<VestarOwnerCapability>(broker);
@@ -142,7 +142,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Burn Vestar with capability
-    public fun burn_with_cap_T<CoinT: store>(signer: &signer, id: u64, _cap: &MintCapability)
+    public fun burn_with_cap_T<CoinT>(signer: &signer, id: u64, _cap: &MintCapability)
     acquires Treasury, VestarOwnerCapability, MintRecordListT, VestarEventHandler, MintRecordList {
         let user_addr = signer::address_of(signer);
 
@@ -201,7 +201,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Query amount in record by given id number
-    public fun value_of_id_by_token<CoinT: store>(user_addr: address, id: u64): u128 acquires MintRecordListT {
+    public fun value_of_id_by_token<CoinT>(user_addr: address, id: u64): u128 acquires MintRecordListT {
         if (!exists<MintRecordListT<CoinT>>(user_addr)) {
             return 0
         };
@@ -264,7 +264,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Add vestar mint record
-    fun add_to_record<CoinT: store>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
+    fun add_to_record<CoinT>(signer: &signer, id: u64, pledge_time_sec: u64, staked_amount: u128, minted_amount: u128)
     acquires MintRecordListT, MintRecordList {
         let user_addr = signer::address_of(signer);
 
@@ -289,7 +289,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Pop vestar mint record
-    fun pop_from_record<CoinT: store>(signer: &signer, id: u64)
+    fun pop_from_record<CoinT>(signer: &signer, id: u64)
     : option::Option<MintRecordT<CoinT>> acquires MintRecordListT, MintRecordList {
         let user_addr = signer::address_of(signer);
 
@@ -310,7 +310,7 @@ module TokenSwapVestarMinter {
         }
     }
 
-    fun find_idx_by_id<CoinT: store>(c: &vector<MintRecordT<CoinT>>, id: u64): option::Option<u64> {
+    fun find_idx_by_id<CoinT>(c: &vector<MintRecordT<CoinT>>, id: u64): option::Option<u64> {
         let len = vector::length(c);
         if (len == 0) {
             return option::none()
@@ -365,7 +365,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Auto convert to new if exist old record list
-    public fun maybe_upgrade_records<CoinT: store>(user_addr: address, items: &mut vector<MintRecordT<CoinT>>) acquires MintRecordList {
+    public fun maybe_upgrade_records<CoinT>(user_addr: address, items: &mut vector<MintRecordT<CoinT>>) acquires MintRecordList {
         if (!exists<MintRecordList>(user_addr)) {
             return
         };
@@ -374,7 +374,7 @@ module TokenSwapVestarMinter {
         update_record_to_recordT<CoinT>(&mut old_record_list, items);
     }
 
-    public fun update_record_to_recordT<CoinT: store>(record_list: &mut vector<MintRecord>,
+    public fun update_record_to_recordT<CoinT>(record_list: &mut vector<MintRecord>,
                                                        record_list_t: &mut vector<MintRecordT<CoinT>>) {
         let len = vector::length(record_list);
         if (len == 0) {
@@ -403,7 +403,7 @@ module TokenSwapVestarMinter {
     }
 
     /// Check vestar record has exists
-    public fun exists_record<CoinT: store>(user_addr: address, id: u64): bool acquires MintRecordListT {
+    public fun exists_record<CoinT>(user_addr: address, id: u64): bool acquires MintRecordListT {
         if (!exists<MintRecordListT<CoinT>>(user_addr)) {
             return false
         };

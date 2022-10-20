@@ -25,8 +25,7 @@ module SwapAdmin::UpgradeScripts {
     }
 
     /// extend farm pool
-    public entry fun extend_farm_pool<X: copy + drop + store,
-                                      Y: copy + drop + store>(
+    public entry fun extend_farm_pool<X, Y>(
         _signer: &signer,
         _override_update: bool
     ) {
@@ -36,14 +35,14 @@ module SwapAdmin::UpgradeScripts {
     }
 
     /// This will initialize syrup
-    public entry fun initialize_global_syrup_info(_signer: &signer, _pool_release_per_second: u128) {
-        // TokenSwapConfig::assert_admin(signer);
-        // TokenSwapSyrupScript::initialize_global_syrup_info(signer, pool_release_per_second);
-        abort error::aborted(ERR_DEPRECATED)
+    public entry fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
+        TokenSwapConfig::assert_admin(signer);
+        TokenSwapSyrupScript::initialize_global_syrup_info(signer, pool_release_per_second);
+        // abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Extend syrup pool
-    public entry fun extend_syrup_pool<TokenT: copy + drop + store>(_signer: &signer, _override_update: bool) {
+    public entry fun extend_syrup_pool<TokenT>(_signer: &signer, _override_update: bool) {
         //TokenSwapConfig::assert_admin(signer);
         //TokenSwapSyrup::extend_syrup_pool<TokenT>(signer, override_update);
         abort error::aborted(ERR_DEPRECATED)
@@ -82,7 +81,6 @@ module SwapAdmin::UpgradeScripts {
         TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
 
         TokenSwapGov::genesis_initialize(account);
-        TokenSwapGov::upgrade_dao_treasury_genesis_func(account);
         TokenSwapGov::linear_initialize(account);
 
         TokenSwapFarmBoost::initialize_boost_event(account);

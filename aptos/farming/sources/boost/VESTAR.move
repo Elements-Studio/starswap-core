@@ -16,7 +16,7 @@ module VESTAR {
     const ERROR_NOT_GENESIS_ACCOUNT: u64 = 10001;
 
     /// Returns true if `CoinType` is `VESTAR::VESTAR`
-    public fun is_vestar<CoinType: store>(): bool {
+    public fun is_vestar<CoinType>(): bool {
         WrapperUtil::is_same_token<VESTAR, CoinType>()
     }
 

@@ -3,7 +3,7 @@ name = "U256"
 version = "0.3.7"
 
 [addresses]
-u256 = "bda17e76b3c4d6c2c004a4dfdf5046e384facedab3e65134a5e1439373df0602"
+u256 = "0x0c3dbe4f07390f05b19ccfc083fc6aa5bc5d75621d131fc49557c8f4bbc11716"
 
 [dev-dependencies.MoveStdlib]
 git = "https://github.com/aptos-labs/aptos-core.git"

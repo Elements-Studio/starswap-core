@@ -4,7 +4,7 @@ module SwapAdmin::WrapperUtil {
 
     use std::vector;
 
-    public fun is_same_token<CoinType1: store, CoinType2: store>(): bool {
+    public fun is_same_token<CoinType1, CoinType2>(): bool {
         return type_info::type_of<CoinType1>() == type_info::type_of<CoinType2>()
     }
 

@@ -28,7 +28,7 @@ module SwapAdmin::TokenMock {
     struct WDOT has copy, drop, store {}
 
 
-    public fun register_token<CoinType: store>(account: &signer, precision: u8){
+    public fun register_token<CoinType>(account: &signer, precision: u8){
         let token_type_info = type_info::type_of<CoinType>();
         let token_symbol = type_info::struct_name(&token_type_info);
         let token_name = string::utf8(copy token_symbol);
@@ -46,13 +46,13 @@ module SwapAdmin::TokenMock {
         move_to(account, TokenSharedCapability { mint: mint_cap, burn: burn_cap, freeze: freeze_cap });
     }
 
-    public fun mint_token<CoinType: store>(amount: u128): Coin<CoinType> acquires TokenSharedCapability{
+    public fun mint_token<CoinType>(amount: u128): Coin<CoinType> acquires TokenSharedCapability{
         //token holder address
         let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
         coin::mint<CoinType>((amount as u64), &cap.mint)
     }
 
-    public fun burn_token<CoinType: store>(tokens: Coin<CoinType>) acquires TokenSharedCapability{
+    public fun burn_token<CoinType>(tokens: Coin<CoinType>) acquires TokenSharedCapability{
         //token holder address
         let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
         coin::burn<CoinType>(tokens, &cap.burn, );

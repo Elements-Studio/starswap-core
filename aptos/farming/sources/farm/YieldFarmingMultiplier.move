@@ -24,19 +24,19 @@ module SwapAdmin::YieldFarmingMultiplier {
     struct PoolCapability<phantom PoolType, phantom AssetT> has key, store {}
 
     /// Initialize from total asset weight and amount
-    public fun init<PoolType: store, AssetT: store>(_signer: &signer): PoolCapability<PoolType, AssetT> {
+    public fun init<PoolType, AssetT>(_signer: &signer): PoolCapability<PoolType, AssetT> {
         abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Uninitialize called by caller
-    public fun uninitialiaze<PoolType: store, AssetT: store>(cap: PoolCapability<PoolType, AssetT>) {
+    public fun uninitialiaze<PoolType, AssetT>(cap: PoolCapability<PoolType, AssetT>) {
         let PoolCapability {} = cap;
     }
 
     /// Add new multiplier pool by admin
     /// @param key: The key name of pool
     ///
-    public fun add<PoolType: store, AssetT: store>(
+    public fun add<PoolType, AssetT>(
         _signer: &signer,
         _key: &vector<u8>,
         _multiplier: u64
@@ -47,7 +47,7 @@ module SwapAdmin::YieldFarmingMultiplier {
     /// Remove an exists multiplier pool by admin
     /// @param key: The key name of pool
     ///
-    public fun remove<PoolType: store, AssetT: store>(
+    public fun remove<PoolType, AssetT>(
         _signer: &signer,
         _key: &vector<u8>
     ) {
@@ -57,7 +57,7 @@ module SwapAdmin::YieldFarmingMultiplier {
     /// Update multiplier pool by admin
     /// @param key: The key name of pool
     ///
-    public fun update<PoolType: store, AssetT: store>(
+    public fun update<PoolType, AssetT>(
         _signer: &signer,
         _key: &vector<u8>,
         _multiplier: u64
@@ -68,14 +68,14 @@ module SwapAdmin::YieldFarmingMultiplier {
     /// Add weight to a pool
     /// @param key: The key name of pool
     /// @param amount: Amount of asset
-    public fun add_amount<PoolType: store, AssetT: store>(
+    public fun add_amount<PoolType, AssetT>(
         _key: &vector<u8>,
         _asset_amount: u128
     ) {
         abort error::aborted(ERR_DEPRECATED)
     }
 
-    public fun remove_weight<PoolType: store, AssetT: store>(
+    public fun remove_weight<PoolType, AssetT>(
         _key: &vector<u8>,
         _asset_amount: u128
     ) {
@@ -84,21 +84,21 @@ module SwapAdmin::YieldFarmingMultiplier {
 
     /// Query pool by key
     /// @return (multiplier, asset_weight, asset_amount)
-    public fun query_pool<PoolType: store, AssetT: store>(
+    public fun query_pool<PoolType, AssetT>(
         _key: &vector<u8>
     ): (u64, u128, u128) {
         abort error::aborted(ERR_DEPRECATED)
     }
 
     /// Find by key which is from user
-    fun find_pool_by_key<PoolType: store, AssetT: store>(
+    fun find_pool_by_key<PoolType, AssetT>(
         _c: &mut vector<MultiplierPool<PoolType, AssetT>>,
         _key: &vector<u8>
     ): &mut MultiplierPool<PoolType, AssetT> {
         abort error::aborted(ERR_DEPRECATED)
     }
 
-    fun find_idx_by_id<PoolType: store, AssetType: store>(
+    fun find_idx_by_id<PoolType, AssetType>(
         _c: &vector<MultiplierPool<PoolType, AssetType>>,
         _key: &vector<u8>
     ): option::Option<u64> {

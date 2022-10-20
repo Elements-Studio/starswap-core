@@ -8,14 +8,12 @@ module SwapAdmin::TokenSwapScripts {
     use SwapAdmin::TokenSwapRouter3;
 
     /// register swap for admin user
-    public entry fun register_swap_pair<X: store + drop,
-                                          Y: store + drop>(account: &signer) {
+    public entry fun register_swap_pair<X, Y>(account: &signer) {
         TokenSwapRouter::register_swap_pair<X, Y>(account);
     }
 
     /// Add liquidity for user
-    public entry fun add_liquidity<X: store,
-                                     Y: store>(
+    public entry fun add_liquidity<X, Y>(
         signer: &signer,
         amount_x_desired: u128,
         amount_y_desired: u128,
@@ -30,8 +28,7 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Remove liquidity for user
-    public entry fun remove_liquidity<X: store,
-                                        Y: store>(
+    public entry fun remove_liquidity<X, Y>(
         signer: &signer,
         liquidity: u128,
         amount_x_min: u128,
@@ -42,13 +39,11 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Poundage number of liquidity token pair
-    public fun get_poundage_rate<X: store,
-                                         Y: store>(): (u64, u64) {
+    public fun get_poundage_rate<X, Y>(): (u64, u64) {
         TokenSwapRouter::get_poundage_rate<X, Y>()
     }
 
-    public entry fun swap_exact_token_for_token<X: store,
-                                                  Y: store>(
+    public entry fun swap_exact_token_for_token<X, Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128,
@@ -56,9 +51,7 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter::swap_exact_token_for_token<X, Y>(signer, amount_x_in, amount_y_out_min);
     }
 
-    public entry fun swap_exact_token_for_token_router2<X: store,
-                                                          R: store,
-                                                          Y: store>(
+    public entry fun swap_exact_token_for_token_router2<X, R, Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128,
@@ -66,10 +59,7 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter2::swap_exact_token_for_token<X, R, Y>(signer, amount_x_in, amount_y_out_min);
     }
 
-    public entry fun swap_exact_token_for_token_router3<X: store,
-                                                          R: store,
-                                                          T: store,
-                                                          Y: store>(
+    public entry fun swap_exact_token_for_token_router3<X, R, T, Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128,
@@ -77,8 +67,7 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter3::swap_exact_token_for_token<X, R, T, Y>(signer, amount_x_in, amount_y_out_min);
     }
 
-    public entry fun swap_token_for_exact_token<X: store,
-                                                  Y: store>(
+    public entry fun swap_token_for_exact_token<X, Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128,
@@ -86,9 +75,7 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter::swap_token_for_exact_token<X, Y>(signer, amount_x_in_max, amount_y_out);
     }
 
-    public entry fun swap_token_for_exact_token_router2<X: store,
-                                                          R: store,
-                                                          Y: store>(
+    public entry fun swap_token_for_exact_token_router2<X, R, Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128,
@@ -96,10 +83,7 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter2::swap_token_for_exact_token<X, R, Y>(signer, amount_x_in_max, amount_y_out);
     }
 
-    public entry fun swap_token_for_exact_token_router3<X: store,
-                                                          R: store,
-                                                          T: store,
-                                                          Y: store>(
+    public entry fun swap_token_for_exact_token_router3<X, R, T, Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128,
@@ -108,8 +92,7 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Poundage rate from swap fee
-    public entry fun set_poundage_rate<X: store,
-                                         Y: store>(signer: &signer, num: u64, denum: u64) {
+    public entry fun set_poundage_rate<X, Y>(signer: &signer, num: u64, denum: u64) {
         TokenSwapRouter::set_poundage_rate<X, Y>(signer, num, denum);
     }
 
@@ -119,8 +102,7 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Operation_v2 rate from all swap fee
-    public entry fun set_swap_fee_operation_rate_v2<X: store,
-                                                      Y: store>(signer: &signer,
+    public entry fun set_swap_fee_operation_rate_v2<X, Y>(signer: &signer,
                                                                               num: u64,
                                                                               denum: u64) {
         TokenSwapRouter::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
@@ -147,16 +129,14 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Get amount in with token pair pondage rate
-    public fun get_amount_in<X: store,
-                             Y: store>(x_value: u128): u128 {
+    public fun get_amount_in<X, Y>(x_value: u128): u128 {
         let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_in(x_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
 
     /// Get amount out with token pair pondage rate
-    public fun get_amount_out<X: store,
-                              Y: store>(x_in_value: u128): u128 {
+    public fun get_amount_out<X, Y>(x_in_value: u128): u128 {
         let (reserve_x, reverse_y) = TokenSwapRouter::get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)

@@ -32,7 +32,7 @@ module SwapAdmin::TokenSwapRouter {
 
 
     /// Check if swap pair exists
-    public fun swap_pair_exists<X: store, Y: store>(): bool {
+    public fun swap_pair_exists<X, Y>(): bool {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -43,15 +43,15 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Swap token auto accept
-    public fun swap_pair_token_auto_accept<Token: store>(signer: &signer) {
+    public fun swap_pair_token_auto_accept<Token>(signer: &signer) {
         if (! coin::is_account_registered<Token>(signer::address_of(signer))) {
             coin::register<Token>(signer);
         };
     }
 
     /// Register swap pair by comparing sort
-    public fun register_swap_pair<X: store,
-                                  Y: store>(signer: &signer) {
+    public fun register_swap_pair<X,
+                                  Y>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -62,8 +62,7 @@ module SwapAdmin::TokenSwapRouter {
     }
 
 
-    public fun liquidity<X: store,
-                         Y: store>(signer: address): u128 {
+    public fun liquidity<X, Y>(signer: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -73,7 +72,7 @@ module SwapAdmin::TokenSwapRouter {
         }
     }
 
-    public fun total_liquidity<X: store, Y: store>(): u128 {
+    public fun total_liquidity<X, Y>(): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -83,7 +82,7 @@ module SwapAdmin::TokenSwapRouter {
         }
     }
 
-    public fun add_liquidity<X: store, Y: store>(
+    public fun add_liquidity<X, Y>(
         signer: &signer,
         amount_x_desired: u128,
         amount_y_desired: u128,
@@ -111,7 +110,7 @@ module SwapAdmin::TokenSwapRouter {
         }
     }
 
-    fun intra_add_liquidity<X: store, Y: store>(
+    fun intra_add_liquidity<X, Y>(
         signer: &signer,
         amount_x_desired: u128,
         amount_y_desired: u128,
@@ -139,7 +138,7 @@ module SwapAdmin::TokenSwapRouter {
         coin::deposit(signer::address_of(signer), liquidity_token);
     }
 
-    fun intra_calculate_amount_for_liquidity<X: store, Y: store>(
+    fun intra_calculate_amount_for_liquidity<X, Y>(
         amount_x_desired: u128,
         amount_y_desired: u128,
         amount_x_min: u128,
@@ -162,7 +161,7 @@ module SwapAdmin::TokenSwapRouter {
         }
     }
 
-    public fun remove_liquidity<X: store, Y: store>(
+    public fun remove_liquidity<X, Y>(
         signer: &signer,
         liquidity: u128,
         amount_x_min: u128,
@@ -177,7 +176,7 @@ module SwapAdmin::TokenSwapRouter {
         }
     }
 
-    fun intra_remove_liquidity<X: store, Y: store>(
+    fun intra_remove_liquidity<X, Y>(
         signer: &signer,
         liquidity: u128,
         amount_x_min: u128,
@@ -193,14 +192,14 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Computer y out value by given x_in and slipper value
-    public fun compute_y_out<X: store, Y: store>(amount_x_in: u128): u128 {
+    public fun compute_y_out<X, Y>(amount_x_in: u128): u128 {
         // calculate actual y out
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
         let (reserve_x, reserve_y) = get_reserves<X, Y>();
         TokenSwapLibrary::get_amount_out(amount_x_in, reserve_x, reserve_y, fee_numberator, fee_denumerator)
     }
 
-    public fun swap_exact_token_for_token<X: store, Y: store>(
+    public fun swap_exact_token_for_token<X, Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128,
@@ -237,14 +236,14 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Computer x in value by given y_out and x_in slipper value
-    public fun compute_x_in<X: store, Y: store>(amount_y_out: u128) : u128 {
+    public fun compute_x_in<X, Y>(amount_y_out: u128) : u128 {
         // calculate actual x in
         let (reserve_x, reserve_y) = get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_in(amount_y_out, reserve_x, reserve_y, fee_numberator, fee_denumerator)
     }
 
-    public fun swap_token_for_exact_token<X: store, Y: store>(
+    public fun swap_token_for_exact_token<X, Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128,
@@ -286,7 +285,7 @@ module SwapAdmin::TokenSwapRouter {
     /// Get reserves of a token pair.
     /// The order of `X`, `Y` doesn't need to be sorted.
     /// And the order of return values are based on the order of type parameters.
-    public fun get_reserves<X: store, Y: store>(): (u128, u128) {
+    public fun get_reserves<X, Y>(): (u128, u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -300,7 +299,7 @@ module SwapAdmin::TokenSwapRouter {
     /// Get cumulative info of a token pair.
     /// The order of `X`, `Y` doesn't need to be sorted.
     /// And the order of return values are based on the order of type parameters.
-    public fun get_cumulative_info<X: store, Y: store>(): (U256, U256, u64) {
+    public fun get_cumulative_info<X, Y>(): (U256, U256, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -313,7 +312,7 @@ module SwapAdmin::TokenSwapRouter {
 
 
     /// Withdraw liquidity from users
-    public fun withdraw_liquidity_token<X: store, Y: store>(
+    public fun withdraw_liquidity_token<X, Y>(
         signer: &signer,
         amount: u128
     ): Coin<LiquidityToken<X, Y>> {
@@ -324,7 +323,7 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Deposit liquidity token into user source list
-    public fun deposit_liquidity_token<X: store, Y: store>(
+    public fun deposit_liquidity_token<X, Y>(
         signer: address,
         to_deposit: Coin<LiquidityToken<X, Y>>
     ) {
@@ -332,8 +331,8 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Poundage number of liquidity token pair
-    public fun get_poundage_rate<X: store,
-                                 Y: store>(): (u64, u64) {
+    public fun get_poundage_rate<X,
+                                 Y>(): (u64, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -344,8 +343,8 @@ module SwapAdmin::TokenSwapRouter {
     }
     
     /// Operation number of liquidity token pair
-    public fun get_swap_fee_operation_rate_v2<X: store,
-                                 Y: store>(): (u64, u64) {
+    public fun get_swap_fee_operation_rate_v2<X,
+                                 Y>(): (u64, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -356,8 +355,8 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Poundage rate from swap fee
-    public fun set_poundage_rate<X: store,
-                                 Y: store>(signer: &signer, num: u64, denum: u64) {
+    public fun set_poundage_rate<X,
+                                 Y>(signer: &signer, num: u64, denum: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -367,8 +366,8 @@ module SwapAdmin::TokenSwapRouter {
         };
     }
 
-    public entry fun upgrade_tokenpair_to_tokenswappair<X: store,
-                                                          Y: store>(signer: &signer) {
+    public entry fun upgrade_tokenpair_to_tokenswappair<X,
+                                                          Y>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -386,8 +385,8 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Operation_v2 rate from all swap fee
-    public fun set_swap_fee_operation_rate_v2<X: store,
-                                              Y: store>(signer: &signer,
+    public fun set_swap_fee_operation_rate_v2<X,
+                                              Y>(signer: &signer,
                                                                       num: u64,
                                                                       denum: u64) {
         TokenSwapConfig::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);

@@ -27,7 +27,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     }
 
     /// Initialize from total asset weight and amount
-    public fun initialize<PoolType: store, AssetType: store>(
+    public fun initialize<PoolType: store, AssetType>(
         account: &signer
     ): PoolCapability<PoolType, AssetType> {
         move_to(account, MultiplierPoolsGlobalInfo<PoolType, AssetType> {
@@ -40,14 +40,14 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     }
 
     /// Uninitialize called by caller
-    public fun uninitialize<PoolType: store, AssetType: store>(cap: PoolCapability<PoolType, AssetType>) {
+    public fun uninitialize<PoolType: store, AssetType>(cap: PoolCapability<PoolType, AssetType>) {
         let PoolCapability<PoolType, AssetType> { holder: _ } = cap;
     }
 
     /// Add new multiplier pool by admin
     /// @param key: The key name of pool
     ///
-    public fun add_pool<PoolType: store, AssetType: store>(
+    public fun add_pool<PoolType: store, AssetType>(
         cap: &PoolCapability<PoolType, AssetType>,
         broker: address,
         key: &vector<u8>,
@@ -71,7 +71,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     /// Remove an exists multiplier pool by admin
     /// @param key: The key name of pool
     ///
-    public fun remove_pool<PoolType: store, AssetType: store>(
+    public fun remove_pool<PoolType: store, AssetType>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>,
         key: &vector<u8>
@@ -102,7 +102,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     /// Add amount to a pool
     /// @param key: The key name of pool
     /// @param amount: Amount of asset
-    public fun add_amount<PoolType: store, AssetType: store>(
+    public fun add_amount<PoolType: store, AssetType>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>,
         key: &vector<u8>,
@@ -122,7 +122,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     /// Add amount from a pool
     /// @param key: The key name of pool
     /// @param amount: Amount of asset
-    public fun remove_amount<PoolType: store, AssetType: store>(
+    public fun remove_amount<PoolType: store, AssetType>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>,
         key: &vector<u8>,
@@ -140,7 +140,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
 
     /// Query pool by key
     /// @return (multiplier, asset_weight, asset_amount)
-    public fun query_pool_by_key<PoolType: store, AssetType: store>(
+    public fun query_pool_by_key<PoolType: store, AssetType>(
         broker: address,
         key: &vector<u8>
     ): (u64, u128, u128) acquires MultiplierPoolsGlobalInfo {
@@ -157,7 +157,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     /// Query all multiplier type of type pledge time
     /// @return (key_list, multiplier_list, asset_amount_list)
     /// key_list split by `|`
-    public fun query_all_pools<PoolType: store, AssetType: store>(
+    public fun query_all_pools<PoolType: store, AssetType>(
         broker: address,
     ): (
         vector<u8>,
@@ -193,7 +193,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
 
     /// Query total staked amounts from multiplier pool
     /// @return (total_amount, total_weight)
-    public fun query_total_amount<PoolType: store, AssetType: store>(
+    public fun query_total_amount<PoolType: store, AssetType>(
         broker: address,
     ): (u128, u128, ) acquires MultiplierPoolsGlobalInfo {
         let (
@@ -232,7 +232,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     }
 
     /// Check the key has exists
-    public fun has<PoolType: store, AssetType: store>(
+    public fun has<PoolType: store, AssetType>(
         broker: address,
         key: &vector<u8>
     ): bool acquires MultiplierPoolsGlobalInfo {
@@ -244,7 +244,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     /// Set mulitplier pool amount with amount
     /// @param key: The key name of pool
     /// @param amount: amount need to be set
-    public fun set_pool_amount<PoolType: store, AssetType: store>(
+    public fun set_pool_amount<PoolType: store, AssetType>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>,
         key: &vector<u8>,
@@ -260,7 +260,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     }
 
     /// Find by key which is from user
-    fun find_pool_by_key<PoolType: store, AssetType: store>(
+    fun find_pool_by_key<PoolType: store, AssetType>(
         c: &mut vector<MultiplierPool<PoolType, AssetType>>,
         key: &vector<u8>
     ): &mut MultiplierPool<PoolType, AssetType> {
@@ -269,7 +269,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         vector::borrow_mut<MultiplierPool<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
     }
 
-    fun find_idx_by_id<PoolType: store, AssetType: store>(
+    fun find_idx_by_id<PoolType: store, AssetType>(
         c: &vector<MultiplierPool<PoolType, AssetType>>,
         key: &vector<u8>
     ): option::Option<u64> {
@@ -290,7 +290,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         }
     }
 
-    fun verify_cap<PoolType: store, AssetType: store>(
+    fun verify_cap<PoolType: store, AssetType>(
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>
     ) {
