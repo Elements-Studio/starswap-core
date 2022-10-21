@@ -212,7 +212,7 @@ module SwapAdmin::TokenSwapGov {
         let scaling_factor = math64::pow(10, (precision as u64));
         let now_timestamp = timestamp::now_seconds();
 
-       // Release 60% for farm. genesis release 5%.
+       // Release 60% for farm. genesis release 5% , and  release 800,000,000,000,000 to genesis swap pool.
        let farm_genesis = calculate_amount_from_percent(GOV_PERCENT_FARM_GENESIS) * (scaling_factor as u128);
        STAR::mint(account, farm_genesis);
        let farm_genesis_token = coin::withdraw<STAR::STAR>(account, (farm_genesis as u64));
@@ -289,9 +289,10 @@ module SwapAdmin::TokenSwapGov {
         // linear 60% - 5 % for farm. 
         let farm_linear = calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128);
         STAR::mint(account, farm_linear);
+        let farm_genesis_swap = farm_linear - ( 800 * 1000 * (scaling_factor as u128));
         move_to(account, GovTreasuryV2<PoolTypeFarmPool>{
             linear_total: farm_linear,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, (farm_linear as u64)),
+            linear_treasury: coin::withdraw<STAR::STAR>(account, ( (farm_linear - farm_genesis_swap) as u64)  ),
             genesis_treasury:coin::zero<STAR::STAR>(),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_FARM_LOCK_TIME,
