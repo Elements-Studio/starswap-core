@@ -265,11 +265,10 @@ module SwapAdmin::TokenSwapGov {
 
 
         // linear APTOS_FARM_GENESIS_AMOUNT - 5 % - 80w for farm linear.
-        let farm_linear_total = APTOS_FARM_GENESIS_AMOUNT - (APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128));
-        let farm_linear = farm_linear_total - ( 800 * 1000 * (scaling_factor as u128));
+        let farm_linear_total = (APTOS_FARM_GENESIS_AMOUNT - (APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128))) - ( 800 * 1000 * (scaling_factor as u128));
         move_to(account, GovTreasuryV2<PoolTypeFarmPool>{
             linear_total: farm_linear_total,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, ( farm_linear as u64)  ),
+            linear_treasury: coin::withdraw<STAR::STAR>(account, ( farm_linear_total as u64)  ),
             genesis_treasury:coin::zero<STAR::STAR>(),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_FARM_LOCK_TIME,
