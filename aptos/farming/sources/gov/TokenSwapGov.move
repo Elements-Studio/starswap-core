@@ -38,6 +38,12 @@ module SwapAdmin::TokenSwapGov {
     // 1e8
     const GOV_TOTAL: u128 = 100000000;
 
+    //Aptos Farm genesis amount
+    const APTOS_FARM_GENESIS_AMOUNT: u128 = 14760000;
+
+    //Aptos Syrup genesis amount
+    const APTOS_SYRUP_GENESIS_AMOUNT: u128 = 3300000;
+
     // 10%
     const GOV_PERCENT_DEVELOPER_FUND: u64 = 10;
     // 5%
@@ -212,46 +218,18 @@ module SwapAdmin::TokenSwapGov {
         let scaling_factor = math64::pow(10, (precision as u64));
         let now_timestamp = timestamp::now_seconds();
 
-       // Release 60% for farm. genesis release 5% , and  release 800,000,000,000,000 to genesis swap pool.
-       let farm_genesis = calculate_amount_from_percent(GOV_PERCENT_FARM_GENESIS) * (scaling_factor as u128);
-       STAR::mint(account, farm_genesis);
-       let farm_genesis_token = coin::withdraw<STAR::STAR>(account, (farm_genesis as u64));
+       // Release farm APTOS_FARM_GENESIS_AMOUNT . release 5% Farm yield, and  release 800,000,000,000,000 to genesis swap pool.
+       let farm_release = APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128);
+       STAR::mint(account, APTOS_FARM_GENESIS_AMOUNT);
+       let farm_genesis_token = coin::withdraw<STAR::STAR>(account, (farm_release as u64));
        TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
 
 
-       // Release 10% for syrup token stake. genesis release 5%.
-       let syrup_genesis = calculate_amount_from_percent(GOV_PERCENT_SYRUP_GENESIS) * (scaling_factor as u128);
-       STAR::mint(account, syrup_genesis);
-       let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, (syrup_genesis as u64));
+       // Release  syrup token stake. release 5% syrup yield.
+       let syrup_release =  APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128);
+       STAR::mint(account, APTOS_SYRUP_GENESIS_AMOUNT);
+       let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, (syrup_release as u64));
        TokenSwapSyrup::initialize(account, syrup_genesis_token);
-
-
-        //Release 5% for community. genesis release 2%.
-        let community_total = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY_GENESIS) * (scaling_factor as u128);
-        STAR::mint(account, community_total);
-        move_to(account, GovTreasury<PoolTypeCommunity>{
-            treasury: coin::withdraw<STAR::STAR>(account, (community_total as u64)),
-            locked_start_timestamp : now_timestamp,
-            locked_total_timestamp : 0,
-        });
-
-        //  Release 1% for IDO
-        let initial_liquidity_total = calculate_amount_from_percent(GOV_PERCENT_IDO) * (scaling_factor as u128);
-        STAR::mint(account, initial_liquidity_total);
-        move_to(account, GovTreasury<PoolTypeIDO>{
-            treasury: coin::withdraw<STAR::STAR>(account, (initial_liquidity_total as u64)),
-            locked_start_timestamp : now_timestamp,
-            locked_total_timestamp : 0,
-        });
-
-        // Release 24% for protocol treasury. genesis release 2%.
-        let protocol_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
-        STAR::mint(account, protocol_treasury_genesis);
-        move_to(account, GovTreasury<PoolTypeProtocolTreasury>{
-            treasury: coin::withdraw<STAR::STAR>(account, (protocol_treasury_genesis as u64)),
-            locked_start_timestamp : now_timestamp,
-            locked_total_timestamp : 0,
-        });
     }
 
     /// dispatch to acceptor from governance treasury pool
@@ -286,13 +264,12 @@ module SwapAdmin::TokenSwapGov {
         let scaling_factor = math64::pow(10, (precision as u64));
 
 
-        // linear 60% - 5 % for farm. 
-        let farm_linear = calculate_amount_from_percent(GOV_PERCENT_FARM - GOV_PERCENT_FARM_GENESIS ) * (scaling_factor as u128);
-        STAR::mint(account, farm_linear);
-        let farm_genesis_swap = farm_linear - ( 800 * 1000 * (scaling_factor as u128));
+        // linear APTOS_FARM_GENESIS_AMOUNT - 5 % - 80w for farm linear.
+        let farm_linear_total = APTOS_FARM_GENESIS_AMOUNT - (APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128));
+        let farm_linear = farm_linear_total - ( 800 * 1000 * (scaling_factor as u128));
         move_to(account, GovTreasuryV2<PoolTypeFarmPool>{
-            linear_total: farm_linear,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, ( (farm_linear - farm_genesis_swap) as u64)  ),
+            linear_total: farm_linear_total,
+            linear_treasury: coin::withdraw<STAR::STAR>(account, ( farm_linear as u64)  ),
             genesis_treasury:coin::zero<STAR::STAR>(),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_FARM_LOCK_TIME,
@@ -303,12 +280,11 @@ module SwapAdmin::TokenSwapGov {
             withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeFarmPool>>(account),
         });
 
-        // linear 10% - 5 % for syrup. 
-        let syrup_linear = calculate_amount_from_percent(GOV_PERCENT_SYRUP - GOV_PERCENT_SYRUP_GENESIS ) * (scaling_factor as u128);
-        STAR::mint(account, syrup_linear);
+        // linear APTOS_SYRUP_GENESIS_AMOUNT - 5 % for syrup.
+        let syrup_linear_total = APTOS_SYRUP_GENESIS_AMOUNT - (APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128));
         move_to(account, GovTreasuryV2<PoolTypeSyrup>{
-            linear_total:syrup_linear,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, (syrup_linear as u64)),
+            linear_total:syrup_linear_total,
+            linear_treasury: coin::withdraw<STAR::STAR>(account, (syrup_linear_total as u64)),
             genesis_treasury:coin::zero<STAR::STAR>(),
             locked_start_timestamp : GENESIS_TIMESTAMP,
             locked_total_timestamp : GOV_PERCENT_SYRUP_LOCK_TIME,
@@ -318,84 +294,6 @@ module SwapAdmin::TokenSwapGov {
             withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeSyrup>>(account),
             withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeSyrup>>(account),
         });
-
-        // linear 5% - 2 % for community. 
-        let community_linear = calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) * (scaling_factor as u128);
-        let GovTreasury{ 
-            treasury:communtiy_genesis_token,
-            locked_start_timestamp:_,
-            locked_total_timestamp:_ 
-            } =  move_from<GovTreasury<PoolTypeCommunity>>(signer::address_of(account));
-        STAR::mint(account, community_linear);
-        move_to(account, GovTreasuryV2<PoolTypeCommunity>{
-            linear_total:community_linear,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, (community_linear as u64)),
-            genesis_treasury:communtiy_genesis_token,
-            locked_start_timestamp : GENESIS_TIMESTAMP,
-            locked_total_timestamp : GOV_PERCENT_COMMUNITY_LOCK_TIME,
-        });
-        
-        move_to(account, GovTreasuryEvent{
-            withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeCommunity>>(account),
-            withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeCommunity>>(account),
-        });
-
-        // linear 10%  for developerfund. 
-        let developerfund_linear = calculate_amount_from_percent(GOV_PERCENT_DEVELOPER_FUND) * (scaling_factor as u128);
-        STAR::mint(account, developerfund_linear);
-        move_to(account, GovTreasuryV2<PoolTypeDeveloperFund>{
-            linear_total:developerfund_linear,
-            linear_treasury: coin::withdraw<STAR::STAR>(account, (developerfund_linear as u64)),
-            genesis_treasury:coin::zero<STAR::STAR>(),
-            locked_start_timestamp : GENESIS_TIMESTAMP,
-            locked_total_timestamp : GOV_PERCENT_DEVELOPER_FUND_LOCK_TIME,
-        });
-
-        move_to(account, GovTreasuryEvent{
-            withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeDeveloperFund>>(account),
-            withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeDeveloperFund>>(account),
-        });
-
-        //  ido.
-        let GovTreasury{ 
-            treasury:ido_genesis_token,
-            locked_start_timestamp:_,
-            locked_total_timestamp:_ 
-            } =  move_from<GovTreasury<PoolTypeIDO>>(signer::address_of(account));
-
-        move_to(account, GovTreasuryV2<PoolTypeIDO>{
-            linear_total:0,
-            linear_treasury: coin::zero<STAR::STAR>(),
-            genesis_treasury:ido_genesis_token,
-            locked_start_timestamp : GENESIS_TIMESTAMP,
-            locked_total_timestamp : 0,
-        });
-        
-        move_to(account, GovTreasuryEvent{
-            withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeIDO>>(account),
-            withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeIDO>>(account),
-        });
-
-        let GovTreasury{ 
-            treasury:protocol_genesis_token,
-            locked_start_timestamp:_,
-            locked_total_timestamp:_ 
-            } =  move_from<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(account));
-
-        move_to(account, GovTreasuryV2<PoolTypeProtocolTreasury>{
-            linear_total:0,
-            linear_treasury: coin::zero<STAR::STAR>(),
-            genesis_treasury:protocol_genesis_token,
-            locked_start_timestamp : GENESIS_TIMESTAMP,
-            locked_total_timestamp : 0,
-        });
-        
-        move_to(account, GovTreasuryEvent{
-            withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeProtocolTreasury>>(account),
-            withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeProtocolTreasury>>(account),
-        });
-
-
     }
     //Linear extraction function (because the models of Farm and syrup are different, the function is set to private)
     fun linear_withdraw<PoolType>(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
@@ -417,14 +315,14 @@ module SwapAdmin::TokenSwapGov {
             receiver:to,
         });
     }
-    //Community Linear Treasury Extraction Function
-    public fun linear_withdraw_community(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
-        linear_withdraw<PoolTypeCommunity>(account,to,amount);
-    }
-    //Developer Fund Linear Treasury Extraction Function
-    public fun linear_withdraw_developerfund(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
-        linear_withdraw<PoolTypeDeveloperFund>(account,to,amount);
-    }
+    // //Community Linear Treasury Extraction Function
+    // public fun linear_withdraw_community(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
+    //     linear_withdraw<PoolTypeCommunity>(account,to,amount);
+    // }
+    // //Developer Fund Linear Treasury Extraction Function
+    // public fun linear_withdraw_developerfund(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
+    //     linear_withdraw<PoolTypeDeveloperFund>(account,to,amount);
+    // }
     //Farm and syrup linear treasury extraction functions need to pass in generic parameters        PoolTypeFarmPool ,PoolTypeSyrup 
     fun linear_withdraw_farm_syrup<PoolType>(account:&signer):Coin<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
             TokenSwapConfig::assert_global_freeze();
