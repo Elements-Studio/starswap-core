@@ -6,7 +6,7 @@ module SwapAdmin::MultiChain {
     use SwapAdmin::STAR::{Self, STAR};
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool, PoolTypeSyrup};
+    use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool, PoolTypeSyrup, PoolTypeCommunity};
     use SwapAdmin::TokenSwapSyrup;
 
     #[test_only]
@@ -54,6 +54,24 @@ module SwapAdmin::MultiChain {
             chain: b"Aptos_Multi_genesis",
             token_code: Token::token_code<STAR>(),
             amount: farm_treasury_burn_amount + farm_linear_burn_amount + syrup_treasury_burn_amount + syrup_linear_burn_amount
+        });
+    }
+
+    public fun genesis_aptos_burn_community(sender: &signer)acquires MultiChainEvent{
+        STAR::assert_genesis_address(sender);
+        assert!(TokenSwapGov::get_total_of_linear_treasury<PoolTypeCommunity>() == 3000000000000000, ERR_APTOS_GENESISED);
+        if (!exists<MultiChainEvent>(address_of(sender))) {
+            move_to(sender, MultiChainEvent {
+                event: new_event_handle<GenesisEvent>(sender)
+            })
+        };
+        TokenSwapGov::aptos_genesis_burn_community(sender, 1000 * 1000 * 1000 * 1000 * 1000);
+        let event = &mut borrow_global_mut<MultiChainEvent>(address_of(sender)).event;
+
+        Event::emit_event(event, GenesisEvent {
+            chain: b"Aptos_Multi_genesis_Community",
+            token_code: Token::token_code<STAR>(),
+            amount: 1000 * 1000 * 1000 * 1000 * 1000
         });
     }
 

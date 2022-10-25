@@ -17,7 +17,7 @@ module UpgradeScripts {
     use SwapAdmin::STAR::STAR;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR;
-    use SwapAdmin::MultiChain::genesis_aptos_burn;
+    use SwapAdmin::MultiChain::{genesis_aptos_burn, genesis_aptos_burn_community};
     use StarcoinFramework::STC::STC;
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;
@@ -131,6 +131,9 @@ module UpgradeScripts {
         genesis_aptos_burn(&account);
     }
 
+    public (script)fun upgrade_from_v2_0_0_to_v2_0_1(account: signer){
+        genesis_aptos_burn_community(&account);
+    }
 
     /// This function initializes all structures for the latest version,
     /// And is only used for integration tests
