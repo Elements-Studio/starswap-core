@@ -300,9 +300,8 @@ module SwapAdmin::TokenSwapGov {
 
         // APTOS_COMMUNITY_GENESIS_AMOUNT  for community linear treasury.
         // 40% APTOS_COMMUNITY_GENESIS_AMOUNT  for community genesis treasury
-
         let commuity_linear_total = APTOS_COMMUNITY_GENESIS_AMOUNT ;
-        let commuity_genesis = APTOS_COMMUNITY_GENESIS_AMOUNT / 5 * 2;
+        let commuity_genesis = APTOS_COMMUNITY_GENESIS_AMOUNT / 100 * 40;
         move_to(account, GovTreasuryV2<PoolTypeCommunity>{
             linear_total: commuity_linear_total - commuity_genesis,
             linear_treasury: coin::withdraw<STAR::STAR>(account, ((commuity_linear_total - commuity_genesis) as u64)),
