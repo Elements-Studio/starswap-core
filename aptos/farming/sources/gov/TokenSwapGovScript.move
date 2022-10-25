@@ -31,13 +31,9 @@ module SwapAdmin::TokenSwapGovScript {
        TokenSwapGov::linear_withdraw_syrup(account , amount);
    }
 
-    // /// Linear extraction of Community treasury
-    // public entry fun linear_withdraw_community(account: &signer ,to:address,amount :u128) {
-    //     TokenSwapGov::linear_withdraw_community(account, to, amount);
-    // }
-    //
-    // /// Linear extraction of developerfund treasury
-    // public entry fun linear_withdraw_developerfund(account: &signer ,to:address,amount :u128) {
-    //     TokenSwapGov::linear_withdraw_developerfund(account, to, amount);
-    // }
+    /// Linear extraction of Community treasury
+    public entry fun linear_withdraw_community(account: &signer ,to:address,amount :u128) {
+        TokenSwapGov::linear_withdraw_community(account, to, amount);
+    }
+
 }

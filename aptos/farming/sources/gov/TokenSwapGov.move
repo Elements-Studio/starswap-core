@@ -336,14 +336,12 @@ module SwapAdmin::TokenSwapGov {
             receiver:to,
         });
     }
-    // //Community Linear Treasury Extraction Function
-    // public fun linear_withdraw_community(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
-    //     linear_withdraw<PoolTypeCommunity>(account,to,amount);
-    // }
-    // //Developer Fund Linear Treasury Extraction Function
-    // public fun linear_withdraw_developerfund(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
-    //     linear_withdraw<PoolTypeDeveloperFund>(account,to,amount);
-    // }
+
+    //Community Linear Treasury Extraction Function
+    public fun linear_withdraw_community(account:&signer,to:address,amount:u128) acquires GovTreasuryV2,GovTreasuryEvent{
+        linear_withdraw<PoolTypeCommunity>(account,to,amount);
+    }
+
     //Farm and syrup linear treasury extraction functions need to pass in generic parameters        PoolTypeFarmPool ,PoolTypeSyrup 
     fun linear_withdraw_farm_syrup<PoolType>(account:&signer):Coin<STAR::STAR> acquires GovTreasuryV2,GovTreasuryEvent{
             TokenSwapConfig::assert_global_freeze();
