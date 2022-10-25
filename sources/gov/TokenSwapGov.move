@@ -485,8 +485,11 @@ module TokenSwapGov {
         let second_release =  treasury.linear_total / (treasury.locked_total_timestamp as u128);
 
         let amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-  
-        Token::value<STAR::STAR>(&treasury.linear_treasury) - (treasury.linear_total - amount)
+        if(Token::value<STAR::STAR>(&treasury.linear_treasury) < (treasury.linear_total - amount)){
+            0
+        }else {
+            Token::value<STAR::STAR>(&treasury.linear_treasury) - (treasury.linear_total - amount)
+        }
     }
 
     #[test]
