@@ -117,6 +117,9 @@ module UpgradeScripts {
     public(script) fun upgrade_from_v1_0_12_to_v2_0_0(account: signer){
         TokenSwapConfig::assert_admin(&account);
 
+        TokenSwapGov::linear_withdraw_farm(&account , 0);
+        TokenSwapGov::linear_withdraw_syrup(&account , 0);
+
         TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
         TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
         TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
