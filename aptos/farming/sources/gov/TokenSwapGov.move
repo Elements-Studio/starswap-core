@@ -44,6 +44,9 @@ module SwapAdmin::TokenSwapGov {
     //Aptos Syrup genesis amount
     const APTOS_SYRUP_GENESIS_AMOUNT: u128 = 3300000;
 
+    //Aptos Commuity genesis amount
+    const APTOS_COMMUNITY_GENESIS_AMOUNT: u128 = 1000000;
+
     // 10%
     const GOV_PERCENT_DEVELOPER_FUND: u64 = 10;
     // 5%
@@ -216,7 +219,6 @@ module SwapAdmin::TokenSwapGov {
 
         let precision = STAR::precision();
         let scaling_factor = math64::pow(10, (precision as u64));
-        let now_timestamp = timestamp::now_seconds();
 
        // Release farm APTOS_FARM_GENESIS_AMOUNT . release 5% Farm yield, and  release 800,000,000,000,000 to genesis swap pool.
        let farm_release = APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128);
@@ -230,6 +232,8 @@ module SwapAdmin::TokenSwapGov {
        STAR::mint(account, APTOS_SYRUP_GENESIS_AMOUNT);
        let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, (syrup_release as u64));
        TokenSwapSyrup::initialize(account, syrup_genesis_token);
+
+        STAR::mint(account, APTOS_COMMUNITY_GENESIS_AMOUNT);
     }
 
     /// dispatch to acceptor from governance treasury pool
@@ -257,7 +261,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
     //Initialize the economic model of linear release
-     public fun linear_initialize(account: &signer) acquires GovTreasury {
+     public fun linear_initialize(account: &signer)  {
         STAR::assert_genesis_address(account);
 
         let precision = STAR::precision();
@@ -292,6 +296,24 @@ module SwapAdmin::TokenSwapGov {
         move_to(account, GovTreasuryEvent{
             withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeSyrup>>(account),
             withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeSyrup>>(account),
+        });
+
+        // APTOS_COMMUNITY_GENESIS_AMOUNT  for community linear treasury.
+        // 40% APTOS_COMMUNITY_GENESIS_AMOUNT  for community genesis treasury
+
+        let commuity_linear_total = APTOS_COMMUNITY_GENESIS_AMOUNT ;
+        let commuity_genesis = APTOS_COMMUNITY_GENESIS_AMOUNT / 5 * 2;
+        move_to(account, GovTreasuryV2<PoolTypeCommunity>{
+            linear_total: commuity_linear_total - commuity_genesis,
+            linear_treasury: coin::withdraw<STAR::STAR>(account, ((commuity_linear_total - commuity_genesis) as u64)),
+            genesis_treasury:coin::withdraw<STAR::STAR>(account, (commuity_genesis as u64)),
+            locked_start_timestamp : GENESIS_TIMESTAMP,
+            locked_total_timestamp : GOV_PERCENT_SYRUP_LOCK_TIME,
+        });
+
+        move_to(account, GovTreasuryEvent{
+            withdraw_linearGovTreasury_event_handler: account::new_event_handle<LinearGovTreasuryWithdrawEvent<PoolTypeCommunity>>(account),
+            withdraw_genesisGovTreasury_event_handler: account::new_event_handle<GenesisGovTreasuryWithdrawEvent<PoolTypeCommunity>>(account),
         });
     }
     //Linear extraction function (because the models of Farm and syrup are different, the function is set to private)
