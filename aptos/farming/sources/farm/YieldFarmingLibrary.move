@@ -7,7 +7,7 @@ module YieldFarmingLibrary {
     use std::error;
 
     use SwapAdmin::BigExponential;
-    use u256::u256::{Self, U256};
+    use SwapAdmin::U256Wrapper::{Self, U256};
 
     const ERR_FARMING_TIMESTAMP_INVALID : u64 = 101;
     const ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW : u64 = 102;
@@ -47,8 +47,8 @@ module YieldFarmingLibrary {
         assert!(last_update_timestamp <= now_seconds, error::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
         let time_period = now_seconds - last_update_timestamp;
         let addtion_index = release_per_second * (time_period as u128);
-        let index_u256 = u256::add(
-            u256::from_u128(harvest_index),
+        let index_u256 = U256Wrapper::add(
+            U256Wrapper::from_u128(harvest_index),
             BigExponential::mantissa(BigExponential::exp_direct_expand(addtion_index))
         );
         BigExponential::to_safe_u128(index_u256)
@@ -67,8 +67,8 @@ module YieldFarmingLibrary {
                 now_seconds,
                 release_per_second);
 
-        let index_u256 = u256::add(
-            u256::from_u128(harvest_index),
+        let index_u256 = U256Wrapper::add(
+            U256Wrapper::from_u128(harvest_index),
             additional_harvest_index,
         );
         BigExponential::to_safe_u128(index_u256)
@@ -93,7 +93,7 @@ module YieldFarmingLibrary {
                                          last_harvest_index: u128,
                                          asset_weight: u128): u128 {
         assert!(harvest_index >= last_harvest_index, error::invalid_argument(ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW));
-        let amount_u256 = u256::mul(u256::from_u128(asset_weight), u256::from_u128(harvest_index - last_harvest_index));
+        let amount_u256 = U256Wrapper::mul(U256Wrapper::from_u128(asset_weight), U256Wrapper::from_u128(harvest_index - last_harvest_index));
         BigExponential::truncate(BigExponential::exp_from_u256(amount_u256))
     }
 

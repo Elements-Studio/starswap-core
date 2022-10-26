@@ -5,7 +5,7 @@ module SwapAdmin::TokenSwapRouter {
     use aptos_framework::coin::{Self, Coin};
     use std::signer;
     use std::option;
-    use u256::u256::{ U256};
+    use SwapAdmin::U256Wrapper::{ U256};
 
     use SwapAdmin::TokenSwap::{LiquidityToken, Self};
     use SwapAdmin::TokenSwapLibrary;

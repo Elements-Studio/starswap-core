@@ -16,4 +16,6 @@ aptos/storage/
 aptos/release/
 aptos/.aptos
 aptos/output*
+aptos/devnet
+aptos/testnet
 
