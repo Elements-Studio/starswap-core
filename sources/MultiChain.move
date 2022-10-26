@@ -6,13 +6,16 @@ module SwapAdmin::MultiChain {
     use SwapAdmin::STAR::{Self, STAR};
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapGov;
-    use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool, PoolTypeSyrup};
+    use SwapAdmin::TokenSwapGovPoolType::{PoolTypeFarmPool, PoolTypeSyrup, PoolTypeCommunity};
     use SwapAdmin::TokenSwapSyrup;
 
     #[test_only]
     use StarcoinFramework::Debug;
+    use StarcoinFramework::Math;
 
     const START_TIME: u64 = 1646445600;
+
+    const MILLION: u128 = 100 * 10000 ;
 
     const ERR_APTOS_GENESISED: u64 = 1;
 
@@ -54,6 +57,28 @@ module SwapAdmin::MultiChain {
             chain: b"Aptos_Multi_genesis",
             token_code: Token::token_code<STAR>(),
             amount: farm_treasury_burn_amount + farm_linear_burn_amount + syrup_treasury_burn_amount + syrup_linear_burn_amount
+        });
+    }
+
+    public fun genesis_aptos_burn_community(sender: &signer)acquires MultiChainEvent{
+        STAR::assert_genesis_address(sender);
+        assert!(TokenSwapGov::get_total_of_linear_treasury<PoolTypeCommunity>() == 3000000000000000, ERR_APTOS_GENESISED);
+        if (!exists<MultiChainEvent>(address_of(sender))) {
+            move_to(sender, MultiChainEvent {
+                event: new_event_handle<GenesisEvent>(sender)
+            })
+        };
+
+        let scaling_factor = Math::pow(10, (STAR::precision() as u64));
+
+        let burn_amount = MILLION * scaling_factor;
+        TokenSwapGov::aptos_genesis_burn_community(sender, burn_amount);
+        let event = &mut borrow_global_mut<MultiChainEvent>(address_of(sender)).event;
+
+        Event::emit_event(event, GenesisEvent {
+            chain: b"Aptos_Multi_genesis_Community",
+            token_code: Token::token_code<STAR>(),
+            amount: burn_amount
         });
     }
 

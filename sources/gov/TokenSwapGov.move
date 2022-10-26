@@ -485,8 +485,11 @@ module TokenSwapGov {
         let second_release =  treasury.linear_total / (treasury.locked_total_timestamp as u128);
 
         let amount = (( now_timestamp - treasury.locked_start_timestamp  ) as u128) * second_release;
-  
-        Token::value<STAR::STAR>(&treasury.linear_treasury) - (treasury.linear_total - amount)
+        if(Token::value<STAR::STAR>(&treasury.linear_treasury) < (treasury.linear_total - amount)){
+            0
+        }else {
+            Token::value<STAR::STAR>(&treasury.linear_treasury) - (treasury.linear_total - amount)
+        }
     }
 
     #[test]
@@ -646,7 +649,7 @@ module TokenSwapGov {
         let farm_treasury_burn = Token::withdraw(&mut farm_treasury.linear_treasury, farm_burn_amount);
         Event::emit_event(event, LinearGovTreasuryMultiBurnEvent{
             amount: farm_burn_amount,
-            chain: b"Aptos_Multi_Genesis",
+            chain: b"Aptos_Multi_Genesis_Farm",
             treasury_type:Token::token_code<PoolTypeFarmPool>()
         });
 
@@ -659,11 +662,34 @@ module TokenSwapGov {
         let syrup_treasury_burn = Token::withdraw(&mut syrup_treasury.linear_treasury, sryup_burn_amount);
         Event::emit_event(event, LinearGovTreasuryMultiBurnEvent{
             amount: sryup_burn_amount,
-            chain: b"Aptos_Multi_Genesis",
+            chain: b"Aptos_Multi_Genesis_Syrup",
             treasury_type:Token::token_code<PoolTypeSyrup>()
         });
         Token::burn(signer, syrup_treasury_burn);
         syrup_treasury.linear_total = syrup_treasury.linear_total - ( syrup_treasury_amount / 3) ;
+    }
+    public fun aptos_genesis_burn_community(signer: &signer, community_burn_amount:u128) acquires GovTreasuryV2, GovTreasuryMultiChainEvent {
+        STAR::assert_genesis_address(signer);
+        let scaling_factor = Math::pow(10, (STAR::precision() as u64));
+
+        if(!exists<GovTreasuryMultiChainEvent>(address_of(signer))){
+            move_to(signer, GovTreasuryMultiChainEvent{
+                burn_linearGovTreasury_event_handler:Event::new_event_handle<LinearGovTreasuryMultiBurnEvent>(signer)
+            });
+        };
+
+        let event = &mut borrow_global_mut<GovTreasuryMultiChainEvent>(address_of(signer)).burn_linearGovTreasury_event_handler;
+        let community_treasury = borrow_global_mut<GovTreasuryV2<PoolTypeCommunity>>(STAR::token_address());
+        assert!(community_treasury.linear_total == calculate_amount_from_percent(GOV_PERCENT_COMMUNITY - GOV_PERCENT_COMMUNITY_GENESIS ) * (scaling_factor as u128) , 100);
+        let community_treasury_amount = Token::value(&community_treasury.linear_treasury);
+        let community_treasury_burn = Token::withdraw(&mut community_treasury.linear_treasury, community_burn_amount);
+        Event::emit_event(event, LinearGovTreasuryMultiBurnEvent{
+            amount: community_treasury_amount,
+            chain: b"Aptos_Multi_Genesis_Communtiy",
+            treasury_type:Token::token_code<PoolTypeFarmPool>()
+        });
+        Token::burn(signer, community_treasury_burn);
+        community_treasury.linear_total = community_treasury.linear_total - community_burn_amount ;
     }
 }
 }
