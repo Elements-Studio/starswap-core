@@ -2,7 +2,7 @@ module SwapAdmin::SafeMath {
     #[test_only]
     use aptos_std::math64;
     use std::error;
-    use u256::u256::{Self, U256};
+    use SwapAdmin::U256Wrapper::{Self, U256};
 
     const EXP_SCALE_9: u128 = 1000000000;// e9
     const EXP_SCALE_10: u128 = 10000000000;// e10
@@ -22,12 +22,12 @@ module SwapAdmin::SafeMath {
     public fun safe_mul_div_u128(x: u128, y: u128, z: u128): u128 {
         let r_u256 = mul_div_u128(x, y ,z);
 
-        let u128_max = u256::from_u128(U128_MAX);
-        let cmp_order = u256::compare(&r_u256, &u128_max);
+        let u128_max = U256Wrapper::from_u128(U128_MAX);
+        let cmp_order = U256Wrapper::compare(&r_u256, &u128_max);
         if (cmp_order == GREATER_THAN) {
             abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
-        u256::as_u128(r_u256)
+        U256Wrapper::as_u128(r_u256)
     }
 
     public fun mul_div_u128(x: u128, y: u128, z: u128): U256 {
@@ -36,13 +36,13 @@ module SwapAdmin::SafeMath {
         };
 
         if (x <= EXP_SCALE_18 && y <= EXP_SCALE_18) {
-            return u256::from_u128(x * y / z)
+            return U256Wrapper::from_u128(x * y / z)
         };
 
-        let x_u256 = u256::from_u128(x);
-        let y_u256 = u256::from_u128(y);
-        let z_u256 = u256::from_u128(z);
-        u256::div(u256::mul(x_u256, y_u256), z_u256)
+        let x_u256 = U256Wrapper::from_u128(x);
+        let y_u256 = U256Wrapper::from_u128(y);
+        let z_u256 = U256Wrapper::from_u128(z);
+        U256Wrapper::div(U256Wrapper::mul(x_u256, y_u256), z_u256)
     }
 
     #[test]
@@ -73,34 +73,34 @@ module SwapAdmin::SafeMath {
 
     /// support 18-bit or larger precision token
     public fun safe_compare_mul_u128(x1: u128, y1: u128, x2: u128, y2: u128): u8 {
-        let r1 = u256::mul(u256::from_u128(x1), u256::from_u128(y1));
-        let r2 = u256::mul(u256::from_u128(x2), u256::from_u128(y2));
-        u256::compare(&r1, &r2)
+        let r1 = U256Wrapper::mul(U256Wrapper::from_u128(x1), U256Wrapper::from_u128(y1));
+        let r2 = U256Wrapper::mul(U256Wrapper::from_u128(x2), U256Wrapper::from_u128(y2));
+        U256Wrapper::compare(&r1, &r2)
     }
 
     public fun mul_u128(x: u128, y: u128): U256 {
-        u256::mul(u256::from_u128(x), u256::from_u128(y))
+        U256Wrapper::mul(U256Wrapper::from_u128(x), U256Wrapper::from_u128(y))
     }
 
     /// support 18-bit or larger precision token
     /// base on native U256
     /// babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
     public fun sqrt_u256(y: U256): u128 {
-        let u128_max = u256::from_u128(U128_MAX);
-        let cmp_order = u256::compare(&y, &u128_max);
+        let u128_max = U256Wrapper::from_u128(U128_MAX);
+        let cmp_order = U256Wrapper::compare(&y, &u128_max);
         if (cmp_order == LESS_THAN || cmp_order == EQUAL){
-            let z = sqrt(u256::as_u128(y));
+            let z = sqrt(U256Wrapper::as_u128(y));
             (z as u128)
         } else {
             let z = copy y;
-            let one_u256 = u256::from_u128(1u128);
-            let two_u256 = u256::from_u128(2u128);
-            let x = u256::add(u256::div(copy y, copy two_u256), one_u256);
-            while (u256::compare(&x, &z) == LESS_THAN) {
+            let one_u256 = U256Wrapper::from_u128(1u128);
+            let two_u256 = U256Wrapper::from_u128(2u128);
+            let x = U256Wrapper::add(U256Wrapper::div(copy y, copy two_u256), one_u256);
+            while (U256Wrapper::compare(&x, &z) == LESS_THAN) {
                 z = copy x;
-                x = u256::div(u256::add(u256::div(copy y, copy x), copy x), copy two_u256);
+                x = U256Wrapper::div(U256Wrapper::add(U256Wrapper::div(copy y, copy x), copy x), copy two_u256);
             };
-            u256::as_u128(z)
+            U256Wrapper::as_u128(z)
         }
     }
 
@@ -137,17 +137,17 @@ module SwapAdmin::SafeMath {
     // #[test]
     // public fun test_sqrt_u256_by_max_u128() {
     //     let _r_expected:u128 = 18446744073709551615;
-    //     let r = Self::sqrt_u256(u256::from_u128(U128_MAX));
+    //     let r = Self::sqrt_u256(U256Wrapper::from_u128(U128_MAX));
     //     assert!(r == _r_expected, 3004);
     // }
 
     public fun to_safe_u128(x: U256): u128 {
-        let u128_max = u256::from_u128(U128_MAX);
-        let cmp_order = u256::compare(&x, &u128_max);
+        let u128_max = U256Wrapper::from_u128(U128_MAX);
+        let cmp_order = U256Wrapper::compare(&x, &u128_max);
         if (cmp_order == GREATER_THAN) {
             abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
-        u256::as_u128(x)
+        U256Wrapper::as_u128(x)
     }
 
     /// babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
