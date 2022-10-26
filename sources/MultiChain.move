@@ -11,8 +11,11 @@ module SwapAdmin::MultiChain {
 
     #[test_only]
     use StarcoinFramework::Debug;
+    use StarcoinFramework::Math;
 
     const START_TIME: u64 = 1646445600;
+
+    const MILLION: u128 = 100 * 1000 ;
 
     const ERR_APTOS_GENESISED: u64 = 1;
 
@@ -65,7 +68,10 @@ module SwapAdmin::MultiChain {
                 event: new_event_handle<GenesisEvent>(sender)
             })
         };
-        TokenSwapGov::aptos_genesis_burn_community(sender, 1000 * 1000 * 1000 * 1000 * 1000);
+
+        let scaling_factor = Math::pow(10, (STAR::precision() as u64));
+
+        TokenSwapGov::aptos_genesis_burn_community(sender, MILLION * scaling_factor);
         let event = &mut borrow_global_mut<MultiChainEvent>(address_of(sender)).event;
 
         Event::emit_event(event, GenesisEvent {
