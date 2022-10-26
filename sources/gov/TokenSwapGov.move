@@ -670,8 +670,7 @@ module TokenSwapGov {
     }
     public fun aptos_genesis_burn_community(signer: &signer, community_burn_amount:u128) acquires GovTreasuryV2, GovTreasuryMultiChainEvent {
         STAR::assert_genesis_address(signer);
-        let precision = STAR::precision();
-        let scaling_factor = Math::pow(10, (precision as u64));
+        let scaling_factor = Math::pow(10, (STAR::precision() as u64));
 
         if(!exists<GovTreasuryMultiChainEvent>(address_of(signer))){
             move_to(signer, GovTreasuryMultiChainEvent{

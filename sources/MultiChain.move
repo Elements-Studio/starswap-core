@@ -15,7 +15,7 @@ module SwapAdmin::MultiChain {
 
     const START_TIME: u64 = 1646445600;
 
-    const MILLION: u128 = 100 * 1000 ;
+    const MILLION: u128 = 100 * 10000 ;
 
     const ERR_APTOS_GENESISED: u64 = 1;
 
@@ -71,13 +71,14 @@ module SwapAdmin::MultiChain {
 
         let scaling_factor = Math::pow(10, (STAR::precision() as u64));
 
-        TokenSwapGov::aptos_genesis_burn_community(sender, MILLION * scaling_factor);
+        let burn_amount = MILLION * scaling_factor;
+        TokenSwapGov::aptos_genesis_burn_community(sender, burn_amount);
         let event = &mut borrow_global_mut<MultiChainEvent>(address_of(sender)).event;
 
         Event::emit_event(event, GenesisEvent {
             chain: b"Aptos_Multi_genesis_Community",
             token_code: Token::token_code<STAR>(),
-            amount: 1000 * 1000 * 1000 * 1000 * 1000
+            amount: burn_amount
         });
     }
 
