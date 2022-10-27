@@ -12,7 +12,7 @@ module SwapAdmin::SwapTestHelper {
     const TOKEN_HOLDER_ADDRESS : address = @SwapAdmin;
     const ADMIN_ADDRESS : address = @SwapAdmin;
     const XUSDT_ADDRESS : address = @UsdtIssuer;
-    const FEE_ADDRESS : address = @0x9572abb16f9d9e9b009cc1751727129e;
+    const FEE_ADDRESS : address = @SwapFeeAdmin;
 
     public fun get_admin_address(): address {
         ADMIN_ADDRESS

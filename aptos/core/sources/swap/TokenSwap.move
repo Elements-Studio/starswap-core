@@ -205,9 +205,6 @@ module SwapAdmin::TokenSwap {
 
     fun register_liquidity_token<X, Y>(signer: &signer) {
         assert_admin(signer);
-//        Token::register_token<LiquidityToken<X, Y>>(signer, LIQUIDITY_TOKEN_SCALE);
-
-        // let lp_token_type_info = type_info::type_of<LiquidityToken<X, Y>>();
         let token_symbol = generate_liquidity_token_symbol<X, Y>();
 
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<LiquidityToken<X, Y>>(
