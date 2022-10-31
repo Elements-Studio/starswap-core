@@ -1,9 +1,9 @@
 module SwapAdmin::EventUtil {
+    use std::error;
+    use std::signer;
+
     use aptos_std::event;
     use aptos_framework::account;
-
-    use std::signer;
-    use std::error;
 
     const ERR_INIT_REPEATE: u64 = 101;
     const ERR_RESOURCE_NOT_EXISTS: u64 = 102;

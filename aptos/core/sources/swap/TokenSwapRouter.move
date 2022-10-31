@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapRouter {
-    use aptos_framework::coin::{Self, Coin};
-    use std::signer;
     use std::option;
-    use SwapAdmin::U256Wrapper::{ U256};
+    use std::signer;
+
+    use aptos_framework::coin::{Self, Coin};
 
     use SwapAdmin::TokenSwap::{LiquidityToken, Self};
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapFee;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapFee;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::U256Wrapper::U256;
     use SwapAdmin::WrapperUtil;
-
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_ROUTER_INSUFFICIENT_X_AMOUNT: u64 = 1002;
@@ -218,9 +218,21 @@ module SwapAdmin::TokenSwapRouter {
         let (token_x_out, token_y_out);
         let (token_x_fee, token_y_fee);
         if (order == 1) {
-            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap_and_emit_event<X, Y>(signer, token_x, y_out, coin::zero(), 0);
+            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap_and_emit_event<X, Y>(
+                signer,
+                token_x,
+                y_out,
+                coin::zero(),
+                0
+            );
         } else {
-            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap_and_emit_event<Y, X>(signer, coin::zero(), 0, token_x, y_out);
+            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap_and_emit_event<Y, X>(
+                signer,
+                coin::zero(),
+                0,
+                token_x,
+                y_out
+            );
         };
 
         coin::destroy_zero(token_x_out);
@@ -236,7 +248,7 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Computer x in value by given y_out and x_in slipper value
-    public fun compute_x_in<X, Y>(amount_y_out: u128) : u128 {
+    public fun compute_x_in<X, Y>(amount_y_out: u128): u128 {
         // calculate actual x in
         let (reserve_x, reserve_y) = get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
@@ -341,10 +353,10 @@ module SwapAdmin::TokenSwapRouter {
             TokenSwapConfig::get_poundage_rate<Y, X>()
         }
     }
-    
+
     /// Operation number of liquidity token pair
     public fun get_swap_fee_operation_rate_v2<X,
-                                 Y>(): (u64, u64) {
+                                              Y>(): (u64, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -366,16 +378,6 @@ module SwapAdmin::TokenSwapRouter {
         };
     }
 
-    public entry fun upgrade_tokenpair_to_tokenswappair<X,
-                                                          Y>(signer: &signer) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<X, Y>(signer);
-        } else {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<Y, X>(signer);
-        };
-    }
 
     /// Operation rate from all swap fee
     public fun set_swap_fee_operation_rate(signer: &signer,
@@ -387,10 +389,10 @@ module SwapAdmin::TokenSwapRouter {
     /// Operation_v2 rate from all swap fee
     public fun set_swap_fee_operation_rate_v2<X,
                                               Y>(signer: &signer,
-                                                                      num: u64,
-                                                                      denum: u64) {
+                                                 num: u64,
+                                                 denum: u64) {
         TokenSwapConfig::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
-    }    
+    }
 
     /// Set fee auto convert switch config
     public fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
@@ -400,15 +402,5 @@ module SwapAdmin::TokenSwapRouter {
     /// Set global freeze switch
     public fun set_global_freeze_switch(signer: &signer, freeze: bool) {
         TokenSwapConfig::set_global_freeze_switch(signer, freeze);
-    }
-
-    /// Set alloc mode upgrade switch
-    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
-    }
-
-    /// Set white list boost switch
-    public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
-        TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch,white_list_pubkey);
     }
 }

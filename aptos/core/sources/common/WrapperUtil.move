@@ -1,8 +1,8 @@
 module SwapAdmin::WrapperUtil {
+    use std::vector;
+
     use aptos_std::type_info;
     use aptos_framework::coin::{Self, Coin};
-
-    use std::vector;
 
     public fun is_same_token<CoinType1, CoinType2>(): bool {
         return type_info::type_of<CoinType1>() == type_info::type_of<CoinType2>()
@@ -39,5 +39,4 @@ module SwapAdmin::WrapperUtil {
         };
         result
     }
-
 }

@@ -1,11 +1,11 @@
 /// The module provides a general implmentation of configuration for onchain contracts.
 module SwapAdmin::Config {
+    use std::error;
+    use std::option::{Self, Option};
+    use std::signer;
+
     use aptos_std::event;
     use aptos_framework::account;
-
-    use std::signer;
-    use std::option::{Self, Option};
-    use std::error;
 
     spec module {
         pragma verify;
@@ -65,7 +65,7 @@ module SwapAdmin::Config {
     }
 
     /// Set a config item to a new value with capability stored under signer
-//    public fun set<ConfigValue: store>(
+    //    public fun set<ConfigValue: store>(
     public fun set<ConfigValue: copy + drop + store>(
         account: &signer,
         payload: ConfigValue,
@@ -110,7 +110,7 @@ module SwapAdmin::Config {
 
     /// Set a config item to a new value with cap.
     public fun set_with_capability<ConfigValue: copy + drop + store>(
-//    public fun set_with_capability<ConfigValue: store+copy+drop>(
+        //    public fun set_with_capability<ConfigValue: store+copy+drop>(
         cap: &mut ModifyConfigCapability<ConfigValue>,
         payload: ConfigValue,
     ) acquires Config {
@@ -133,7 +133,7 @@ module SwapAdmin::Config {
     public fun publish_new_config_with_capability<ConfigValue: copy + drop + store>(
         account: &signer,
         payload: ConfigValue,
-    ): ModifyConfigCapability<ConfigValue> acquires ModifyConfigCapabilityHolder{
+    ): ModifyConfigCapability<ConfigValue> acquires ModifyConfigCapabilityHolder {
         publish_new_config<ConfigValue>(account, payload);
         extract_modify_config_capability<ConfigValue>(account)
     }
@@ -150,12 +150,12 @@ module SwapAdmin::Config {
 
     /// Publish a new config item under account address.
     public fun publish_new_config<ConfigValue: copy + drop + store>(account: &signer, payload: ConfigValue) {
-        move_to(account, Config<ConfigValue>{ payload });
+        move_to(account, Config<ConfigValue> { payload });
         let cap = ModifyConfigCapability<ConfigValue> {
             account_address: signer::address_of(account),
             events: account::new_event_handle<ConfigChangeEvent<ConfigValue>>(account),
         };
-        move_to(account, ModifyConfigCapabilityHolder{cap: option::some(cap)});
+        move_to(account, ModifyConfigCapabilityHolder { cap: option::some(cap) });
     }
 
     spec publish_new_config {
@@ -246,7 +246,7 @@ module SwapAdmin::Config {
     public fun destroy_modify_config_capability<ConfigValue: copy + drop + store>(
         cap: ModifyConfigCapability<ConfigValue>,
     ) {
-        let ModifyConfigCapability{account_address:_, events} = cap;
+        let ModifyConfigCapability { account_address: _, events } = cap;
         event::destroy_handle(events)
     }
 

@@ -1,8 +1,8 @@
 module SwapAdmin::CommonHelper {
-    use aptos_framework::coin::{Self};
-    use aptos_std::math64;
-
     use std::signer;
+
+    use aptos_std::math64;
+    use aptos_framework::coin;
 
     use SwapAdmin::TokenMock;
 
@@ -28,12 +28,12 @@ module SwapAdmin::CommonHelper {
         coin::deposit<CoinType>(signer::address_of(account), token);
     }
 
-    public fun transfer<CoinType>(account: &signer, token_address: address, token_amount: u128){
+    public fun transfer<CoinType>(account: &signer, token_address: address, token_amount: u128) {
         let token = coin::withdraw<CoinType>(account, (token_amount as u64));
-         coin::deposit(token_address, token);
+        coin::deposit(token_address, token);
     }
 
-    public fun get_safe_balance<CoinType>(token_address: address): u128{
+    public fun get_safe_balance<CoinType>(token_address: address): u128 {
         let token_balance: u128 = 0;
         if (coin::is_account_registered<CoinType>(token_address)) {
             token_balance = (coin::balance<CoinType>(token_address) as u128);
@@ -66,5 +66,4 @@ module SwapAdmin::CommonHelper {
         };
         result_val
     }
-
 }

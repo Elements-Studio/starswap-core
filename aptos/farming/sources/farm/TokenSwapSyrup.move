@@ -2,26 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapSyrup {
-    use aptos_framework::coin;
-    use aptos_framework::timestamp;
+    use std::bcs;
+    use std::error;
+    use std::option;
+    use std::signer;
+    use std::vector;
 
     use aptos_std::event;
     use aptos_std::type_info;
+    use aptos_framework::coin;
+    use aptos_framework::timestamp;
 
-    use std::error;
-    use std::vector;
-    use std::signer;
-    use std::option;
-    use std::bcs;
-
-    use SwapAdmin::STAR;
-    use SwapAdmin::YieldFarmingV3 as YieldFarming;
-    use SwapAdmin::YieldFarmingMultiplier;
-    use SwapAdmin::TokenSwapGovPoolType::{PoolTypeSyrup};
-    use SwapAdmin::TokenSwapConfig;
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::TokenSwapSyrupMultiplierPool;
     use SwapAdmin::EventUtil;
+    use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapGovPoolType::PoolTypeSyrup;
+    use SwapAdmin::TokenSwapSyrupMultiplierPool;
+    use SwapAdmin::YieldFarmingMultiplier;
+    use SwapAdmin::YieldFarmingV3 as YieldFarming;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -355,9 +354,6 @@ module SwapAdmin::TokenSwapSyrup {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
-        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON));
-
         let broker = signer::address_of(signer);
         let syrup = borrow_global<Syrup<CoinT>>(broker);
         let syrup_ext_info = borrow_global_mut<SyrupExtInfo<CoinT>>(broker);
@@ -426,29 +422,16 @@ module SwapAdmin::TokenSwapSyrup {
         );
 
         let syrup = borrow_global<Syrup<CoinT>>(broker_addr);
-        let (harvest_cap, id) = if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            // maybe upgrade under the upgrading switch turned on
-            maybe_upgrade_all_stake<CoinT>(signer, &syrup.param_cap);
+        let (harvest_cap, id) = YieldFarming::stake_v2<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
+            signer,
+            broker_addr,
+            stake_token,
+            amount * (stepwise_multiplier as u128),
+            amount,
+            stepwise_multiplier,
+            pledge_time_sec,
+            &syrup.param_cap);
 
-            YieldFarming::stake_v2<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
-                signer,
-                broker_addr,
-                stake_token,
-                amount * (stepwise_multiplier as u128),
-                amount,
-                stepwise_multiplier,
-                pledge_time_sec,
-                &syrup.param_cap)
-        } else {
-            YieldFarming::stake<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
-                signer,
-                broker_addr,
-                stake_token,
-                amount,
-                stepwise_multiplier,
-                pledge_time_sec,
-                &syrup.param_cap)
-        };
 
         // Save stake to list
         let stake_list = borrow_global_mut<SyrupStakeList<CoinT>>(user_addr);
@@ -472,7 +455,6 @@ module SwapAdmin::TokenSwapSyrup {
                 multiplier: stepwise_multiplier,
             }
         );
-
     }
 
     /// Unstake from list
@@ -480,7 +462,7 @@ module SwapAdmin::TokenSwapSyrup {
     public fun unstake<CoinT>(signer: &signer, id: u64): (
         coin::Coin<CoinT>,
         coin::Coin<STAR::STAR>
-    ) acquires SyrupStakeList, SyrupExtInfoV2, Syrup {
+    ) acquires SyrupStakeList, SyrupExtInfoV2 {
         TokenSwapConfig::assert_global_freeze();
 
         let user_addr = signer::address_of(signer);
@@ -492,13 +474,6 @@ module SwapAdmin::TokenSwapSyrup {
 
         assert!(stake.id == id, error::invalid_state(ERROR_STAKE_ID_INVALID));
         assert!(stake.end_time < timestamp::now_seconds(), error::invalid_state(ERROR_HARVEST_STILL_LOCKING));
-
-        // Upgrade if alloc mode upgrade switch turned on
-        let syrup = borrow_global<Syrup<CoinT>>(broker_addr);
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            // maybe upgrade under the upgrading switch turned on
-            maybe_upgrade_all_stake<CoinT>(signer, &syrup.param_cap);
-        };
 
         let SyrupStake<CoinT> {
             id: _,
@@ -686,39 +661,6 @@ module SwapAdmin::TokenSwapSyrup {
         YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(signer, pool_release_per_second);
     }
 
-    /// Extend syrup pool for type
-    public fun extend_syrup_pool<CoinT>(_signer: &signer, _override_update: bool) {
-        abort error::aborted(ERR_DEPRECATED)
-    }
-
-    /// Upgrade all staking resource that
-    /// two condition are matched that
-    /// the upgrading switch has opened and new resource doesn't exist
-    fun maybe_upgrade_all_stake<CoinT>(signer: &signer,
-                                              cap: &YieldFarming::ParameterModifyCapability<PoolTypeSyrup, coin::Coin<CoinT>>) {
-        let account_addr = signer::address_of(signer);
-
-        // Check false if old stakes not exists or new stakes are exist
-        if (!YieldFarming::exists_stake_at_address<PoolTypeSyrup, coin::Coin<CoinT>>(account_addr) ||
-            YieldFarming::exists_stake_list_extend<PoolTypeSyrup, coin::Coin<CoinT>>(account_addr)) {
-            return
-        };
-
-        // Access Control
-        let stake_ids = YieldFarming::query_stake_list<PoolTypeSyrup, coin::Coin<CoinT>>(account_addr);
-        let len = vector::length(&stake_ids);
-        let idx = 0;
-        loop {
-            if (idx >= len) {
-                break
-            };
-
-            let stake_id = vector::borrow(&stake_ids, idx);
-            YieldFarming::extend_farm_stake_info<PoolTypeSyrup, coin::Coin<CoinT>>(signer, *stake_id, cap);
-
-            idx = idx + 1;
-        }
-    }
 
     public fun adjust_total_amount<CoinT>(
         account: &signer,

@@ -1,7 +1,7 @@
 module SwapAdmin::YieldFarmingMultiplier {
     use std::error;
-    use std::signer;
     use std::option;
+    use std::signer;
 
     const ERR_DEPRECATED: u64 = 1;
 

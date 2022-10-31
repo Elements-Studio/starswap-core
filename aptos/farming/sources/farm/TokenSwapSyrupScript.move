@@ -3,15 +3,16 @@
 
 address SwapAdmin {
 module TokenSwapSyrupScript {
-    use aptos_framework::coin;
+    use std::error;
     use std::signer;
 
+    use aptos_framework::coin;
+
     use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapGov;
     use SwapAdmin::TokenSwapSyrup;
     use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::TokenSwapVestarRouter;
-    use SwapAdmin::TokenSwapGov;
-    use std::error;
 
     const ERR_DEPRECATED: u64 = 1;
 

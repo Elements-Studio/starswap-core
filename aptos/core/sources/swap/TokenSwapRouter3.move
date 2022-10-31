@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapRouter3 {
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapRouter2;
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapConfig;
 
     const ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED: u64 = 1002;
     const ERROR_ROUTER_X_IN_OVER_LIMIT_MAX: u64 = 1003;

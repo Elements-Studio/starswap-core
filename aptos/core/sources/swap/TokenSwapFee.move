@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapFee {
-    use aptos_framework::coin::{Self, Coin};
-    use aptos_framework::account;
-
-    use aptos_std::type_info::{Self, TypeInfo};
     use aptos_std::event;
-    #[test_only]
-    use aptos_std::math64;
-
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::TokenSwap::{Self};
-    use SwapAdmin::WrapperUtil;
+    use aptos_std::type_info::{Self, TypeInfo};
+    use aptos_framework::account;
+    use aptos_framework::coin::{Self, Coin};
 
     use UsdtIssuer::XUSDT::XUSDT;
+
+    use SwapAdmin::TokenSwap;
+    use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::WrapperUtil;
+
+    #[test_only]
+    use aptos_std::math64;
 
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;
@@ -40,7 +40,7 @@ module SwapAdmin::TokenSwapFee {
     public fun initialize_token_swap_fee(signer: &signer) {
         init_swap_oper_fee_config(signer);
 
-        move_to(signer, TokenSwapFeeEvent{
+        move_to(signer, TokenSwapFeeEvent {
             swap_fee_event: account::new_event_handle<SwapFeeEvent>(signer),
         });
     }
@@ -98,7 +98,7 @@ module SwapAdmin::TokenSwapFee {
         fee_out: u128,
     ) acquires TokenSwapFeeEvent {
         let token_swap_fee_event = borrow_global_mut<TokenSwapFeeEvent>(TokenSwapConfig::admin_address());
-        event::emit_event(&mut token_swap_fee_event.swap_fee_event, SwapFeeEvent{
+        event::emit_event(&mut token_swap_fee_event.swap_fee_event, SwapFeeEvent {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
             signer: signer_address,
@@ -140,13 +140,29 @@ module SwapAdmin::TokenSwapFee {
         assert!(order != 0, ERROR_SWAP_INVALID_TOKEN_PAIR);
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, FeeToken>();
         let (reserve_x, reserve_fee) = TokenSwap::get_reserves<X, FeeToken>();
-        let fee_out = TokenSwapLibrary::get_amount_out((x_value as u128), reserve_x, reserve_fee, fee_numberator, fee_denumerator);
+        let fee_out = TokenSwapLibrary::get_amount_out(
+            (x_value as u128),
+            reserve_x,
+            reserve_fee,
+            fee_numberator,
+            fee_denumerator
+        );
         let (token_x_out, token_fee_out);
         let (token_x_fee, token_fee_fee);
         if (order == 1) {
-            (token_x_out, token_fee_out, token_x_fee, token_fee_fee) = TokenSwap::swap<X, FeeToken>(token_x, fee_out, coin::zero(), 0);
+            (token_x_out, token_fee_out, token_x_fee, token_fee_fee) = TokenSwap::swap<X, FeeToken>(
+                token_x,
+                fee_out,
+                coin::zero(),
+                0
+            );
         } else {
-            (token_fee_out, token_x_out, token_fee_fee, token_x_fee) = TokenSwap::swap<FeeToken, X>(coin::zero(), 0, token_x, fee_out);
+            (token_fee_out, token_x_out, token_fee_fee, token_x_fee) = TokenSwap::swap<FeeToken, X>(
+                coin::zero(),
+                0,
+                token_x,
+                fee_out
+            );
         };
         coin::destroy_zero(token_x_out);
         coin::deposit(fee_address, token_fee_out);

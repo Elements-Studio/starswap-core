@@ -180,12 +180,6 @@ module SwapAdmin::TokenSwapGov {
         burn_cap: coin::BurnCapability<STAR::STAR>,
     }
 
-    struct GovTreasury<phantom PoolType> has key, store {
-        treasury: Coin<STAR::STAR>,
-        locked_start_timestamp: u64,    // locked start time
-        locked_total_timestamp: u64,    // locked total time
-    }
-
     struct GovTreasuryV2<phantom PoolType> has key,store{
         linear_total:u128,                         //LinearGovTreasury total amount 
         linear_treasury:Coin<STAR::STAR>,
@@ -261,7 +255,7 @@ module SwapAdmin::TokenSwapGov {
     }
 
     //Initialize the economic model of linear release
-     public fun linear_initialize(account: &signer)  {
+    public fun linear_initialize(account: &signer)  {
         STAR::assert_genesis_address(account);
 
         let precision = STAR::precision();
@@ -438,35 +432,5 @@ module SwapAdmin::TokenSwapGov {
               - get_balance_of_treasury<PoolTypeProtocolTreasury>()
               - get_balance_of_linear_treasury<PoolTypeDeveloperFund>()
               - get_balance_of_treasury<PoolTypeDeveloperFund>()
-    }
-
-
-    public entry fun upgrade_dao_treasury_genesis_func(signer: &signer) {
-        STAR::assert_genesis_address(signer);
-        //upgrade dao treasury genesis can only be execute once
-        if(! exists<GovTreasury<PoolTypeProtocolTreasury>>(signer::address_of(signer))){
-            let precision = STAR::precision();
-            let scaling_factor = math64::pow(10, (precision as u64));
-            let now_timestamp = timestamp::now_seconds();
-
-            //  Release 24% for dao treasury. genesis release 2%.
-            let dao_treasury_genesis = calculate_amount_from_percent(GOV_PERCENT_PROTOCOL_TREASURY_GENESIS) * (scaling_factor as u128);
-            STAR::mint(signer, dao_treasury_genesis);
-            move_to(signer, GovTreasury<PoolTypeProtocolTreasury>{
-                treasury: coin::withdraw<STAR::STAR>(signer, (dao_treasury_genesis as u64)),
-                locked_start_timestamp : now_timestamp,
-                locked_total_timestamp : 0,
-            });
-        };
-    }
-
-    /// DEPRECATED
-    public entry fun upgrade_dao_treasury_genesis(_signer: &signer) {
-        abort error::aborted(ERR_DEPRECATED)
-    }
-
-    /// DEPRECATED
-    public entry fun upgrade_pool_type_genesis(_signer: &signer) {
-        abort error::aborted(ERR_DEPRECATED)
     }
 }
