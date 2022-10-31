@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapFarm {
-
     use aptos_framework::account;
     use aptos_framework::coin;
     use aptos_std::event;

@@ -15,7 +15,8 @@ module SwapAdmin::TokenSwapFee {
     use SwapAdmin::TokenSwap::{Self};
     use SwapAdmin::WrapperUtil;
 
-    use UsdtIssuer::XUSDT::XUSDT;
+    use bridge::asset::USDT;
+
 
     const ERROR_ROUTER_SWAP_FEE_MUST_NOT_NEGATIVE: u64 = 1031;
     const ERROR_SWAP_INVALID_TOKEN_PAIR: u64 = 2000;
@@ -52,7 +53,7 @@ module SwapAdmin::TokenSwapFee {
 
     public fun handle_token_swap_fee<X, Y>(signer_address: address, token_x: Coin<X>
     ) acquires TokenSwapFeeEvent {
-        intra_handle_token_swap_fee<X, Y, XUSDT>(signer_address, token_x)
+        intra_handle_token_swap_fee<X, Y, USDT>(signer_address, token_x)
     }
 
 
