@@ -35,13 +35,18 @@ module SwapAdmin::TokenMock {
         let token_name = string::utf8(copy token_symbol);
         string::append_utf8(&mut token_name, b" Coin");
 
-        let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinType>(
+        let (
+            burn_cap,
+            freeze_cap,
+            mint_cap
+        ) = coin::initialize<CoinType>(
             account,
             token_name,
             string::utf8(token_symbol),
             precision,
             true,
         );
+
         coin::register<CoinType>(account);
 
         move_to(account, TokenSharedCapability { mint: mint_cap, burn: burn_cap, freeze: freeze_cap });
@@ -49,13 +54,15 @@ module SwapAdmin::TokenMock {
 
     public fun mint_token<CoinType>(amount: u128): Coin<CoinType> acquires TokenSharedCapability {
         //token holder address
-        let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
+        let cap =
+            borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
         coin::mint<CoinType>((amount as u64), &cap.mint)
     }
 
     public fun burn_token<CoinType>(tokens: Coin<CoinType>) acquires TokenSharedCapability {
         //token holder address
-        let cap = borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
+        let cap =
+            borrow_global<TokenSharedCapability<CoinType>>(WrapperUtil::coin_address<CoinType>());
         coin::burn<CoinType>(tokens, &cap.burn, );
     }
 }

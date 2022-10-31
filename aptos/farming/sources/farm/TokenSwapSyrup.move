@@ -8,9 +8,9 @@ module SwapAdmin::TokenSwapSyrup {
     use std::signer;
     use std::vector;
 
-    use aptos_std::event;
     use aptos_std::type_info;
     use aptos_framework::coin;
+    use aptos_framework::event;
     use aptos_framework::timestamp;
 
     use SwapAdmin::CommonHelper;
@@ -422,7 +422,10 @@ module SwapAdmin::TokenSwapSyrup {
         );
 
         let syrup = borrow_global<Syrup<CoinT>>(broker_addr);
-        let (harvest_cap, id) = YieldFarming::stake_v2<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
+        let (
+            harvest_cap,
+            id
+        ) = YieldFarming::stake_v2<PoolTypeSyrup, STAR::STAR, coin::Coin<CoinT>>(
             signer,
             broker_addr,
             stake_token,

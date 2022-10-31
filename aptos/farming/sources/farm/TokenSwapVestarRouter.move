@@ -1,6 +1,4 @@
-address SwapAdmin {
-
-module TokenSwapVestarRouter {
+module SwapAdmin::TokenSwapVestarRouter {
     use std::signer;
 
     use SwapAdmin::STAR;
@@ -14,10 +12,12 @@ module TokenSwapVestarRouter {
         cap: TokenSwapVestarMinter::MintCapability,
     }
 
-    public fun stake_hook<CoinT>(signer: &signer,
-                                 pledge_time_sec: u64,
-                                 amount: u128,
-                                 cap: &VestarRouterCapability) {
+    public fun stake_hook<CoinT>(
+        signer: &signer,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         let id = TokenSwapSyrup::get_global_stake_id<CoinT>(signer::address_of(signer));
         TokenSwapVestarMinter::mint_with_cap_T<CoinT>(signer,
             id,
@@ -26,11 +26,13 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun stake_hook_with_id<CoinT>(signer: &signer,
-                                         id: u64,
-                                         pledge_time_sec: u64,
-                                         amount: u128,
-                                         cap: &VestarRouterCapability) {
+    public fun stake_hook_with_id<CoinT>(
+        signer: &signer,
+        id: u64,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         TokenSwapVestarMinter::mint_with_cap_T<CoinT>(signer,
             id,
             pledge_time_sec,
@@ -70,5 +72,4 @@ module TokenSwapVestarRouter {
             cap
         }
     }
-}
 }

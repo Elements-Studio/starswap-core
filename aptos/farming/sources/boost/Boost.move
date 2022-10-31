@@ -1,10 +1,8 @@
-address SwapAdmin {
-
-module Boost {
-    use aptos_framework::coin;
+module SwapAdmin::Boost {
     use std::option;
 
     use aptos_std::math64;
+    use aptos_framework::coin;
 
     use SwapAdmin::SafeMath;
     use SwapAdmin::VESTAR;
@@ -23,46 +21,53 @@ module Boost {
     /// @param Total stake on the current farm
     /// return Boost factor Max:250 
     /// `boost factor = ( UserLockedVeSTARAmount / TotalVeSTARAmount ) / ( ( 2 / 3) * UserLockedFarmAmount / TotalLockedFarmAmount ) + 1  `
-    public fun compute_boost_factor(user_locked_vestar_amount: u128,
-                                    user_locked_farm_amount: u128,
-                                    total_farm_amount: u128): u64 {
+    public fun compute_boost_factor(
+        user_locked_vestar_amount: u128,
+        user_locked_farm_amount: u128,
+        total_farm_amount: u128
+    ): u64 {
         let factor = (math64::pow(10, 8) as u128);
 
         let total_vestar_amount = option::get_with_default(&coin::supply<VESTAR::VESTAR>(), 0u128);
-        
-        let boost_factor = 1 * factor;   
+
+        let boost_factor = 1 * factor;
         let dividend = SafeMath::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor;
-        let divisor  = SafeMath::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
-        
-        if(divisor != 0){
-            boost_factor = ( dividend / divisor ) + boost_factor; 
+        let divisor = SafeMath::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
+
+        if (divisor != 0) {
+            boost_factor = (dividend / divisor) + boost_factor;
         };
         if (boost_factor > (25 * factor / 10)) {
             boost_factor = 25 * factor / 10;
-        }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
-            boost_factor =  1 * factor + 1 * ( factor / 100 ) ;
+        }else if ((1 * factor) < boost_factor && boost_factor < (1 * factor + 1 * (factor / 100))) {
+            boost_factor = 1 * factor + 1 * (factor / 100) ;
         };
-        let boost_factor = boost_factor / ( factor / 100 );
+        let boost_factor = boost_factor / (factor / 100);
         return (boost_factor as u64)
     }
 
     #[test_only]
-    fun compute_boost_factor_test(user_locked_vestar_amount: u128, total_vestar_amount: u128, user_locked_farm_amount: u128, total_farm_amount: u128): u64 {
+    fun compute_boost_factor_test(
+        user_locked_vestar_amount: u128,
+        total_vestar_amount: u128,
+        user_locked_farm_amount: u128,
+        total_farm_amount: u128
+    ): u64 {
         let factor = (math64::pow(10, 8) as u128);
 
-        let boost_factor = 1 * factor;   
+        let boost_factor = 1 * factor;
         let dividend = SafeMath::mul_div(user_locked_vestar_amount, factor * 3, total_vestar_amount) * factor;
-        let divisor  = SafeMath::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
-        
-        if(divisor != 0){
-            boost_factor = ( dividend / divisor ) + boost_factor; 
+        let divisor = SafeMath::mul_div(user_locked_farm_amount, factor * 2, total_farm_amount);
+
+        if (divisor != 0) {
+            boost_factor = (dividend / divisor) + boost_factor;
         };
-        if (boost_factor > (25 * factor / 10)) {  
+        if (boost_factor > (25 * factor / 10)) {
             boost_factor = 25 * factor / 10;
-        }else if( ( 1 * factor ) < boost_factor && boost_factor <  ( 1 * factor + 1 * ( factor / 100 ) ) ){
-            boost_factor =  1 * factor + 1 * ( factor / 100 ) ;
+        }else if ((1 * factor) < boost_factor && boost_factor < (1 * factor + 1 * (factor / 100))) {
+            boost_factor = 1 * factor + 1 * (factor / 100) ;
         };
-        let boost_factor = boost_factor / ( factor / 100 );
+        let boost_factor = boost_factor / (factor / 100);
         return (boost_factor as u64)
     }
 
@@ -137,5 +142,4 @@ module Boost {
     public fun test_compute_mint_amount() {
         assert!(compute_mint_amount(100, 50000000000) == 79274, 10001);
     }
-}
 }

@@ -19,7 +19,8 @@ module YieldFarmingLibrary {
         asset_harvest_index: u128,
         asset_last_update_timestamp: u64,
         asset_release_per_second: u128,
-        now_seconds: u64): u128 {
+        now_seconds: u64
+    ): u128 {
         // Recalculate harvest index
         if (asset_total_weight <= 0) {
             calculate_harvest_index_weight_zero(
@@ -40,10 +41,12 @@ module YieldFarmingLibrary {
     }
 
     /// There is calculating from harvest index and global parameters without asset_total_weight
-    public fun calculate_harvest_index_weight_zero(harvest_index: u128,
-                                                   last_update_timestamp: u64,
-                                                   now_seconds: u64,
-                                                   release_per_second: u128): u128 {
+    public fun calculate_harvest_index_weight_zero(
+        harvest_index: u128,
+        last_update_timestamp: u64,
+        now_seconds: u64,
+        release_per_second: u128
+    ): u128 {
         assert!(last_update_timestamp <= now_seconds, error::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
         let time_period = now_seconds - last_update_timestamp;
         let addtion_index = release_per_second * (time_period as u128);
@@ -55,11 +58,13 @@ module YieldFarmingLibrary {
     }
 
     /// There is calculating from harvest index and global parameters
-    public fun calculate_harvest_index(harvest_index: u128,
-                                       asset_total_weight: u128,
-                                       last_update_timestamp: u64,
-                                       now_seconds: u64,
-                                       release_per_second: u128): u128 {
+    public fun calculate_harvest_index(
+        harvest_index: u128,
+        asset_total_weight: u128,
+        last_update_timestamp: u64,
+        now_seconds: u64,
+        release_per_second: u128
+    ): u128 {
         let additional_harvest_index =
             calculate_addtion_harvest_index(
                 asset_total_weight,
@@ -75,10 +80,12 @@ module YieldFarmingLibrary {
     }
 
     /// Computer addtion harvest index from old harvest index
-    public fun calculate_addtion_harvest_index(asset_total_weight: u128,
-                                               last_update_timestamp: u64,
-                                               now_seconds: u64,
-                                               release_per_second: u128): U256 {
+    public fun calculate_addtion_harvest_index(
+        asset_total_weight: u128,
+        last_update_timestamp: u64,
+        now_seconds: u64,
+        release_per_second: u128
+    ): U256 {
         assert!(asset_total_weight > 0, error::invalid_argument(ERR_FARMING_TOTAL_WEIGHT_IS_ZERO));
         assert!(last_update_timestamp <= now_seconds, error::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID));
 
@@ -89,9 +96,11 @@ module YieldFarmingLibrary {
     }
 
     /// This function will return a gain index
-    public fun calculate_withdraw_amount(harvest_index: u128,
-                                         last_harvest_index: u128,
-                                         asset_weight: u128): u128 {
+    public fun calculate_withdraw_amount(
+        harvest_index: u128,
+        last_harvest_index: u128,
+        asset_weight: u128
+    ): u128 {
         assert!(
             harvest_index >= last_harvest_index,
             error::invalid_argument(ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW)

@@ -4,10 +4,10 @@
 module SwapAdmin::TokenSwapFarmBoost {
     use std::signer;
 
-    use aptos_std::event;
     use aptos_std::type_info;
     use aptos_framework::account;
     use aptos_framework::coin;
+    use aptos_framework::event;
 
     use SwapAdmin::Boost;
     use SwapAdmin::STAR;
@@ -141,7 +141,8 @@ module SwapAdmin::TokenSwapFarmBoost {
             });
         };
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
-        let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
+        let vestar_treasury_cap =
+            borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
 
         // lock boost amount vestar
         let vestar_total_amount = TokenSwapVestarMinter::value(user_addr);
@@ -179,9 +180,12 @@ module SwapAdmin::TokenSwapFarmBoost {
                 locked_vetoken: VToken::zero<VESTAR>(),
             });
         };
+
         let user_info = borrow_global_mut<UserInfo<X, Y>>(user_addr);
-        let vestar_treasury_cap = borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
-        //unlock boost amount vestar
+        let vestar_treasury_cap =
+            borrow_global<VeStarTreasuryCapabilityWrapper>(@SwapAdmin);
+
+        // Unlock boost amount vestar
         let vestar_value = VToken::value<VESTAR>(&user_info.locked_vetoken);
         if (vestar_value > 0) {
             let vestar_token = VToken::withdraw<VESTAR>(&mut user_info.locked_vetoken, vestar_value);
@@ -292,9 +296,20 @@ module SwapAdmin::TokenSwapFarmBoost {
     ) {
         let account_addr = signer::address_of(account);
         // check if need udpate
-        YieldFarming::update_pool_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(cap,
-            @SwapAdmin, new_asset_weight, last_asset_weight);
-        YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(cap,
-            @SwapAdmin, account_addr, stake_id, new_weight_factor, new_asset_weight, last_asset_weight);
+        YieldFarming::update_pool_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+            cap,
+            @SwapAdmin,
+            new_asset_weight,
+            last_asset_weight
+        );
+        YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+            cap,
+            @SwapAdmin,
+            account_addr,
+            stake_id,
+            new_weight_factor,
+            new_asset_weight,
+            last_asset_weight
+        );
     }
 }

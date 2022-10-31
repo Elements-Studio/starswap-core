@@ -6,10 +6,10 @@ module SwapAdmin::TokenSwapFarm {
     use std::signer;
     use std::vector;
 
-    use aptos_std::event;
     use aptos_std::type_info;
     use aptos_framework::account;
     use aptos_framework::coin;
+    use aptos_framework::event;
 
     use SwapAdmin::CommonHelper;
     use SwapAdmin::STAR;
@@ -162,7 +162,7 @@ module SwapAdmin::TokenSwapFarm {
     }
 
     /// Get farm multiplier of second per releasing
-    public fun get_farm_multiplier<X, Y>(): u64 acquires  FarmPoolInfo {
+    public fun get_farm_multiplier<X, Y>(): u64 acquires FarmPoolInfo {
         let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
         (farm_pool_info.alloc_point as u64)
     }
@@ -251,8 +251,7 @@ module SwapAdmin::TokenSwapFarm {
             });
     }
 
-    fun extend_farm_stake_resource<X, Y>(account: &signer)
-    acquires FarmPoolCapability {
+    fun extend_farm_stake_resource<X, Y>(account: &signer) acquires FarmPoolCapability {
         let account_addr = signer::address_of(account);
         //double check if need extend
         if (!(YieldFarming::exists_stake_at_address<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
@@ -384,7 +383,7 @@ module SwapAdmin::TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X, Y>(): u128 acquires  FarmPoolInfo {
+    public fun query_release_per_second<X, Y>(): u128 acquires FarmPoolInfo {
         let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
         let (total_alloc_point, pool_release_per_second) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(
             STAR::token_address()
@@ -402,10 +401,11 @@ module SwapAdmin::TokenSwapFarm {
 
 
     /// Inner stake operation that unstake all from pool and combind new amount to total asset, then restake.
-    fun inner_stake<X, Y>(account: &signer,
-                          amount: u128,
-                          farm_cap: &FarmPoolCapability<X, Y>)
-    : FarmPoolStake<X, Y> acquires FarmPoolStake {
+    fun inner_stake<X, Y>(
+        account: &signer,
+        amount: u128,
+        farm_cap: &FarmPoolCapability<X, Y>
+    ): FarmPoolStake<X, Y> acquires FarmPoolStake {
         let account_addr = signer::address_of(account);
         // If stake exist, unstake all withdraw staking, and set reward token to buffer pool
         let own_token = if (YieldFarming::exists_stake_at_address<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
@@ -466,11 +466,12 @@ module SwapAdmin::TokenSwapFarm {
     }
 
     /// Inner unstake operation that unstake all from pool and combind new amount to total asset, then restake.
-    fun inner_unstake<X, Y>(account: &signer,
-                            amount: u128,
-                            farm_cap: &FarmPoolCapability<X, Y>,
-                            farm_stake: FarmPoolStake<X, Y>)
-    : FarmPoolStake<X, Y> {
+    fun inner_unstake<X, Y>(
+        account: &signer,
+        amount: u128,
+        farm_cap: &FarmPoolCapability<X, Y>,
+        farm_stake: FarmPoolStake<X, Y>
+    ): FarmPoolStake<X, Y> {
         let account_addr = signer::address_of(account);
         let FarmPoolStake {
             cap: unwrap_harvest_cap,
@@ -489,33 +490,36 @@ module SwapAdmin::TokenSwapFarm {
         coin::deposit<STAR::STAR>(account_addr, reward_token);
 
         // Process asset token
-        let withdraw_asset_token = coin::extract<LiquidityToken<X, Y>>(&mut own_asset_token, (amount as u64));
+        let withdraw_asset_token =
+            coin::extract<LiquidityToken<X, Y>>(&mut own_asset_token, (amount as u64));
         TokenSwapRouter::deposit_liquidity_token<X, Y>(account_addr, withdraw_asset_token);
 
         let own_asset_amount = (coin::value<LiquidityToken<X, Y>>(&own_asset_token) as u128);
 
         // Restake to pool
         // after pool alloc mode upgrade
-        let (new_harvest_cap, stake_id) =
-            {
-                // once farm unstake, user boost factor lose efficacy, become 1
-                TokenSwapFarmBoost::unboost_from_farm_pool<X, Y>(&farm_cap.cap, account);
-                let weight_factor = TokenSwapFarmBoost::get_boost_factor<X, Y>(account_addr);
-                let own_asset_weight = TokenSwapFarmBoost::calculate_boost_weight(own_asset_amount, weight_factor);
-                YieldFarming::stake_v2<
-                    PoolTypeFarmPool,
-                    STAR::STAR,
-                    coin::Coin<LiquidityToken<X, Y>>>(
-                    account,
-                    STAR::token_address(),
-                    own_asset_token,
-                    own_asset_weight,
-                    own_asset_amount,
-                    weight_factor,
-                    0,
-                    &farm_cap.cap
-                )
-            };
+        let (
+            new_harvest_cap,
+            stake_id
+        ) = {
+            // once farm unstake, user boost factor lose efficacy, become 1
+            TokenSwapFarmBoost::unboost_from_farm_pool<X, Y>(&farm_cap.cap, account);
+            let weight_factor = TokenSwapFarmBoost::get_boost_factor<X, Y>(account_addr);
+            let own_asset_weight = TokenSwapFarmBoost::calculate_boost_weight(own_asset_amount, weight_factor);
+            YieldFarming::stake_v2<
+                PoolTypeFarmPool,
+                STAR::STAR,
+                coin::Coin<LiquidityToken<X, Y>>>(
+                account,
+                STAR::token_address(),
+                own_asset_token,
+                own_asset_weight,
+                own_asset_amount,
+                weight_factor,
+                0,
+                &farm_cap.cap
+            )
+        };
 
         FarmPoolStake<X, Y> {
             cap: new_harvest_cap,

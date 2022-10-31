@@ -1,17 +1,14 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-
-address SwapAdmin {
-
-module TokenSwapVestarMinter {
+module SwapAdmin::TokenSwapVestarMinter {
     use std::error;
     use std::option;
     use std::signer;
     use std::vector;
 
-    use aptos_std::event;
     use aptos_framework::account;
+    use aptos_framework::event;
 
     use SwapAdmin::Boost;
     use SwapAdmin::VESTAR;
@@ -249,7 +246,8 @@ module TokenSwapVestarMinter {
     fun deposit(signer: &signer, t: VToken::VToken<VESTAR::VESTAR>) acquires Treasury, VestarEventHandler {
         let user_addr = signer::address_of(signer);
 
-        let event_handler = borrow_global_mut<VestarEventHandler>(WrapperUtil::coin_address<VESTAR::VESTAR>());
+        let event_handler =
+            borrow_global_mut<VestarEventHandler>(WrapperUtil::coin_address<VESTAR::VESTAR>());
         event::emit_event(&mut event_handler.deposit_event_handler, DepositEvent {
             account: user_addr,
             amount: VToken::value(&t),
@@ -272,7 +270,8 @@ module TokenSwapVestarMinter {
         let treasury = borrow_global_mut<Treasury>(user_addr);
         let vtoken = VToken::withdraw<VESTAR::VESTAR>(&mut treasury.vtoken, amount);
 
-        let event_handler = borrow_global_mut<VestarEventHandler>(WrapperUtil::coin_address<VESTAR::VESTAR>());
+        let event_handler =
+            borrow_global_mut<VestarEventHandler>(WrapperUtil::coin_address<VESTAR::VESTAR>());
         event::emit_event(&mut event_handler.withdraw_event_handler, WithdrawEvent {
             account: user_addr,
             amount
@@ -523,5 +522,4 @@ module TokenSwapVestarMinter {
         assert!(value_of_id_by_token<STAR::STAR>(user_addr, 1) == 100, 10006);
         assert!(!exists_record<STAR::STAR>(user_addr, 2), 10007);
     }
-}
 }

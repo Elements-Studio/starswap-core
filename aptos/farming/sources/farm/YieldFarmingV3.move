@@ -1,9 +1,7 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address SwapAdmin {
-
-module YieldFarmingV3 {
+module SwapAdmin::YieldFarmingV3 {
     use std::error;
     use std::option;
     use std::signer;
@@ -533,7 +531,8 @@ module YieldFarmingV3 {
         asset_amount: u128,
         weight_factor: u64, //if farm: weight_factor = user boost factor * 100; if stake: weight_factor = stepwise multiplier
         deadline: u64,
-        _cap: &ParameterModifyCapability<PoolType, AssetT>): (HarvestCapability<PoolType, AssetT>, u64)
+        _cap: &ParameterModifyCapability<PoolType, AssetT>
+    ): (HarvestCapability<PoolType, AssetT>, u64)
     acquires StakeList, StakeListExtend, FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
         assert!(
             exists<FarmingAsset<PoolType, AssetT>>(broker_addr),
@@ -699,9 +698,7 @@ module YieldFarmingV3 {
     }
 
     /// Harvest yield farming token from stake
-    public fun harvest<PoolType: store,
-                       RewardCoinT,
-                       AssetT: store>(
+    public fun harvest<PoolType: store, RewardCoinT, AssetT: store>(
         user_addr: address,
         broker_addr: address,
         amount: u128,
@@ -805,16 +802,17 @@ module YieldFarmingV3 {
 
 
     /// Query total stake count from yield farming resource
-    public fun query_total_stake<PoolType: store,
-                                 AssetT: store>(broker: address): u128 acquires FarmingAssetExtend {
+    public fun query_total_stake<PoolType: store, AssetT: store>(broker: address): u128 acquires FarmingAssetExtend {
         //TODO can be clean up after pool alloc mode upgrade
         let farming_asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
         farming_asset_extend.asset_total_amount
     }
 
     /// Query stake weight from user staking objects.
-    public fun query_stake<PoolType: store,
-                           AssetT: store>(account: address, id: u64): u128 acquires StakeListExtend {
+    public fun query_stake<PoolType: store, AssetT: store>(
+        account: address,
+        id: u64
+    ): u128 acquires StakeListExtend {
         let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(account);
         let stake_extend = get_stake_extend(&mut stake_list_extend.items, id);
         assert!(stake_extend.id == id, error::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
@@ -822,8 +820,7 @@ module YieldFarmingV3 {
     }
 
     /// Query stake id list from user
-    public fun query_stake_list<PoolType: store,
-                                AssetT: store>(user_addr: address): vector<u64> acquires StakeList {
+    public fun query_stake_list<PoolType: store, AssetT: store>(user_addr: address): vector<u64> acquires StakeList {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let len = vector::length(&stake_list.items);
         if (len <= 0) {
@@ -909,7 +906,8 @@ module YieldFarmingV3 {
             error::invalid_argument(ERR_FARMING_TIMESTAMP_INVALID)
         );
 
-        let golbal_pool_info = borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(@SwapAdmin);
+        let golbal_pool_info =
+            borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(@SwapAdmin);
 
         // Not any pool have alloc point
         if (golbal_pool_info.total_alloc_point <= 0) {
@@ -1041,8 +1039,7 @@ module YieldFarmingV3 {
         }
     }
 
-    fun get_stake_extend<PoolType: store,
-                         AssetType>(
+    fun get_stake_extend<PoolType: store, AssetType>(
         c: &mut vector<StakeExtend<PoolType, AssetType>>,
         id: u64
     ): &mut StakeExtend<PoolType, AssetType> {
@@ -1061,17 +1058,17 @@ module YieldFarmingV3 {
         vector::remove<StakeExtend<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
     }
 
-    public fun get_stake_info<
-        PoolType: store,
-        AssetT: store>(account: &signer, stake_id: u64): (
+    public fun get_stake_info<PoolType: store, AssetT: store>(account: &signer, stake_id: u64): (
         u64, u128, u128, u128, u64, u128, u64) acquires StakeList, StakeListExtend {
         let user_addr = signer::address_of(account);
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
 
         let (asset_amount, weight_factor) = if (exists_stake_list_extend<PoolType, AssetT>(user_addr)) {
-            let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-            let stake_extend = get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, stake_id);
+            let stake_list_extend
+                = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
+            let stake_extend =
+                get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, stake_id);
             (stake_extend.asset_amount, stake_extend.weight_factor)
         } else {
             (0, 0)
@@ -1133,5 +1130,4 @@ module YieldFarmingV3 {
     public fun exists_stake_extend<PoolType: store, AssetT: store>(account: address): bool {
         return exists<StakeExtend<PoolType, AssetT>>(account)
     }
-}
 }

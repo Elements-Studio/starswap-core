@@ -1,6 +1,4 @@
-address SwapAdmin {
-
-module VESTAR {
+module SwapAdmin::VESTAR {
     use aptos_std::type_info;
 
     use std::signer;
@@ -34,5 +32,4 @@ module VESTAR {
     public fun precision(): u8 {
         PRECISION
     }
-}
 }

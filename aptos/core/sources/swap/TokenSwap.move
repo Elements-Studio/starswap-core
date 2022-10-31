@@ -9,10 +9,10 @@ module SwapAdmin::TokenSwap {
     use std::string::{Self, String};
 
     use aptos_std::comparator;
-    use aptos_std::event;
     use aptos_std::type_info;
     use aptos_framework::account;
     use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::event;
     use aptos_framework::timestamp;
 
     use SwapAdmin::FixedPoint64;
@@ -162,7 +162,11 @@ module SwapAdmin::TokenSwap {
         assert_admin(signer);
         let token_symbol = generate_liquidity_token_symbol<X, Y>();
 
-        let (burn_cap, freeze_cap, mint_cap) = coin::initialize<LiquidityToken<X, Y>>(
+        let (
+            burn_cap,
+            freeze_cap,
+            mint_cap
+        ) = coin::initialize<LiquidityToken<X, Y>>(
             signer,
             string::utf8(b"STARSWAP LP Coin"),
             token_symbol,
@@ -230,10 +234,12 @@ module SwapAdmin::TokenSwap {
             }
         };
         assert!(liquidity > 0, ERROR_SWAP_ADDLIQUIDITY_INVALID);
-        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         coin::merge(&mut token_pair.token_x_reserve, x);
         coin::merge(&mut token_pair.token_y_reserve, y);
-        let liquidity_cap = borrow_global<LiquidityTokenCapability<X, Y>>(TokenSwapConfig::admin_address());
+        let liquidity_cap =
+            borrow_global<LiquidityTokenCapability<X, Y>>(TokenSwapConfig::admin_address());
         let mint_token = coin::mint((liquidity as u64), &liquidity_cap.mint);
         update_oracle<X, Y>(x_reserve, y_reserve);
         // emit_mint_event<X, Y>(x_value, y_value, liquidity);
@@ -248,7 +254,9 @@ module SwapAdmin::TokenSwap {
         TokenSwapConfig::assert_global_freeze();
 
         let to_burn_value = WrapperUtil::coin_value(&to_burn) ;
-        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+
         let x_reserve = WrapperUtil::coin_value(&token_pair.token_x_reserve) ;
         let y_reserve = WrapperUtil::coin_value(&token_pair.token_y_reserve) ;
         let total_supply = option::get_with_default(&coin::supply<LiquidityToken<X, Y>>(), 0u128);
@@ -268,14 +276,16 @@ module SwapAdmin::TokenSwap {
     fun burn_liquidity<X, Y>(
         to_burn: Coin<LiquidityToken<X, Y>>
     ) acquires LiquidityTokenCapability {
-        let liquidity_cap = borrow_global<LiquidityTokenCapability<X, Y>>(TokenSwapConfig::admin_address());
+        let liquidity_cap =
+            borrow_global<LiquidityTokenCapability<X, Y>>(TokenSwapConfig::admin_address());
         coin::burn<LiquidityToken<X, Y>>(to_burn, &liquidity_cap.burn);
     }
 
     /// Get reserves of a token pair.
     /// The order of type args should be sorted.
     public fun get_reserves<X, Y>(): (u128, u128) acquires TokenSwapPair {
-        let token_pair = borrow_global<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         let x_reserve = WrapperUtil::coin_value(&token_pair.token_x_reserve);
         let y_reserve = WrapperUtil::coin_value(&token_pair.token_y_reserve);
         //        let last_block_timestamp = token_pair.last_block_timestamp;
@@ -285,15 +295,15 @@ module SwapAdmin::TokenSwap {
     /// Get cumulative info of a token pair.
     /// The order of type args should be sorted.
     public fun get_cumulative_info<X, Y>(): (U256, U256, u64) acquires TokenSwapPair {
-        let token_pair = borrow_global<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         let last_price_x_cumulative = *&token_pair.last_price_x_cumulative;
         let last_price_y_cumulative = *&token_pair.last_price_y_cumulative;
         let last_block_timestamp = token_pair.last_block_timestamp;
         (last_price_x_cumulative, last_price_y_cumulative, last_block_timestamp)
     }
 
-    public fun swap<X,
-                    Y>(
+    public fun swap<X, Y>(
         x_in: Coin<X>,
         y_out: u128,
         y_in: Coin<Y>,
@@ -305,7 +315,8 @@ module SwapAdmin::TokenSwap {
         let y_in_value = WrapperUtil::coin_value(&y_in) ;
         assert!(x_in_value > 0 || y_in_value > 0, ERROR_SWAP_TOKEN_INSUFFICIENT);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
-        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         coin::merge(&mut token_pair.token_x_reserve, x_in);
         coin::merge(&mut token_pair.token_y_reserve, y_in);
         let x_swapped = coin::extract(&mut token_pair.token_x_reserve, (x_out as u64));
@@ -320,15 +331,23 @@ module SwapAdmin::TokenSwap {
             x_adjusted = x_reserve_new * (fee_denominator as u128) - x_in_value * (fee_numerator as u128);
             y_adjusted = y_reserve_new * (fee_denominator as u128) - y_in_value * (fee_numerator as u128);
             // x_adjusted, y_adjusted >= x_reserve, y_reserve * 1000000
-            let cmp_order = SafeMath::safe_compare_mul_u128(x_adjusted, y_adjusted, x_reserve, y_reserve * 1000000);
+            let cmp_order = SafeMath::safe_compare_mul_u128(
+                x_adjusted,
+                y_adjusted,
+                x_reserve,
+                y_reserve * 1000000
+            );
             assert!((EQUAL == cmp_order || GREATER_THAN == cmp_order), ERROR_SWAP_SWAPOUT_CALC_INVALID);
         };
 
         let (x_swap_fee, y_swap_fee);
         // cacl and handle swap fee, default fee rate is 3/1000
         if (TokenSwapConfig::get_swap_fee_switch()) {
-            let (actual_fee_operation_numerator, actual_fee_operation_denominator) = cacl_actual_swap_fee_operation_rate<X, Y>(
-            );
+            let (
+                actual_fee_operation_numerator,
+                actual_fee_operation_denominator
+            ) = cacl_actual_swap_fee_operation_rate<X, Y>();
+
             x_swap_fee = coin::extract(
                 &mut token_pair.token_x_reserve,
                 (SafeMath::safe_mul_div_u128(
@@ -360,7 +379,8 @@ module SwapAdmin::TokenSwap {
     fun emit_token_pair_register_event<X, Y>(
         signer: &signer,
     ) acquires TokenSwapEventHandle {
-        let event_handle = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
+        let event_handle =
+            borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
         event::emit_event(&mut event_handle.register_event, RegisterEvent {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
@@ -399,7 +419,8 @@ module SwapAdmin::TokenSwap {
         x_reserve: u128,
         y_reserve: u128,
     ) acquires TokenSwapPair {
-        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
 
         let last_block_timestamp = token_pair.last_block_timestamp;
         let block_timestamp = timestamp::now_seconds() % (1u64 << 32);
@@ -427,20 +448,20 @@ module SwapAdmin::TokenSwap {
     }
 
     /// if swap fee deposit to fee address fail, return back to lp pool
-    public fun return_back_to_lp_pool<X,
-                                      Y>(
+    public fun return_back_to_lp_pool<X, Y>(
         x_in: Coin<X>,
         y_in: Coin<Y>,
     ) acquires TokenSwapPair {
-        let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
+        let token_pair =
+            borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         coin::merge(&mut token_pair.token_x_reserve, x_in);
         coin::merge(&mut token_pair.token_y_reserve, y_in);
     }
 
-    public fun cacl_actual_swap_fee_operation_rate<X,
-                                                   Y>(): (u128, u128) {
+    public fun cacl_actual_swap_fee_operation_rate<X, Y>(): (u128, u128) {
         let (fee_numerator, fee_denominator) = TokenSwapConfig::get_poundage_rate<X, Y>();
-        let (operation_numerator, operation_denominator) = TokenSwapConfig::get_swap_fee_operation_rate_v2<X, Y>();
+        let (operation_numerator, operation_denominator) =
+            TokenSwapConfig::get_swap_fee_operation_rate_v2<X, Y>();
         (((fee_numerator * operation_numerator) as u128), ((fee_denominator * operation_denominator) as u128))
     }
 
@@ -456,7 +477,8 @@ module SwapAdmin::TokenSwap {
     acquires TokenSwapPair, LiquidityTokenCapability, TokenSwapEventHandle {
         let liquidity_token = mint<X, Y>(x_token, y_token);
 
-        let event_handle = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
+        let event_handle =
+            borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
         event::emit_event(&mut event_handle.add_liquidity_event, AddLiquidityEvent {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
@@ -471,16 +493,17 @@ module SwapAdmin::TokenSwap {
     }
 
     /// Do burn and emit `RemoveLiquidityEvent` event
-    public fun burn_and_emit_event<X,
-                                   Y>(signer: &signer,
-                                      to_burn: Coin<LiquidityToken<X, Y>>,
-                                      amount_x_min: u128,
-                                      amount_y_min: u128)
-    : (Coin<X>, Coin<Y>) acquires TokenSwapPair, LiquidityTokenCapability, TokenSwapEventHandle {
+    public fun burn_and_emit_event<X, Y>(
+        signer: &signer,
+        to_burn: Coin<LiquidityToken<X, Y>>,
+        amount_x_min: u128,
+        amount_y_min: u128
+    ): (Coin<X>, Coin<Y>) acquires TokenSwapPair, LiquidityTokenCapability, TokenSwapEventHandle {
         let liquidity = WrapperUtil::coin_value<LiquidityToken<X, Y>>(&to_burn) ;
         let (x_token, y_token) = burn<X, Y>(to_burn);
 
-        let event_handle = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
+        let event_handle =
+            borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
         event::emit_event(&mut event_handle.remove_liquidity_event, RemoveLiquidityEvent {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),
@@ -493,15 +516,17 @@ module SwapAdmin::TokenSwap {
     }
 
     /// Do swap and emit `SwapEvent` event
-    public fun swap_and_emit_event<X,
-                                   Y>(
+    public fun swap_and_emit_event<X, Y>(
         signer: &signer,
         x_in: Coin<X>,
         y_out: u128,
         y_in: Coin<Y>,
-        x_out: u128): (Coin<X>, Coin<Y>, Coin<X>, Coin<Y>) acquires TokenSwapPair, TokenSwapEventHandle {
+        x_out: u128
+    ): (Coin<X>, Coin<Y>, Coin<X>, Coin<Y>) acquires TokenSwapPair, TokenSwapEventHandle {
         let (token_x_out, token_y_out, token_x_fee, token_y_fee) = swap<X, Y>(x_in, y_out, y_in, x_out);
-        let event_handle = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
+        let event_handle
+            = borrow_global_mut<TokenSwapEventHandle>(TokenSwapConfig::admin_address());
+
         event::emit_event(&mut event_handle.swap_event, SwapEvent {
             x_type_info: type_info::type_of<X>(),
             y_type_info: type_info::type_of<Y>(),

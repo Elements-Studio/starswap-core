@@ -4,7 +4,7 @@ module SwapAdmin::Config {
     use std::option::{Self, Option};
     use std::signer;
 
-    use aptos_std::event;
+    use aptos_framework::event;
     use aptos_framework::account;
 
     spec module {

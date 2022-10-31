@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapFee {
-    use aptos_std::event;
     use aptos_std::type_info::{Self, TypeInfo};
     use aptos_framework::account;
     use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::event;
 
     use bridge::asset::USDT;
 
