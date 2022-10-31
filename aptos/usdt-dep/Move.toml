@@ -1,17 +1,16 @@
 [package]
-name = "StarswapAptosFarming"
-version = "1.0.0"
-#upgrade_policy = "immutable"
+name = "USDTRepo"
+version = "0.1.0"
 
 [addresses]
-SwapAdmin = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
+UsdtIssuer = "0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b"
 move_std = "0x1"
 aptos_framework = "0x1"
 aptos_std = "0x1"
 aptos_token = "0x3"
 
 [dependencies]
+#StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "01c84198819310620f2417413c3c800df8292ae5" }
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
 AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-stdlib"}
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/move-stdlib"}
-StarswapAptosCore = {local = "../core"}
