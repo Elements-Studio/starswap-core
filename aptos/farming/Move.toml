@@ -1,22 +1,17 @@
 [package]
 name = "StarswapAptosFarming"
-version = "0.0.1"
+version = "1.0.0"
 #upgrade_policy = "immutable"
 
 [addresses]
-SwapAdmin = "0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b"
-SwapFeeAdmin = "0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b"
-#UsdtIssuer = "0x70f7070b07046c4eb6d0288a77c9dd8f829e09d797b8492e343dd360324ffe0b"
+SwapAdmin = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
 move_std = "0x1"
 aptos_framework = "0x1"
 aptos_std = "0x1"
 aptos_token = "0x3"
 
 [dependencies]
-USDTRepo = { local = "../usdt-dep" }
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
 AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-stdlib"}
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/move-stdlib"}
-#U256 = {git = "https://github.com/pontem-network/U256.git", rev = "v0.3.7"}
-#U256 = {local = "../u256-dep"}
 StarswapAptosCore = {local = "../core"}

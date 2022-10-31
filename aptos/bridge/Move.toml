@@ -1,11 +1,9 @@
 [package]
-name = "StarswapAptosCore"
+name = "bridge"
 version = "1.0.0"
-#upgrade_policy = "immutable"
 
 [addresses]
-SwapAdmin = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
-SwapFeeAdmin = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
+bridge = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
 move_std = "0x1"
 aptos_framework = "0x1"
 aptos_std = "0x1"
@@ -15,5 +13,3 @@ aptos_token = "0x3"
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
 AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-stdlib"}
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/move-stdlib"}
-bridge = { local = "../bridge" }
-#bridge = { git = "https://github.com/LayerZero-Labs/LayerZero-Aptos-Contract.git", rev = "95dafa66708904b96272eeca59834aefc55a7182", subdir = "apps/bridge"}
