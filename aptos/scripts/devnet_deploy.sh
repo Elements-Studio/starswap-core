@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#cd starswap-core/aptos目录
+
 ### 生成私钥（文件在当前目录）
 #aptos key generate --key-type ed25519 --output-file output.key.admin
 
