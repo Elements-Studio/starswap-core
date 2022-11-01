@@ -47,7 +47,7 @@ aptos move publish  --package-dir ./farming  --named-addresses SwapAdmin=devnet-
 
 ## 初始化合约
 
-### XUSDT初始化
+### USDT初始化
 aptos move run --function-id 'devnet-admin::asset::init' --profile devnet-admin --assume-yes
 
 ### 治理币创世初始化
@@ -63,22 +63,22 @@ aptos move run --function-id 'devnet-admin::TokenSwapGovScript::linear_initializ
 #aptos move run --function-id 'devnet-admin::TokenSwapScripts::set_swap_fee_operation_rate'  --args  u64:10 u64:60  --profile devnet-admin --assume-yes
 
 ### 管理员创建swap交易对
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --profile devnet-admin --assume-yes
 
 
 ##  准备测试Token
 
  ###提取STAR
 #aptos move run --function-id 'devnet-admin::TokenSwapGovScript::dispatch' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::TokenSwapGovPoolType::PoolTypeCommunity --args address:0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca u128:50000000000000  --profile devnet-admin --assume-yes
-aptos move run --function-id 'devnet-admin::TokenSwapGovScript::linear_withdraw_farm'  --args u128:800000000000000  --profile dev-admin --assume-yes
+aptos move run --function-id 'devnet-admin::TokenSwapGovScript::linear_withdraw_farm'  --args u128:800000000000000  --profile devnet-admin --assume-yes
 
 
 ### mint USDT
-aptos move run --function-id 'devnet-admin::XUSDT::mint'  --args u128:50000000000  --profile devnet-admin --assume-yes
+aptos move run --function-id 'devnet-admin::asset::mint'  --args u128:50000000000  --profile devnet-admin --assume-yes
 
 
-### 管理员添加代币对流动性（STAR:XUSDT 约等于 60:1,，STAR-XUSDT初始流动性(30000,500)）
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --args  u128:30000000000000  u128:500000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
+### 管理员添加代币对流动性（STAR:USDT 约等于 60:1,，STAR-USDT初始流动性(30000,500)）
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --args  u128:30000000000000  u128:500000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
 
 ### 添加第二个LP交易对
 
@@ -96,17 +96,17 @@ aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --t
 ### 添加第三个LP交易对
 
 ### 管理员创建swap交易对
-aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --profile devnet-admin --assume-yes
+aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --profile devnet-admin --assume-yes
 
 
 ### 管理员添加代币对流动性（APT:USDT 约等于 1:7，APT:USDT初始流动性(10,70)）
-aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --args  u128:1000000000  u128:70000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
+aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --args  u128:1000000000  u128:70000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
 
 
 ## 初始化farm+stake
 
 ### 打开boost 开关
-aptos move run --function-id 'devnet-admin::TokenSwapScripts::set_alloc_mode_upgrade_switch' --args bool:true --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::set_alloc_mode_upgrade_switch' --args bool:true --profile devnet-admin --assume-yes
 
 ### 事件初始化
 aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::initialize_boost_event' --profile devnet-admin --assume-yes
@@ -115,10 +115,10 @@ aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::initialize_boos
 aptos move run --function-id 'devnet-admin::UpgradeScripts::initialize_global_pool_info' --args u128:270000000 --profile devnet-admin --assume-yes
 
 ### 管理员创建Farm池
-#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT --args u128:30 --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT --args u128:30 --profile devnet-admin --assume-yes
 
 ### 调整Farm池子倍率
-#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::set_farm_alloc_point' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --args u128:0 --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::set_farm_alloc_point' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --args u128:0 --profile devnet-admin --assume-yes
 
 ### 管理员创建第二个Farm池
 aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:30 --profile devnet-admin --assume-yes
@@ -128,7 +128,7 @@ aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v
 
 
 ### 管理员创建第三个Farm池
-aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --args u128:10 --profile devnet-admin --assume-yes
+aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --args u128:10 --profile devnet-admin --assume-yes
 
 ###初始化Syrup池global pool info，syrup池每秒恒定释放0.008个STAR
 aptos move run --function-id 'devnet-admin::UpgradeScripts::initialize_global_syrup_info' --args u128:8000000 --profile devnet-admin --assume-yes
@@ -175,7 +175,7 @@ aptos move run --function-id 'devnet-admin::TokenSwapSyrupScript::put_stepwise_m
 #aptos move run --function-id 0x1::coin::transfer --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR --args address:0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca u64:200000000000 --profile devnet-admin --assume-yes
 
 ### 触发一次swap交易
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::XUSDT::XUSDT  --args u128:10000000000 u128:100 --private-key {output.key.test}  --url https://devnet.aptoslabs.com --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::asset::USDT  --args u128:10000000000 u128:100 --private-key {output.key.test}  --url https://devnet.aptoslabs.com --assume-yes
 
 ### 查看resource信息
 #https://url:port/accounts/{address}/resource/{resource_type}
