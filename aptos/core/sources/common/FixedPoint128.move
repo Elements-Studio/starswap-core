@@ -1,11 +1,15 @@
 module SwapAdmin::FixedPoint128 {
     use std::error;
+
     use SwapAdmin::U256Wrapper::{Self, U256};
 
     const RESOLUTION: u8 = 128;
-    const Q128: u128 = 340282366920938463463374607431768211455u128; // 2**128
-    const Q256_HEX: vector<u8> = x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"; // 2**256
-    const LOWER_MASK: u128 = 340282366920938463463374607431768211455u128; // decimal of UQ128x128 (lower 128 bits), equal to 0xffffffffffffffffffffffffffffffff
+    const Q128: u128 = 340282366920938463463374607431768211455u128;
+    // 2**128
+    const Q256_HEX: vector<u8> = x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    // 2**256
+    const LOWER_MASK: u128 = 340282366920938463463374607431768211455u128;
+    // decimal of UQ128x128 (lower 128 bits), equal to 0xffffffffffffffffffffffffffffffff
     const U128_MAX: u128 = 340282366920938463463374607431768211455u128;
     const U64_MAX: u128 = 18446744073709551615u128;
 
@@ -23,9 +27,9 @@ module SwapAdmin::FixedPoint128 {
     }
 
 
-//    public fun Q256(): U256 {
-//        U256Wrapper::from_big_endian(Q256_HEX)
-//    }
+    //    public fun Q256(): U256 {
+    //        U256Wrapper::from_big_endian(Q256_HEX)
+    //    }
 
     // encode a u128 as a UQ128x128
     // U256 type has no bitwise shift operators yet, instead of realize by mul Q128
@@ -63,20 +67,20 @@ module SwapAdmin::FixedPoint128 {
         }
     }
 
-//    #[test]
-//    /// U128_MAX * U128_MAX < U256_MAX
-//    public fun test_u256_mul_not_overflow() {
-//        let u256_max:U256 = Q256();
-//        let u128_max = U256Wrapper::from_u128(U128_MAX);
-//        let u128_mul_u128_max = U256Wrapper::mul(copy u128_max, copy u128_max);
-//        let order = U256Wrapper::compare(&u256_max, &u128_mul_u128_max);
-//        assert!(order == GREATER_THAN, 1100);
-//
-//    }
+    //    #[test]
+    //    /// U128_MAX * U128_MAX < U256_MAX
+    //    public fun test_u256_mul_not_overflow() {
+    //        let u256_max:U256 = Q256();
+    //        let u128_max = U256Wrapper::from_u128(U128_MAX);
+    //        let u128_mul_u128_max = U256Wrapper::mul(copy u128_max, copy u128_max);
+    //        let order = U256Wrapper::compare(&u256_max, &u128_mul_u128_max);
+    //        assert!(order == GREATER_THAN, 1100);
+    //
+    //    }
 
     // divide a UQ128x128 by a u128, returning a UQ128x128
     public fun div(uq: UQ128x128, y: u128): UQ128x128 {
-        if ( y == 0) {
+        if (y == 0) {
             abort error::invalid_argument(ERR_DIVIDE_BY_ZERO)
         };
         let v: U256 = U256Wrapper::div(*&uq.v, U256Wrapper::from_u128(y));
@@ -120,6 +124,5 @@ module SwapAdmin::FixedPoint128 {
             false
         }
     }
-
 }
 

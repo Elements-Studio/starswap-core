@@ -24,28 +24,11 @@ module SwapAdmin::UpgradeScripts {
         TokenSwapFarm::initialize_global_pool_info(signer, pool_release_per_second);
     }
 
-    /// extend farm pool
-    public entry fun extend_farm_pool<X, Y>(
-        _signer: &signer,
-        _override_update: bool
-    ) {
-        // TokenSwapConfig::assert_admin(signer);
-        // TokenSwapFarm::extend_farm_pool<X, Y>(signer, override_update);
-        abort error::aborted(ERR_DEPRECATED)
-    }
-
     /// This will initialize syrup
     public entry fun initialize_global_syrup_info(signer: &signer, pool_release_per_second: u128) {
         TokenSwapConfig::assert_admin(signer);
         TokenSwapSyrupScript::initialize_global_syrup_info(signer, pool_release_per_second);
         // abort error::aborted(ERR_DEPRECATED)
-    }
-
-    /// Extend syrup pool
-    public entry fun extend_syrup_pool<TokenT>(_signer: &signer, _override_update: bool) {
-        //TokenSwapConfig::assert_admin(signer);
-        //TokenSwapSyrup::extend_syrup_pool<TokenT>(signer, override_update);
-        abort error::aborted(ERR_DEPRECATED)
     }
 
     // Must called by buyback account
@@ -78,7 +61,6 @@ module SwapAdmin::UpgradeScripts {
         syrup_pool_release_per_second: u128,
     ) {
         TokenSwapConfig::assert_admin(account);
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
 
         TokenSwapGov::genesis_initialize(account);
         TokenSwapGov::linear_initialize(account);

@@ -73,8 +73,7 @@ module SwapAdmin::TimelyReleasePool {
     }
 
     /// Deposit token to treasury
-    public fun deposit<PoolT, CoinT>(broker: address,
-                                                    token: Coin<CoinT>) acquires TimelyReleasePool {
+    public fun deposit<PoolT, CoinT>(broker: address, token: Coin<CoinT>) acquires TimelyReleasePool {
         let pool = borrow_global_mut<TimelyReleasePool<PoolT, CoinT>>(broker);
         pool.total_treasury_amount = pool.total_treasury_amount + WrapperUtil::coin_value(&token);
         coin::merge<CoinT>(&mut pool.treasury, token);

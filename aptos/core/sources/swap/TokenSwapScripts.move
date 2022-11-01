@@ -103,11 +103,11 @@ module SwapAdmin::TokenSwapScripts {
 
     /// Operation_v2 rate from all swap fee
     public entry fun set_swap_fee_operation_rate_v2<X, Y>(signer: &signer,
-                                                                              num: u64,
-                                                                              denum: u64) {
+                                                          num: u64,
+                                                          denum: u64) {
         TokenSwapRouter::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
     }
-    
+
     /// Set fee auto convert switch config
     public entry fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
         TokenSwapRouter::set_fee_auto_convert_switch(signer, auto_convert_switch);
@@ -118,15 +118,6 @@ module SwapAdmin::TokenSwapScripts {
         TokenSwapRouter::set_global_freeze_switch(signer, freeze);
     }
 
-    /// Set alloc mode upgrade switch
-    public entry fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-        TokenSwapRouter::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
-    }
-
-    /// Set alloc mode upgrade switch
-    public entry fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>) {
-        TokenSwapRouter::set_white_list_boost_switch(signer, white_list_switch,white_list_pubkey);
-    }
 
     /// Get amount in with token pair pondage rate
     public fun get_amount_in<X, Y>(x_value: u128): u128 {
@@ -141,5 +132,4 @@ module SwapAdmin::TokenSwapScripts {
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
-
 }

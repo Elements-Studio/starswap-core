@@ -1,8 +1,9 @@
 /// STAR is a governance token of Starswap DAPP.
 /// It uses apis defined in the `Token` module.
 module SwapAdmin::STAR {
-    use aptos_framework::managed_coin;
     use std::signer;
+
+    use aptos_framework::managed_coin;
 
     use SwapAdmin::WrapperUtil;
 
@@ -35,7 +36,7 @@ module SwapAdmin::STAR {
         WrapperUtil::is_same_token<STAR, CoinType>()
     }
 
-    public fun assert_genesis_address(account : &signer) {
+    public fun assert_genesis_address(account: &signer) {
         assert!(signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
     }
 

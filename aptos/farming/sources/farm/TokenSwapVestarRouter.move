@@ -1,14 +1,10 @@
-address SwapAdmin {
-
-module TokenSwapVestarRouter {
-    use std::error;
+module SwapAdmin::TokenSwapVestarRouter {
     use std::signer;
 
-    use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapFarmBoost;
-    use SwapAdmin::TokenSwapVestarMinter;
     use SwapAdmin::STAR;
+    use SwapAdmin::TokenSwapFarmBoost;
+    use SwapAdmin::TokenSwapSyrup;
+    use SwapAdmin::TokenSwapVestarMinter;
 
     const ERROR_ALLOC_MODEL_NOT_OPEN: u64 = 101;
 
@@ -16,14 +12,12 @@ module TokenSwapVestarRouter {
         cap: TokenSwapVestarMinter::MintCapability,
     }
 
-    public fun stake_hook<CoinT>(signer: &signer,
-                                         pledge_time_sec: u64,
-                                         amount: u128,
-                                         cap: &VestarRouterCapability) {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            return
-        };
-
+    public fun stake_hook<CoinT>(
+        signer: &signer,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         let id = TokenSwapSyrup::get_global_stake_id<CoinT>(signer::address_of(signer));
         TokenSwapVestarMinter::mint_with_cap_T<CoinT>(signer,
             id,
@@ -32,13 +26,13 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun stake_hook_with_id<CoinT>(signer: &signer,
-                                                 id: u64,
-                                                 pledge_time_sec: u64,
-                                                 amount: u128,
-                                                 cap: &VestarRouterCapability) {
-        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), error::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
-
+    public fun stake_hook_with_id<CoinT>(
+        signer: &signer,
+        id: u64,
+        pledge_time_sec: u64,
+        amount: u128,
+        cap: &VestarRouterCapability
+    ) {
         TokenSwapVestarMinter::mint_with_cap_T<CoinT>(signer,
             id,
             pledge_time_sec,
@@ -47,9 +41,6 @@ module TokenSwapVestarRouter {
     }
 
     public fun unstake_hook<CoinT>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            return
-        };
         TokenSwapVestarMinter::burn_with_cap_T<CoinT>(signer, id, &cap.cap);
     }
 
@@ -70,16 +61,15 @@ module TokenSwapVestarRouter {
 
         // Set mint treasury capability to farm boost
         TokenSwapFarmBoost::set_treasury_cap(signer, treasury_cap);
-        VestarRouterCapability{
+        VestarRouterCapability {
             cap: issuer_cap,
         }
     }
 
     ///TODO: Turn over capability from script to syrup boost on barnard
     public fun turnover_vestar_mintcap_for_barnard(cap: TokenSwapVestarMinter::MintCapability): VestarRouterCapability {
-        VestarRouterCapability{
+        VestarRouterCapability {
             cap
         }
     }
-}
 }

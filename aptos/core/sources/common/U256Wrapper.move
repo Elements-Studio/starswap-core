@@ -1,7 +1,9 @@
 module SwapAdmin::U256Wrapper {
-    use std::vector;
     use std::error;
+    use std::vector;
+
     use aptos_std::from_bcs;
+
     #[test_only]
     use aptos_std::bcs;
     #[test_only]
@@ -16,7 +18,7 @@ module SwapAdmin::U256Wrapper {
     const U64_MAX: u128 = 18446744073709551615u128;
 
     struct U256 has copy, drop, store {
-       v: u128,
+        v: u128,
     }
 
     public fun zero(): U256 {

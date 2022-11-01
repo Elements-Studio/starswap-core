@@ -9,15 +9,6 @@ module SwapAdmin::TokenSwapFarmRouter {
 
     const ERROR_ROUTER_INVALID_TOKEN_PAIR: u64 = 1001;
 
-    public fun add_farm_pool<X, Y>(account: &signer, release_per_second: u128) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::add_farm<X, Y>(account, release_per_second);
-        } else {
-            TokenSwapFarm::add_farm<Y, X>(account, release_per_second);
-        };
-    }
 
     public fun add_farm_pool_v2<X, Y>(account: &signer, alloc_point: u128) {
         let order = TokenSwap::compare_token<X, Y>();
@@ -29,22 +20,10 @@ module SwapAdmin::TokenSwapFarmRouter {
         };
     }
 
-
-    public fun reset_farm_activation<X, Y>(account: &signer,
-                                                                                     active: bool) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::reset_farm_activation<X, Y>(account, active);
-        } else {
-            TokenSwapFarm::reset_farm_activation<Y, X>(account, active);
-        };
-    }
-
     public fun stake<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        TokenSwapGov::linear_withdraw_farm( account , 0 );
+        TokenSwapGov::linear_withdraw_farm(account, 0);
         if (order == 1) {
             TokenSwapFarm::stake<X, Y>(account, amount);
         } else {
@@ -55,7 +34,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     public fun unstake<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        TokenSwapGov::linear_withdraw_farm( account , 0 );
+        TokenSwapGov::linear_withdraw_farm(account, 0);
         if (order == 1) {
             TokenSwapFarm::unstake<X, Y>(account, amount);
         } else {
@@ -67,7 +46,7 @@ module SwapAdmin::TokenSwapFarmRouter {
     public fun harvest<X, Y>(account: &signer, amount: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        TokenSwapGov::linear_withdraw_farm( account , 0 );
+        TokenSwapGov::linear_withdraw_farm(account, 0);
         if (order == 1) {
             TokenSwapFarm::harvest<X, Y>(account, amount);
         } else {
@@ -141,21 +120,10 @@ module SwapAdmin::TokenSwapFarmRouter {
         }
     }
 
-    /// Set farm mutiple of second per releasing
-    public fun set_farm_multiplier<X,
-                                   Y>(signer: &signer, multiplier: u64) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwapFarm::set_farm_multiplier<X, Y>(signer, multiplier);
-        } else {
-            TokenSwapFarm::set_farm_multiplier<Y, X>(signer, multiplier);
-        }
-    }
 
     /// Set farm alloc point
     public fun set_farm_alloc_point<X,
-                                   Y>(signer: &signer, alloc_point: u128) {
+                                    Y>(signer: &signer, alloc_point: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -194,13 +162,13 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// white list boost for farm
-    public fun wl_boost<X, Y>(account: &signer, boost_amount: u128,signature:&vector<u8>) {
+    public fun wl_boost<X, Y>(account: &signer, boost_amount: u128, signature: &vector<u8>) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            TokenSwapFarm::wl_boost<X, Y>(account, boost_amount,signature);
+            TokenSwapFarm::wl_boost<X, Y>(account, boost_amount, signature);
         } else {
-            TokenSwapFarm::wl_boost<Y, X>(account, boost_amount,signature);
+            TokenSwapFarm::wl_boost<Y, X>(account, boost_amount, signature);
         }
     }
 

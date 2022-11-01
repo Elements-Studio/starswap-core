@@ -1,6 +1,6 @@
 module SwapAdmin::SwapUpgradeScripts {
-    use SwapAdmin::TokenSwapFee;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapFee;
 
     const ERROR_INVALID_PARAMETER: u64 = 101;
 

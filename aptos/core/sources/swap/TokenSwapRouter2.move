@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapRouter2 {
-    use SwapAdmin::TokenSwapRouter;
-    use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::TokenSwapLibrary;
+    use SwapAdmin::TokenSwapRouter;
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED: u64 = 1002;
     const ERROR_ROUTER_X_IN_OVER_LIMIT_MAX: u64 = 1003;
 
     public fun get_amount_in<X, R, Y>(amount_y_out: u128): (u128, u128) {
-
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<R, Y>();
         let (reserve_r, reserve_y) = TokenSwapRouter::get_reserves<R, Y>();
         let r_in = TokenSwapLibrary::get_amount_in(amount_y_out, reserve_r, reserve_y, fee_numberator, fee_denumerator);
@@ -24,10 +23,15 @@ module SwapAdmin::TokenSwapRouter2 {
     }
 
     public fun get_amount_out<X, R, Y>(amount_x_in: u128): (u128, u128) {
-
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, R>();
         let (reserve_x, reserve_r) = TokenSwapRouter::get_reserves<X, R>();
-        let r_out = TokenSwapLibrary::get_amount_out(amount_x_in, reserve_x, reserve_r, fee_numberator, fee_denumerator);
+        let r_out = TokenSwapLibrary::get_amount_out(
+            amount_x_in,
+            reserve_x,
+            reserve_r,
+            fee_numberator,
+            fee_denumerator
+        );
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<R, Y>();
         let (reserve_r, reserve_y) = TokenSwapRouter::get_reserves<R, Y>();

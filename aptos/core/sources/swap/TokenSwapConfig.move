@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapConfig {
-    use std::signer;
-    use std::vector;
-    use std::option::{Self, Option};
     use std::error;
+    use std::option::{Self, Option};
+    use std::vector;
+    use std::signer;
 
     use SwapAdmin::Config;
 
@@ -17,9 +17,7 @@ module SwapAdmin::TokenSwapConfig {
 
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
-    const DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH: bool = false;
-    const DEFAULT_WHITE_LIST_BOOST_SWITCH: bool = false;
-    const DEFAULT_WHITE_LIST_BOOST_PUBKEY: vector<u8> = x"d6da1bea14990ad936a848c2a375a2c105d5038ce726ed03f8700998c4e840b5";
+
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
@@ -35,6 +33,7 @@ module SwapAdmin::TokenSwapConfig {
         numerator: u64,
         denumerator: u64,
     }
+
     struct SwapFeeOperationConfigV2<phantom X, phantom Y> has copy, drop, store {
         numerator: u64,
         denumerator: u64,
@@ -48,7 +47,7 @@ module SwapAdmin::TokenSwapConfig {
     struct SwapStepwiseMultiplierConfig has copy, drop, store {
         list: vector<StepwiseMutiplier>,
     }
-    
+
     struct SwapFeeSwitchConfig has copy, drop, store {
         auto_convert_switch: bool,
     }
@@ -57,18 +56,10 @@ module SwapAdmin::TokenSwapConfig {
         freeze_switch: bool,
     }
 
-    struct AllocModeUpgradeSwitch has copy, drop, store {
-        upgrade_switch: bool,
-    }
-
-    struct WhiteListBoostSwitch has copy, drop, store {
-        white_list_switch: bool,
-        white_list_pubkey: vector<u8>,
-    }
-
     public fun get_swap_fee_operation_rate(): (u64, u64) {
         if (Config::config_exist_by_address<SwapFeeOperationConfig>(admin_address())) {
-            let conf = Config::get_by_address<SwapFeeOperationConfig>(admin_address());
+            let conf =
+                Config::get_by_address<SwapFeeOperationConfig>(admin_address());
             let numerator: u64 = conf.numerator;
             let denumerator: u64 = conf.denumerator;
             (numerator, denumerator)
@@ -76,12 +67,12 @@ module SwapAdmin::TokenSwapConfig {
             (DEFAULT_OPERATION_NUMERATOR, DEFAULT_OPERATION_DENUMERATOR)
         }
     }
-    
+
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     public fun get_swap_fee_operation_rate_v2<X, Y>(): (u64, u64) {
-
         if (Config::config_exist_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address())) {
-            let conf = Config::get_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address());
+            let conf =
+                Config::get_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address());
             let numerator: u64 = conf.numerator;
             let denumerator: u64 = conf.denumerator;
             (numerator, denumerator)
@@ -93,9 +84,9 @@ module SwapAdmin::TokenSwapConfig {
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     /// Poundage number of liquidity token pair
     public fun get_poundage_rate<X, Y>(): (u64, u64) {
-
         if (Config::config_exist_by_address<SwapFeePoundageConfig<X, Y>>(admin_address())) {
-            let conf = Config::get_by_address<SwapFeePoundageConfig<X, Y>>(admin_address());
+            let conf =
+                Config::get_by_address<SwapFeePoundageConfig<X, Y>>(admin_address());
             let numerator: u64 = conf.numerator;
             let denumerator: u64 = conf.denumerator;
             (numerator, denumerator)
@@ -117,7 +108,7 @@ module SwapAdmin::TokenSwapConfig {
     /// Set fee rate for operation rate, only admin can call
     public fun set_swap_fee_operation_rate(signer: &signer, num: u64, denum: u64) {
         assert_admin(signer);
-        let config = SwapFeeOperationConfig{
+        let config = SwapFeeOperationConfig {
             numerator: num,
             denumerator: denum,
         };
@@ -129,12 +120,14 @@ module SwapAdmin::TokenSwapConfig {
     }
 
     /// Set fee rate for operation_v2 rate, only admin can call
-    public fun set_swap_fee_operation_rate_v2<X,  Y>(signer: &signer,
-                                                                      num: u64,
-                                                                      denum: u64) {
+    public fun set_swap_fee_operation_rate_v2<X, Y>(
+        signer: &signer,
+        num: u64,
+        denum: u64
+    ) {
         assert_admin(signer);
 
-        let config = SwapFeeOperationConfigV2<X, Y>{
+        let config = SwapFeeOperationConfigV2<X, Y> {
             numerator: num,
             denumerator: denum,
         };
@@ -147,11 +140,11 @@ module SwapAdmin::TokenSwapConfig {
 
     /// Set fee rate for poundage rate, only admin can call
     public fun set_poundage_rate<X, Y>(signer: &signer,
-                                                         num: u64,
-                                                         denum: u64) {
+                                       num: u64,
+                                       denum: u64) {
         assert_admin(signer);
 
-        let config = SwapFeePoundageConfig<X, Y>{
+        let config = SwapFeePoundageConfig<X, Y> {
             numerator: num,
             denumerator: denum,
         };
@@ -166,15 +159,17 @@ module SwapAdmin::TokenSwapConfig {
         signer: &signer,
         interval_sec: u64,
         multiplier: u64) {
-        
         assert_admin(signer);
-        
+
         if (Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
             let conf = Config::get_by_address<SwapStepwiseMultiplierConfig>(admin_address());
             let idx = find_mulitplier_idx(&mut conf.list, interval_sec);
 
             if (option::is_some(&idx)) {
-                let step_mutiplier = vector::borrow_mut<StepwiseMutiplier>(&mut conf.list, option::destroy_some<u64>(idx));
+                let step_mutiplier = vector::borrow_mut<StepwiseMutiplier>(
+                    &mut conf.list,
+                    option::destroy_some<u64>(idx)
+                );
                 step_mutiplier.multiplier = multiplier;
             } else {
                 vector::push_back(&mut conf.list, StepwiseMutiplier {
@@ -186,7 +181,6 @@ module SwapAdmin::TokenSwapConfig {
             Config::set<SwapStepwiseMultiplierConfig>(signer, SwapStepwiseMultiplierConfig {
                 list: *&conf.list
             });
-
         } else {
             let step_mutiplier = vector::empty<StepwiseMutiplier>();
             vector::push_back(&mut step_mutiplier, StepwiseMutiplier {
@@ -214,7 +208,7 @@ module SwapAdmin::TokenSwapConfig {
         }
     }
 
-    public fun get_stepwise_multiplier_list() : (
+    public fun get_stepwise_multiplier_list(): (
         vector<u64>, // time
         vector<u64>  // multiplier
     ) {
@@ -237,7 +231,7 @@ module SwapAdmin::TokenSwapConfig {
     }
 
     /// Check is the time second has in stepwise multiplier list
-    public fun has_in_stepwise(time_sec: u64) : bool {
+    public fun has_in_stepwise(time_sec: u64): bool {
         if (!Config::config_exist_by_address<SwapStepwiseMultiplierConfig>(admin_address())) {
             return false
         };
@@ -264,12 +258,12 @@ module SwapAdmin::TokenSwapConfig {
             idx = idx - 1;
         }
     }
-    
+
     /// Set fee auto convert switch config, only admin can call
     public fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
         assert_admin(signer);
-        
-        let config = SwapFeeSwitchConfig{
+
+        let config = SwapFeeSwitchConfig {
             auto_convert_switch,
         };
         if (Config::config_exist_by_address<SwapFeeSwitchConfig>(admin_address())) {
@@ -283,7 +277,7 @@ module SwapAdmin::TokenSwapConfig {
     public fun set_global_freeze_switch(signer: &signer, freeze_switch: bool) {
         assert_admin(signer);
 
-        let config = SwapGlobalFreezeSwitch{
+        let config = SwapGlobalFreezeSwitch {
             freeze_switch,
         };
         if (Config::config_exist_by_address<SwapGlobalFreezeSwitch>(admin_address())) {
@@ -303,53 +297,6 @@ module SwapAdmin::TokenSwapConfig {
         }
     }
 
-    /// Pool alloc mode upgrade switch
-    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-        assert_admin(signer);
-
-        let config = AllocModeUpgradeSwitch{
-            upgrade_switch,
-        };
-        if (Config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
-            Config::set<AllocModeUpgradeSwitch>(signer, config);
-        } else {
-            Config::publish_new_config<AllocModeUpgradeSwitch>(signer, config);
-        }
-    }
-
-    ///  Pool alloc mode upgrade switch
-    public fun get_alloc_mode_upgrade_switch(): bool {
-        if (Config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
-            let conf = Config::get_by_address<AllocModeUpgradeSwitch>(admin_address());
-            conf.upgrade_switch
-        } else {
-            DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH
-        }
-    }
-
-    ///  White list boost switch
-    public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
-        assert_admin(signer);
-        let config = WhiteListBoostSwitch{
-            white_list_switch,
-            white_list_pubkey,
-        };
-        if (Config::config_exist_by_address<WhiteListBoostSwitch>(admin_address())) {
-            Config::set<WhiteListBoostSwitch>(signer, config);
-        } else {
-            Config::publish_new_config<WhiteListBoostSwitch>(signer, config);
-        }
-    }
-
-    ///  White list boost switch
-    public fun get_white_list_boost_switch():(bool,vector<u8>){
-        if (Config::config_exist_by_address<WhiteListBoostSwitch>(admin_address())) {
-            let conf = Config::get_by_address<WhiteListBoostSwitch>(admin_address());
-            ( conf.white_list_switch , *&conf.white_list_pubkey )
-        } else {
-            (DEFAULT_WHITE_LIST_BOOST_SWITCH, DEFAULT_WHITE_LIST_BOOST_PUBKEY)
-        }
-    }
 
     public fun admin_address(): address {
         @SwapAdmin
@@ -370,6 +317,4 @@ module SwapAdmin::TokenSwapConfig {
     public fun get_swap_fee_switch(): bool {
         SWAP_FEE_SWITCH_ON
     }
-
-
 }

@@ -1,8 +1,8 @@
 module SwapAdmin::TokenSwapSyrupMultiplierPool {
     use std::error;
+    use std::option;
     use std::signer;
     use std::vector;
-    use std::option;
 
     const ERROR_ACCOUNT_NOT_ADMIN: u64 = 101;
     const ERROR_POOL_NOT_FOUND: u64 = 102;
