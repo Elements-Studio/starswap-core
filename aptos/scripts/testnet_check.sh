@@ -8,7 +8,7 @@
 #Testnet测试
 #aptos init --profile testnet-test --private-key {output.key.test}  --rest-url https://testnet.aptoslabs.com --skip-faucet
 
-#0xa1f9519d22512ae8b2347ea448463dc85dd49f07f48f78855fc7e920931c58d9
+#0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca
 
 ### 钱包手动转gas,测试APT > 5个
 
@@ -17,7 +17,7 @@
 aptos move run --function-id 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::CommonHelper::accept_token_entry --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR --assume-yes --profile  testnet-test
 
 ### 给test account 转 STAR，单次转4500个STAR
-aptos move run --function-id 0x1::coin::transfer --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR --args address:0xa1f9519d22512ae8b2347ea448463dc85dd49f07f48f78855fc7e920931c58d9 u64:4500000000000 --profile testnet-default --assume-yes
+aptos move run --function-id 0x1::coin::transfer --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR --args address:0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca u64:4500000000000 --profile testnet-default --assume-yes
 
 
 

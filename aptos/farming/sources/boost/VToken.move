@@ -20,7 +20,11 @@ module SwapAdmin::VToken {
     public fun register_token<CoinT>(account: &signer, precision: u8) {
         let coin_info = type_info::type_of<CoinT>();
         let coin_name = type_info::struct_name(&coin_info);
-        let (burn_cap, freeze_cap, mint_cap) = coin::initialize<CoinT>(
+        let (
+            burn_cap,
+            freeze_cap,
+            mint_cap
+        ) = coin::initialize<CoinT>(
             account,
             string::utf8(coin_name),
             string::utf8(coin_name),
@@ -29,7 +33,7 @@ module SwapAdmin::VToken {
         );
         CommonHelper::safe_accept_token<CoinT>(account);
 
-        move_to(account, OwnerCapability<CoinT>{
+        move_to(account, OwnerCapability<CoinT> {
             mint_cap,
             burn_cap,
             freeze_cap,
@@ -49,14 +53,14 @@ module SwapAdmin::VToken {
 
     public fun mint<CoinT>(signer: &signer, amount: u128): VToken<CoinT> acquires OwnerCapability {
         let cap = borrow_global<OwnerCapability<CoinT>>(signer::address_of(signer));
-        VToken<CoinT>{
+        VToken<CoinT> {
             token: coin::mint((amount as u64), &cap.mint_cap)
         }
     }
 
     public fun mint_with_cap<CoinT>(cap: &OwnerCapability<CoinT>, amount: u128): VToken<CoinT> {
         let bared_token = coin::mint((amount as u64), &cap.mint_cap);
-        VToken<CoinT>{
+        VToken<CoinT> {
             token: bared_token
         }
     }
@@ -67,7 +71,7 @@ module SwapAdmin::VToken {
     }
 
     public fun burn_with_cap<CoinT>(cap: &OwnerCapability<CoinT>, vt: VToken<CoinT>) {
-        let VToken<CoinT>{
+        let VToken<CoinT> {
             token
         } = vt;
         coin::burn(token, &cap.burn_cap);
@@ -78,7 +82,7 @@ module SwapAdmin::VToken {
     }
 
     public fun deposit<CoinT>(lhs: &mut VToken<CoinT>, rhs: VToken<CoinT>) {
-        let VToken<CoinT>{
+        let VToken<CoinT> {
             token
         } = rhs;
         coin::merge(&mut lhs.token, token);
@@ -86,7 +90,7 @@ module SwapAdmin::VToken {
 
     /// Withdraw from a token
     public fun withdraw<CoinT>(src_token: &mut VToken<CoinT>, amount: u128): VToken<CoinT> {
-        VToken<CoinT>{
+        VToken<CoinT> {
             token: coin::extract(&mut src_token.token, (amount as u64))
         }
     }

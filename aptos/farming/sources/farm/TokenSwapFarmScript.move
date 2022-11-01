@@ -2,22 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module SwapAdmin::TokenSwapFarmScript {
-    use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::TokenSwapFarmBoost;
+    use SwapAdmin::TokenSwapFarmRouter;
 
-    /// Called by admin account
-    public entry fun add_farm_pool<X, Y>(account: &signer, release_per_second: u128) {
-        TokenSwapFarmRouter::add_farm_pool<X, Y>(account, release_per_second);
-    }
 
     /// Called by admin account
     public entry fun add_farm_pool_v2<X, Y>(account: &signer, alloc_point: u128) {
         TokenSwapFarmRouter::add_farm_pool_v2<X, Y>(account, alloc_point);
     }
 
-    public entry fun reset_farm_activation<X, Y>(account: &signer, active: bool) {
-        TokenSwapFarmRouter::reset_farm_activation<X, Y>(account, active);
-    }
 
     /// Stake liquidity token
     public entry fun stake<X, Y>(account: &signer, amount: u128) {
@@ -59,10 +52,6 @@ module SwapAdmin::TokenSwapFarmScript {
         TokenSwapFarmRouter::query_release_per_second<X, Y>()
     }
 
-    public entry fun set_farm_multiplier<X, Y>(signer: &signer, mutiple: u64) {
-        TokenSwapFarmRouter::set_farm_multiplier<X, Y>(signer, mutiple);
-    }
-
     public entry fun set_farm_alloc_point<X, Y>(signer: &signer, alloc_point: u128) {
         TokenSwapFarmRouter::set_farm_alloc_point<X, Y>(signer, alloc_point);
     }
@@ -75,13 +64,13 @@ module SwapAdmin::TokenSwapFarmScript {
     public entry fun boost<X, Y>(signer: &signer, boost_amount: u128) {
         TokenSwapFarmRouter::boost<X, Y>(signer, boost_amount);
     }
-           
+
     /// white list boost for farm
-    public entry fun wl_boost<X, Y>(signer: &signer, boost_amount: u128,signature:vector<u8>) {
-        TokenSwapFarmRouter::wl_boost<X, Y>(signer, boost_amount,&signature);
+    public entry fun wl_boost<X, Y>(signer: &signer, boost_amount: u128, signature: vector<u8>) {
+        TokenSwapFarmRouter::wl_boost<X, Y>(signer, boost_amount, &signature);
     }
 
-    public entry fun initialize_boost_event(signer: &signer){
-       TokenSwapFarmBoost::initialize_boost_event(signer);
+    public entry fun initialize_boost_event(signer: &signer) {
+        TokenSwapFarmBoost::initialize_boost_event(signer);
     }
 }
