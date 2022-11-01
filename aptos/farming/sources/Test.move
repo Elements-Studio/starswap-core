@@ -17,6 +17,7 @@ module SwapAdmin::Test {
     use SwapAdmin::TokenSwapFarm;
     use SwapAdmin::TokenSwapFarmRouter;
     use SwapAdmin::TokenSwapSyrup;
+    use SwapAdmin::TokenSwapSyrupScript;
 
 
     #[test(sender=@SwapAdmin,framework=@aptos_framework)]
@@ -38,12 +39,18 @@ module SwapAdmin::Test {
         asset::init(sender);
         asset::mint(sender, 1000 * 1000 * 1000 * 1000 * 1000);
 
-        TokenSwapRouter::set_alloc_mode_upgrade_switch(sender, true);
 
         TokenSwapGov::genesis_initialize(sender);
         TokenSwapFee::initialize_token_swap_fee(sender);
 
         TokenSwapGov::linear_initialize(sender);
+
+        assert!(coin::balance<STAR>(address_of(sender)) == 800000000000000 ,100);
+
+        TokenSwapFarmBoost::initialize_boost_event(sender);
+        TokenSwapFarm::initialize_global_pool_info(sender, 270000000);
+
+        TokenSwapSyrupScript::initialize_global_syrup_info(sender,8000000);
 
         TokenSwapRouter::set_swap_fee_operation_rate(sender, 10, 60);
         TokenSwapRouter::register_swap_pair<STAR,USDT>(sender);
@@ -74,12 +81,10 @@ module SwapAdmin::Test {
             5000
         );
 
-        TokenSwapFarmBoost::initialize_boost_event(sender);
-        TokenSwapFarm::initialize_global_pool_info(sender, 270000000);
 
         TokenSwapFarmRouter::add_farm_pool_v2<STAR, AptosCoin>(sender, 30);
         TokenSwapFarmRouter::add_farm_pool_v2<STAR, USDT>(sender, 10);
-        TokenSwapSyrup::initialize_global_pool_info(sender,2700000);
+
         TokenSwapSyrup::add_pool_v2<STAR>(sender, 30, 0);
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(sender, 100, 1);
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(sender, 3600, 1);
@@ -89,6 +94,6 @@ module SwapAdmin::Test {
         timestamp::update_global_time_for_test_secs(1646445610);
 
         TokenSwapFarmRouter::stake<STAR, USDT>(sender, 10);
-
+        TokenSwapSyrupScript::stake<STAR>(sender, 100, 1000000);
     }
 }
