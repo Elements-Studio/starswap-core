@@ -110,7 +110,7 @@ sleep 5
 ## 初始化farm+stake
 
 ### 打开boost 开关
-aptos move run --function-id 'mainnet-admin::TokenSwapScripts::set_alloc_mode_upgrade_switch' --args bool:true --profile mainnet-admin --assume-yes
+#aptos move run --function-id 'mainnet-admin::TokenSwapScripts::set_alloc_mode_upgrade_switch' --args bool:true --profile mainnet-admin --assume-yes
 sleep 5
 
 ### 事件初始化
