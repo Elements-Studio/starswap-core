@@ -110,15 +110,22 @@ module SwapAdmin::Test {
 
         timestamp::update_global_time_for_test_secs(1646445701);
 
-        let old = balance<STAR>(address_of(test1));
-        TokenSwapSyrupScript::unstake<STAR>(test1, 1);
-        let stake_reward = balance<STAR>(address_of(test1)) - old;
-        debug::print(&stake_reward);
-        assert!(stake_reward == 100 * 8000000, 10013);
+
 
         let old = balance<STAR>(address_of(test1));
         TokenSwapFarmRouter::unstake<STAR, USDT>(test1, 10);
         let farm_reward = balance<STAR>(address_of(test1)) - old;
         debug::print(&farm_reward);
+        assert!(farm_reward == 6817500000, 10214);
+
+
+        timestamp::update_global_time_for_test_secs(1646532000);
+
+        let old = balance<STAR>(address_of(test1));
+        TokenSwapSyrupScript::unstake<STAR>(test1, 1);
+        let stake_reward = balance<STAR>(address_of(test1)) - old - 1000000;
+        debug::print(&stake_reward);
+
+        assert!(stake_reward == 691200000000, 13425);
     }
 }
