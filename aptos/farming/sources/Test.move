@@ -20,44 +20,63 @@ module SwapAdmin::Test {
     use SwapAdmin::TokenSwapSyrupScript;
     use SwapAdmin::TokenSwap::LiquidityToken;
     use aptos_std::debug;
-    use aptos_framework::coin::balance;
+    use aptos_framework::coin::{balance, Coin};
+
+    struct AptosCoinCap has key{
+        mint_cap: coin::MintCapability<AptosCoin>,
+        burn_cap: coin::BurnCapability<AptosCoin>
+    }
 
 
-    #[test(sender=@SwapAdmin,framework=@aptos_framework,test1=@0x1234)]
-    public fun Test(sender:&signer,framework:&signer,test1:&signer){
-        timestamp::set_time_has_started_for_testing(framework);
-        timestamp::update_global_time_for_test_secs(1646445600);
-        let (burn_cap,mint_cap) = aptos_coin::initialize_for_test(framework);
-
-
-        account::create_account_for_test(address_of(sender));
-        account::create_account_for_test(address_of(test1));
-
-        coin::register<AptosCoin>(sender);
-
-
-        coin::deposit(address_of(sender), coin::mint(1000 * 1000 * 1000 * 1000 * 1000,&mint_cap));
-        coin::destroy_burn_cap(burn_cap);
-        coin::destroy_mint_cap(mint_cap);
-
-
-        asset::init(sender);
-        asset::mint(sender, 1000 * 1000 * 1000 * 1000 * 1000);
-
-
+    public fun starswap_init(sender:&signer){
         TokenSwapGov::genesis_initialize(sender);
         TokenSwapFee::initialize_token_swap_fee(sender);
 
         TokenSwapGov::linear_initialize(sender);
-
-        assert!(coin::balance<STAR>(address_of(sender)) == 800000000000000 ,100);
-
         TokenSwapFarmBoost::initialize_boost_event(sender);
         TokenSwapFarm::initialize_global_pool_info(sender, 270000000);
 
         TokenSwapSyrupScript::initialize_global_syrup_info(sender,8000000);
 
         TokenSwapRouter::set_swap_fee_operation_rate(sender, 10, 60);
+    }
+
+    public fun framework_init(sender:&signer ,framework:&signer){
+        timestamp::set_time_has_started_for_testing(framework);
+        coin::register<AptosCoin>(sender);
+        let (burn_cap,mint_cap) = aptos_coin::initialize_for_test(framework);
+        move_to(sender, AptosCoinCap{
+            mint_cap,
+            burn_cap
+        });
+    }
+
+    public fun mint_apt(sender:&signer,amount:u64):Coin<AptosCoin> acquires AptosCoinCap {
+        let cap = &borrow_global<AptosCoinCap>(address_of(sender)).mint_cap;
+        coin::mint(amount, cap)
+    }
+
+
+    #[test(sender=@SwapAdmin,framework=@aptos_framework,test1=@0x1234)]
+    public fun Test(sender:&signer,framework:&signer,test1:&signer)acquires AptosCoinCap {
+        account::create_account_for_test(address_of(sender));
+        account::create_account_for_test(address_of(test1));
+
+        framework_init(sender,framework);
+
+        coin::deposit(address_of(sender), mint_apt(sender,1000 * 1000 * 1000 * 1000 * 1000));
+
+
+        timestamp::update_global_time_for_test_secs(1646445600);
+
+        asset::init(sender);
+        asset::mint(sender, 1000 * 1000 * 1000 * 1000 * 1000);
+
+
+        starswap_init(sender);
+        assert!(coin::balance<STAR>(address_of(sender)) == 800000000000000 ,100);
+
+
         TokenSwapRouter::register_swap_pair<STAR,USDT>(sender);
         TokenSwapGov::dispatch<PoolTypeCommunity>(sender, address_of(sender), 50000000000000);
         TokenSwapRouter::add_liquidity<STAR, USDT>(
