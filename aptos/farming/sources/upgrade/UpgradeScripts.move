@@ -1,5 +1,4 @@
 module SwapAdmin::UpgradeScripts {
-    use std::error;
     use aptos_framework::aptos_coin::AptosCoin as APT;
 
     use SwapAdmin::TokenSwapConfig;
