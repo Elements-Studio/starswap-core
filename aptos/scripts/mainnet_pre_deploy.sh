@@ -14,11 +14,11 @@
 #cd aptos目录，为了方便，依赖的项目临时使用swap同样的地址来测试
 
 ### 编译依赖项目usdt-dep
-aptos move compile  --package-dir ./bridge  --named-addresses bridge=mainnet-admin
+#aptos move compile  --package-dir ./bridge  --named-addresses bridge=mainnet-admin
 
 ### 部署依赖项目usdt-dep
-aptos move publish  --package-dir ./bridge  --named-addresses bridge=mainnet-admin --profile mainnet-admin  --included-artifacts sparse --assume-yes
-sleep 5
+#aptos move publish  --package-dir ./bridge  --named-addresses bridge=mainnet-admin --profile mainnet-admin  --included-artifacts sparse --assume-yes
+#sleep 5
 
 ### 编译依赖项目u256
 #aptos move compile  --package-dir ./u256-dep  --named-addresses u256=mainnet-admin

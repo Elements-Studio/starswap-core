@@ -14,10 +14,10 @@
 #cd aptos目录，为了方便，依赖的项目临时使用swap同样的地址来测试
 
 ### 编译依赖项目usdt-dep
-aptos move compile  --package-dir ./bridge  --named-addresses bridge=devnet-admin
+aptos move compile  --package-dir ./bridge-mock  --named-addresses bridge=devnet-admin
 
 ### 部署依赖项目usdt-dep
-aptos move publish  --package-dir ./bridge  --named-addresses bridge=devnet-admin --profile devnet-admin  --included-artifacts sparse --assume-yes
+aptos move publish  --package-dir ./bridge-mock  --named-addresses bridge=devnet-admin --profile devnet-admin  --included-artifacts sparse --assume-yes
 sleep 5
 
 ### 编译依赖项目u256
