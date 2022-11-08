@@ -23,42 +23,42 @@ sleep 5
 
 
 ### 触发一次swap交易
-aptos move run --function-id 'mainnet-test::TokenSwapScripts::swap_exact_token_for_token' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:200000000000 u128:100 --assume-yes --profile  mainnet-test
+aptos move run --function-id 'mainnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:200000000000 u128:100 --assume-yes --profile  mainnet-test
 sleep 5
 
 ### 再触发一次swap交易，另一个交易对
-aptos move run --function-id 'mainnet-test::TokenSwapScripts::swap_exact_token_for_token' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:100000000000 u128:100 --assume-yes --profile  mainnet-test
+aptos move run --function-id 'mainnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:100000000000 u128:100 --assume-yes --profile  mainnet-test
 sleep 5
 
 ### 测试添加流动性
-aptos move run --function-id 'mainnet-test::TokenSwapScripts::add_liquidity' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR     0x1::aptos_coin::AptosCoin   --args  u128:1200000000000  u128:300000000  u128:5000  u128:5000  --profile mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapScripts::add_liquidity' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR     0x1::aptos_coin::AptosCoin   --args  u128:1200000000000  u128:300000000  u128:5000  u128:5000  --profile mainnet-test --assume-yes
 sleep 5
 
 ### 质押流动性
-aptos move run --function-id 'mainnet-test::TokenSwapFarmScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin --args  u128:26655101   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin --args  u128:26655101   --profile  mainnet-test --assume-yes
 sleep 5
 
 ### 领取奖励
-aptos move run --function-id 'mainnet-test::TokenSwapFarmScript::harvest' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin --args  u128:0   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::harvest' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin --args  u128:0   --profile  mainnet-test --assume-yes
 sleep 5
 
 
 ### 取出Farm质押
-aptos move run --function-id 'mainnet-test::TokenSwapFarmScript::unstake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args  u128:3100   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::unstake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args  u128:3100   --profile  mainnet-test --assume-yes
 sleep 5
 
 ### 质押Syrup
-aptos move run --function-id 'mainnet-test::TokenSwapSyrupScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:100 u128:12000000000   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapSyrupScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:100 u128:12000000000   --profile  mainnet-test --assume-yes
 sleep 5
 
-aptos move run --function-id 'mainnet-test::TokenSwapSyrupScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:3600 u128:25000000000   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapSyrupScript::stake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:3600 u128:25000000000   --profile  mainnet-test --assume-yes
 sleep 5
 
 
 ### 给farm池boost加速
-aptos move run --function-id 'mainnet-test::TokenSwapFarmScript::boost' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args  u128:1445965   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::boost' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR 0x1::aptos_coin::AptosCoin  --args  u128:1445965   --profile  mainnet-test --assume-yes
 sleep 5
 
 ### syrup unstake
-aptos move run --function-id 'mainnet-test::TokenSwapSyrupScript::unstake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:1   --profile  mainnet-test --assume-yes
+aptos move run --function-id 'mainnet-admin::TokenSwapSyrupScript::unstake' --type-args 0xf0b07b5181ce76e447632cdff90525c0411fd15eb61df7da4e835cf88dc05f5b::STAR::STAR  --args  u64:1   --profile  mainnet-test --assume-yes
 sleep 5

@@ -3,7 +3,6 @@ name = "bridge-mock"
 version = "1.0.0"
 
 [addresses]
-#bridge = "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa"
 bridge = "0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca"
 move_std = "0x1"
 aptos_framework = "0x1"
@@ -12,5 +11,3 @@ aptos_token = "0x3"
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
-#AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-stdlib"}
-#MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/move-stdlib"}

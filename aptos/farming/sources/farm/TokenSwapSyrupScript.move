@@ -211,10 +211,5 @@ module TokenSwapSyrupScript {
             cap
         });
     }
-
-    ///TODO: Turn over capability from script to syrup boost on barnard
-    public entry fun turnover_vestar_mintcap_for_barnard(_account: &signer) {
-        abort error::aborted(ERR_DEPRECATED)
-    }
 }
 }

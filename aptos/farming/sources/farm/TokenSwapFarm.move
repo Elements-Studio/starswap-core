@@ -25,6 +25,7 @@ module SwapAdmin::TokenSwapFarm {
     const ERR_WHITE_LIST_BOOST_IS_OPEN: u64 = 102;
     const ERR_WHITE_LIST_BOOST_SIGN_IS_NULL: u64 = 103;
     const ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER: u64 = 104;
+    const ERR_BOOST_IS_NOT_TURN_ON:u64 = 105;
 
     /// Event emitted when farm been added
     struct AddFarmEvent has drop, store {
@@ -530,9 +531,9 @@ module SwapAdmin::TokenSwapFarm {
     /// boost for farm
     public fun boost<X, Y>(account: &signer, boost_amount: u128)
     acquires FarmPoolStake, FarmPoolCapability {
-        let user_addr = signer::address_of(account);
+        assert!(TokenSwapConfig::get_boost_switch(), error::invalid_state(ERR_BOOST_IS_NOT_TURN_ON));
 
-        // after pool alloc mode upgrade
+        let user_addr = signer::address_of(account);
         if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr) &&
             (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr))) {
             extend_farm_stake_resource<X, Y>(account);
@@ -549,8 +550,9 @@ module SwapAdmin::TokenSwapFarm {
         boost_amount: u128,
         _signature: &vector<u8>
     )acquires FarmPoolStake, FarmPoolCapability {
-        let user_addr = signer::address_of(account);
+        assert!(TokenSwapConfig::get_boost_switch(), error::invalid_state(ERR_BOOST_IS_NOT_TURN_ON));
 
+        let user_addr = signer::address_of(account);
         if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr) &&
             (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr))) {
             extend_farm_stake_resource<X, Y>(account);

@@ -51,8 +51,7 @@ module SwapAdmin::TokenSwapRouter {
     }
 
     /// Register swap pair by comparing sort
-    public fun register_swap_pair<X,
-                                  Y>(signer: &signer) {
+    public fun register_swap_pair<X, Y>(signer: &signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
