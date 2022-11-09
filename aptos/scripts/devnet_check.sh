@@ -22,6 +22,7 @@ aptos move run --function-id 0x1::coin::transfer --type-args 0x9bf32e42c442ae2ad
 sleep 5
 
 
+
 ### 触发一次swap交易
 aptos move run --function-id 'devnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args 0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:200000000000 u128:100 --assume-yes --profile  devnet-test
 sleep 5
