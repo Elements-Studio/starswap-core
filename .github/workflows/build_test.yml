@@ -9,7 +9,7 @@ jobs:
     name: build and test
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    steps:
+    steps:     
       - name: checkout-move
         uses: actions/checkout@v3
 
@@ -24,7 +24,6 @@ jobs:
         run: |
           source "$HOME/.profile"
           mpm integration-test -p starcoin
-
       - name: build
         run: |
           source "$HOME/.profile"
