@@ -17,8 +17,7 @@ module BigExponential {
     const ERR_EXP_DIVIDE_BY_ZERO: u64 = 101;
     const ERR_U128_OVERFLOW: u64 = 102;
 
-    const EXP_SCALE: u128 = 1000000000000000000;
-    //e18
+    const EXP_SCALE: u128 = 1000000000000000000; //e18
     const EXP_MAX_SCALE: u64 = 18;
     const U128_MAX: u128 = 340282366920938463463374607431768211455;  //length(U128_MAX)==39
 
@@ -35,19 +34,19 @@ module BigExponential {
     }
 
     public fun exp_direct(num: u128): Exp {
-        Exp {
+        Exp{
             mantissa: U256::from_u128(num)
         }
     }
 
     public fun exp_from_u256(num: U256): Exp {
-        Exp {
+        Exp{
             mantissa: num
         }
     }
 
     public fun exp_direct_expand(num: u128): Exp {
-        Exp {
+        Exp{
             mantissa: mul_u128(num, EXP_SCALE)
         }
     }
@@ -60,7 +59,7 @@ module BigExponential {
         // if overflow move will abort
         let scaledNumerator: U256 = mul_u128(num, EXP_SCALE);
         let rational = U256::div(scaledNumerator, U256::from_u128(denom));
-        Exp {
+        Exp{
             mantissa: rational
         }
     }
@@ -70,13 +69,13 @@ module BigExponential {
     }
 
     public fun add_exp(a: Exp, b: Exp): Exp {
-        Exp {
+        Exp{
             mantissa: U256::add(*&a.mantissa, *&b.mantissa)
         }
     }
 
     public fun div_exp(a: Exp, b: Exp): Exp {
-        Exp {
+        Exp{
             mantissa: U256::div(*&a.mantissa, *&b.mantissa)
         }
     }

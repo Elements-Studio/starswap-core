@@ -24,7 +24,7 @@ module SwapAdmin::SwapOracleWrapper {
     }
 
     /// ignore token pair order, just for test
-    public fun initialize_oracle<X: copy + drop + store, Y: copy + drop + store>(signer: &signer) {
+    public fun initialize_oralce<X: copy + drop + store, Y: copy + drop + store>(signer: &signer) {
         let price_oracle = SwapOralce<X, Y>{
             last_block_timestamp: 0,
             last_price_x_cumulative: U256::zero(),
@@ -158,8 +158,8 @@ script {
     use SwapAdmin::TokenMock::{WETH, WUSDT};
     use SwapAdmin::SwapOracleWrapper;
 
-    fun initialize_oracle(signer: signer) {
-        SwapOracleWrapper::initialize_oracle<WETH, WUSDT>(&signer);
+    fun initialize_oralce(signer: signer) {
+        SwapOracleWrapper::initialize_oralce<WETH, WUSDT>(&signer);
     }
 }
 
@@ -173,7 +173,7 @@ script {
     use SwapAdmin::TokenSwapOracleLibrary;
     use StarcoinFramework::Debug;
 
-    fun oracle_info(_: signer) {
+    fun oralce_info(_: signer) {
         let block_timestamp = TokenSwapOracleLibrary::current_block_timestamp();
         Debug::print(&block_timestamp);
     }
@@ -186,7 +186,7 @@ script {
     use SwapAdmin::TokenMock::{WETH, WUSDT};
     use StarcoinFramework::Debug;
 
-    fun oracle_info(_: signer) {
+    fun oralce_info(_: signer) {
         let (price_x_cumulative, price_y_cumulative, block_timestamp) = TokenSwapOracleLibrary::current_cumulative_prices<WETH, WUSDT>();
 
         Debug::print<u128>(&110500);

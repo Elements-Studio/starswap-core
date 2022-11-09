@@ -11,7 +11,7 @@ script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::Timestamp;
 
-    fun oracle_info(_: signer) {
+    fun oralce_info(_: signer) {
         let timestamp = Timestamp::now_seconds();
         let block_time = Timestamp::now_seconds() % (1u64 << 32);
         Debug::print<u128>(&110101);
@@ -30,7 +30,7 @@ script {
     use StarcoinFramework::Debug;
     use StarcoinFramework::Timestamp;
 
-    fun oracle_info(_: signer) {
+    fun oralce_info(_: signer) {
         let timestamp = Timestamp::now_seconds();
         Debug::print<u128>(&110102);
         Debug::print(&timestamp);

@@ -1,8 +1,8 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-
-module SwapAdmin::TokenSwapScripts {
+address SwapAdmin {
+module TokenSwapScripts {
     use SwapAdmin::TokenSwapLibrary;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapRouter2;
@@ -44,7 +44,7 @@ module SwapAdmin::TokenSwapScripts {
 
     /// Poundage number of liquidity token pair
     public fun get_poundage_rate<X: copy + drop + store,
-                                 Y: copy + drop + store>(): (u64, u64) {
+                                         Y: copy + drop + store>(): (u64, u64) {
         TokenSwapRouter::get_poundage_rate<X, Y>()
     }
 
@@ -126,7 +126,7 @@ module SwapAdmin::TokenSwapScripts {
                                                                               denum: u64) {
         TokenSwapRouter::set_swap_fee_operation_rate_v2<X, Y>(&signer, num, denum);
     }
-
+    
     /// Set fee auto convert switch config
     public(script) fun set_fee_auto_convert_switch(signer: signer, auto_convert_switch: bool) {
         TokenSwapRouter::set_fee_auto_convert_switch(&signer, auto_convert_switch);
@@ -143,12 +143,8 @@ module SwapAdmin::TokenSwapScripts {
     }
 
     /// Set alloc mode upgrade switch
-    public(script) fun set_white_list_boost_switch(
-        signer: signer,
-        white_list_switch: bool,
-        white_list_pubkey: vector<u8>
-    ) {
-        TokenSwapRouter::set_white_list_boost_switch(&signer, white_list_switch, white_list_pubkey);
+    public(script) fun set_white_list_boost_switch(signer: signer, white_list_switch: bool, white_list_pubkey:vector<u8>) {
+        TokenSwapRouter::set_white_list_boost_switch(&signer, white_list_switch,white_list_pubkey);
     }
 
     /// Get amount in with token pair pondage rate
@@ -166,4 +162,6 @@ module SwapAdmin::TokenSwapScripts {
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
+
+}
 }

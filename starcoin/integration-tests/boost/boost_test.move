@@ -45,7 +45,10 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         items: vector<YieldFarming::HarvestCapability<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>>
     }
 
-    public fun initialize<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, treasury: Token::Token<STARWrapper>) {
+    public fun initialize<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        treasury: Token::Token<STARWrapper>
+    ) {
         YieldFarming::initialize<PoolTypeFarmPool, STARWrapper>(signer, treasury);
         YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(signer, 800000000u128);
         let alloc_point = 10;
@@ -56,7 +59,11 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
     }
 
     // only admin call
-    public fun update_pool<X: copy + drop + store, Y: copy + drop + store>(_signer: &signer, alloc_point: u128, last_alloc_point: u128) acquires GovModfiyParamCapability {
+    public fun update_pool<X: copy + drop + store, Y: copy + drop + store>(
+        _signer: &signer,
+        alloc_point: u128,
+        last_alloc_point: u128
+    ) acquires GovModfiyParamCapability {
         let cap = borrow_global<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
         YieldFarming::update_pool<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(
             &cap.cap,
@@ -65,10 +72,23 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
             last_alloc_point);
     }
 
-    public fun stake_v2<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, asset_amount: u128, asset_weight: u128, weight_factor: u64, asset: Token::Token<LiquidityToken<X, Y>>, deadline: u64): u64
-    acquires GovModfiyParamCapability, StakeCapbabilityList {
+    public fun stake_v2<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        asset_amount: u128,
+        asset_weight: u128,
+        weight_factor: u64,
+        asset: Token::Token<LiquidityToken<X, Y>>,
+        deadline: u64
+    ): u64 acquires GovModfiyParamCapability, StakeCapbabilityList {
         let cap = borrow_global_mut<GovModfiyParamCapability<X, Y>>(@SwapAdmin);
-        let (harvest_cap, stake_id) = YieldFarming::stake_v2<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(
+        let (
+            harvest_cap,
+            stake_id
+        ) = YieldFarming::stake_v2<
+            PoolTypeFarmPool,
+            STARWrapper,
+            Token::Token<LiquidityToken<X, Y>>
+        >(
             signer,
             @SwapAdmin,
             asset,
@@ -76,7 +96,8 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
             asset_amount,
             weight_factor,
             deadline,
-            &cap.cap);
+            &cap.cap
+        );
 
         let user_addr = Signer::address_of(signer);
         if (!exists<StakeCapbabilityList<X, Y>>(user_addr)) {
@@ -90,7 +111,10 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         stake_id
     }
 
-    public fun unstake<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, id: u64): (u128, u128) acquires StakeCapbabilityList {
+    public fun unstake<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        id: u64
+    ): (u128, u128) acquires StakeCapbabilityList {
         assert!(id > 0, 10000);
         let cap_list = borrow_global_mut<StakeCapbabilityList<X, Y>>(Signer::address_of(signer));
         let cap = Vector::remove(&mut cap_list.items, id - 1);
@@ -102,11 +126,26 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         (asset_value, token_val)
     }
 
-    public fun harvest<X: copy + drop + store, Y: copy + drop + store>(signer: &signer, id: u64): Token::Token<STARWrapper> acquires StakeCapbabilityList {
+    public fun harvest<
+        X: copy + drop + store,
+        Y: copy + drop + store
+    >(
+        signer: &signer,
+        id: u64
+    ): Token::Token<STARWrapper> acquires StakeCapbabilityList {
         assert!(id > 0, 10000);
         let cap_list = borrow_global_mut<StakeCapbabilityList<X, Y>>(Signer::address_of(signer));
         let cap = Vector::borrow(&cap_list.items, id - 1);
-        YieldFarming::harvest<PoolTypeFarmPool, STARWrapper, Token::Token<LiquidityToken<X, Y>>>(Signer::address_of(signer), @SwapAdmin, 0, cap)
+        YieldFarming::harvest<
+            PoolTypeFarmPool,
+            STARWrapper,
+            Token::Token<LiquidityToken<X, Y>>
+        >(
+            Signer::address_of(signer),
+            @SwapAdmin,
+            0,
+            cap
+        )
     }
 
     public fun query_expect_gain<X: copy + drop + store, Y: copy + drop + store>(user_addr: address, id: u64): u128 acquires StakeCapbabilityList {
@@ -174,6 +213,8 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
             mint_cap,
             treasury_cap
         ) = TokenSwapVestarMinter::init(signer);
+
+        TokenSwapFarmBoost::initialize_boost_event(signer);
         TokenSwapFarmBoost::set_treasury_cap(signer, treasury_cap);
 
         move_to(signer, CapabilityWrapper{
@@ -182,15 +223,30 @@ module SwapAdmin::YieldFarmingAndVestarWrapper {
         });
     }
 
-    public fun mint(signer: &signer, pledge_time_sec: u64, staked_amount: u128) acquires CapabilityWrapper {
+    public fun mint(
+        signer: &signer,
+        pledge_time_sec: u64,
+        staked_amount: u128
+    ) acquires CapabilityWrapper {
         let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
         cap.id = cap.id + 1;
-        TokenSwapVestarMinter::mint_with_cap_T<STARWrapper>(signer, cap.id, pledge_time_sec, staked_amount, &cap.mint_cap);
+        TokenSwapVestarMinter::mint_with_cap_T<STARWrapper>(
+            signer,
+            cap.id,
+            pledge_time_sec,
+            staked_amount,
+            &cap.mint_cap
+        );
     }
 
     public fun burn(signer: &signer) acquires CapabilityWrapper {
-        let cap = borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
-        TokenSwapVestarMinter::burn_with_cap_T<STARWrapper>(signer, cap.id, &cap.mint_cap);
+        let cap =
+            borrow_global_mut<CapabilityWrapper>(@SwapAdmin);
+        TokenSwapVestarMinter::burn_with_cap_T<STARWrapper>(
+            signer,
+            cap.id,
+            &cap.mint_cap
+        );
     }
 
     public fun value(signer: &signer): u128 {
@@ -230,12 +286,21 @@ script {
         let scaling_factor = Math::pow(10, (precision as u64));
 
         // Resister and mint Token_X and deposit to alice
-        CommonHelper::safe_mint<Token_X>(&signer, 100000000 * scaling_factor);
-        Account::deposit<Token_X>(@alice, TokenMock::mint_token<Token_X>(100000000 * scaling_factor));
+        CommonHelper::safe_mint<Token_X>(
+            &signer,
+            100000000 * scaling_factor
+        );
+        Account::deposit<Token_X>(
+            @alice,
+            TokenMock::mint_token<Token_X>(100000000 * scaling_factor)
+        );
 
         // Resister and mint Token_Y and deposit to alice
         CommonHelper::safe_mint<Token_Y>(&signer, 100000000 * scaling_factor);
-        Account::deposit<Token_Y>(@alice, TokenMock::mint_token<Token_Y>(100000000 * scaling_factor));
+        Account::deposit<Token_Y>(
+            @alice,
+            TokenMock::mint_token<Token_Y>(100000000 * scaling_factor)
+        );
     }
 }
 // check: EXECUTED
@@ -259,7 +324,8 @@ script {
             amount_tokenx_desired,
             amount_tokenydesired,
             amount_tokenx_min,
-            amount_tokenymin);
+            amount_tokenymin
+        );
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<Token_X, Token_Y>();
         assert!(total_liquidity > 0, 1003);
     }
@@ -280,7 +346,10 @@ script {
         Token::register_token<STARWrapper>(&signer, 9u8);
         Account::do_accept_token<STARWrapper>(&signer);
 
-        let star_token = Token::mint<STARWrapper>(&signer, CommonHelper::pow_amount<STARWrapper>(100000000));
+        let star_token = Token::mint<STARWrapper>(
+            &signer,
+            CommonHelper::pow_amount<STARWrapper>(100000000)
+        );
         Account::deposit_to_self(&signer, star_token);
     }
 }
@@ -317,15 +386,6 @@ script {
 }
 // check: EXECUTED
 
-//# run --signers SwapAdmin
-script {
-    use SwapAdmin::TokenSwapFarmScript;
-
-    fun initialize_boost_event(signer: signer) {
-        TokenSwapFarmScript::initialize_boost_event(signer);
-    }
-}
-// check: EXECUTED
 
 //# run --signers SwapAdmin
 script {
@@ -346,7 +406,11 @@ script {
 
     fun vestar_mint(signer: signer) {
         let perday = 60 * 60 * 24;
-        YieldFarmingAndVestarWrapper::mint(&signer, 7 * perday, CommonHelper::pow_amount<STARWrapper>(1) * 1000);
+        YieldFarmingAndVestarWrapper::mint(
+            &signer,
+            7 * perday,
+            CommonHelper::pow_amount<STARWrapper>(1) * 1000
+        );
         Debug::print(&YieldFarmingAndVestarWrapper::value(&signer));
         assert!(YieldFarmingAndVestarWrapper::value(&signer) > 0, 10001);
     }
@@ -375,15 +439,25 @@ script {
 
         //        let liquidity_amount = TokenSwapRouter::liquidity<Token_X, Token_Y>(Signer::address_of(&signer));
         let liquidity_amount: u128 = 1 * (Math::pow(10, 9u64));
-        let liquidity_token = TokenSwapRouter::withdraw_liquidity_token<Token_X, Token_Y>(&signer, liquidity_amount);
-        let stake_id = YieldFarmingAndVestarWrapper::stake_v2<Token_X, Token_Y>(&signer, asset_amount, asset_weight, 100, liquidity_token, 0);
+        let liquidity_token =
+            TokenSwapRouter::withdraw_liquidity_token<Token_X, Token_Y>(
+                &signer,
+                liquidity_amount
+            );
+        let stake_id = YieldFarmingAndVestarWrapper::stake_v2<Token_X, Token_Y>(
+            &signer,
+            asset_amount,
+            asset_weight,
+            100,
+            liquidity_token,
+            0
+        );
         assert!(stake_id == 1, 1005);
     }
 }
 // check: EXECUTED
 
 //# run --signers alice
-
 script {
     use StarcoinFramework::Signer;
 
@@ -395,7 +469,12 @@ script {
         let user_addr = Signer::address_of(&signer);
         let boost_factor = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
         assert!(boost_factor == 100, 1006);
-        let (_, asset_total_amount, asset_total_weight, _) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
+        let (
+            _,
+            asset_total_amount,
+            asset_total_weight,
+            _
+        ) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
         assert!(asset_total_weight == asset_total_amount, 1007);
 
         let vestar_amount = YieldFarmingAndVestarWrapper::value(&signer);
@@ -403,7 +482,11 @@ script {
 
         let boost_factor_after = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
         assert!(boost_factor_after >= boost_factor, 1011);
-        let (_, asset_total_amount_after, asset_total_weight_after, _) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
+        let (
+            _,
+            asset_total_amount_after,
+            asset_total_weight_after,
+            _) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
         assert!(asset_total_weight_after >= asset_total_amount_after, 1012);
 
         let calc_weight = TokenSwapFarmBoost::calculate_boost_weight(asset_total_amount, boost_factor_after);
@@ -414,6 +497,7 @@ script {
     }
 }
 // check: EXECUTED
+
 
 
 //# block --author 0x1 --timestamp 10004000
@@ -437,7 +521,11 @@ script {
 
         let boost_factor_after = TokenSwapFarmBoost::get_boost_factor<Token_X, Token_Y>(user_addr);
         assert!(boost_factor_after == 100, 1018);
-        let (_, asset_total_amount_after, asset_total_weight_after, _) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
+        let (_,
+            asset_total_amount_after,
+            asset_total_weight_after,
+            _
+        ) = YieldFarmingAndVestarWrapper::query_pool_info_v2<Token_X, Token_Y>();
         assert!(asset_total_weight_after == asset_total_amount_after, 1019);
 
         let vestar_amount_after = YieldFarmingAndVestarWrapper::value(&signer);
@@ -458,7 +546,11 @@ script {
 
     fun vestar_mint_again(signer: signer) {
         let perday = 2 * 60 * 60 * 24;
-        YieldFarmingAndVestarWrapper::mint(&signer, 7 * perday, CommonHelper::pow_amount<STARWrapper>(1) * 1000);
+        YieldFarmingAndVestarWrapper::mint(
+            &signer,
+            7 * perday,
+            CommonHelper::pow_amount<STARWrapper>(1) * 1000
+        );
         Debug::print(&YieldFarmingAndVestarWrapper::value(&signer));
         assert!(YieldFarmingAndVestarWrapper::value(&signer) > 0, 10001);
     }
