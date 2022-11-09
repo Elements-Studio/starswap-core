@@ -12,9 +12,6 @@ module bridge::asset {
 
     /// USDT initialization.
     public entry fun init(account: &signer) {
-//        Token::register_token<USDT>(account, PRECISION);
-//        Account::do_accept_token<USDT>(account);
-
         managed_coin::initialize<USDT>(
             account,
             b"USDT Coin",

@@ -17,6 +17,7 @@ module SwapAdmin::TokenSwapConfig {
 
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
+    const DEFAULT_SWAP_BOOST_SWITCH: bool = false;
 
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
@@ -54,6 +55,10 @@ module SwapAdmin::TokenSwapConfig {
 
     struct SwapGlobalFreezeSwitch has copy, drop, store {
         freeze_switch: bool,
+    }
+
+    struct BoostSwitch has copy, drop, store {
+        boost_switch: bool,
     }
 
     public fun get_swap_fee_operation_rate(): (u64, u64) {
@@ -294,6 +299,30 @@ module SwapAdmin::TokenSwapConfig {
             conf.freeze_switch
         } else {
             DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH
+        }
+    }
+
+    /// Farm boost switch
+    public fun set_boost_switch(signer: &signer, boost_switch: bool) {
+        assert_admin(signer);
+
+        let config = BoostSwitch {
+            boost_switch,
+        };
+        if (Config::config_exist_by_address<BoostSwitch>(admin_address())) {
+            Config::set<BoostSwitch>(signer, config);
+        } else {
+            Config::publish_new_config<BoostSwitch>(signer, config);
+        }
+    }
+
+    /// Farm boost switch
+    public fun get_boost_switch(): bool {
+        if (Config::config_exist_by_address<BoostSwitch>(admin_address())) {
+            let conf = Config::get_by_address<BoostSwitch>(admin_address());
+            conf.boost_switch
+        } else {
+            DEFAULT_SWAP_BOOST_SWITCH
         }
     }
 

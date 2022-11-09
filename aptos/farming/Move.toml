@@ -12,6 +12,4 @@ aptos_token = "0x3"
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
-#AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-stdlib"}
-#MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/move-stdlib"}
 StarswapAptosCore = {local = "../core"}
