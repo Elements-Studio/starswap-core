@@ -7,7 +7,7 @@ on:
 jobs:
   starcoin-build-and-test:
     name: build and test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - name: checkout-move
@@ -44,7 +44,13 @@ jobs:
           source "$HOME/.profile"
           bash aptos/core/script/build.sh
 
+      - name: check aptos swap core changed files
+        run: bash ./aptos/core/scripts/changed_files.sh
+
       - name: aptos swap farming build and test
         run: |
           source "$HOME/.profile"
           bash aptos/farming/script/build.sh
+
+      - name: check aptos farming core changed files
+        run: bash ./aptos/farming/scripts/changed_files.sh
