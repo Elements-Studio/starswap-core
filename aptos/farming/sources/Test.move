@@ -21,6 +21,7 @@ module SwapAdmin::Test {
     use SwapAdmin::TokenSwap::LiquidityToken;
     use aptos_std::debug;
     use aptos_framework::coin::{balance, Coin};
+    use SwapAdmin::TokenSwapGov::get_genesis_timestamp;
 
     struct AptosCoinCap has key{
         mint_cap: coin::MintCapability<AptosCoin>,
@@ -67,7 +68,7 @@ module SwapAdmin::Test {
         coin::deposit(address_of(sender), mint_apt(sender,1000 * 1000 * 1000 * 1000 * 1000));
 
 
-        timestamp::update_global_time_for_test_secs(1646445600);
+        timestamp::update_global_time_for_test_secs(get_genesis_timestamp());
 
         asset::init(sender);
         asset::mint(sender, 1000 * 1000 * 1000 * 1000 * 1000);
@@ -127,7 +128,7 @@ module SwapAdmin::Test {
         TokenSwapSyrupScript::stake<STAR>(test1, 100, 1000000);
         debug::print(&balance<STAR>(address_of(test1)));
 
-        timestamp::update_global_time_for_test_secs(1646445701);
+        timestamp::update_global_time_for_test_secs(get_genesis_timestamp() + 101);
 
 
 
@@ -138,7 +139,7 @@ module SwapAdmin::Test {
         assert!(farm_reward == 6817500000, 10214);
 
 
-        timestamp::update_global_time_for_test_secs(1646532000);
+        timestamp::update_global_time_for_test_secs(get_genesis_timestamp() + 86400);
 
         let old = balance<STAR>(address_of(test1));
         TokenSwapSyrupScript::unstake<STAR>(test1, 1);

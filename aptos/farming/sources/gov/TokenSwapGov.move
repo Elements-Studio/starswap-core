@@ -203,6 +203,11 @@ module SwapAdmin::TokenSwapGov {
         assert!(developer_fund_can_withdraw_amount == 570776252400, 1024);
     }
 
+    #[test_only]
+    public fun get_genesis_timestamp():u64{
+        GENESIS_TIMESTAMP
+    }
+
     struct GovCapability has key, store {
         mint_cap: coin::MintCapability<STAR::STAR>,
         burn_cap: coin::BurnCapability<STAR::STAR>,
