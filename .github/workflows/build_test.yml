@@ -50,9 +50,7 @@ jobs:
       - name: aptos swap core build and test
         run: |
           source "$HOME/.profile"
-          aptos move compile
-          aptos move test
-#          bash ./aptos/core/script/build.sh
+          bash aptos/core/script/pre_release.sh
 
 #       - name: check aptos swap core changed files
 #         run: bash ./aptos/core/scripts/changed_files.sh
