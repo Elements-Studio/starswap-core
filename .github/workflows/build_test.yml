@@ -49,6 +49,7 @@ jobs:
 
       - name: aptos swap core build and test
         run: |
+          source "$HOME/.profile"
           bash aptos/core/scripts/build.sh
 
 #       - name: check aptos swap core changed files
