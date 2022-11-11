@@ -52,13 +52,13 @@ jobs:
           source "$HOME/.profile"
           bash aptos/core/scripts/build.sh
 
-#       - name: check aptos swap core changed files
-#         run: bash ./aptos/core/scripts/changed_files.sh
+      - name: check aptos swap core changed files
+        run: bash aptos/core/scripts/changed_files.sh
 
-#       - name: aptos swap farming build and test
-#         run: |
-#           source "$HOME/.profile"
-#           bash aptos/farming/script/build.sh
+      - name: aptos swap farming build and test
+        run: |
+          source "$HOME/.profile"
+          bash aptos/farming/scripts/build.sh
 
-#       - name: check aptos farming core changed files
-#         run: bash ./aptos/farming/scripts/changed_files.sh
+      - name: check aptos farming core changed files
+        run: bash aptos/farming/scripts/changed_files.sh
