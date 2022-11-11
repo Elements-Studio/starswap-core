@@ -81,7 +81,9 @@ function install_aptos_CLI {
       aptos_file="aptos-cli-${APTOS_VERSION}-MacOSX-x86_64";
     else
       if [ "$(. /etc/os-release; )" = "Ubuntu" ]; then
-        if [[ $(lsb_release -r | cut -f 2) == '18.04' ]]; then
+        ubuntu_version=$(lsb_release -r | cut -f 2)
+        echo "Ubuntu version: $ubuntu_version"
+        if [[ $ubuntu_version == '18.04' ]]; then
           echo "Unsupported OS version, only supported ubuntu 20 and later"
           exit 1
         else
