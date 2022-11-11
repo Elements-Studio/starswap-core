@@ -80,7 +80,7 @@ function install_aptos_CLI {
     if [[ $(uname -s) == "Darwin" ]]; then
       aptos_file="aptos-cli-${APTOS_VERSION}-MacOSX-x86_64";
     else
-      if [ "$(. /etc/os-release; )" = "Ubuntu" ]; then
+      if [ "$(. /etc/os-release; echo $NAME)" = "Ubuntu" ]; then
         ubuntu_version=$(lsb_release -r | cut -f 2)
         echo "Ubuntu version: $ubuntu_version"
         if [[ $ubuntu_version == '18.04' ]]; then
@@ -90,6 +90,7 @@ function install_aptos_CLI {
           aptos_file="aptos-cli-${APTOS_VERSION}-Ubuntu-22.04-x86_64";
         fi
       else
+      	echo "Unsupported OS version, only supported ubuntu"
         aptos_file="";
       fi
     fi
