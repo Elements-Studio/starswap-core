@@ -210,5 +210,9 @@ module TokenSwapSyrupScript {
     public(script) fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
+
+    public(script) fun update_token_pool_index<X: copy + drop>(signer: signer) {
+        TokenSwapSyrup::update_token_pool_index<X>(&signer);
+    }
 }
 }

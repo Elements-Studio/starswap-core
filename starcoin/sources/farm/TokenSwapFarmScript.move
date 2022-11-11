@@ -93,5 +93,9 @@ module TokenSwapFarmScript {
     public(script) fun initialize_boost_event(_signer: signer){
        //TokenSwapFarmBoost::initialize_boost_event(&signer);
     }
+
+    public(script) fun update_token_pool_index<X: copy + drop + store, Y: copy + drop + store>(signer: signer){
+        TokenSwapFarm::update_token_pool_index<X,Y>(&signer);
+    }
 }
 }

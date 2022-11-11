@@ -21,7 +21,8 @@ module UpgradeScripts {
     use StarcoinFramework::STC::STC;
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;
-    use Bridge::XUSDT::XUSDT;
+    use XUSDT::XUSDT::XUSDT;
+    use XETH::XETH::XETH;
 
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
@@ -138,6 +139,35 @@ module UpgradeScripts {
         genesis_aptos_burn_community(&account);
     }
 
+    public (script)fun upgrade_from_v2_0_1_to_v2_0_2(account:signer){
+        TokenSwapFarm::update_token_pool_index<STC,XETH>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
+        TokenSwapFarm::update_token_pool_index<FAI,XUSDT>(&account);
+
+        TokenSwapFarm::set_pool_release_per_second(&account, 800000000 );
+
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, 23000000 );
+
+    }
+
+    public (script)fun upgrade_from_v2_0_2_to_v2_0_3(account:signer){
+        TokenSwapFarm::update_token_pool_index<STC,XETH>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
+        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
+        TokenSwapFarm::update_token_pool_index<FAI,XUSDT>(&account);
+
+        TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
+
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
+
+    }
     /// This function initializes all structures for the latest version,
     /// And is only used for integration tests
     public fun genesis_initialize_for_latest_version(
