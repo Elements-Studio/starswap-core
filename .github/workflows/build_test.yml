@@ -6,7 +6,7 @@ on:
 
 jobs:
   starcoin-build-and-test:
-    name: build and test
+    name: Starcoin build and test
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -36,10 +36,13 @@ jobs:
         run: bash ./starcoin/scripts/changed_files.sh
 
   aptos-build-and-test:
-    name: build and test
+    name: Aptos build and test
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
+      - name: checkout-move
+        uses: actions/checkout@v3
+
       - name: download and install aptos CI
         run: |
           bash aptos/scripts/dev_setup.sh -b -t -p
