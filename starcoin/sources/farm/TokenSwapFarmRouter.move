@@ -173,6 +173,16 @@ module TokenSwapFarmRouter {
         }
     }
 
+    public fun update_token_pool_index<X: copy + drop + store, Y: copy + drop + store>(signer: &signer){
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::update_token_pool_index<X, Y>(signer);
+        } else {
+            TokenSwapFarm::update_token_pool_index<Y, X>(signer);
+        }
+    }
+
     /// Get farm mutiple of second per releasing
     public fun get_farm_multiplier<X: copy + drop + store,
                                    Y: copy + drop + store>(): u64 {

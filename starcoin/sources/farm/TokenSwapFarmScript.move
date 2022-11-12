@@ -95,7 +95,7 @@ module TokenSwapFarmScript {
     }
 
     public(script) fun update_token_pool_index<X: copy + drop + store, Y: copy + drop + store>(signer: signer){
-       TokenSwapFarm::update_token_pool_index<X,Y>(&signer);
+       TokenSwapFarmRouter::update_token_pool_index<X,Y>(&signer);
     }
 }
 }

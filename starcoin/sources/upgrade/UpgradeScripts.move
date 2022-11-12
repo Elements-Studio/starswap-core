@@ -22,6 +22,7 @@ module UpgradeScripts {
     use WEN::WEN::WEN;
     use FAI::FAI::FAI;
     use Bridge::XUSDT::XUSDT;
+    use SwapAdmin::TokenSwapFarmRouter;
 
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
@@ -138,31 +139,26 @@ module UpgradeScripts {
         genesis_aptos_burn_community(&account);
     }
 
-    public (script)fun upgrade_from_v2_0_1_to_v2_0_2(account:signer){
-        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
-
-        TokenSwapFarm::set_pool_release_per_second(&account, 800000000 );
-
-        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
-        TokenSwapSyrup::set_pool_release_per_second(&account, 23000000 );
-
+    public (script)fun upgrade_from_v2_0_1_to_v2_0_2(_account:signer){
     }
 
-    public (script)fun upgrade_from_v2_0_2_to_v2_0_3(account:signer){
-        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
-
-        TokenSwapFarm::set_pool_release_per_second(&account, (800000000 * 2) / 3);
-
-        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
-        TokenSwapSyrup::set_pool_release_per_second(&account, (23000000 * 2) / 3);
-
+    public (script)fun upgrade_from_v2_0_2_to_v2_0_3(_account:signer){
     }
+
+    public(script)fun set_farm_pool_release_per_second(account:signer, pool_release_per_second:u128){
+        TokenSwapFarmRouter::update_token_pool_index<STC,XUSDT>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,WEN>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,STAR>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,FAI>(&account);
+
+        TokenSwapFarm::set_pool_release_per_second(&account, pool_release_per_second);
+    }
+
+    public(script)fun set_stake_pool_release_per_second(account:signer, pool_release_per_second:u128){
+        TokenSwapSyrup::update_token_pool_index<STAR::STAR>(&account);
+        TokenSwapSyrup::set_pool_release_per_second(&account, pool_release_per_second);
+    }
+
 
     /// This function initializes all structures for the latest version,
     /// And is only used for integration tests
