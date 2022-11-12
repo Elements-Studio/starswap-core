@@ -1,6 +1,6 @@
 [package]
 name = "Starswap-Core"
-version = "2.0.1"
+version = "2.0.3"
 
 [addresses]
 StarcoinFramework = "0x1"
