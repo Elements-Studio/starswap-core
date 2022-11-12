@@ -140,9 +140,11 @@ module UpgradeScripts {
     }
 
     public (script)fun upgrade_from_v2_0_1_to_v2_0_2(_account:signer){
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     public (script)fun upgrade_from_v2_0_2_to_v2_0_3(_account:signer){
+        abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
     public(script)fun set_farm_pool_release_per_second(account:signer, pool_release_per_second:u128){
