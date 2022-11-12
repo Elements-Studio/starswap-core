@@ -147,12 +147,12 @@ module UpgradeScripts {
     }
 
     public(script)fun set_farm_pool_release_per_second(account:signer, pool_release_per_second:u128){
-        TokenSwapFarm::update_token_pool_index<STC,XETH>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,XUSDT>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,WEN>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,STAR>(&account);
-        TokenSwapFarm::update_token_pool_index<STC,FAI>(&account);
-        TokenSwapFarm::update_token_pool_index<FAI,XUSDT>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,XETH>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,XUSDT>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,WEN>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,STAR>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<STC,FAI>(&account);
+        TokenSwapFarmRouter::update_token_pool_index<FAI,XUSDT>(&account);
         TokenSwapFarm::set_pool_release_per_second(&account, pool_release_per_second);
     }
 
