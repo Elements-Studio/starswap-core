@@ -52,9 +52,6 @@ jobs:
           source "$HOME/.profile"
           bash aptos/scripts/build.sh core
 
-      - name: check aptos swap core changed files
-        run: bash aptos/scripts/changed_files.sh
-
       - name: aptos swap farming build and test
         run: |
           source "$HOME/.profile"
