@@ -61,4 +61,4 @@ jobs:
           bash aptos/scripts/build.sh farming
 
       - name: check aptos farming core changed files
-        run: bash aptos/farming/scripts/changed_files.sh
+        run: bash aptos/scripts/changed_files.sh
