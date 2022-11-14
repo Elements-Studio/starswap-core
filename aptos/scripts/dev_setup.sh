@@ -14,8 +14,7 @@
 # fast fail.
 set -eo pipefail
 
-MPM_VERSION=v1.12.3
-
+APTOS_VERSION=1.0.1
 
 SCRIPT_PATH="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
 cd "$SCRIPT_PATH/.." || exit
@@ -69,74 +68,54 @@ function update_path_and_profile {
   fi
 }
 
-function install_mpm {
-  echo "Installing mpm"
-  VERSION="$(mpm --version || true)"
+# Install aptos CLI file,
+function install_aptos_CLI {
+  echo "Installing aptos CLI"
+  VERSION="$(aptos --version || true)"
   if [ -n "$VERSION" ]; then
     if [[ "${BATCH_MODE}" == "false" ]]; then
-      echo "mpm is already installed, version: $VERSION"
+      echo "aptos CLI is already installed, version: $VERSION"
     fi
   else
     if [[ $(uname -s) == "Darwin" ]]; then
-      mpm_file="mpm-macos-latest";
+      aptos_file="aptos-cli-${APTOS_VERSION}-MacOSX-x86_64";
     else
       if [ "$(. /etc/os-release; echo $NAME)" = "Ubuntu" ]; then
-        if [[ $(lsb_release -r | cut -f 2) == '18.04' ]]; then
-          mpm_file="mpm-ubuntu-18.04";
+        ubuntu_version=$(lsb_release -r | cut -f 2)
+        echo "Ubuntu version: $ubuntu_version"
+        if [[ $ubuntu_version == '18.04' ]]; then
+          echo "Unsupported OS version, only supported ubuntu 20 and later"
+          exit 1
         else
-          mpm_file="mpm-ubuntu-latest";
+          aptos_file="aptos-cli-${APTOS_VERSION}-Ubuntu-22.04-x86_64";
         fi
       else
-        mpm_file="";
+      	echo "Unsupported OS version, only supported ubuntu"
+        aptos_file="";
       fi
     fi
-    if [[ $mpm_file != "" ]]; then
-      curl -sL -o "${INSTALL_DIR}${mpm_file}.zip" "https://github.com/starcoinorg/starcoin/releases/download/${MPM_VERSION}/${mpm_file}.zip"
-      unzip -q "${INSTALL_DIR}${mpm_file}.zip" -d "${INSTALL_DIR}"
-      mv "${INSTALL_DIR}${mpm_file}/mpm" "${INSTALL_DIR}mpm"
-      chmod +x "${INSTALL_DIR}mpm"
-      rmdir "${INSTALL_DIR}${mpm_file}"
-    else
-      echo "Install mpm from source"
-      cargo install --git https://github.com/starcoinorg/starcoin move-package-manager --tag $MPM_VERSION --bin mpm --root $HOME
-    fi
-  fi
-}
 
-function install_pkg {
-  package=$1
-  PACKAGE_MANAGER=$2
-  PRE_COMMAND=()
-  if [ "$(whoami)" != 'root' ]; then
-    PRE_COMMAND=(sudo)
-  fi
-  if command -v "$package" &>/dev/null; then
-    echo "$package is already installed"
-  else
-    echo "Installing ${package}."
-    if [[ "$PACKAGE_MANAGER" == "yum" ]]; then
-      "${PRE_COMMAND[@]}" yum install "${package}" -y
-    elif [[ "$PACKAGE_MANAGER" == "apt-get" ]]; then
-      "${PRE_COMMAND[@]}" apt-get install "${package}" --no-install-recommends -y
-      echo apt-get install result code: $?
-    elif [[ "$PACKAGE_MANAGER" == "pacman" ]]; then
-      "${PRE_COMMAND[@]}" pacman -Syu "$package" --noconfirm
-    elif [[ "$PACKAGE_MANAGER" == "apk" ]]; then
-      apk --update add --no-cache "${package}"
-    elif [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
-      dnf install "$package"
-    elif [[ "$PACKAGE_MANAGER" == "brew" ]]; then
-      brew install "$package"
+    work_dir=$(pwd)
+
+    if [[ $aptos_file != "" ]]; then
+      download_url="https://github.com/aptos-labs/aptos-core/releases/download/aptos-cli-v${APTOS_VERSION}/${aptos_file}.zip"
+      curl -sL -o "${work_dir}/${aptos_file}.zip" ${download_url}
+      unzip -q "${work_dir}/${aptos_file}.zip" -d "${INSTALL_DIR}"
+      chmod +x "${INSTALL_DIR}aptos"
+      rm "${work_dir}/${aptos_file}.zip"
+    else
+      echo "Unable to find CLI package, please check the version of aptos, Abort"
+      exit 1
     fi
   fi
 }
 
 function welcome_message {
 cat <<EOF
-Welcome to Starcoin Move Framework!
+Welcome to Aptos Framework!
 
 This script will download and install the necessary dependencies needed to
-build, test and inspect Starcoin Move Framework.
+build, test and inspect Aptos Framework.
 
 Based on your selection, these tools will be included:
 EOF
@@ -144,7 +123,7 @@ EOF
   if [[ "$INSTALL_BUILD_TOOLS" == "true" ]]; then
 cat <<EOF
 Build tools (since -t or no option was provided):
-  * mpm
+  * aptos
 EOF
   fi
 
@@ -164,7 +143,6 @@ BATCH_MODE=false;
 VERBOSE=false;
 INSTALL_BUILD_TOOLS=false;
 INSTALL_PROFILE=false;
-INSTALL_PACKAGES=();
 INSTALL_DIR="${HOME}/bin/"
 OPT_DIR="false"
 
@@ -185,11 +163,6 @@ while getopts "btopvysah:i:n" arg; do
       ;;
     y)
       INSTALL_PROVER="true"
-      ;;
-    i)
-      INSTALL_INDIVIDUAL="true"
-      echo "$OPTARG"
-      INSTALL_PACKAGES+=("$OPTARG")
       ;;
     n)
       OPT_DIR="true"
@@ -290,11 +263,8 @@ if [[ "$INSTALL_PROFILE" == "true" ]]; then
   update_path_and_profile
 fi
 
-install_pkg curl "$PACKAGE_MANAGER"
-
-
 if [[ "$INSTALL_BUILD_TOOLS" == "true" ]]; then
-  install_mpm
+  install_aptos_CLI
 fi
 
 
@@ -303,8 +273,7 @@ cat <<EOF
 Finished installing all dependencies.
 
 You should now be able to build the project by running:
-	mpm package build
-	mpm package prove
+	aptos move build
 EOF
 fi
 
