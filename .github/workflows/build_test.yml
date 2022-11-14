@@ -50,15 +50,15 @@ jobs:
       - name: aptos swap core build and test
         run: |
           source "$HOME/.profile"
-          bash aptos/core/scripts/build.sh
+          bash aptos/scripts/build.sh core
 
       - name: check aptos swap core changed files
-        run: bash aptos/core/scripts/changed_files.sh
+        run: bash aptos/scripts/changed_files.sh
 
       - name: aptos swap farming build and test
         run: |
           source "$HOME/.profile"
-          bash aptos/farming/scripts/build.sh
+          bash aptos/scripts/build.sh farming
 
       - name: check aptos farming core changed files
         run: bash aptos/farming/scripts/changed_files.sh
