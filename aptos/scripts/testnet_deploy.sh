@@ -10,7 +10,6 @@ SWAP_ADMIN=$1
 ### 连接testnet网络
 #aptos init --profile testnet-admin --private-key {output.key.admin}  --rest-url https://testnet.aptoslabs.com --skip-faucet
 #${SWAP_ADMIN}
-#0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca
 
 ### 手动转gas, 测试APT > 6个
 
