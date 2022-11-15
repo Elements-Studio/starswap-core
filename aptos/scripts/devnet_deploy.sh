@@ -226,3 +226,7 @@ aptos move run --function-id 'devnet-admin::TokenSwapSyrupScript::stake' --type-
 
 ### syrup unstake
 aptos move run --function-id 'devnet-admin::TokenSwapSyrupScript::unstake' --type-args ${SWAP_ADMIN}::STAR::STAR  --args  u64:1   --profile  devnet-admin --assume-yes
+
+### adjust farm and stake release per second
+#aptos move run --function-id 'devnet-admin::UpgradeScripts::set_farm_pool_release_per_second' --args  u128:180000000 --profile  devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::UpgradeScripts::set_stake_pool_release_per_second' --args u128:4000000   --profile  devnet-admin --assume-yes

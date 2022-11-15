@@ -73,4 +73,18 @@ module SwapAdmin::UpgradeScripts {
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(account, 7776000, 12);
     }
 
+    /// must only call by admin
+    public entry fun set_farm_pool_release_per_second(account:&signer, pool_release_per_second:u128){
+        TokenSwapFarmRouter::update_token_pool_index<STAR, APT>(account);
+        TokenSwapFarmRouter::update_token_pool_index<APT, USDT>(account);
+
+        TokenSwapFarm::set_pool_release_per_second(account, pool_release_per_second);
+    }
+
+    /// must only call by admin
+    public entry fun set_stake_pool_release_per_second(account:&signer, pool_release_per_second:u128){
+        TokenSwapSyrup::update_token_pool_index<STAR>(account);
+        TokenSwapSyrup::set_pool_release_per_second(account, pool_release_per_second);
+    }
+
 }

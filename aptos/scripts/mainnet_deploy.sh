@@ -4,6 +4,16 @@ SWAP_ADMIN=$1
 
 #cd starswap-core/aptos目录
 
+### 生成私钥（文件在当前目录）
+#aptos key generate --key-type ed25519 --output-file output.key.mainnet.admin
+
+### 连接mainnet网络
+#aptos init --profile mainnet-admin --private-key {output.key.admin}  --rest-url https://mainnet.aptoslabs.com --skip-faucet
+#${SWAP_ADMIN}
+#0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca
+
+### 手动转gas, 测试APT > 2个
+
 ### 编译starswap core
 aptos move compile  --package-dir ./core  --named-addresses SwapAdmin=mainnet-admin,SwapFeeAdmin=mainnet-admin
 
@@ -138,3 +148,7 @@ sleep 5
 
 ### syrup unstake
 #aptos move run --function-id 'mainnet-admin::TokenSwapSyrupScript::unstake' --type-args ${SWAP_ADMIN}::STAR::STAR  --args  u64:1   --profile  mainnet-admin --assume-yes
+
+### adjust farm and stake release per second
+#aptos move run --function-id 'mainnet-admin::UpgradeScripts::set_farm_pool_release_per_second' --args  u128:180000000 --profile  mainnet-admin --assume-yes
+#aptos move run --function-id 'mainnet-admin::UpgradeScripts::set_stake_pool_release_per_second' --args u128:4000000   --profile  mainnet-admin --assume-yes
