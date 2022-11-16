@@ -4,6 +4,7 @@
 module SwapAdmin::TokenSwapFarmScript {
     use SwapAdmin::TokenSwapFarmBoost;
     use SwapAdmin::TokenSwapFarmRouter;
+    use SwapAdmin::TokenSwapFarm;
 
 
     /// Called by admin account
@@ -58,6 +59,10 @@ module SwapAdmin::TokenSwapFarmScript {
 
     public fun get_farm_multiplier<X, Y>(): u64 {
         TokenSwapFarmRouter::get_farm_multiplier<X, Y>()
+    }
+
+    public entry fun set_pool_release_per_second(signer: &signer, release_per_second: u128) {
+        TokenSwapFarm::set_pool_release_per_second(signer, release_per_second);
     }
 
     /// boost for farm

@@ -227,3 +227,8 @@ sleep 5
 ### syrup unstake
 aptos move run --function-id 'testnet-admin::TokenSwapSyrupScript::unstake' --type-args ${SWAP_ADMIN}::STAR::STAR  --args  u64:1   --profile  testnet-admin --assume-yes
 sleep 5
+
+
+### adjust farm and stake release per second
+#aptos move run --function-id 'testnet-admin::UpgradeScripts::set_farm_pool_release_per_second' --args  u128:180000000 --profile  testnet-admin --assume-yes
+#aptos move run --function-id 'testnet-admin::UpgradeScripts::set_stake_pool_release_per_second' --args u128:4000000   --profile  testnet-admin --assume-yes

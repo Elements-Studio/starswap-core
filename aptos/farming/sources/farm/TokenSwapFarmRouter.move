@@ -122,8 +122,7 @@ module SwapAdmin::TokenSwapFarmRouter {
 
 
     /// Set farm alloc point
-    public fun set_farm_alloc_point<X,
-                                    Y>(signer: &signer, alloc_point: u128) {
+    public fun set_farm_alloc_point<X, Y>(signer: &signer, alloc_point: u128) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -134,14 +133,23 @@ module SwapAdmin::TokenSwapFarmRouter {
     }
 
     /// Get farm mutiple of second per releasing
-    public fun get_farm_multiplier<X,
-                                   Y>(): u64 {
+    public fun get_farm_multiplier<X, Y>(): u64 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
             TokenSwapFarm::get_farm_multiplier<X, Y>()
         } else {
             TokenSwapFarm::get_farm_multiplier<Y, X>()
+        }
+    }
+
+    public fun update_token_pool_index<X, Y>(signer: &signer){
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::update_token_pool_index<X, Y>(signer);
+        } else {
+            TokenSwapFarm::update_token_pool_index<Y, X>(signer);
         }
     }
 

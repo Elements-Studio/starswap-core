@@ -27,6 +27,8 @@ module SwapAdmin::TokenSwapFarm {
     const ERR_WHITE_LIST_BOOST_IS_NOT_WL_USER: u64 = 104;
     const ERR_BOOST_IS_NOT_TURN_ON:u64 = 105;
 
+    const ERR_FARM_NOT_EXIST: u64 = 201;
+
     /// Event emitted when farm been added
     struct AddFarmEvent has drop, store {
         /// token code of X type
@@ -200,6 +202,16 @@ module SwapAdmin::TokenSwapFarm {
                 }
             );
         };
+    }
+
+    public fun set_pool_release_per_second(signer: &signer, pool_release_per_second: u128){
+        STAR::assert_genesis_address(signer);
+
+        // Updated release per second for `PoolTypeFarmPool`
+        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeFarmPool>(
+            signer,
+            pool_release_per_second
+        );
     }
 
 
@@ -588,6 +600,22 @@ module SwapAdmin::TokenSwapFarm {
         assert!(
             ed25519::signature_verify_strict(&sig, &pub_key, msg),
             1001
+        );
+    }
+
+    public fun update_token_pool_index<X, Y>(signer: &signer) acquires FarmPoolCapability {
+        STAR::assert_genesis_address(signer);
+
+        assert!(
+            exists<FarmPoolCapability<X,Y>>(STAR::token_address()),
+            error::invalid_state(ERR_FARM_NOT_EXIST)
+        );
+
+        // Updated harvest index of token type
+        let farm = borrow_global_mut<FarmPoolCapability<X,Y>>(STAR::token_address());
+        YieldFarming::update_pool_index<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X,Y>>>(
+            &farm.cap,
+            STAR::token_address(),
         );
     }
 }

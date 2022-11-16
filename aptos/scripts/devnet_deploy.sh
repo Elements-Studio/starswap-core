@@ -9,7 +9,6 @@ SWAP_ADMIN=$1
 
 ### 连接devnet网络
 #aptos init --profile devnet-admin --private-key {output.key.admin}  --rest-url https://devnet.aptoslabs.com --skip-faucet
-#0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca
 
 ### 手动转gas, 测试APT > 6个
 
@@ -226,3 +225,7 @@ aptos move run --function-id 'devnet-admin::TokenSwapSyrupScript::stake' --type-
 
 ### syrup unstake
 aptos move run --function-id 'devnet-admin::TokenSwapSyrupScript::unstake' --type-args ${SWAP_ADMIN}::STAR::STAR  --args  u64:1   --profile  devnet-admin --assume-yes
+
+### adjust farm and stake release per second
+#aptos move run --function-id 'devnet-admin::UpgradeScripts::set_farm_pool_release_per_second' --args  u128:180000000 --profile  devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::UpgradeScripts::set_stake_pool_release_per_second' --args u128:4000000   --profile  devnet-admin --assume-yes
