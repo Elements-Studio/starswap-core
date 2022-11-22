@@ -12,7 +12,7 @@ module SwapAdmin::UpgradeScripts {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR::STAR;
 
-    use bridge::asset::USDT;
+    use bridge::asset::USDC;
 
     const DEFAULT_MIN_TIME_LIMIT: u64 = 86400000;// one day
 
@@ -59,10 +59,10 @@ module SwapAdmin::UpgradeScripts {
         TokenSwapConfig::assert_admin(account);
 
         TokenSwapRouter::register_swap_pair<STAR, APT>(account);
-        TokenSwapRouter::register_swap_pair<APT, USDT>(account);
+        TokenSwapRouter::register_swap_pair<APT, USDC>(account);
 
         TokenSwapFarmRouter::add_farm_pool_v2<STAR, APT>(account, 30);
-        TokenSwapFarmRouter::add_farm_pool_v2<APT, USDT>(account, 10);
+        TokenSwapFarmRouter::add_farm_pool_v2<APT, USDC>(account, 10);
 
         TokenSwapSyrup::add_pool_v2<STAR>(account, 30, 0);
 
@@ -76,7 +76,7 @@ module SwapAdmin::UpgradeScripts {
     /// must only call by admin
     public entry fun set_farm_pool_release_per_second(account:&signer, pool_release_per_second:u128){
         TokenSwapFarmRouter::update_token_pool_index<STAR, APT>(account);
-        TokenSwapFarmRouter::update_token_pool_index<APT, USDT>(account);
+        TokenSwapFarmRouter::update_token_pool_index<APT, USDC>(account);
 
         TokenSwapFarm::set_pool_release_per_second(account, pool_release_per_second);
     }

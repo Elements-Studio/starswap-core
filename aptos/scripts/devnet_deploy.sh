@@ -14,10 +14,10 @@ SWAP_ADMIN=$1
 
 #cd aptos目录，为了方便，依赖的项目临时使用swap同样的地址来测试
 
-### 编译依赖项目usdt-dep
+### 编译依赖项目bridge-mock
 aptos move compile  --package-dir ./bridge-mock  --named-addresses bridge=devnet-admin
 
-### 部署依赖项目usdt-dep
+### 部署依赖项目bridge-mock
 aptos move publish  --package-dir ./bridge-mock  --named-addresses bridge=devnet-admin --profile devnet-admin  --included-artifacts sparse --assume-yes
 sleep 5
 
@@ -51,8 +51,8 @@ sleep 5
 
 ## 初始化合约
 
-### USDT初始化
-aptos move run --function-id 'devnet-admin::asset::init' --profile devnet-admin --assume-yes
+### USDC初始化
+aptos move run --function-id 'devnet-admin::asset::init_usdc' --profile devnet-admin --assume-yes
 sleep 5
 
 ### 初始化为最新版本
@@ -78,7 +78,7 @@ sleep 5
 #aptos move run --function-id 'devnet-admin::TokenSwapScripts::set_swap_fee_operation_rate'  --args  u64:10 u64:60  --profile devnet-admin --assume-yes
 
 ### 管理员创建swap交易对
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDT  --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDC  --profile devnet-admin --assume-yes
 
 
 ##  准备测试Token
@@ -88,12 +88,12 @@ sleep 5
 aptos move run --function-id 'devnet-admin::TokenSwapGovScript::linear_withdraw_farm'  --args u128:800000000000000  --profile devnet-admin --assume-yes
 sleep 5
 
-### mint USDT
-aptos move run --function-id 'devnet-admin::asset::mint'  --args u128:50000000000  --profile devnet-admin --assume-yes
+### mint USDC
+aptos move run --function-id 'devnet-admin::asset::mint_usdc'  --args u128:50000000000  --profile devnet-admin --assume-yes
 sleep 5
 
-### 管理员添加代币对流动性（STAR:USDT 约等于 60:1,，STAR-USDT初始流动性(30000,500)）
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDT  --args  u128:30000000000000  u128:500000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
+### 管理员添加代币对流动性（STAR:USDC 约等于 60:1,，STAR-USDC初始流动性(30000,500)）
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDC  --args  u128:30000000000000  u128:500000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
 
 ### 添加第二个LP交易对
 
@@ -106,16 +106,16 @@ aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --t
 sleep 5
 
 
-#方案C：按STAR-APT X30、APT-USDT X10 来计算：
+#方案C：按STAR-APT X30、APT-USDC X10 来计算：
 
 ### 添加第三个LP交易对
 
 ### 管理员创建swap交易对
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDT  --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDC  --profile devnet-admin --assume-yes
 #sleep 5
 
-### 管理员添加代币对流动性（APT:USDT 约等于 1:7，APT:USDT初始流动性(1,7)）
-aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDT  --args  u128:100000000  u128:7000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
+### 管理员添加代币对流动性（APT:USDC 约等于 1:7，APT:USDC初始流动性(1,7)）
+aptos move run --function-id 'devnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDC  --args  u128:100000000  u128:7000000  u128:5000  u128:5000  --profile devnet-admin --assume-yes
 sleep 5
 
 ## 初始化farm+stake
@@ -132,10 +132,10 @@ sleep 5
 #sleep 5
 
 ### 管理员创建Farm池
-#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDT --args u128:30 --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDC --args u128:30 --profile devnet-admin --assume-yes
 
 ### 调整Farm池子倍率
-#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::set_farm_alloc_point' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDT  --args u128:0 --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::set_farm_alloc_point' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDC  --args u128:0 --profile devnet-admin --assume-yes
 
 ### 管理员创建第二个Farm池
 #aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args ${SWAP_ADMIN}::STAR::STAR 0x1::aptos_coin::AptosCoin  --args u128:30 --profile devnet-admin --assume-yes
@@ -146,7 +146,7 @@ sleep 5
 
 
 ### 管理员创建第三个Farm池
-#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDT  --args u128:10 --profile devnet-admin --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin ${SWAP_ADMIN}::asset::USDC  --args u128:10 --profile devnet-admin --assume-yes
 #sleep 5
 
 ###初始化Syrup池global pool info，syrup池每秒恒定释放0.008个STAR
@@ -200,7 +200,7 @@ sleep 5
 #aptos move run --function-id 0x1::coin::transfer --type-args ${SWAP_ADMIN}::STAR::STAR --args address:0x9bf32e42c442ae2adbc87bc7923610621469bf183266364503a7a434fe9d50ca u64:200000000000 --profile devnet-admin --assume-yes
 
 ### 触发一次swap交易
-#aptos move run --function-id 'devnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDT  --args u128:10000000000 u128:100 --private-key {output.key.test}  --url https://devnet.aptoslabs.com --assume-yes
+#aptos move run --function-id 'devnet-admin::TokenSwapScripts::swap_exact_token_for_token' --type-args ${SWAP_ADMIN}::STAR::STAR ${SWAP_ADMIN}::asset::USDC  --args u128:10000000000 u128:100 --private-key {output.key.test}  --url https://devnet.aptoslabs.com --assume-yes
 
 ### 查看resource信息
 #https://url:port/accounts/{address}/resource/{resource_type}
