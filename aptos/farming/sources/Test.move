@@ -7,7 +7,7 @@ module SwapAdmin::Test {
     use std::signer::address_of;
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::STAR::STAR;
-    use bridge::asset::{Self ,USDT};
+    use bridge::asset::{Self ,USDC};
     use SwapAdmin::TokenSwapGovPoolType::PoolTypeCommunity;
     use aptos_framework::timestamp;
     use aptos_framework::aptos_coin::AptosCoin;
@@ -70,17 +70,17 @@ module SwapAdmin::Test {
 
         timestamp::update_global_time_for_test_secs(get_genesis_timestamp());
 
-        asset::init(sender);
-        asset::mint(sender, 1000 * 1000 * 1000 * 1000 * 1000);
+        asset::init_usdc(sender);
+        asset::mint_usdc(sender, 1000 * 1000 * 1000 * 1000 * 1000);
 
 
         starswap_init(sender);
         assert!(coin::balance<STAR>(address_of(sender)) == 800000000000000 ,100);
 
 
-        TokenSwapRouter::register_swap_pair<STAR,USDT>(sender);
+        TokenSwapRouter::register_swap_pair<STAR,USDC>(sender);
         TokenSwapGov::dispatch<PoolTypeCommunity>(sender, address_of(sender), 50000000000000);
-        TokenSwapRouter::add_liquidity<STAR, USDT>(
+        TokenSwapRouter::add_liquidity<STAR, USDC>(
             sender,
             30000000000000,
             500000000,
@@ -97,8 +97,8 @@ module SwapAdmin::Test {
             5000
         );
 
-        TokenSwapRouter::register_swap_pair<AptosCoin,USDT>(sender);
-        TokenSwapRouter::add_liquidity<AptosCoin, USDT>(
+        TokenSwapRouter::register_swap_pair<AptosCoin,USDC>(sender);
+        TokenSwapRouter::add_liquidity<AptosCoin, USDC>(
             sender,
             1000000000,
             70000000,
@@ -108,7 +108,7 @@ module SwapAdmin::Test {
 
 
         TokenSwapFarmRouter::add_farm_pool_v2<STAR, AptosCoin>(sender, 30);
-        TokenSwapFarmRouter::add_farm_pool_v2<STAR, USDT>(sender, 10);
+        TokenSwapFarmRouter::add_farm_pool_v2<STAR, USDC>(sender, 10);
 
         TokenSwapSyrup::add_pool_v2<STAR>(sender, 30, 0);
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(sender, 100, 1);
@@ -117,14 +117,14 @@ module SwapAdmin::Test {
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(sender, 1209600, 9);
         TokenSwapSyrup::put_stepwise_multiplier<STAR>(sender, 2592000 , 12);
 
-        coin::register<LiquidityToken<STAR,USDT>>(test1);
-        coin::transfer<LiquidityToken<STAR,USDT>>(sender, address_of(test1), 10);
+        coin::register<LiquidityToken<STAR,USDC>>(test1);
+        coin::transfer<LiquidityToken<STAR,USDC>>(sender, address_of(test1), 10);
 
         coin::register<STAR>(test1);
         coin::transfer<STAR>(sender, address_of(test1), 1000000);
 
 
-        TokenSwapFarmRouter::stake<STAR, USDT>(test1, 10);
+        TokenSwapFarmRouter::stake<STAR, USDC>(test1, 10);
         TokenSwapSyrupScript::stake<STAR>(test1, 100, 1000000);
         debug::print(&balance<STAR>(address_of(test1)));
 
@@ -133,7 +133,7 @@ module SwapAdmin::Test {
 
 
         let old = balance<STAR>(address_of(test1));
-        TokenSwapFarmRouter::unstake<STAR, USDT>(test1, 10);
+        TokenSwapFarmRouter::unstake<STAR, USDC>(test1, 10);
         let farm_reward = balance<STAR>(address_of(test1)) - old;
         debug::print(&farm_reward);
         assert!(farm_reward == 6817500000, 10214);

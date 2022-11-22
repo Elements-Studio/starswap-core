@@ -61,16 +61,16 @@ sleep 5
 
 
 
-#按STAR-APT X30、APT-USDT X10 来计算：
+#按STAR-APT X30、APT-USDC X10 来计算：
 
 ### 添加第二个LP交易对
 
 ### 管理员创建swap交易对
-#aptos move run --function-id 'mainnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT  --profile mainnet-admin --assume-yes
+#aptos move run --function-id 'mainnet-admin::TokenSwapScripts::register_swap_pair' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC  --profile mainnet-admin --assume-yes
 #sleep 5
 
-### 管理员添加代币对流动性（APT:USDT 约等于 1:7，APT:USDT初始流动性(10,70)）
-#aptos move run --function-id 'mainnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT  --args  u128:1000000000  u128:70000000  u128:5000  u128:5000  --profile mainnet-admin --assume-yes
+### 管理员添加代币对流动性（APT:USDC 约等于 1:7，APT:USDC初始流动性(10,70)）
+#aptos move run --function-id 'mainnet-admin::TokenSwapScripts::add_liquidity' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC  --args  u128:1000000000  u128:70000000  u128:5000  u128:5000  --profile mainnet-admin --assume-yes
 
 
 ## 初始化farm+stake
@@ -92,7 +92,7 @@ sleep 5
 #sleep 5
 
 ### 管理员创建第二个Farm池
-#aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT  --args u128:10 --profile mainnet-admin --assume-yes
+#aptos move run --function-id 'mainnet-admin::TokenSwapFarmScript::add_farm_pool_v2' --type-args  0x1::aptos_coin::AptosCoin 0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC  --args u128:10 --profile mainnet-admin --assume-yes
 #sleep 5
 
 ###初始化Syrup池global pool info，syrup池每秒恒定释放0.008个STAR

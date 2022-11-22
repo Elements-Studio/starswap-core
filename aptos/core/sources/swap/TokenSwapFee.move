@@ -7,7 +7,7 @@ module SwapAdmin::TokenSwapFee {
     use aptos_framework::coin::{Self, Coin};
     use aptos_framework::event;
 
-    use bridge::asset::USDT;
+    use bridge::asset::USDC;
 
 
     use SwapAdmin::TokenSwap;
@@ -53,7 +53,7 @@ module SwapAdmin::TokenSwapFee {
 
     public fun handle_token_swap_fee<X, Y>(signer_address: address, token_x: Coin<X>
     ) acquires TokenSwapFeeEvent {
-        intra_handle_token_swap_fee<X, Y, USDT>(signer_address, token_x)
+        intra_handle_token_swap_fee<X, Y, USDC>(signer_address, token_x)
     }
 
 
