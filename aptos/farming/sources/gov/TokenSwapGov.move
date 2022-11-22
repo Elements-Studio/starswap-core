@@ -31,10 +31,11 @@ module SwapAdmin::TokenSwapGov {
     const GOV_TOTAL: u128 = 100000000;
 
     //Aptos Farm genesis amount
-    const APTOS_FARM_GENESIS_AMOUNT: u128 = 14760000;
+    const APTOS_FARM_GENESIS_AMOUNT: u128 = 14258869866666666;
 
     //Aptos Syrup genesis amount
-    const APTOS_SYRUP_GENESIS_AMOUNT: u128 = 3300000;
+    const APTOS_SYRUP_GENESIS_AMOUNT: u128 = 3302057664999999;
+
 
     //Aptos Commuity genesis amount
     const APTOS_COMMUNITY_GENESIS_AMOUNT: u128 = 1000000;
@@ -253,15 +254,15 @@ module SwapAdmin::TokenSwapGov {
         let scaling_factor = math64::pow(10, (precision as u64));
 
         // Release farm APTOS_FARM_GENESIS_AMOUNT . release 5% Farm yield, and  release 800,000,000,000,000 to genesis swap pool.
-        let farm_release = APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128);
-        STAR::mint(account, APTOS_FARM_GENESIS_AMOUNT * (scaling_factor as u128));
+        let farm_release = APTOS_FARM_GENESIS_AMOUNT / 100 * 5 ;
+        STAR::mint(account, APTOS_FARM_GENESIS_AMOUNT);
         let farm_genesis_token = coin::withdraw<STAR::STAR>(account, (farm_release as u64));
         TokenSwapFarm::initialize_farm_pool(account, farm_genesis_token);
 
 
         // Release  syrup token stake. release 5% syrup yield.
-        let syrup_release = APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128);
-        STAR::mint(account, APTOS_SYRUP_GENESIS_AMOUNT * (scaling_factor as u128));
+        let syrup_release = APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 ;
+        STAR::mint(account, APTOS_SYRUP_GENESIS_AMOUNT);
         let syrup_genesis_token = coin::withdraw<STAR::STAR>(account, (syrup_release as u64));
         TokenSwapSyrup::initialize(account, syrup_genesis_token);
 
@@ -308,8 +309,8 @@ module SwapAdmin::TokenSwapGov {
 
         // linear APTOS_FARM_GENESIS_AMOUNT - 5 % - 80w for farm linear.
         let farm_linear_total = (
-            APTOS_FARM_GENESIS_AMOUNT * (scaling_factor as u128) -
-                (APTOS_FARM_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128)) -
+            APTOS_FARM_GENESIS_AMOUNT -
+                (APTOS_FARM_GENESIS_AMOUNT / 100 * 5 ) -
                 (800 * 1000 * (scaling_factor as u128))
         );
         move_to(account, GovTreasuryV2<PoolTypeFarmPool> {
@@ -330,7 +331,7 @@ module SwapAdmin::TokenSwapGov {
         });
 
         // linear APTOS_SYRUP_GENESIS_AMOUNT - 5 % for syrup.
-        let syrup_linear_total = APTOS_SYRUP_GENESIS_AMOUNT * (scaling_factor as u128) - (APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 * (scaling_factor as u128));
+        let syrup_linear_total = APTOS_SYRUP_GENESIS_AMOUNT - (APTOS_SYRUP_GENESIS_AMOUNT / 100 * 5 );
         move_to(account, GovTreasuryV2<PoolTypeSyrup> {
             linear_total: syrup_linear_total,
             linear_treasury: coin::withdraw<STAR::STAR>(account, (syrup_linear_total as u64)),
@@ -350,7 +351,7 @@ module SwapAdmin::TokenSwapGov {
 
         // APTOS_COMMUNITY_GENESIS_AMOUNT  for community linear treasury.
         // 40% APTOS_COMMUNITY_GENESIS_AMOUNT  for community genesis treasury
-        let commuity_linear_total = APTOS_COMMUNITY_GENESIS_AMOUNT * (scaling_factor as u128) ;
+        let commuity_linear_total = APTOS_COMMUNITY_GENESIS_AMOUNT * (scaling_factor as u128);
         let commuity_genesis = APTOS_COMMUNITY_GENESIS_AMOUNT / 100 * 40 * (scaling_factor as u128);
         move_to(account, GovTreasuryV2<PoolTypeCommunity> {
             linear_total: commuity_linear_total - commuity_genesis,
