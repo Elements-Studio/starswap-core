@@ -56,7 +56,7 @@ aptos move run --function-id 'devnet-admin::asset::init_usdc' --profile devnet-a
 sleep 5
 
 ### 初始化为最新版本
-aptos move run --function-id 'devnet-admin::UpgradeScripts::genesis_initialize_for_latest_version' --args u128:270000000 u128:8000000 --profile devnet-admin --assume-yes
+aptos move run --function-id 'devnet-admin::UpgradeScripts::genesis_initialize_for_latest_version' --args u128:67500000 u128:4000000 --profile devnet-admin --assume-yes
 sleep 5
 
 ### 初始化设置，包括swap、pool、farm和stake

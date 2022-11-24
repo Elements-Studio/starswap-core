@@ -23,8 +23,8 @@ module SwapAdmin::TokenSwapGov {
     #[test_only]
     use SwapAdmin::SafeMath;
 
-    //2022-11-10 09:00:00 UTC+8
-    const GENESIS_TIMESTAMP: u64 = 1668042000;
+    //2022-11-25 09:00:00 UTC+8
+    const GENESIS_TIMESTAMP: u64 = 1669338000;
 
 
     // 1e8
