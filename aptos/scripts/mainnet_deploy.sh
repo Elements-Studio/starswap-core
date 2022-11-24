@@ -31,7 +31,7 @@ sleep 5
 ## 初始化合约
 
 ### 初始化为最新版本
-aptos move run --function-id 'mainnet-admin::UpgradeScripts::genesis_initialize_for_latest_version' --args u128:270000000 u128:8000000 --profile mainnet-admin --assume-yes
+aptos move run --function-id 'mainnet-admin::UpgradeScripts::genesis_initialize_for_latest_version' --args u128:67500000 u128:4000000 --profile mainnet-admin --assume-yes
 sleep 5
 
 ### 初始化设置，包括swap、pool、farm和stake
