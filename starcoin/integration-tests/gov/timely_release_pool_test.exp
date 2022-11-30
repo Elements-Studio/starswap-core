@@ -1,24 +1,24 @@
-processed 17 tasks
+processed 23 tasks
 
-task 4 'run'. lines 54-74:
+task 5 'run'. lines 59-78:
 {
   "gas_used": 741952,
   "status": "Executed"
 }
 
-task 5 'run'. lines 76-114:
+task 6 'run'. lines 80-117:
 {
   "gas_used": 723904,
   "status": "Executed"
 }
 
-task 6 'run'. lines 117-156:
+task 7 'run'. lines 120-157:
 {
-  "gas_used": 120754,
+  "gas_used": 137404,
   "status": "Executed"
 }
 
-task 7 'run'. lines 158-171:
+task 8 'run'. lines 159-171:
 {
   "gas_used": 24309,
   "status": {
@@ -34,25 +34,9 @@ task 7 'run'. lines 158-171:
   }
 }
 
-task 9 'run'. lines 175-191:
+task 10 'run'. lines 175-190:
 {
-  "gas_used": 24309,
-  "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "769025"
-    }
-  }
-}
-
-task 11 'run'. lines 195-213:
-{
-  "gas_used": 24511,
+  "gas_used": 29121,
   "status": {
     "MoveAbort": {
       "location": {
@@ -66,20 +50,54 @@ task 11 'run'. lines 195-213:
   }
 }
 
-task 13 'run'. lines 217-235:
+task 12 'run'. lines 194-211:
 {
-  "gas_used": 87301,
+  "gas_used": 92550,
   "status": "Executed"
 }
 
-task 15 'run'. lines 239-257:
+task 14 'run'. lines 215-232:
 {
-  "gas_used": 87301,
+  "gas_used": 92550,
   "status": "Executed"
 }
 
-task 16 'run'. lines 259-275:
+task 15 'run'. lines 235-253:
 {
-  "gas_used": 73629,
+  "gas_used": 29121,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TimelyReleasePool"
+        }
+      },
+      "abort_code": "512513"
+    }
+  }
+}
+
+task 16 'run'. lines 255-274:
+{
+  "gas_used": 59111,
+  "status": "Executed"
+}
+
+task 18 'run'. lines 278-292:
+{
+  "gas_used": 97681,
+  "status": "Executed"
+}
+
+task 20 'run'. lines 296-323:
+{
+  "gas_used": 44401,
+  "status": "Executed"
+}
+
+task 22 'run'. lines 327-362:
+{
+  "gas_used": 130740,
   "status": "Executed"
 }
