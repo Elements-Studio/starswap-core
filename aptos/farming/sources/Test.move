@@ -58,10 +58,11 @@ module SwapAdmin::Test {
     }
 
 
-    #[test(sender=@SwapAdmin,framework=@aptos_framework,test1=@0x1234)]
-    public fun Test(sender:&signer,framework:&signer,test1:&signer)acquires AptosCoinCap {
+    #[test(sender=@SwapAdmin,framework=@aptos_framework,bridge=@bridge,test1=@0x1234)]
+    public fun Test(sender:&signer,framework:&signer,bridge:&signer,test1:&signer)acquires AptosCoinCap {
         account::create_account_for_test(address_of(sender));
         account::create_account_for_test(address_of(test1));
+        account::create_account_for_test(address_of(bridge));
 
         framework_init(sender,framework);
 
@@ -70,8 +71,11 @@ module SwapAdmin::Test {
 
         timestamp::update_global_time_for_test_secs(get_genesis_timestamp());
 
-        asset::init_usdc(sender);
-        asset::mint_usdc(sender, 1000 * 1000 * 1000 * 1000 * 1000);
+        asset::init_usdc(bridge);
+        asset::mint_usdc(bridge, 1000 * 1000 * 1000 * 1000 * 1000);
+
+        coin::register<asset::USDC>(sender);
+        coin::transfer<asset::USDC>(bridge, address_of(sender),1000 * 1000 * 1000 * 1000 * 1000);
 
 
         starswap_init(sender);

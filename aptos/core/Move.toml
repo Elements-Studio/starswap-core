@@ -6,10 +6,6 @@ version = "1.0.0"
 [addresses]
 SwapAdmin = "0xc755e4c8d7a6ab6d56f9289d97c43c1c94bde75ec09147c90d35cd1be61c8fb9"
 SwapFeeAdmin = "0xc755e4c8d7a6ab6d56f9289d97c43c1c94bde75ec09147c90d35cd1be61c8fb9"
-move_std = "0x1"
-aptos_framework = "0x1"
-aptos_std = "0x1"
-aptos_token = "0x3"
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", rev = "01108a2345b87d539d54a67b32db55193f9ace40", subdir = "aptos-move/framework/aptos-framework"}
