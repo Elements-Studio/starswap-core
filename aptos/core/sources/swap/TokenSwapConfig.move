@@ -17,7 +17,7 @@ module SwapAdmin::TokenSwapConfig {
 
     const DEFAULT_SWAP_FEE_AUTO_CONVERT_SWITCH: bool = false;
     const DEFAULT_SWAP_GLOBAL_FREEZE_SWITCH: bool = false;
-    const DEFAULT_SWAP_BOOST_SWITCH: bool = false;
+    const DEFAULT_SWAP_BOOST_SWITCH: bool = true;
 
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;

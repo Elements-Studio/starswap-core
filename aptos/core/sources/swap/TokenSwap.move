@@ -187,13 +187,23 @@ module SwapAdmin::TokenSwap {
         let y_struct_name = type_info::struct_name(&y_type_info);
 
         let lp_token_symbol = string::utf8(b"LP");
-        string::append_utf8(&mut lp_token_symbol, x_struct_name);
-        string::append_utf8(&mut lp_token_symbol, y_struct_name);
+        string::append_utf8(&mut lp_token_symbol, get_token_simple_symbol(x_struct_name));
+        string::append_utf8(&mut lp_token_symbol, get_token_simple_symbol(y_struct_name));
 
         if (string::length(&lp_token_symbol) > MAX_COIN_SYMBOL_LENGTH) {
             lp_token_symbol = string::sub_string(&lp_token_symbol, 0, MAX_COIN_SYMBOL_LENGTH);
         };
         lp_token_symbol
+    }
+
+    /// simplified token symbol
+    fun get_token_simple_symbol(token_symbol: vector<u8>): vector<u8> {
+        let token_simple_symbol = if (b"AptosCoin" == token_symbol) {
+            b"APT"
+        } else {
+            token_symbol
+        };
+        token_simple_symbol
     }
 
     fun make_token_swap_pair<X, Y>(): TokenSwapPair<X, Y> {

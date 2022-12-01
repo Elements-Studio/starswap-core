@@ -6,6 +6,7 @@ module SwapAdmin::TokenSwapScripts {
     use SwapAdmin::TokenSwapRouter;
     use SwapAdmin::TokenSwapRouter2;
     use SwapAdmin::TokenSwapRouter3;
+    use SwapAdmin::TokenSwapConfig;
 
     /// register swap for admin user
     public entry fun register_swap_pair<X, Y>(account: &signer) {
@@ -116,6 +117,11 @@ module SwapAdmin::TokenSwapScripts {
     /// Set global freeze switch
     public entry fun set_global_freeze_switch(signer: &signer, freeze: bool) {
         TokenSwapRouter::set_global_freeze_switch(signer, freeze);
+    }
+
+    /// Set boost switch
+    public entry fun set_boost_switch(signer: &signer, boost_switch: bool) {
+        TokenSwapConfig::set_boost_switch(signer, boost_switch);
     }
 
 
