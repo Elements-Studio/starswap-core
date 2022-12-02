@@ -7,16 +7,3 @@ release/
 .vs
 data/
 
-starcoin/build/
-starcoin/storage/
-starcoin/release/
-
-aptos/build/
-aptos/storage/
-aptos/release/
-aptos/.aptos
-aptos/output*
-aptos/devnet
-aptos/testnet
-aptos/scritps
-

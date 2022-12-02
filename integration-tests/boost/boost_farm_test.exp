@@ -1,0 +1,96 @@
+processed 15 tasks
+
+task 3 'block'. lines 7-7:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 4 'run'. lines 10-21:
+{
+  "gas_used": 3017522,
+  "status": "Executed"
+}
+
+task 5 'run'. lines 23-34:
+{
+  "gas_used": 59798,
+  "status": "Executed"
+}
+
+task 6 'run'. lines 37-132:
+{
+  "gas_used": 3500075,
+  "status": "Executed"
+}
+
+task 7 'run'. lines 134-218:
+{
+  "gas_used": 1668293,
+  "status": {
+    "ExecutionFailure": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapGov"
+        }
+      },
+      "function": 7,
+      "code_offset": 33
+    }
+  }
+}
+
+task 8 'block'. lines 220-220:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 9 'run'. lines 222-231:
+{
+  "gas_used": 101752,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 234-243:
+{
+  "gas_used": 569159,
+  "status": "Executed"
+}
+
+task 11 'block'. lines 245-245:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 12 'run'. lines 247-266:
+{
+  "gas_used": 106481,
+  "status": {
+    "ExecutionFailure": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "TokenSwapFarm"
+        }
+      },
+      "function": 2,
+      "code_offset": 33
+    }
+  }
+}
+
+task 13 'run'. lines 268-284:
+{
+  "gas_used": 15821,
+  "status": {
+    "MoveAbort": {
+      "location": "Script",
+      "abort_code": "10010"
+    }
+  }
+}
+
+task 14 'run'. lines 286-301:
+{
+  "gas_used": 136687,
+  "status": {
+    "MoveAbort": {
+      "location": "Script",
+      "abort_code": "10012"
+    }
+  }
+}

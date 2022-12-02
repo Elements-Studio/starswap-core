@@ -15,47 +15,22 @@ jobs:
 
       - name: setup environment
         run: |
-          bash starcoin/scripts/dev_setup.sh -b -t -p
+          bash scripts/dev_setup.sh -b -t -p
 
       - name: starcoin unittest
         run: |
           source "$HOME/.profile"
-          mpm package test -p starcoin
+          mpm package test 
 
       - name: starcoin integration test
         run: |
           source "$HOME/.profile"
-          mpm integration-test -p starcoin
+          mpm integration-test 
 
       - name: build
         run: |
           source "$HOME/.profile"
-          mpm package build -p starcoin
+          mpm package build
 
       - name: check changed files
-        run: bash ./starcoin/scripts/changed_files.sh
-
-  aptos-build-and-test:
-    name: Aptos build and test
-    runs-on: ubuntu-22.04
-    timeout-minutes: 20
-    steps:
-      - name: checkout-move
-        uses: actions/checkout@v3
-
-      - name: download and install aptos CI
-        run: |
-          bash aptos/scripts/dev_setup.sh -b -t -p
-
-      - name: aptos swap core build and test
-        run: |
-          source "$HOME/.profile"
-          bash aptos/scripts/build.sh core
-
-      - name: aptos swap farming build and test
-        run: |
-          source "$HOME/.profile"
-          bash aptos/scripts/build.sh farming
-
-      - name: check aptos farming core changed files
-        run: bash aptos/scripts/changed_files.sh
+        run: bash ./scripts/changed_files.sh

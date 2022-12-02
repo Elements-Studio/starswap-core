@@ -10,9 +10,9 @@ Starswap is a general purpose DEX on Starcoin.
 mpm package build
 ```
 
-### Run Functional Tests
+### Run Integration Tests
 ```commandline
-mpm spectest 
+mpm integration-test 
 ```
 
 ### Run Unit Tests
