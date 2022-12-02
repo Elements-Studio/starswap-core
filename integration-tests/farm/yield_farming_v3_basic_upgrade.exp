@@ -1,0 +1,4 @@
+processed 6 tasks
+
+task 5 'block'. lines 11-378:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation

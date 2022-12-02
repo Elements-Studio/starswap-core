@@ -1,0 +1,77 @@
+processed 20 tasks
+
+task 5 'block'. lines 11-11:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 7 'block'. lines 74-74:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 8 'run'. lines 76-104:
+{
+  "gas_used": 715678,
+  "status": "Executed"
+}
+
+task 9 'run'. lines 107-127:
+{
+  "gas_used": 204230,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 130-146:
+{
+  "gas_used": 130301,
+  "status": "Executed"
+}
+
+task 11 'run'. lines 148-168:
+{
+  "gas_used": 460795,
+  "status": "Executed"
+}
+
+task 12 'block'. lines 171-171:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 13 'run'. lines 173-184:
+{
+  "gas_used": 249045,
+  "status": "Executed"
+}
+
+task 14 'block'. lines 186-186:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 15 'run'. lines 188-202:
+{
+  "gas_used": 350439,
+  "status": {
+    "MoveAbort": {
+      "location": "Script",
+      "abort_code": "10004"
+    }
+  }
+}
+
+task 16 'block'. lines 204-204:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 17 'run'. lines 206-227:
+{
+  "gas_used": 713918,
+  "status": {
+    "MoveAbort": {
+      "location": "Script",
+      "abort_code": "10005"
+    }
+  }
+}
+
+task 18 'block'. lines 229-229:
+Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
+
+task 19 'run'. lines 231-262:
+{
+  "gas_used": 728027,
+  "status": "Executed"
+}
