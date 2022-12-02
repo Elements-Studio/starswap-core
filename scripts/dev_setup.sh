@@ -14,7 +14,7 @@
 # fast fail.
 set -eo pipefail
 
-MPM_VERSION=v1.12.5
+MPM_VERSION=v1.12.7
 
 
 SCRIPT_PATH="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
