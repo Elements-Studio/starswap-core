@@ -12,15 +12,14 @@
 
 //# publish
 module SwapAdmin::YieldFarmingWrapper {
-    use StarcoinFramework::Token;
     use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Vector;
     use StarcoinFramework::Debug;
     use StarcoinFramework::Option;
-
-    use SwapAdmin::YieldFarmingV3 as YieldFarming;
+    use StarcoinFramework::Signer;
+    use StarcoinFramework::Token;
+    use StarcoinFramework::Vector;
     use SwapAdmin::TokenSwapConfig;
+    use SwapAdmin::YieldFarmingV3 as YieldFarming;
 
     struct MockTokenType has copy, drop, store {}
 
@@ -71,7 +70,6 @@ module SwapAdmin::YieldFarmingWrapper {
             &cap.cap,
             broker
         );
-
     }
 
     public fun stake(
@@ -131,7 +129,11 @@ module SwapAdmin::YieldFarmingWrapper {
         assert!(Option::is_some(&idx), 10001);
 
         let cap = Vector::remove(&mut cap_list.items, Option::destroy_some(idx));
-        let (asset, token) = YieldFarming::unstake<MockPoolType, MockTokenType, MockAssetType>(signer, broker_addr(), cap);
+        let (asset, token) = YieldFarming::unstake<MockPoolType, MockTokenType, MockAssetType>(
+            signer,
+            broker_addr(),
+            cap
+        );
         let token_val = Token::value<MockTokenType>(&token);
         Account::deposit<MockTokenType>(Signer::address_of(signer), token);
         (asset.value, token_val)
@@ -160,6 +162,10 @@ module SwapAdmin::YieldFarmingWrapper {
 
     public fun query_stake_list(user_addr: address): vector<u64> {
         YieldFarming::query_stake_list<MockPoolType, MockAssetType>(user_addr)
+    }
+
+    public fun query_user_total_stake_weight(user_addr: address): u128 {
+        YieldFarming::query_stake_weight<MockPoolType, MockAssetType>(user_addr)
     }
 
     public fun query_info(): (u128, u128, u128, u128) {
@@ -249,7 +255,7 @@ script {
 //# run --signers alice
 script {
     use StarcoinFramework::Account;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
+    use SwapAdmin::YieldFarmingWrapper::MockTokenType;
 
     fun alice_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
@@ -258,7 +264,7 @@ script {
 //# run --signers bob
 script {
     use StarcoinFramework::Account;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
+    use SwapAdmin::YieldFarmingWrapper::MockTokenType;
 
     fun bob_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
@@ -267,7 +273,7 @@ script {
 //# run --signers cindy
 script {
     use StarcoinFramework::Account;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType};
+    use SwapAdmin::YieldFarmingWrapper::MockTokenType;
 
     fun cindy_accepte_token(signer: signer) { Account::do_accept_token<MockTokenType>(&signer); }
 }
@@ -279,7 +285,7 @@ script {
     use StarcoinFramework::Account;
     use StarcoinFramework::Token;
 
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     /// Initial reward token, registered and mint it
@@ -300,7 +306,7 @@ script {
 
 //# run --signers cindy
 script {
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     /// Cindy joined and staking some asset
@@ -339,7 +345,7 @@ script {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Debug;
 
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     /// Cindy harvest after 3 seconds, checking whether has rewards.
@@ -361,9 +367,7 @@ script {
 
 //# run --signers bob
 script {
-    //use StarcoinFramework::Account;
-
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     fun bob_stake_1(signer: signer) {
@@ -385,7 +389,7 @@ script {
     use StarcoinFramework::Signer;
     use StarcoinFramework::Account;
 
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     /// bob harvest after 4 seconds, checking whether has rewards.
@@ -404,7 +408,7 @@ script {
 //# run --signers bob
 
 script {
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     fun bob_stake_2(signer: signer) {
@@ -420,7 +424,7 @@ script {
 //# run --signers bob
 script {
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
 
     fun bob_stake_3(signer: signer) {
         // Third stake operation, 3x
@@ -439,7 +443,7 @@ script {
     use StarcoinFramework::Debug;
 
     use SwapAdmin::CommonHelper;
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
 
     fun bob_stake_4(signer: signer) {
         // Third stake operation, 1x
@@ -559,7 +563,7 @@ script {
 
 //# run --signers alice
 script {
-    use SwapAdmin::YieldFarmingWrapper::{MockTokenType, Self};
+    use SwapAdmin::YieldFarmingWrapper::{Self, MockTokenType};
     use SwapAdmin::CommonHelper;
 
     fun alice_stake_after_modify_release_per_second(signer: signer) {
@@ -587,6 +591,35 @@ script {
         Account::deposit<YieldFarmingWrapper::MockTokenType>(Signer::address_of(&signer), token);
         Debug::print(&amount);
         assert!(amount == CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(10), 10120);
+    }
+}
+// check: EXECUTED
+
+//# run --signers bob
+script {
+    use StarcoinFramework::Signer;
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::YieldFarmingWrapper;
+
+    fun stake_from_bob(sender: signer) {
+        YieldFarmingWrapper::stake(&sender, CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(1), 3, 0);
+        let user_total_staked_weight = YieldFarmingWrapper::query_user_total_stake_weight(Signer::address_of(&sender));
+        assert!(user_total_staked_weight == CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(3), 10130);
+    }
+}
+// check: EXECUTED
+
+//# run --signers alice
+script {
+    use SwapAdmin::CommonHelper;
+    use SwapAdmin::YieldFarmingWrapper;
+    use StarcoinFramework::Signer;
+
+    fun query_stake_weight(signer: signer) {
+        let (_alloc_point, _asset_total_amount, asset_total_weight, _harvest_index) = YieldFarmingWrapper::query_info();
+        let user_total_staked_weight = YieldFarmingWrapper::query_user_total_stake_weight(Signer::address_of(&signer));
+        assert!(asset_total_weight == CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(1) * 4, 10140);
+        assert!(user_total_staked_weight == CommonHelper::pow_amount<YieldFarmingWrapper::MockTokenType>(1), 10141);
     }
 }
 // check: EXECUTED

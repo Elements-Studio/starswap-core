@@ -607,7 +607,7 @@ module TokenSwapGov {
 
 
     /// DEPRECATED
-    public(script) fun upgrade_dao_treasury_genesis(_signer: signer) {
+    public entry fun upgrade_dao_treasury_genesis(_signer: signer) {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
@@ -627,7 +627,7 @@ module TokenSwapGov {
     //     });
     // }
 
-    public(script) fun upgrade_pool_type_genesis(signer: signer) {
+    public entry fun upgrade_pool_type_genesis(signer: signer) {
         STAR::assert_genesis_address(&signer);
     }
 

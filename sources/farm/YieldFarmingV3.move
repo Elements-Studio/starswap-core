@@ -798,11 +798,7 @@ module YieldFarmingV3 {
 
 
     /// The user can quering all yield farming amount in any time and scene
-    public fun query_expect_gain<
-        PoolType: store,
-        RewardTokenT: store,
-        AssetT: store
-    >(
+    public fun query_expect_gain<PoolType: store, RewardTokenT: store, AssetT: store>(
         user_addr: address,
         broker_addr: address,
         cap: &HarvestCapability<PoolType, AssetT>
@@ -846,7 +842,11 @@ module YieldFarmingV3 {
                 farming_asset_extend,
                 now_seconds
             );
-            let new_gain = calculate_withdraw_amount_v2(new_harvest_index, stake.last_harvest_index, stake.asset_weight);
+            let new_gain = calculate_withdraw_amount_v2(
+                new_harvest_index,
+                stake.last_harvest_index,
+                stake.asset_weight
+            );
             new_gain
         };
 
@@ -856,10 +856,7 @@ module YieldFarmingV3 {
 
     /// Get the total pledge amount under the specified Token type pool
     /// @return farming_asset_extend.asset_total_amount
-    public fun query_total_stake<
-        PoolType: store,
-        AssetT: store
-    >(
+    public fun query_total_stake<PoolType: store, AssetT: store>(
         broker: address
     ): u128 acquires FarmingAsset, FarmingAssetExtend {
         //TODO can be clean up after pool alloc mode upgrade
@@ -873,7 +870,7 @@ module YieldFarmingV3 {
         }
     }
 
-    /// Query stake weight from user staking objects.
+    /// Query stake from user staking objects.
     public fun query_stake<PoolType: store, AssetT: store>(
         account: address,
         id: u64
@@ -891,6 +888,29 @@ module YieldFarmingV3 {
             assert!(stake_extend.id == id, Errors::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
             stake_extend.asset_amount
         }
+    }
+
+
+    /// Get the total pledge weight under the specified Token type pool by account staking
+    /// @return total stake weight by user
+    public fun query_stake_weight<PoolType: store, AssetT: store>(account: address): u128 acquires StakeList {
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
+        let len = Vector::length(&stake_list.items);
+        if (len <= 0) {
+            return 0
+        };
+
+        let i = 0;
+        let account_total_stake_weight: u128 = 0;
+        loop {
+            if (i >= len) {
+                break
+            };
+            let stake_item = Vector::borrow(&stake_list.items, i);
+            account_total_stake_weight = account_total_stake_weight + stake_item.asset_weight;
+            i = i + 1;
+        };
+        account_total_stake_weight
     }
 
     /// Query stake id list from user
@@ -936,8 +956,7 @@ module YieldFarmingV3 {
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
     public fun query_pool_info_v2<PoolType: store, AssetT: store>(
         broker: address
-    ): (u128, u128, u128, u128)
-    acquires FarmingAsset, FarmingAssetExtend {
+    ): (u128, u128, u128, u128) acquires FarmingAsset, FarmingAssetExtend {
         let asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
         let asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
         (
@@ -950,8 +969,9 @@ module YieldFarmingV3 {
 
     /// Queyry global pool info
     /// return value: (total_alloc_point, pool_release_per_second)
-    public fun query_global_pool_info<PoolType: store>(broker: address): (u128, u128)
-    acquires YieldFarmingGlobalPoolInfo {
+    public fun query_global_pool_info<PoolType: store>(
+        broker: address
+    ): (u128, u128) acquires YieldFarmingGlobalPoolInfo {
         let global_pool_info =
             borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
         (

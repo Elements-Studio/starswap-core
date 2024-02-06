@@ -366,7 +366,7 @@ module TokenSwapRouter {
         };
     }
 
-    public(script) fun upgrade_tokenpair_to_tokenswappair<X: copy + drop + store,
+    public entry fun upgrade_tokenpair_to_tokenswappair<X: copy + drop + store,
                                                           Y: copy + drop + store>(signer: signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);

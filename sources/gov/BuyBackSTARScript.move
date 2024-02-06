@@ -26,15 +26,15 @@ module SwapAdmin::BuyBackSTARScript {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
-    public(script) fun uninit_entry(_sender: signer) {
+    public entry fun uninit_entry(_sender: signer) {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
-    public(script) fun buy_back_entry(_sender: signer) {
+    public entry fun buy_back_entry(_sender: signer) {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
-    public(script) fun deposit_entry(_sender: signer, _amount: u128) {
+    public entry fun deposit_entry(_sender: signer, _amount: u128) {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
@@ -47,11 +47,11 @@ module SwapAdmin::BuyBackSTARScript {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
-    public(script) fun set_release_per_time_entry(_sender: signer, _release_per_time: u128) {
+    public entry fun set_release_per_time_entry(_sender: signer, _release_per_time: u128) {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 
-    public(script) fun set_interval_entry(_sender: signer, _interval: u64) {
+    public entry fun set_interval_entry(_sender: signer, _interval: u64) {
         abort Errors::deprecated(ERR_DEPRECRATED)
     }
 }

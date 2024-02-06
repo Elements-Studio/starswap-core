@@ -1,91 +1,79 @@
 processed 23 tasks
 
-task 5 'block'. lines 11-11:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
-task 7 'block'. lines 257-257:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 8 'run'. lines 259-269:
 {
-  "gas_used": 259227,
+  "gas_used": 258455,
   "status": "Executed"
 }
 
 task 9 'run'. lines 271-306:
 {
-  "gas_used": 1086328,
+  "gas_used": 1012193,
   "status": "Executed"
 }
 
 task 10 'run'. lines 308-333:
 {
-  "gas_used": 763059,
+  "gas_used": 665059,
   "status": "Executed"
 }
 
 task 11 'run'. lines 335-356:
 {
-  "gas_used": 212694,
+  "gas_used": 215025,
   "status": "Executed"
 }
 
 task 12 'run'. lines 358-374:
 {
-  "gas_used": 174237,
+  "gas_used": 171836,
   "status": "Executed"
 }
 
 task 13 'run'. lines 376-387:
 {
-  "gas_used": 97777,
+  "gas_used": 93702,
   "status": "Executed"
 }
 
 task 14 'run'. lines 390-398:
 {
-  "gas_used": 340757,
+  "gas_used": 340415,
   "status": "Executed"
 }
 
 task 15 'run'. lines 400-418:
 {
-  "gas_used": 201417,
+  "gas_used": 191343,
   "status": "Executed"
 }
 
 task 16 'run'. lines 421-458:
 {
-  "gas_used": 279879,
+  "gas_used": 251717,
   "status": "Executed"
 }
 
 task 17 'run'. lines 460-499:
 {
-  "gas_used": 835134,
+  "gas_used": 635665,
   "status": "Executed"
 }
-
-task 18 'block'. lines 503-503:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 19 'run'. lines 505-535:
 {
-  "gas_used": 775677,
+  "gas_used": 636162,
   "status": "Executed"
 }
 
-task 20 'block'. lines 538-538:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 21 'run'. lines 540-558:
 {
-  "gas_used": 202686,
+  "gas_used": 191961,
   "status": "Executed"
 }
 
 task 22 'run'. lines 560-598:
 {
-  "gas_used": 388487,
+  "gas_used": 365022,
   "status": "Executed"
 }

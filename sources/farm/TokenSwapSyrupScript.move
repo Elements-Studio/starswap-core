@@ -25,7 +25,7 @@ module TokenSwapSyrupScript {
         cap: TokenSwapVestarRouter::VestarRouterCapability,
     }
 
-    public(script) fun add_pool<TokenT: store>(
+    public entry fun add_pool<TokenT: store>(
         signer: signer,
         alloc_point: u128,
         delay: u64
@@ -33,7 +33,7 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::add_pool_v2<TokenT>(&signer, alloc_point, delay);
     }
 
-    public(script) fun update_allocation_point<TokenT: store>(
+    public entry fun update_allocation_point<TokenT: store>(
         signer: signer,
         alloc_point: u128
     ) {
@@ -41,7 +41,7 @@ module TokenSwapSyrupScript {
     }
 
     /// Set release per second for token type pool
-    public(script) fun set_pool_release_per_second(
+    public entry fun set_pool_release_per_second(
         signer: signer,
         release_per_second: u128
     ) {
@@ -56,7 +56,7 @@ module TokenSwapSyrupScript {
 
     /// DEPRECATED
     /// Set release per second for token type pool
-    public(script) fun set_release_per_second<TokenT: copy + drop + store>(
+    public entry fun set_release_per_second<TokenT: copy + drop + store>(
         _signer: signer,
         _release_per_second: u128
     ) {
@@ -65,7 +65,7 @@ module TokenSwapSyrupScript {
     }
 
     /// Set alivestate for token type pool
-    public(script) fun set_alive<TokenT: copy + drop + store>(
+    public entry fun set_alive<TokenT: copy + drop + store>(
         _signer: signer,
         _alive: bool
     ) {
@@ -73,7 +73,7 @@ module TokenSwapSyrupScript {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    public(script) fun stake<TokenT: store>(
+    public entry fun stake<TokenT: store>(
         signer: signer,
         pledge_time_sec: u64,
         amount: u128
@@ -85,7 +85,7 @@ module TokenSwapSyrupScript {
         TokenSwapVestarRouter::stake_hook<TokenT>(&signer, pledge_time_sec, amount, &cap_wrapper.cap);
     }
 
-    public(script) fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
+    public entry fun unstake<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
         TokenSwapGov::linear_withdraw_syrup(&signer, 0);
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<TokenT>(&signer, id);
@@ -98,7 +98,7 @@ module TokenSwapSyrupScript {
     }
 
     /// Boost stake that had staked before the boost function online
-    public(script) fun take_vestar_by_stake_id<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
+    public entry fun take_vestar_by_stake_id<TokenT: store>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = Signer::address_of(&signer);
 
         // if there not have stake id then report error
@@ -118,7 +118,7 @@ module TokenSwapSyrupScript {
     }
 
     /// TODO: DEPRECATED on mainnet
-    public(script) fun put_stepwise_multiplier(
+    public entry fun put_stepwise_multiplier(
         _signer: signer,
         _interval_sec: u64,
         _multiplier: u64
@@ -128,7 +128,7 @@ module TokenSwapSyrupScript {
 
     /// Set the multiplier of each pledge time in the multiplier pool corresponding to TokenT
     /// It will abort while calling this function if the pool has exists,
-    public(script) fun put_stepwise_multiplier_with_token_type<TokenT: store>(
+    public entry fun put_stepwise_multiplier_with_token_type<TokenT: store>(
         signer: signer,
         interval_sec: u64,
         multiplier: u64
@@ -138,7 +138,7 @@ module TokenSwapSyrupScript {
 
     /// Set amount for every Pledge time in multiplier pool
     /// This function will be forbidden in next version
-    public(script) fun set_multiplier_pool_amount<TokenT: store>(
+    public entry fun set_multiplier_pool_amount<TokenT: store>(
         account: signer,
         pledge_time: u64,
         amount: u128
@@ -146,7 +146,7 @@ module TokenSwapSyrupScript {
         TokenSwapSyrup::set_multiplier_pool_amount<TokenT>(&account, pledge_time, amount);
     }
 
-    public(script) fun adjust_total_amount_entry<TokenT: store>(
+    public entry fun adjust_total_amount_entry<TokenT: store>(
         account: signer,
         total_amount: u128,
         total_weight: u128,
@@ -157,7 +157,7 @@ module TokenSwapSyrupScript {
     /// Calculate the Total Weight and Total Amount from the multiplier pool and
     /// update them to YieldFarming
     ///
-    public(script) fun update_total_from_multiplier_pool<TokenT: store>(
+    public entry fun update_total_from_multiplier_pool<TokenT: store>(
         account: signer,
     ) {
         TokenSwapSyrup::update_total_from_multiplier_pool<TokenT>(&account);
@@ -207,11 +207,11 @@ module TokenSwapSyrupScript {
     }
 
     ///TODO: DEPRECATED, Turn over capability from script to syrup boost on barnard
-    public(script) fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
+    public entry fun turnover_vestar_mintcap_for_barnard(_signer: signer) {
         abort Errors::invalid_state(ERR_DEPRECATED)
     }
 
-    public(script) fun update_token_pool_index<X: copy + drop>(signer: signer){
+    public entry fun update_token_pool_index<X: copy + drop>(signer: signer){
         TokenSwapSyrup::update_token_pool_index<X>(&signer)
     }
 }
