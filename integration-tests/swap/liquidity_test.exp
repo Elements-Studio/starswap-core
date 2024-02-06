@@ -14,12 +14,12 @@ task 5 'run'. lines 21-34:
 
 task 6 'run'. lines 37-49:
 {
-  "gas_used": 515038,
+  "gas_used": 465483,
   "status": "Executed"
 }
 
 task 7 'run'. lines 52-107:
 {
-  "gas_used": 1765043,
+  "gas_used": 1454887,
   "status": "Executed"
 }

@@ -2,7 +2,7 @@ processed 40 tasks
 
 task 7 'run'. lines 209-242:
 {
-  "gas_used": 745412,
+  "gas_used": 452746,
   "status": "Executed"
 }
 
@@ -32,37 +32,37 @@ task 11 'run'. lines 273-280:
 
 task 12 'run'. lines 283-305:
 {
-  "gas_used": 658410,
+  "gas_used": 652580,
   "status": "Executed"
 }
 
 task 13 'run'. lines 307-319:
 {
-  "gas_used": 110169,
+  "gas_used": 97926,
   "status": "Executed"
 }
 
 task 15 'run'. lines 323-339:
 {
-  "gas_used": 493709,
+  "gas_used": 317045,
   "status": "Executed"
 }
 
 task 17 'run'. lines 343-366:
 {
-  "gas_used": 1179557,
+  "gas_used": 794762,
   "status": "Executed"
 }
 
 task 18 'run'. lines 368-384:
 {
-  "gas_used": 110235,
+  "gas_used": 97992,
   "status": "Executed"
 }
 
 task 19 'run'. lines 386-404:
 {
-  "gas_used": 620845,
+  "gas_used": 409769,
   "status": {
     "MoveAbort": {
       "location": {
@@ -78,72 +78,72 @@ task 19 'run'. lines 386-404:
 
 task 21 'run'. lines 408-420:
 {
-  "gas_used": 318069,
+  "gas_used": 221291,
   "status": "Executed"
 }
 
 task 23 'run'. lines 424-435:
 {
-  "gas_used": 318069,
+  "gas_used": 221291,
   "status": "Executed"
 }
 
 task 25 'run'. lines 439-458:
 {
-  "gas_used": 365903,
+  "gas_used": 245222,
   "status": "Executed"
 }
 
 task 27 'run'. lines 462-483:
 {
-  "gas_used": 666453,
+  "gas_used": 444300,
   "status": "Executed"
 }
 
 task 29 'run'. lines 487-503:
 {
-  "gas_used": 667213,
+  "gas_used": 445643,
   "status": "Executed"
 }
 
 task 31 'run'. lines 507-523:
 {
-  "gas_used": 668037,
+  "gas_used": 447050,
   "status": "Executed"
 }
 
 task 33 'run'. lines 527-548:
 {
-  "gas_used": 2649608,
+  "gas_used": 1822331,
   "status": "Executed"
 }
 
 task 34 'run'. lines 550-562:
 {
-  "gas_used": 217203,
+  "gas_used": 149575,
   "status": "Executed"
 }
 
 task 35 'run'. lines 564-574:
 {
-  "gas_used": 110169,
+  "gas_used": 97926,
   "status": "Executed"
 }
 
 task 37 'run'. lines 578-596:
 {
-  "gas_used": 652681,
+  "gas_used": 443937,
   "status": "Executed"
 }
 
 task 38 'run'. lines 598-610:
 {
-  "gas_used": 321559,
+  "gas_used": 231777,
   "status": "Executed"
 }
 
 task 39 'run'. lines 612-625:
 {
-  "gas_used": 58085,
+  "gas_used": 54004,
   "status": "Executed"
 }

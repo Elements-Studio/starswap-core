@@ -32,7 +32,7 @@ task 13 'run'. lines 248-255:
 
 task 14 'run'. lines 257-288:
 {
-  "gas_used": 746461,
+  "gas_used": 740631,
   "status": "Executed"
 }
 
@@ -66,13 +66,13 @@ task 18 'run'. lines 321-329:
 
 task 20 'run'. lines 333-366:
 {
-  "gas_used": 767341,
+  "gas_used": 557431,
   "status": "Executed"
 }
 
 task 22 'run'. lines 370-378:
 {
-  "gas_used": 270345,
+  "gas_used": 180563,
   "status": "Executed"
 }
 
@@ -84,24 +84,24 @@ task 24 'run'. lines 382-390:
 
 task 26 'run'. lines 394-418:
 {
-  "gas_used": 1282269,
+  "gas_used": 876471,
   "status": "Executed"
 }
 
 task 28 'run'. lines 423-433:
 {
-  "gas_used": 110169,
+  "gas_used": 97926,
   "status": "Executed"
 }
 
 task 29 'run'. lines 435-443:
 {
-  "gas_used": 244946,
+  "gas_used": 166241,
   "status": "Executed"
 }
 
 task 30 'run'. lines 445-464:
 {
-  "gas_used": 443507,
+  "gas_used": 324545,
   "status": "Executed"
 }
