@@ -904,7 +904,7 @@ module YieldFarmingV3 {
         let account_total_stake_weight: u128 = 0;
         loop {
             if (i >= len) {
-                break;
+                break
             };
             let stake_item = Vector::borrow(&stake_list.items, i);
             account_total_stake_weight = account_total_stake_weight + stake_item.asset_weight;
