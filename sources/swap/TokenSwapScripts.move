@@ -9,13 +9,13 @@ module TokenSwapScripts {
     use SwapAdmin::TokenSwapRouter3;
 
     /// register swap for admin user
-    public(script) fun register_swap_pair<X: copy + drop + store,
+    public entry fun register_swap_pair<X: copy + drop + store,
                                           Y: copy + drop + store>(account: signer) {
         TokenSwapRouter::register_swap_pair<X, Y>(&account);
     }
 
     /// Add liquidity for user
-    public(script) fun add_liquidity<X: copy + drop + store,
+    public entry fun add_liquidity<X: copy + drop + store,
                                      Y: copy + drop + store>(
         signer: signer,
         amount_x_desired: u128,
@@ -31,7 +31,7 @@ module TokenSwapScripts {
     }
 
     /// Remove liquidity for user
-    public(script) fun remove_liquidity<X: copy + drop + store,
+    public entry fun remove_liquidity<X: copy + drop + store,
                                         Y: copy + drop + store>(
         signer: signer,
         liquidity: u128,
@@ -48,7 +48,7 @@ module TokenSwapScripts {
         TokenSwapRouter::get_poundage_rate<X, Y>()
     }
 
-    public(script) fun swap_exact_token_for_token<X: copy + drop + store,
+    public entry fun swap_exact_token_for_token<X: copy + drop + store,
                                                   Y: copy + drop + store>(
         signer: signer,
         amount_x_in: u128,
@@ -57,7 +57,7 @@ module TokenSwapScripts {
         TokenSwapRouter::swap_exact_token_for_token<X, Y>(&signer, amount_x_in, amount_y_out_min);
     }
 
-    public(script) fun swap_exact_token_for_token_router2<X: copy + drop + store,
+    public entry fun swap_exact_token_for_token_router2<X: copy + drop + store,
                                                           R: copy + drop + store,
                                                           Y: copy + drop + store>(
         signer: signer,
@@ -67,7 +67,7 @@ module TokenSwapScripts {
         TokenSwapRouter2::swap_exact_token_for_token<X, R, Y>(&signer, amount_x_in, amount_y_out_min);
     }
 
-    public(script) fun swap_exact_token_for_token_router3<X: copy + drop + store,
+    public entry fun swap_exact_token_for_token_router3<X: copy + drop + store,
                                                           R: copy + drop + store,
                                                           T: copy + drop + store,
                                                           Y: copy + drop + store>(
@@ -78,7 +78,7 @@ module TokenSwapScripts {
         TokenSwapRouter3::swap_exact_token_for_token<X, R, T, Y>(&signer, amount_x_in, amount_y_out_min);
     }
 
-    public(script) fun swap_token_for_exact_token<X: copy + drop + store,
+    public entry fun swap_token_for_exact_token<X: copy + drop + store,
                                                   Y: copy + drop + store>(
         signer: signer,
         amount_x_in_max: u128,
@@ -87,7 +87,7 @@ module TokenSwapScripts {
         TokenSwapRouter::swap_token_for_exact_token<X, Y>(&signer, amount_x_in_max, amount_y_out);
     }
 
-    public(script) fun swap_token_for_exact_token_router2<X: copy + drop + store,
+    public entry fun swap_token_for_exact_token_router2<X: copy + drop + store,
                                                           R: copy + drop + store,
                                                           Y: copy + drop + store>(
         signer: signer,
@@ -97,7 +97,7 @@ module TokenSwapScripts {
         TokenSwapRouter2::swap_token_for_exact_token<X, R, Y>(&signer, amount_x_in_max, amount_y_out);
     }
 
-    public(script) fun swap_token_for_exact_token_router3<X: copy + drop + store,
+    public entry fun swap_token_for_exact_token_router3<X: copy + drop + store,
                                                           R: copy + drop + store,
                                                           T: copy + drop + store,
                                                           Y: copy + drop + store>(
@@ -109,18 +109,18 @@ module TokenSwapScripts {
     }
 
     /// Poundage rate from swap fee
-    public(script) fun set_poundage_rate<X: copy + drop + store,
+    public entry fun set_poundage_rate<X: copy + drop + store,
                                          Y: copy + drop + store>(signer: signer, num: u64, denum: u64) {
         TokenSwapRouter::set_poundage_rate<X, Y>(&signer, num, denum);
     }
 
     /// Operation rate from all swap fee
-    public(script) fun set_swap_fee_operation_rate(signer: signer, num: u64, denum: u64) {
+    public entry fun set_swap_fee_operation_rate(signer: signer, num: u64, denum: u64) {
         TokenSwapRouter::set_swap_fee_operation_rate(&signer, num, denum);
     }
 
     /// Operation_v2 rate from all swap fee
-    public(script) fun set_swap_fee_operation_rate_v2<X: copy + drop + store,
+    public entry fun set_swap_fee_operation_rate_v2<X: copy + drop + store,
                                                       Y: copy + drop + store>(signer: signer,
                                                                               num: u64,
                                                                               denum: u64) {
@@ -128,22 +128,22 @@ module TokenSwapScripts {
     }
     
     /// Set fee auto convert switch config
-    public(script) fun set_fee_auto_convert_switch(signer: signer, auto_convert_switch: bool) {
+    public entry fun set_fee_auto_convert_switch(signer: signer, auto_convert_switch: bool) {
         TokenSwapRouter::set_fee_auto_convert_switch(&signer, auto_convert_switch);
     }
 
     /// Set global freeze switch
-    public(script) fun set_global_freeze_switch(signer: signer, freeze: bool) {
+    public entry fun set_global_freeze_switch(signer: signer, freeze: bool) {
         TokenSwapRouter::set_global_freeze_switch(&signer, freeze);
     }
 
     /// Set alloc mode upgrade switch
-    public(script) fun set_alloc_mode_upgrade_switch(signer: signer, upgrade_switch: bool) {
+    public entry fun set_alloc_mode_upgrade_switch(signer: signer, upgrade_switch: bool) {
         TokenSwapRouter::set_alloc_mode_upgrade_switch(&signer, upgrade_switch);
     }
 
     /// Set alloc mode upgrade switch
-    public(script) fun set_white_list_boost_switch(signer: signer, white_list_switch: bool, white_list_pubkey:vector<u8>) {
+    public entry fun set_white_list_boost_switch(signer: signer, white_list_switch: bool, white_list_pubkey:vector<u8>) {
         TokenSwapRouter::set_white_list_boost_switch(&signer, white_list_switch,white_list_pubkey);
     }
 

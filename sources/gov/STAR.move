@@ -53,7 +53,7 @@ module SwapAdmin::STARScript {
     use SwapAdmin::STAR;
 
     /// Only called with someone who have burn capability
-    public(script) fun burn(account: signer, amount: u128) {
+    public entry fun burn(account: signer, amount: u128) {
         STAR::burn(&account, amount);
     }
 }

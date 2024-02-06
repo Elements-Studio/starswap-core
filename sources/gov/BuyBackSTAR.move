@@ -22,15 +22,15 @@ module BuyBackSTAR {
         init_func(&sender, total_amount, begin_time, interval, release_per_time);
     }
 
-    public(script) fun uninit(sender: signer) {
+    public entry fun uninit(sender: signer) {
         BuyBack::dismiss<BuyBackSTAR, STC::STC>(&sender);
     }
 
-    public(script) fun buy_back(sender: signer) {
+    public entry fun buy_back(sender: signer) {
         BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
     }
 
-    public(script) fun deposit(sender: signer, amount: u128) {
+    public entry fun deposit(sender: signer, amount: u128) {
         let token = Account::withdraw<STC::STC>(&sender, amount);
         BuyBack::deposit<BuyBackSTAR, STC::STC>(@BuyBackAccount, token);
     }
@@ -87,16 +87,16 @@ module BuyBackSTAR {
         BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
     }
 
-    public(script) fun set_release_per_time(sender: signer, release_per_time: u128) {
+    public entry fun set_release_per_time(sender: signer, release_per_time: u128) {
         BuyBack::set_release_per_time<BuyBackSTAR, STC::STC>(&sender, release_per_time);
     }
 
-    public(script) fun set_interval(sender: signer, interval: u64) {
+    public entry fun set_interval(sender: signer, interval: u64) {
         BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
     }
 
     /// DEPRECRATED
-    public(script) fun upgrade_event_store_for_barnard(_account: signer) {
+    public entry fun upgrade_event_store_for_barnard(_account: signer) {
         abort Errors::deprecated(1)
     }
 }
