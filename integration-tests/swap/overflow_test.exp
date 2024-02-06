@@ -2,25 +2,25 @@ processed 9 tasks
 
 task 4 'run'. lines 19-28:
 {
-  "gas_used": 132384,
+  "gas_used": 132082,
   "status": "Executed"
 }
 
 task 5 'run'. lines 31-44:
 {
-  "gas_used": 147177,
+  "gas_used": 146427,
   "status": "Executed"
 }
 
 task 6 'run'. lines 46-58:
 {
-  "gas_used": 516208,
+  "gas_used": 515038,
   "status": "Executed"
 }
 
 task 7 'run'. lines 61-78:
 {
-  "gas_used": 410754,
+  "gas_used": 409580,
   "status": {
     "ExecutionFailure": {
       "location": {
@@ -30,7 +30,7 @@ task 7 'run'. lines 61-78:
         }
       },
       "function": 13,
-      "code_offset": 22
+      "code_offset": 21
     }
   }
 }

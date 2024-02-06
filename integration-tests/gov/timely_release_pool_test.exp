@@ -1,29 +1,26 @@
 processed 23 tasks
 
-task 3 'block'. lines 7-7:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 5 'run'. lines 59-78:
 {
-  "gas_used": 741952,
+  "gas_used": 739844,
   "status": "Executed"
 }
 
 task 6 'run'. lines 80-117:
 {
-  "gas_used": 723904,
+  "gas_used": 720432,
   "status": "Executed"
 }
 
 task 7 'run'. lines 120-157:
 {
-  "gas_used": 137404,
+  "gas_used": 136870,
   "status": "Executed"
 }
 
 task 8 'run'. lines 159-171:
 {
-  "gas_used": 24309,
+  "gas_used": 24311,
   "status": {
     "MoveAbort": {
       "location": {
@@ -36,13 +33,10 @@ task 8 'run'. lines 159-171:
     }
   }
 }
-
-task 9 'block'. lines 173-173:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 10 'run'. lines 175-190:
 {
-  "gas_used": 24309,
+  "gas_used": 29125,
   "status": {
     "MoveAbort": {
       "location": {
@@ -51,52 +45,26 @@ task 10 'run'. lines 175-190:
           "name": "TimelyReleasePool"
         }
       },
-      "abort_code": "769025"
+      "abort_code": "512513"
     }
   }
 }
-
-task 11 'block'. lines 192-192:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 12 'run'. lines 194-211:
 {
-  "gas_used": 24309,
-  "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "769025"
-    }
-  }
+  "gas_used": 92340,
+  "status": "Executed"
 }
-
-task 13 'block'. lines 213-213:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 14 'run'. lines 215-232:
 {
-  "gas_used": 24309,
-  "status": {
-    "MoveAbort": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "abort_code": "769025"
-    }
-  }
+  "gas_used": 92340,
+  "status": "Executed"
 }
 
 task 15 'run'. lines 235-253:
 {
-  "gas_used": 24309,
+  "gas_used": 29125,
   "status": {
     "MoveAbort": {
       "location": {
@@ -105,61 +73,31 @@ task 15 'run'. lines 235-253:
           "name": "TimelyReleasePool"
         }
       },
-      "abort_code": "769025"
+      "abort_code": "512513"
     }
   }
 }
 
 task 16 'run'. lines 255-274:
 {
-  "gas_used": 59111,
+  "gas_used": 58985,
   "status": "Executed"
 }
 
-task 17 'block'. lines 276-276:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 18 'run'. lines 278-292:
 {
-  "gas_used": 86818,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TimelyReleasePool"
-        }
-      },
-      "function": 0,
-      "code_offset": 2
-    }
-  }
+  "gas_used": 97269,
+  "status": "Executed"
 }
-
-task 19 'block'. lines 294-294:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 20 'run'. lines 296-323:
 {
-  "gas_used": 21962,
-  "status": {
-    "MoveAbort": {
-      "location": "Script",
-      "abort_code": "100040"
-    }
-  }
+  "gas_used": 44273,
+  "status": "Executed"
 }
-
-task 21 'block'. lines 325-325:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 22 'run'. lines 327-362:
 {
-  "gas_used": 21962,
-  "status": {
-    "MoveAbort": {
-      "location": "Script",
-      "abort_code": "100050"
-    }
-  }
+  "gas_used": 130274,
+  "status": "Executed"
 }

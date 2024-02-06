@@ -1,22 +1,19 @@
 processed 7 tasks
 
-task 2 'block'. lines 5-5:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 4 'run'. lines 65-82:
 {
-  "gas_used": 114262,
+  "gas_used": 114116,
   "status": "Executed"
 }
 
 task 5 'run'. lines 84-101:
 {
-  "gas_used": 130449,
+  "gas_used": 130241,
   "status": "Executed"
 }
 
 task 6 'run'. lines 103-118:
 {
-  "gas_used": 128697,
+  "gas_used": 128489,
   "status": "Executed"
 }

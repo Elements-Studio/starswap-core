@@ -1,312 +1,147 @@
 processed 33 tasks
 
-task 7 'block'. lines 15-15:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 8 'run'. lines 17-26:
 {
-  "gas_used": 1165998,
+  "gas_used": 1162692,
   "status": "Executed"
 }
 
 task 9 'run'. lines 28-52:
 {
-  "gas_used": 196634,
+  "gas_used": 196028,
   "status": "Executed"
 }
 
-task 10 'block'. lines 55-55:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 11 'run'. lines 57-65:
 {
-  "gas_used": 33946,
+  "gas_used": 33722,
   "status": "Executed"
 }
 
 task 12 'run'. lines 67-76:
 {
-  "gas_used": 967941,
+  "gas_used": 965721,
   "status": "Executed"
 }
 
 task 13 'run'. lines 78-91:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 34609,
+  "status": "Executed"
 }
 
 task 14 'run'. lines 93-111:
 {
-  "gas_used": 229473,
+  "gas_used": 228395,
   "status": "Executed"
 }
 
-task 15 'block'. lines 117-117:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
-
 task 16 'run'. lines 119-143:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 195568,
+  "status": "Executed"
 }
 
 task 17 'run'. lines 145-169:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 195568,
+  "status": "Executed"
 }
 
 task 18 'run'. lines 171-198:
 {
-  "gas_used": 21529,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 242548,
+  "status": "Executed"
 }
 
 task 19 'run'. lines 200-227:
 {
-  "gas_used": 21593,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 242612,
+  "status": "Executed"
 }
 
 task 20 'run'. lines 229-238:
 {
-  "gas_used": 40886,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 78072,
+  "status": "Executed"
 }
 
 task 21 'run'. lines 240-255:
 {
-  "gas_used": 66807,
+  "gas_used": 79694,
   "status": {
-    "ExecutionFailure": {
+    "MoveAbort": {
       "location": {
         "Module": {
           "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapGov"
         }
       },
-      "function": 7,
-      "code_offset": 33
+      "abort_code": "51719"
     }
   }
 }
 
 task 22 'run'. lines 257-265:
 {
-  "gas_used": 40886,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 78072,
+  "status": "Executed"
 }
 
 task 23 'run'. lines 267-275:
 {
-  "gas_used": 43281,
+  "gas_used": 56290,
   "status": {
-    "ExecutionFailure": {
+    "MoveAbort": {
       "location": {
         "Module": {
           "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapGov"
         }
       },
-      "function": 7,
-      "code_offset": 33
+      "abort_code": "51975"
     }
   }
 }
 
 task 24 'run'. lines 277-289:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 34677,
+  "status": "Executed"
 }
 
 task 25 'run'. lines 291-303:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 34677,
+  "status": "Executed"
 }
-
-task 26 'block'. lines 305-305:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 27 'run'. lines 307-320:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 31693,
+  "status": "Executed"
 }
 
 task 28 'run'. lines 322-335:
 {
-  "gas_used": 20977,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 31693,
+  "status": "Executed"
 }
 
 task 29 'run'. lines 338-354:
 {
-  "gas_used": 14837,
-  "status": {
-    "MoveAbort": {
-      "location": "Script",
-      "abort_code": "1011"
-    }
-  }
+  "gas_used": 149615,
+  "status": "Executed"
 }
 
 task 30 'run'. lines 356-369:
 {
-  "gas_used": 43281,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 146649,
+  "status": "Executed"
 }
-
-task 31 'block'. lines 374-374:
-Error: Transaction discarded. VMStatus: status UNEXPECTED_ERROR_FROM_KNOWN_MOVE_FUNCTION of type Invariant violation
 
 task 32 'run'. lines 376-395:
 {
-  "gas_used": 35110,
-  "status": {
-    "ExecutionFailure": {
-      "location": {
-        "Module": {
-          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
-          "name": "TokenSwapGov"
-        }
-      },
-      "function": 7,
-      "code_offset": 33
-    }
-  }
+  "gas_used": 177965,
+  "status": "Executed"
 }

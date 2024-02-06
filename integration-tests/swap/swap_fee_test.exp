@@ -2,102 +2,102 @@ processed 23 tasks
 
 task 6 'run'. lines 14-25:
 {
-  "gas_used": 381084,
+  "gas_used": 380186,
   "status": "Executed"
 }
 
 task 7 'run'. lines 27-39:
 {
-  "gas_used": 392251,
+  "gas_used": 390011,
   "status": "Executed"
 }
 
 task 8 'run'. lines 42-50:
 {
-  "gas_used": 117449,
+  "gas_used": 117453,
   "status": "Executed"
 }
 
 task 9 'run'. lines 53-67:
 {
-  "gas_used": 195679,
+  "gas_used": 195061,
   "status": "Executed"
 }
 
 task 10 'run'. lines 70-79:
 {
-  "gas_used": 34291,
+  "gas_used": 34047,
   "status": "Executed"
 }
 
 task 11 'run'. lines 82-92:
 {
-  "gas_used": 34084,
+  "gas_used": 33852,
   "status": "Executed"
 }
 
 task 12 'run'. lines 95-104:
 {
-  "gas_used": 34084,
+  "gas_used": 33852,
   "status": "Executed"
 }
 
 task 13 'run'. lines 107-117:
 {
-  "gas_used": 106064,
+  "gas_used": 105560,
   "status": "Executed"
 }
 
 task 14 'run'. lines 120-130:
 {
-  "gas_used": 104563,
+  "gas_used": 104099,
   "status": "Executed"
 }
 
 task 15 'run'. lines 133-154:
 {
-  "gas_used": 1657268,
+  "gas_used": 1652066,
   "status": "Executed"
 }
 
 task 16 'run'. lines 158-166:
 {
-  "gas_used": 87342,
+  "gas_used": 87344,
   "status": "Executed"
 }
 
 task 17 'run'. lines 169-185:
 {
-  "gas_used": 1884357,
+  "gas_used": 1875157,
   "status": "Executed"
 }
 
 task 18 'run'. lines 188-228:
 {
-  "gas_used": 2184313,
+  "gas_used": 2180095,
   "status": "Executed"
 }
 
 task 19 'run'. lines 231-276:
 {
-  "gas_used": 2326326,
+  "gas_used": 2321952,
   "status": "Executed"
 }
 
 task 20 'run'. lines 280-320:
 {
-  "gas_used": 1595508,
+  "gas_used": 1591072,
   "status": "Executed"
 }
 
 task 21 'run'. lines 323-355:
 {
-  "gas_used": 402765,
+  "gas_used": 402195,
   "status": "Executed"
 }
 
 task 22 'run'. lines 358-387:
 {
-  "gas_used": 401025,
+  "gas_used": 400457,
   "status": "Executed"
 }
