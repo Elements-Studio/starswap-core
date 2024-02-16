@@ -12,7 +12,11 @@ module BuyBackSTAR {
 
     struct BuyBackSTAR has store {}
 
-    public fun init(
+    /// Due to version updates and compatibility,
+    /// the declaration
+    /// `public entry fun init` is used for Barnard,
+    /// `public fun init` is used for the mainnet.
+    public /*entry*/ fun init(
         sender: signer,
         total_amount: u128,
         begin_time: u64,

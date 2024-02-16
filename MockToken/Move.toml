@@ -3,8 +3,9 @@ name = "Mock-Token"
 version = "0.0.1"
 
 [addresses]
-FAI = "0x4ffcc98f43ce74668264a0cf6eebe42b"
-WEN = "0xbf60b00855c92fe725296a436101c8c6"
+# FAI = "0x4ffcc98f43ce74668264a0cf6eebe42b"
+FAI = "0x8c109349c6bd91411d6bc962e080c4a3"
+WEN = "0x8c109349c6bd91411d6bc962e080c4a3"
 
 [dependencies]
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "345a3900a0064dc57a9560235bc72c12f03448b1" }
