@@ -45,13 +45,12 @@ $RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmR
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmScript::set_farm_alloc_point -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR  --arg 5u128 -b'
 
 ### 查看池子倍率
-dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_info_v2 -t -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR
+$RUN_CMD'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_info_v2 -t -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR'
 
 ### 查询farm池子总体Global信息
-dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_global_pool_info
+$RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_global_pool_info'
 
-
-### 查询farm池子总体Global信息
+### 查询用户手上的质押所有的代币的权重
 $RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarm::query_total_stake_weight -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR  --arg 0x8c109349c6bd91411d6bc962e080c4a3'
 
 ### 管理员创建Syrup
