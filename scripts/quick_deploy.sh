@@ -13,10 +13,9 @@ RUN_CMD="./starcoin.sh $NETWORK ~/.starcoin/$NETWORK"
 
 ## 获取STC
 # kubectl exec -it -n starcoin-halley starcoin-0 -- /starcoin/starcoin --connect /sc-data/halley/starcoin.ipc console
-# account transfer
+# account transfer -r 0x8c109349c6bd91411d6bc962e080c4a3 -v 1000000000000 -b
 
-
-### 获取STAR
+### 从 Developer Fund 中获取STAR
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovScript::linear_withdraw_developerfund --arg 0x8c109349c6bd91411d6bc962e080c4a3 --arg 10000000000000u128 -b'
 
 ############### Farm相关  ###########################
