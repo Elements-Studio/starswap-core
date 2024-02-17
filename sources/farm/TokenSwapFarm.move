@@ -610,10 +610,10 @@ module TokenSwapFarm {
         YieldFarming::query_total_stake<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
-    /// Query all stake weight
-    public fun query_total_stake_weight<X: copy + drop + store, Y: copy + drop + store>(user: address): u128 {
-        YieldFarming::query_stake_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user)
-    }
+    // /// Query all stake weight
+    // public fun query_total_stake_weight<X: copy + drop + store, Y: copy + drop + store>(user: address): u128 {
+    //     YieldFarming::query_stake_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(user)
+    // }
 
     /// Query stake amount from user
     public fun query_stake<X: copy + drop + store,
@@ -626,6 +626,13 @@ module TokenSwapFarm {
         } else {
             0
         }
+    }
+
+    /// Query all stake amount weight by user
+    public fun query_stake_weight<X: copy + drop + store, Y: copy + drop + store>(
+        account: address
+    ): u128 {
+        YieldFarming::query_stake_weight<PoolTypeFarmPool, Token::Token<LiquidityToken<X, Y>>>(account)
     }
 
     /// Query release per second

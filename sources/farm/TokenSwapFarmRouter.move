@@ -93,7 +93,7 @@ module TokenSwapFarmRouter {
         }
     }
 
-    /// Query all stake amount
+    /// Query all stake amount for pool
     public fun query_total_stake<X: copy + drop + store, Y: copy + drop + store>(): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
@@ -104,7 +104,7 @@ module TokenSwapFarmRouter {
         }
     }
 
-    /// Query all stake amount
+    /// Query all stake amount by user
     public fun query_stake<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
@@ -112,6 +112,17 @@ module TokenSwapFarmRouter {
             TokenSwapFarm::query_stake<X, Y>(account)
         } else {
             TokenSwapFarm::query_stake<Y, X>(account)
+        }
+    }
+
+    /// Query all stake weight by user
+    public fun query_stake_weight<X: copy + drop + store, Y: copy + drop + store>(user: address): u128 {
+        let order = TokenSwap::compare_token<X, Y>();
+        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
+        if (order == 1) {
+            TokenSwapFarm::query_stake_weight<X, Y>(user)
+        } else {
+            TokenSwapFarm::query_stake_weight<Y, X>(user)
         }
     }
 

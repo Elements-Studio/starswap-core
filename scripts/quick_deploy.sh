@@ -11,8 +11,15 @@ RUN_CMD="./starcoin.sh $NETWORK ~/.starcoin/$NETWORK"
 
 ### ！！注意这里需要先导入管理员账户，否则下面的命令不会生效！！ ###
 
-## 需要获取 STC 和 STAR TODO
+## 获取STC
+# kubectl exec -it -n starcoin-halley starcoin-0 -- /starcoin/starcoin --connect /sc-data/halley/starcoin.ipc console
+# account transfer
 
+
+### 获取STAR
+$RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapGovScript::linear_withdraw_developerfund --arg 0x8c109349c6bd91411d6bc962e080c4a3 --arg 10000000000000u128 -b'
+
+############### Farm相关  ###########################
 ### 这里需要将Poly-STC-Bridge部署包拷贝到release目录下
 $RUN_CMD 'account unlock 0x8c109349c6bd91411d6bc962e080c4a3'
 
@@ -20,6 +27,8 @@ $RUN_CMD 'account unlock 0x8c109349c6bd91411d6bc962e080c4a3'
 $RUN_CMD 'dev deploy -s 0xe52552637c5897a2d499fbf08216f73e release/Poly-STC-Bridge.v1.0.12.blob -b'
 
 $RUN_CMD 'dev deploy -s 0x8c109349c6bd91411d6bc962e080c4a3 release/Starswap-Core.v1.0.12.blob -b'
+
+############### Swap 相关  ###########################
 
 ### 执行初始化
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::UpgradeScripts::genesis_initialize_for_latest_version_entry --arg 800000000u128 --arg 46000000u128 -b'
@@ -30,7 +39,9 @@ $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --funct
 ### 添加 STAR-STC流动性(200,20)
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapScripts::add_liquidity -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 20000000000u128 --arg 200000000000u128 --arg 2000u128 --arg 2000u128 -b'
 
-############### Farm相关  ###########################
+
+
+############### Farm 相关  ###########################
 
 ### 管理员创建 STAR-STC Farm
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmScript::add_farm_pool_v2 -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 0u128 -b'
@@ -45,16 +56,24 @@ $RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmR
 $RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmScript::set_farm_alloc_point -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR  --arg 5u128 -b'
 
 ### 查看池子倍率
-$RUN_CMD'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_info_v2 -t -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR'
+$RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_info_v2 -t -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR'
 
-### 查询farm池子总体Global信息
-$RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmRouter::query_global_pool_info'
+### 质押到Farm
+$RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmScript::stake -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 10000u128 -b'
 
 ### 查询用户手上的质押所有的代币的权重
-$RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarm::query_total_stake_weight -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR  --arg 0x8c109349c6bd91411d6bc962e080c4a3'
+$RUN_CMD 'dev call --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapFarmScript::query_stake_weight -t 0x1::STC::STC -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 0x8c109349c6bd91411d6bc962e080c4a3'
+
+
+
+############ Syrup 相关 #########################
+
+# 更新池子每秒释放量
+$RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrupScript::set_pool_release_per_second --arg 23000000u128'
 
 ### 管理员创建Syrup
-$RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrupScript::add_pool -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 2000000u128 --arg 0u64 -b'
+$RUN_CMD 'account execute-function -s 0x8c109349c6bd91411d6bc962e080c4a3 --function 0x8c109349c6bd91411d6bc962e080c4a3::TokenSwapSyrupScript::add_pool -t 0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR --arg 100u128 --arg 0u64 -b'
+
 
 ### 添加Syrup池子阶梯倍率
 

@@ -55,6 +55,11 @@ module TokenSwapFarmScript {
         TokenSwapFarmRouter::query_stake<X, Y>(account)
     }
 
+    /// Query all stake amount
+    public fun query_stake_weight<X: copy + drop + store, Y: copy + drop + store>(account: address): u128 {
+        TokenSwapFarmRouter::query_stake_weight<X, Y>(account)
+    }
+
     /// Query release per second
     public fun query_release_per_second<X: copy + drop + store, Y: copy + drop + store>(): u128 {
         TokenSwapFarmRouter::query_release_per_second<X, Y>()
