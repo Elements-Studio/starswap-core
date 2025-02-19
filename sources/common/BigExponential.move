@@ -3,7 +3,7 @@
 
 module swap_admin::BigExponential {
 
-    use starcoin_framework::error;
+    use std::error;
 
     // e18
     const EQUAL: u8 = 0;
@@ -108,7 +108,7 @@ module swap_admin::BigExponential {
     }
 
     public fun to_safe_u128(n: u256): u128 {
-        assert!(n > (U128_MAX as u256), error::invalid_argument(ERR_U128_OVERFLOW));
+        assert!(n < (U128_MAX as u256), error::invalid_argument(ERR_U128_OVERFLOW));
         (n as u128)
     }
 }
