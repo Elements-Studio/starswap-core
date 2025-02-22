@@ -43,7 +43,7 @@ module swap_admin::TokenSwapFee {
     public fun initialize_token_swap_fee(signer: &signer) {
         init_swap_oper_fee_config(signer);
 
-        move_to(signer, TokenSwapFeeEvent{
+        move_to(signer, TokenSwapFeeEvent {
             swap_fee_event: account::new_event_handle<SwapFeeEvent>(signer),
         });
     }
