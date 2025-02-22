@@ -16,7 +16,7 @@ module swap_admin::BigExponential {
 
     const EXP_SCALE: u128 = 1000000000000000000;
     //e18
-    const EXP_MAX_SCALE: u64 = 18;
+    const EXP_MAX_SCALE: u8 = 18;
     const U128_MAX: u128 = 340282366920938463463374607431768211455;  //length(U128_MAX)==39
 
     struct Exp has copy, store, drop {
@@ -27,7 +27,7 @@ module swap_admin::BigExponential {
         return EXP_SCALE
     }
 
-    public fun exp_scale_limition(): u64 {
+    public fun exp_scale_limition(): u8 {
         return EXP_MAX_SCALE
     }
 
