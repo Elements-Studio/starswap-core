@@ -27,18 +27,6 @@ module swap_admin::TokenSwap {
         freeze: coin::FreezeCapability<LiquidityToken<X, Y>>,
     }
 
-    // /// event emitted when add token pair register.
-    // /// (Obsoleted)
-    // struct TokenPairRegisterEvent has drop, store {
-    //     /// token code of X type
-    //     x_token_code: string::String,
-    //     /// token code of y type
-    //     y_token_code: string::String,
-    //     // string::String,
-    //     /// signer of token pair register
-    //     signer: address,
-    // }
-
     /// event emitted when add token pair register.
     struct RegisterEvent has drop, store {
         /// token code of X type
