@@ -1,17 +1,17 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address SwapAdmin {
-module TokenSwapRouter {
-    use SwapAdmin::TokenSwap::{LiquidityToken, Self};
-    use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Token;
-    use StarcoinFramework::U256::U256;
+module swap_admin::TokenSwapRouter {
 
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapFee;
-    use SwapAdmin::TokenSwapConfig;
+    use std::signer;
+    use std::option;
+
+    use starcoin_framework::coin;
+
+    use swap_admin::TokenSwap::{Self, LiquidityToken};
+    use swap_admin::TokenSwapLibrary;
+    use swap_admin::TokenSwapConfig;
+    use swap_admin::TokenSwapFee;
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_ROUTER_INSUFFICIENT_X_AMOUNT: u64 = 1002;
@@ -42,9 +42,9 @@ module TokenSwapRouter {
     }
 
     /// Swap token auto accept
-    public fun swap_pair_token_auto_accept<Token: store>(signer: &signer) {
-        if (!Account::is_accepts_token<Token>(Signer::address_of(signer))) {
-            Account::do_accept_token<Token>(signer);
+    public fun swap_pair_token_auto_accept<T: store>(signer: &signer) {
+        if (!coin::is_account_registered<T>(signer::address_of(signer))) {
+            coin::register<T>(signer);
         };
     }
 
@@ -66,9 +66,9 @@ module TokenSwapRouter {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            Account::balance<LiquidityToken<X, Y>>(signer)
+            (coin::balance<LiquidityToken<X, Y>>(signer) as u128)
         } else {
-            Account::balance<LiquidityToken<Y, X>>(signer)
+            (coin::balance<LiquidityToken<Y, X>>(signer) as u128)
         }
     }
 
@@ -76,9 +76,9 @@ module TokenSwapRouter {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
-            Token::market_cap<LiquidityToken<X, Y>>()
+            option::destroy_some(coin::supply<LiquidityToken<X, Y>>())
         } else {
-            Token::market_cap<LiquidityToken<Y, X>>()
+            option::destroy_some(coin::supply<LiquidityToken<Y, X>>())
         }
     }
 
@@ -123,19 +123,19 @@ module TokenSwapRouter {
             amount_x_min,
             amount_y_min,
         );
-        let x_token = Account::withdraw<X>(signer, amount_x);
-        let y_token = Account::withdraw<Y>(signer, amount_y);
+        let x_token = coin::withdraw<X>(signer, (amount_x as u64));
+        let y_token = coin::withdraw<Y>(signer, (amount_y as u64));
 
         let liquidity_token = TokenSwap::mint_and_emit_event<X, Y>(
             signer, x_token, y_token, amount_x_desired, amount_y_desired, amount_x_min, amount_y_min);
 
-        if (!Account::is_accepts_token<LiquidityToken<X, Y>>(Signer::address_of(signer))) {
-            Account::do_accept_token<LiquidityToken<X, Y>>(signer);
+        if (!coin::is_account_registered<LiquidityToken<X, Y>>(signer::address_of(signer))) {
+            coin::register<LiquidityToken<X, Y>>(signer);
         };
 
-        let liquidity: u128 = Token::value<LiquidityToken<X, Y>>(&liquidity_token);
+        let liquidity: u128 = (coin::value<LiquidityToken<X, Y>>(&liquidity_token) as u128);
         assert!(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
-        Account::deposit(Signer::address_of(signer), liquidity_token);
+        coin::deposit(signer::address_of(signer), liquidity_token);
     }
 
     fun intra_calculate_amount_for_liquidity<X: copy + drop + store, Y: copy + drop + store>(
@@ -182,12 +182,12 @@ module TokenSwapRouter {
         amount_x_min: u128,
         amount_y_min: u128,
     ) {
-        let liquidity_token = Account::withdraw<LiquidityToken<X, Y>>(signer, liquidity);
+        let liquidity_token = coin::withdraw<LiquidityToken<X, Y>>(signer, (liquidity as u64));
         let (token_x, token_y) = TokenSwap::burn_and_emit_event(signer, liquidity_token, amount_x_min, amount_y_min);
-        assert!(Token::value(&token_x) >= amount_x_min, ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
-        assert!(Token::value(&token_y) >= amount_y_min, ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
-        Account::deposit(Signer::address_of(signer), token_x);
-        Account::deposit(Signer::address_of(signer), token_y);
+        assert!(coin::value(&token_x) >= (amount_x_min as u64), ERROR_ROUTER_INSUFFICIENT_X_AMOUNT);
+        assert!(coin::value(&token_y) >= (amount_y_min as u64), ERROR_ROUTER_INSUFFICIENT_Y_AMOUNT);
+        coin::deposit(signer::address_of(signer), token_x);
+        coin::deposit(signer::address_of(signer), token_y);
         // TokenSwap::emit_remove_liquidity_event<X, Y>(signer, liquidity, amount_x_min, amount_y_min);
     }
 
@@ -214,29 +214,41 @@ module TokenSwapRouter {
         assert!(y_out >= amount_y_out_min, ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED);
 
         // do actual swap
-        let token_x = Account::withdraw<X>(signer, amount_x_in);
+        let token_x = coin::withdraw<X>(signer, (amount_x_in as u64));
         let (token_x_out, token_y_out);
         let (token_x_fee, token_y_fee);
         if (order == 1) {
-            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap_and_emit_event<X, Y>(signer, token_x, y_out, Token::zero(), 0);
+            (token_x_out, token_y_out, token_x_fee, token_y_fee) = TokenSwap::swap_and_emit_event<X, Y>(
+                signer,
+                token_x,
+                y_out,
+                coin::zero(),
+                0
+            );
         } else {
-            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap_and_emit_event<Y, X>(signer, Token::zero(), 0, token_x, y_out);
+            (token_y_out, token_x_out, token_y_fee, token_x_fee) = TokenSwap::swap_and_emit_event<Y, X>(
+                signer,
+                coin::zero(),
+                0,
+                token_x,
+                y_out
+            );
         };
 
-        Token::destroy_zero(token_x_out);
-        Account::deposit(Signer::address_of(signer), token_y_out);
-        Token::destroy_zero(token_y_fee);
+        coin::destroy_zero(token_x_out);
+        coin::deposit(signer::address_of(signer), token_y_out);
+        coin::destroy_zero(token_y_fee);
 
         //handle swap fee
         if (TokenSwapConfig::get_swap_fee_switch()) {
-            TokenSwapFee::handle_token_swap_fee<X, Y>(Signer::address_of(signer), token_x_fee);
+            TokenSwapFee::handle_token_swap_fee<X, Y>(signer::address_of(signer), token_x_fee);
         } else {
-            Token::destroy_zero(token_x_fee);
+            coin::destroy_zero(token_x_fee);
         }
     }
 
     /// Computer x in value by given y_out and x_in slipper value
-    public fun compute_x_in<X: copy + drop + store, Y: copy + drop + store>(amount_y_out: u128) : u128 {
+    public fun compute_x_in<X: copy + drop + store, Y: copy + drop + store>(amount_y_out: u128): u128 {
         // calculate actual x in
         let (reserve_x, reserve_y) = get_reserves<X, Y>();
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, Y>();
@@ -259,25 +271,25 @@ module TokenSwapRouter {
         assert!(x_in <= amount_x_in_max, ERROR_ROUTER_X_IN_OVER_LIMIT_MAX);
 
         // do actual swap
-        let token_x = Account::withdraw<X>(signer, x_in);
+        let token_x = coin::withdraw<X>(signer, (x_in as u64));
         let (token_x_out, token_y_out);
         let (token_x_fee, token_y_fee);
         if (order == 1) {
             (token_x_out, token_y_out, token_x_fee, token_y_fee) =
-                TokenSwap::swap<X, Y>(token_x, amount_y_out, Token::zero(), 0);
+                TokenSwap::swap<X, Y>(token_x, amount_y_out, coin::zero(), 0);
         } else {
             (token_y_out, token_x_out, token_y_fee, token_x_fee) =
-                TokenSwap::swap<Y, X>(Token::zero(), 0, token_x, amount_y_out);
+                TokenSwap::swap<Y, X>(coin::zero(), 0, token_x, amount_y_out);
         };
-        Token::destroy_zero(token_x_out);
-        Account::deposit(Signer::address_of(signer), token_y_out);
-        Token::destroy_zero(token_y_fee);
+        coin::destroy_zero(token_x_out);
+        coin::deposit(signer::address_of(signer), token_y_out);
+        coin::destroy_zero(token_y_fee);
 
         //handle swap fee
         if (TokenSwapConfig::get_swap_fee_switch()) {
-            TokenSwapFee::handle_token_swap_fee<X, Y>(Signer::address_of(signer), token_x_fee);
+            TokenSwapFee::handle_token_swap_fee<X, Y>(signer::address_of(signer), token_x_fee);
         } else {
-            Token::destroy_zero(token_x_fee);
+            coin::destroy_zero(token_x_fee);
         }
     }
 
@@ -299,7 +311,7 @@ module TokenSwapRouter {
     /// Get cumulative info of a token pair.
     /// The order of `X`, `Y` doesn't need to be sorted.
     /// And the order of return values are based on the order of type parameters.
-    public fun get_cumulative_info<X: copy + drop + store, Y: copy + drop + store>(): (U256, U256, u64) {
+    public fun get_cumulative_info<X: copy + drop + store, Y: copy + drop + store>(): (u256, u256, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -315,19 +327,19 @@ module TokenSwapRouter {
     public fun withdraw_liquidity_token<X: copy + drop + store, Y: copy + drop + store>(
         signer: &signer,
         amount: u128
-    ): Token::Token<LiquidityToken<X, Y>> {
-        let user_liquidity = liquidity<X, Y>(Signer::address_of(signer));
+    ): coin::Coin<LiquidityToken<X, Y>> {
+        let user_liquidity = liquidity<X, Y>(signer::address_of(signer));
         assert!(amount <= user_liquidity, ERROR_ROUTER_WITHDRAW_INSUFFICIENT);
 
-        Account::withdraw<LiquidityToken<X, Y>>(signer, amount)
+        coin::withdraw<LiquidityToken<X, Y>>(signer, (amount as u64))
     }
 
     /// Deposit liquidity token into user source list
     public fun deposit_liquidity_token<X: copy + drop + store, Y: copy + drop + store>(
         signer: address,
-        to_deposit: Token::Token<LiquidityToken<X, Y>>
+        to_deposit: coin::Coin<LiquidityToken<X, Y>>
     ) {
-        Account::deposit<LiquidityToken<X, Y>>(signer, to_deposit);
+        coin::deposit<LiquidityToken<X, Y>>(signer, to_deposit);
     }
 
     /// Poundage number of liquidity token pair
@@ -341,10 +353,10 @@ module TokenSwapRouter {
             TokenSwapConfig::get_poundage_rate<Y, X>()
         }
     }
-    
+
     /// Operation number of liquidity token pair
     public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
-                                 Y: copy + drop + store>(): (u64, u64) {
+                                              Y: copy + drop + store>(): (u64, u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -367,7 +379,7 @@ module TokenSwapRouter {
     }
 
     public entry fun upgrade_tokenpair_to_tokenswappair<X: copy + drop + store,
-                                                          Y: copy + drop + store>(signer: signer) {
+                                                        Y: copy + drop + store>(signer: signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -390,7 +402,7 @@ module TokenSwapRouter {
                                                                       num: u64,
                                                                       denum: u64) {
         TokenSwapConfig::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
-    }    
+    }
 
     /// Set fee auto convert switch config
     public fun set_fee_auto_convert_switch(signer: &signer, auto_convert_switch: bool) {
@@ -408,8 +420,11 @@ module TokenSwapRouter {
     }
 
     /// Set white list boost switch
-    public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
-        TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch,white_list_pubkey);
+    public fun set_white_list_boost_switch(
+        signer: &signer,
+        white_list_switch: bool,
+        white_list_pubkey: vector<u8>
+    ) {
+        TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch, white_list_pubkey);
     }
-}
 }
