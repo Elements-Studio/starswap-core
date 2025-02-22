@@ -5,6 +5,7 @@ version = "0.0.1"
 [addresses]
 FAI = "0x4ffcc98f43ce74668264a0cf6eebe42b"
 WEN = "0xbf60b00855c92fe725296a436101c8c6"
+XUSDT = "0xe52552637c5897a2d499fbf08216f73e"
 
 [dependencies]
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin.git", rev = "8f9b203859079384aa3deae0aeb0637843ce8325", subdir = "vm/framework/starcoin-framework" }
