@@ -1,12 +1,11 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address SwapAdmin {
-module TokenSwapScripts {
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapRouter;
-    use SwapAdmin::TokenSwapRouter2;
-    use SwapAdmin::TokenSwapRouter3;
+module swap_admin::TokenSwapScripts {
+    use swap_admin::TokenSwapLibrary;
+    use swap_admin::TokenSwapRouter;
+    use swap_admin::TokenSwapRouter2;
+    use swap_admin::TokenSwapRouter3;
 
     /// register swap for admin user
     public entry fun register_swap_pair<X: copy + drop + store,
@@ -162,6 +161,4 @@ module TokenSwapScripts {
         let (fee_numberator, fee_denumerator) = TokenSwapRouter::get_poundage_rate<X, Y>();
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
-
-}
 }

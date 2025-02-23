@@ -1,12 +1,11 @@
 // Copyright (c) The Elements Studio Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-address SwapAdmin {
-module TokenSwapRouter3 {
-    use SwapAdmin::TokenSwapRouter;
-    use SwapAdmin::TokenSwapRouter2;
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapConfig;
+module swap_admin::TokenSwapRouter3 {
+    use swap_admin::TokenSwapRouter;
+    use swap_admin::TokenSwapRouter2;
+    use swap_admin::TokenSwapLibrary;
+    use swap_admin::TokenSwapConfig;
 
     const ERROR_ROUTER_PARAMETER_INVALID: u64 = 1001;
     const ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED: u64 = 1002;
@@ -70,5 +69,4 @@ module TokenSwapRouter3 {
         TokenSwapRouter::swap_token_for_exact_token<R, T>(signer, r_in, t_in);
         TokenSwapRouter::swap_token_for_exact_token<T, Y>(signer, t_in, amount_y_out);
     }
-}
 }
