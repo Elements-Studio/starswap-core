@@ -10,7 +10,7 @@ module swap_admin::YieldFarmingLibrary {
     const ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW: u64 = 102;
     const ERR_FARMING_TOTAL_WEIGHT_IS_ZERO: u64 = 103;
 
-        /// Update farming asset
+    /// Update farming asset
     public fun calculate_harvest_index_with_asse_info(
         asset_total_weight: u128,
         asset_harvest_index: u128,

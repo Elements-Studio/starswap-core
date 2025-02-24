@@ -1,8 +1,8 @@
-address SwapAdmin {
+module swap_admin::VESTAR {
 
-module VESTAR {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Signer;
+    use std::signer;
+
+    use starcoin_std::type_info;
 
     /// VESTAR token marker.
     struct VESTAR has copy, drop, store {}
@@ -14,21 +14,20 @@ module VESTAR {
 
     /// Returns true if `TokenType` is `VESTAR::VESTAR`
     public fun is_vestar<TokenType: store>(): bool {
-        Token::is_same_token<VESTAR, TokenType>()
+        type_info::type_name<TokenType>() == type_info::type_name<VESTAR>()
     }
 
     public fun assert_genesis_address(account: &signer) {
-        assert!(Signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
+        assert!(signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
     }
 
     /// Return VESTAR token address.
     public fun token_address(): address {
-        Token::token_address<VESTAR>()
+        type_info::account_address(&type_info::type_of<VESTAR>())
     }
 
     /// Return VESTAR precision.
     public fun precision(): u8 {
         PRECISION
     }
-}
 }
