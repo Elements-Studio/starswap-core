@@ -1,8 +1,9 @@
-module SwapAdmin::TokenSwapSyrupMultiplierPool {
-    use StarcoinFramework::Errors;
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Vector;
-    use StarcoinFramework::Option;
+module swap_admin::TokenSwapSyrupMultiplierPool {
+
+    use std::error;
+    use std::option;
+    use std::signer;
+    use std::vector;
 
     const ERROR_ACCOUNT_NOT_ADMIN: u64 = 101;
     const ERROR_POOL_NOT_FOUND: u64 = 102;
@@ -31,11 +32,11 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         account: &signer
     ): PoolCapability<PoolType, AssetType> {
         move_to(account, MultiplierPoolsGlobalInfo<PoolType, AssetType> {
-            items: Vector::empty<MultiplierPool<PoolType, AssetType>>(),
+            items: vector::empty<MultiplierPool<PoolType, AssetType>>(),
         });
 
         PoolCapability<PoolType, AssetType> {
-            holder: Signer::address_of(account),
+            holder: signer::address_of(account),
         }
     }
 
@@ -58,9 +59,9 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         let info =
             borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
         let idx = find_idx_by_id(&info.items, key);
-        assert!(Option::is_none(&idx), Errors::invalid_state(ERROR_POOL_HAS_EXISTS));
+        assert!(option::is_none(&idx), error::invalid_state(ERROR_POOL_HAS_EXISTS));
 
-        Vector::push_back(&mut info.items, MultiplierPool<PoolType, AssetType> {
+        vector::push_back(&mut info.items, MultiplierPool<PoolType, AssetType> {
             key: *key,
             asset_weight: 0,
             asset_amount: 0,
@@ -81,14 +82,14 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         let info =
             borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
         let idx = find_idx_by_id(&info.items, key);
-        assert!(Option::is_some(&idx), Errors::invalid_state(ERROR_POOL_NOT_FOUND));
+        assert!(option::is_some(&idx), error::invalid_state(ERROR_POOL_NOT_FOUND));
 
-        let i = Option::destroy_some(idx);
+        let i = option::destroy_some(idx);
         let multiplier_pool =
-            Vector::borrow_mut<MultiplierPool<PoolType, AssetType>>(&mut info.items, i);
+            vector::borrow_mut<MultiplierPool<PoolType, AssetType>>(&mut info.items, i);
 
         assert!(multiplier_pool.asset_weight <= 0 && multiplier_pool.asset_amount <= 0,
-            Errors::invalid_state(ERROR_POOL_WEIGHT_NOT_ZERO));
+            error::invalid_state(ERROR_POOL_WEIGHT_NOT_ZERO));
 
         // Unpacking Multiplier Pool
         let MultiplierPool<PoolType, AssetType> {
@@ -96,7 +97,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
             asset_weight: _,
             asset_amount: _,
             multiplier: _
-        } = Vector::remove(&mut info.items, i);
+        } = vector::remove(&mut info.items, i);
     }
 
     /// Add amount to a pool
@@ -166,24 +167,24 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     ) acquires MultiplierPoolsGlobalInfo {
         let info =
             borrow_global<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
-        let key_list = Vector::empty<u8>();
-        let multiplier_list = Vector::empty<u64>();
-        let asset_amount_list = Vector::empty<u128>();
+        let key_list = vector::empty<u8>();
+        let multiplier_list = vector::empty<u64>();
+        let asset_amount_list = vector::empty<u128>();
 
-        if (!Vector::is_empty<MultiplierPool<PoolType, AssetType>>(&info.items)) {
+        if (!vector::is_empty<MultiplierPool<PoolType, AssetType>>(&info.items)) {
             let idx = 0;
-            let len = Vector::length(&info.items);
+            let len = vector::length(&info.items);
             loop {
                 if (idx >= len) {
                     break
                 };
 
                 let item =
-                    Vector::borrow(&info.items, idx);
-                Vector::append(&mut key_list, *&item.key);
-                // Vector::append(&mut key_list, b"|");
-                Vector::push_back(&mut multiplier_list, item.multiplier);
-                Vector::push_back(&mut asset_amount_list, item.asset_amount);
+                    vector::borrow(&info.items, idx);
+                vector::append(&mut key_list, *&item.key);
+                // vector::append(&mut key_list, b"|");
+                vector::push_back(&mut multiplier_list, item.multiplier);
+                vector::push_back(&mut asset_amount_list, item.asset_amount);
 
                 idx = idx + 1;
             };
@@ -203,26 +204,26 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         ) = query_all_pools<PoolType, AssetType>(broker);
 
         assert!(
-            !Vector::is_empty(&multiplier_list) && !Vector::is_empty(&amount_list),
-            Errors::invalid_state(ERROR_POOL_EMPTY)
+            !vector::is_empty(&multiplier_list) && !vector::is_empty(&amount_list),
+            error::invalid_state(ERROR_POOL_EMPTY)
         );
 
         assert!(
-            Vector::length(&multiplier_list) == Vector::length(&amount_list),
-            Errors::invalid_state(ERROR_POOL_PARAMETER_INVALID)
+            vector::length(&multiplier_list) == vector::length(&amount_list),
+            error::invalid_state(ERROR_POOL_PARAMETER_INVALID)
         );
 
         let total_amount: u128 = 0;
         let total_weight: u128 = 0;
         let idx = 0;
-        let len = Vector::length(&amount_list);
+        let len = vector::length(&amount_list);
         loop {
             if (idx >= len) {
                 break
             };
 
-            let stepwise_amount = *Vector::borrow(&amount_list, idx);
-            let stepwise_mulitplier = *Vector::borrow(&multiplier_list, idx);
+            let stepwise_amount = *vector::borrow(&amount_list, idx);
+            let stepwise_mulitplier = *vector::borrow(&multiplier_list, idx);
             total_amount = total_amount + stepwise_amount;
             total_weight = total_weight + stepwise_amount * (stepwise_mulitplier as u128);
 
@@ -238,7 +239,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
     ): bool acquires MultiplierPoolsGlobalInfo {
         let info =
             borrow_global_mut<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
-        Option::is_some(&find_idx_by_id<PoolType, AssetType>(&info.items, key))
+        option::is_some(&find_idx_by_id<PoolType, AssetType>(&info.items, key))
     }
 
     /// Set mulitplier pool amount with amount
@@ -265,26 +266,26 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         key: &vector<u8>
     ): &mut MultiplierPool<PoolType, AssetType> {
         let idx = find_idx_by_id<PoolType, AssetType>(c, key);
-        assert!(Option::is_some(&idx), Errors::invalid_state(ERROR_POOL_NOT_FOUND));
-        Vector::borrow_mut<MultiplierPool<PoolType, AssetType>>(c, Option::destroy_some<u64>(idx))
+        assert!(option::is_some(&idx), error::invalid_state(ERROR_POOL_NOT_FOUND));
+        vector::borrow_mut<MultiplierPool<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
     }
 
     fun find_idx_by_id<PoolType: store, AssetType: store>(
         c: &vector<MultiplierPool<PoolType, AssetType>>,
         key: &vector<u8>
-    ): Option::Option<u64> {
-        let len = Vector::length(c);
+    ): option::Option<u64> {
+        let len = vector::length(c);
         if (len == 0) {
-            return Option::none()
+            return option::none()
         };
         let idx = len - 1;
         loop {
-            let el = Vector::borrow(c, idx);
+            let el = vector::borrow(c, idx);
             if (*&el.key == *key) {
-                return Option::some(idx)
+                return option::some(idx)
             };
             if (idx == 0) {
-                return Option::none()
+                return option::none()
             };
             idx = idx - 1;
         }
@@ -294,7 +295,7 @@ module SwapAdmin::TokenSwapSyrupMultiplierPool {
         broker: address,
         cap: &PoolCapability<PoolType, AssetType>
     ) {
-        assert!(broker == cap.holder, Errors::invalid_state(ERROR_ACCOUNT_NOT_ADMIN));
+        assert!(broker == cap.holder, error::invalid_state(ERROR_ACCOUNT_NOT_ADMIN));
     }
 }
 
