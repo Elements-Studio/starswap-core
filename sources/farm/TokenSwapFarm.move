@@ -257,7 +257,7 @@ module swap_admin::TokenSwapFarm {
     // }
 
 
-    public fun set_pool_release_per_second(signer: &signer, pool_release_per_second: u128) {
+    public entry fun set_pool_release_per_second(signer: &signer, pool_release_per_second: u128) {
         STAR::assert_genesis_address(signer);
 
         // Updated release per second for `PoolTypeFarmPool`
@@ -296,8 +296,7 @@ module swap_admin::TokenSwapFarm {
     // }
 
     /// Get farm multiplier of second per releasing
-    public fun get_farm_multiplier<X,
-                                   Y>()
+    public fun get_farm_multiplier<X, Y>()
     : u64 acquires FarmMultiplier, FarmPoolInfo {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
@@ -310,8 +309,7 @@ module swap_admin::TokenSwapFarm {
     }
 
 
-    public fun set_farm_alloc_point<X,
-                                    Y>(
+    public fun set_farm_alloc_point<X, Y>(
         signer: &signer,
         alloc_point: u128
     ) acquires FarmPoolCapability, FarmPoolInfo, FarmPoolEvent {
