@@ -4,6 +4,7 @@
 module swap_admin::TokenSwapSyrupRouter {
 
     use std::signer;
+    use swap_admin::TokenSwapGov;
 
     use starcoin_framework::coin;
 
@@ -85,8 +86,9 @@ module swap_admin::TokenSwapSyrupRouter {
 
     public entry fun unstake<T>(signer: signer, id: u64) acquires VestarRouterCapabilityWrapper {
         let user_addr = signer::address_of(&signer);
-        //TODO(VR): to confirm linear extract from governance
-        // TokenSwapGov::linear_withdraw_syrup(&signer, 0);
+
+        TokenSwapGov::linear_withdraw_syrup(&signer, 0);
+
         let (asset_token, reward_token) = TokenSwapSyrup::unstake<T>(&signer, id);
         coin::deposit<T>(user_addr, asset_token);
         coin::deposit<STAR::STAR>(user_addr, reward_token);

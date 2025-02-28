@@ -295,7 +295,11 @@ module swap_admin::TokenSwapGov {
     }
 
     /// dispatch to acceptor from governance treasury pool
-    public fun dispatch<PoolType: store>(account: &signer, acceptor: address, amount: u128) acquires GovTreasuryV2 {
+    public entry fun dispatch<PoolType: store>(
+        account: &signer,
+        acceptor: address,
+        amount: u128
+    ) acquires GovTreasuryV2 {
         TokenSwapConfig::assert_global_freeze();
 
         assert!(amount != 0, error::invalid_argument(ERR_WITHDRAW_AMOUNT_IS_ZERO));
@@ -320,7 +324,7 @@ module swap_admin::TokenSwapGov {
     }
 
     //Initialize the economic model of linear release
-    public fun linear_initialize(account: &signer) acquires GovTreasury {
+    public entry fun linear_initialize(account: &signer) acquires GovTreasury {
         STAR::assert_genesis_address(account);
 
         let precision = STAR::precision();
@@ -467,12 +471,12 @@ module swap_admin::TokenSwapGov {
     }
 
     //Community Linear Treasury Extraction Function
-    public fun linear_withdraw_community(account: &signer, to: address, amount: u128) acquires GovTreasuryV2 {
+    public entry fun linear_withdraw_community(account: &signer, to: address, amount: u128) acquires GovTreasuryV2 {
         linear_withdraw<PoolTypeCommunity>(account, to, amount);
     }
 
     //Developer Fund Linear Treasury Extraction Function
-    public fun linear_withdraw_developerfund(account: &signer, to: address, amount: u128) acquires GovTreasuryV2 {
+    public entry fun linear_withdraw_developerfund(account: &signer, to: address, amount: u128) acquires GovTreasuryV2 {
         linear_withdraw<PoolTypeDeveloperFund>(account, to, amount);
     }
 
@@ -514,7 +518,7 @@ module swap_admin::TokenSwapGov {
     }
 
     //Syrup Linear Treasury Extraction Function
-    public fun linear_withdraw_syrup(account: &signer, _amount: u128) acquires GovTreasuryV2 {
+    public entry fun linear_withdraw_syrup(account: &signer, _amount: u128) acquires GovTreasuryV2 {
         let disp_token = linear_withdraw_farm_syrup<PoolTypeSyrup>(account);
         TokenSwapSyrup::deposit<PoolTypeSyrup, STAR::STAR>(account, disp_token);
     }
