@@ -81,8 +81,8 @@ module swap_admin::TokenSwapConfig {
     }
 
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
-    public fun get_swap_fee_operation_rate_v2<X: copy + drop + store,
-                                              Y: copy + drop + store>(): (u64, u64) {
+    public fun get_swap_fee_operation_rate_v2<X,
+                                              Y>(): (u64, u64) {
         if (on_chain_config::config_exist_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address())) {
             let conf = on_chain_config::get_by_address<SwapFeeOperationConfigV2<X, Y>>(admin_address());
             let numerator: u64 = conf.numerator;
@@ -95,8 +95,8 @@ module swap_admin::TokenSwapConfig {
 
     /// Swap fee allocation mode: LP Providor 5/6, Operation management 1/6
     /// Poundage number of liquidity token pair
-    public fun get_poundage_rate<X: copy + drop + store,
-                                 Y: copy + drop + store>(): (u64, u64) {
+    public fun get_poundage_rate<X,
+                                 Y>(): (u64, u64) {
         if (on_chain_config::config_exist_by_address<SwapFeePoundageConfig<X, Y>>(admin_address())) {
             let conf = on_chain_config::get_by_address<SwapFeePoundageConfig<X, Y>>(admin_address());
             let numerator: u64 = conf.numerator;
@@ -132,8 +132,8 @@ module swap_admin::TokenSwapConfig {
     }
 
     /// Set fee rate for operation_v2 rate, only admin can call
-    public fun set_swap_fee_operation_rate_v2<X: copy + drop + store,
-                                              Y: copy + drop + store>(signer: &signer,
+    public fun set_swap_fee_operation_rate_v2<X,
+                                              Y>(signer: &signer,
                                                                       num: u64,
                                                                       denum: u64) {
         assert_admin(signer);
@@ -150,8 +150,8 @@ module swap_admin::TokenSwapConfig {
     }
 
     /// Set fee rate for poundage rate, only admin can call
-    public fun set_poundage_rate<X: copy + drop + store,
-                                 Y: copy + drop + store>(signer: &signer,
+    public fun set_poundage_rate<X,
+                                 Y>(signer: &signer,
                                                          num: u64,
                                                          denum: u64) {
         assert_admin(signer);

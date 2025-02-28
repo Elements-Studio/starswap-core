@@ -53,7 +53,7 @@ module swap_admin::TokenSwapFee {
         TokenSwapConfig::set_swap_fee_operation_rate(signer, 10, 60);
     }
 
-    public fun handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store>(
+    public fun handle_token_swap_fee<X, Y>(
         signer_address: address,
         token_x: coin::Coin<X>
     ) acquires TokenSwapFeeEvent {
@@ -62,7 +62,7 @@ module swap_admin::TokenSwapFee {
 
 
     /// X is token to pay for fee
-    fun intra_handle_token_swap_fee<X: copy + drop + store, Y: copy + drop + store, FeeToken: copy + drop + store>(
+    fun intra_handle_token_swap_fee<X, Y, FeeToken: copy + drop + store>(
         signer_address: address,
         token_x: coin::Coin<X>
     ) acquires TokenSwapFeeEvent {
@@ -100,7 +100,7 @@ module swap_admin::TokenSwapFee {
 
 
     /// Emit swap fee event
-    fun emit_swap_fee_event<X: copy + drop + store, Y: copy + drop + store>(
+    fun emit_swap_fee_event<X, Y>(
         signer_address: address,
         swap_fee: u128,
         fee_out: u128,
@@ -117,7 +117,7 @@ module swap_admin::TokenSwapFee {
         });
     }
 
-    fun swap_fee_direct_deposit<X: copy + drop + store, Y: copy + drop + store>(
+    fun swap_fee_direct_deposit<X, Y>(
         token_x: coin::Coin<X>
     ): (bool, u128, u128) {
         let fee_address = TokenSwapConfig::fee_address();
@@ -138,7 +138,7 @@ module swap_admin::TokenSwapFee {
         }
     }
 
-    fun swap_fee_swap<X: copy + drop + store, FeeToken: copy + drop + store>(
+    fun swap_fee_swap<X, FeeToken: copy + drop + store>(
         token_x: coin::Coin<X>
     ): (bool, u128, u128) {
         let x_value = (coin::value(&token_x) as u128);

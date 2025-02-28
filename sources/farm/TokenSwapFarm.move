@@ -149,8 +149,8 @@ module swap_admin::TokenSwapFarm {
 
     // /// DEPRECATED call
     // /// Initialize Liquidity pair gov pool, only called by token issuer
-    // public fun add_farm<X: copy + drop + store,
-    //                     Y: copy + drop + store>(
+    // public fun add_farm<X,
+    //                     Y>(
     //     _signer: &signer,
     //     _release_per_seconds: u128
     // ) {
@@ -191,7 +191,7 @@ module swap_admin::TokenSwapFarm {
 
 
     /// Initialize Liquidity pair gov pool, only called by token issuer
-    public fun add_farm_v2<X: copy + drop + store, Y: copy + drop + store>(
+    public fun add_farm_v2<X, Y>(
         signer: &signer,
         alloc_point: u128
     ) acquires FarmPoolEvent {
@@ -233,8 +233,8 @@ module swap_admin::TokenSwapFarm {
 
 
     // /// call only for extend
-    // public fun extend_farm_pool<X: copy + drop + store,
-    //                             Y: copy + drop + store>(
+    // public fun extend_farm_pool<X,
+    //                             Y>(
     //     _account: &signer,
     //     _override_update: bool
     // ) {
@@ -269,8 +269,8 @@ module swap_admin::TokenSwapFarm {
 
     // /// DEPRECATED call
     // /// Set farm mutiplier of second per releasing
-    // public fun set_farm_multiplier<X: copy + drop + store,
-    //                                Y: copy + drop + store>(
+    // public fun set_farm_multiplier<X,
+    //                                Y>(
     //     _signer: &signer,
     //     _multiplier: u64
     // ) {
@@ -296,8 +296,8 @@ module swap_admin::TokenSwapFarm {
     // }
 
     /// Get farm multiplier of second per releasing
-    public fun get_farm_multiplier<X: copy + drop + store,
-                                   Y: copy + drop + store>()
+    public fun get_farm_multiplier<X,
+                                   Y>()
     : u64 acquires FarmMultiplier, FarmPoolInfo {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
@@ -310,8 +310,8 @@ module swap_admin::TokenSwapFarm {
     }
 
 
-    public fun set_farm_alloc_point<X: copy + drop + store,
-                                    Y: copy + drop + store>(
+    public fun set_farm_alloc_point<X,
+                                    Y>(
         signer: &signer,
         alloc_point: u128
     ) acquires FarmPoolCapability, FarmPoolInfo, FarmPoolEvent {
@@ -348,8 +348,8 @@ module swap_admin::TokenSwapFarm {
 
     // /// DEPRECATED call
     // /// Reset activation of farm from token type X and Y
-    // public fun reset_farm_activation<X: copy + drop + store,
-    //                                  Y: copy + drop + store>(
+    // public fun reset_farm_activation<X,
+    //                                  Y>(
     //     _account: &signer,
     //     _active: bool
     // ) {
@@ -426,7 +426,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Stake liquidity Token pair
-    public fun stake<X: copy + drop + store, Y: copy + drop + store>(
+    public fun stake<X, Y>(
         account: &signer,
         amount: u128
     ) acquires FarmPoolCapability, FarmPoolEvent, FarmPoolStake {
@@ -467,8 +467,8 @@ module swap_admin::TokenSwapFarm {
             });
     }
 
-    fun extend_farm_stake_resource<X: copy + drop + store,
-                                   Y: copy + drop + store>(
+    fun extend_farm_stake_resource<X,
+                                   Y>(
         account: &signer
     ) acquires FarmPoolCapability {
         let account_addr = signer::address_of(account);
@@ -508,8 +508,8 @@ module swap_admin::TokenSwapFarm {
 
 
     /// Unstake liquidity Token pair
-    public fun unstake<X: copy + drop + store,
-                       Y: copy + drop + store>(
+    public fun unstake<X,
+                       Y>(
         account: &signer,
         amount: u128
     ) acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
@@ -546,7 +546,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Harvest reward from token pool
-    public fun harvest<X: copy + drop + store, Y: copy + drop + store>(
+    public fun harvest<X, Y>(
         account: &signer,
         amount: u128
     ) acquires FarmPoolStake, FarmPoolCapability {
@@ -583,8 +583,8 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Return calculated APY
-    public fun lookup_gain<X: copy + drop + store,
-                           Y: copy + drop + store>(
+    public fun lookup_gain<X,
+                           Y>(
         account: address
     ): u128 acquires FarmPoolStake {
         if (exists<FarmPoolStake<X, Y>>(account)) {
@@ -597,30 +597,30 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query all stake info
-    public fun query_info<X: copy + drop + store, Y: copy + drop + store>(): (bool, u128, u128, u128) {
+    public fun query_info<X, Y>(): (bool, u128, u128, u128) {
         abort error::invalid_state(ERR_DEPRECATED)
         //YieldFarming::query_info<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_info_v2<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u128, u128) {
+    public fun query_info_v2<X, Y>(): (u128, u128, u128, u128) {
         YieldFarming::query_pool_info_v2<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query all stake amount
-    public fun query_total_stake<X: copy + drop + store, Y: copy + drop + store>(): u128 {
+    public fun query_total_stake<X, Y>(): u128 {
         YieldFarming::query_total_stake<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
     /// Query all stake weight
-    public fun query_total_stake_weight<X: copy + drop + store, Y: copy + drop + store>(user: address): u128 {
+    public fun query_total_stake_weight<X, Y>(user: address): u128 {
         YieldFarming::query_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user)
     }
 
     /// Query stake amount from user
-    public fun query_stake<X: copy + drop + store,
-                           Y: copy + drop + store>(
+    public fun query_stake<X,
+                           Y>(
         account: address
     ): u128 acquires FarmPoolStake {
         if (exists<FarmPoolStake<X, Y>>(account)) {
@@ -632,8 +632,8 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X: copy + drop + store,
-                                        Y: copy + drop + store>()
+    public fun query_release_per_second<X,
+                                        Y>()
     : u128 acquires FarmPoolCapability, FarmPoolInfo {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
@@ -660,8 +660,8 @@ module swap_admin::TokenSwapFarm {
 
 
     /// Inner stake operation that unstake all from pool and combind new amount to total asset, then restake.
-    fun inner_stake<X: copy + drop + store,
-                    Y: copy + drop + store>(
+    fun inner_stake<X,
+                    Y>(
         account: &signer,
         amount: u128,
         farm_cap: &FarmPoolCapability<X, Y>
@@ -741,7 +741,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Inner unstake operation that unstake all from pool and combind new amount to total asset, then restake.
-    fun inner_unstake<X: copy + drop + store, Y: copy + drop + store>(
+    fun inner_unstake<X, Y>(
         account: &signer,
         amount: u128,
         farm_cap: &FarmPoolCapability<X, Y>,
@@ -814,8 +814,8 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// boost for farm
-    public fun boost<X: copy + drop + store,
-                     Y: copy + drop + store>(
+    public fun boost<X,
+                     Y>(
         account: &signer,
         boost_amount: u128)
     acquires FarmPoolStake, FarmPoolCapability {
@@ -839,8 +839,8 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// boost for farm
-    // public fun wl_boost<X: copy + drop + store,
-    //                     Y: copy + drop + store>(
+    // public fun wl_boost<X,
+    //                     Y>(
     //     account: &signer,
     //     boost_amount: u128,
     //     signature: &vector<u8>
@@ -886,7 +886,7 @@ module swap_admin::TokenSwapFarm {
     //     assert!(Signature::ed25519_verify(signature, public_key, BCS::to_bytes(&message)), 1001);
     // }
 
-    public fun update_token_pool_index<X: copy + drop + store, Y: copy + drop + store>(
+    public fun update_token_pool_index<X, Y>(
         signer: &signer
     ) acquires FarmPoolCapability {
         STAR::assert_genesis_address(signer);

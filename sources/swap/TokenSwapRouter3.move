@@ -11,10 +11,10 @@ module swap_admin::TokenSwapRouter3 {
     const ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED: u64 = 1002;
     const ERROR_ROUTER_X_IN_OVER_LIMIT_MAX: u64 = 1003;
 
-    public fun get_amount_in<X: copy + drop + store,
+    public fun get_amount_in<X,
                              R: copy + drop + store,
                              T: copy + drop + store,
-                             Y: copy + drop + store>(amount_y_out: u128): (u128, u128, u128) {
+                             Y>(amount_y_out: u128): (u128, u128, u128) {
         let (t_in, r_in) = TokenSwapRouter2::get_amount_in<R, T, Y>(amount_y_out);
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, R>();
@@ -24,10 +24,10 @@ module swap_admin::TokenSwapRouter3 {
         (t_in, r_in, x_in)
     }
 
-    public fun get_amount_out<X: copy + drop + store,
+    public fun get_amount_out<X,
                               R: copy + drop + store,
                               T: copy + drop + store,
-                              Y: copy + drop + store>(amount_x_in: u128): (u128, u128, u128) {
+                              Y>(amount_x_in: u128): (u128, u128, u128) {
         let (r_out, t_out) = TokenSwapRouter2::get_amount_out<X, R, T>(amount_x_in);
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<T, Y>();
@@ -37,10 +37,10 @@ module swap_admin::TokenSwapRouter3 {
         (r_out, t_out, y_out)
     }
 
-    public fun swap_exact_token_for_token<X: copy + drop + store,
+    public fun swap_exact_token_for_token<X,
                                           R: copy + drop + store,
                                           T: copy + drop + store,
-                                          Y: copy + drop + store>(
+                                          Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128) {
@@ -54,10 +54,10 @@ module swap_admin::TokenSwapRouter3 {
         TokenSwapRouter::swap_exact_token_for_token<T, Y>(signer, t_out, amount_y_out_min);
     }
 
-    public fun swap_token_for_exact_token<X: copy + drop + store,
+    public fun swap_token_for_exact_token<X,
                                           R: copy + drop + store,
                                           T: copy + drop + store,
-                                          Y: copy + drop + store>(
+                                          Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128) {

@@ -15,7 +15,7 @@ module swap_admin::TokenSwapOracleLibrary {
     }
 
     /// TWAP price oracle, include update price accumulators, on the first call per block
-    public fun current_cumulative_prices<X: copy + drop + store, Y: copy + drop + store>(): (u128, u128, u64) {
+    public fun current_cumulative_prices<X, Y>(): (u128, u128, u64) {
         let (price_x_cumulative, price_y_cumulative, block_timestamp) = current_cumulative_prices_v2<X, Y>();
         let price_x_cumulative_decode =
             FixedPoint128::decode(FixedPoint128::encode_u256(price_x_cumulative, false));
@@ -27,7 +27,7 @@ module swap_admin::TokenSwapOracleLibrary {
 
     /// TWAP price oracle, include update price accumulators, on the first call per block
     /// return U256 with precision
-    public fun current_cumulative_prices_v2<X: copy + drop + store, Y: copy + drop + store>(): (u256, u256, u64) {
+    public fun current_cumulative_prices_v2<X, Y>(): (u256, u256, u64) {
         let block_timestamp = current_block_timestamp();
         let (price_x_cumulative, price_y_cumulative, last_block_timestamp) =
             TokenSwapRouter::get_cumulative_info<X, Y>();

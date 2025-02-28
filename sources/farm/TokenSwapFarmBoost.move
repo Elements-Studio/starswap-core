@@ -91,7 +91,7 @@ module swap_admin::TokenSwapFarmBoost {
 
 
     /// Query user boost factor
-    public fun get_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+    public fun get_boost_factor<X, Y>(
         account: address
     ): u64 acquires UserInfo {
         if (exists<UserInfo<X, Y>>(account)) {
@@ -103,7 +103,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// Query user boost locked vestar amount
-    public fun get_boost_locked_vestar_amount<X: copy + drop + store, Y: copy + drop + store>(
+    public fun get_boost_locked_vestar_amount<X, Y>(
         account: address
     ): u128 acquires UserInfo {
         if (exists<UserInfo<X, Y>>(account)) {
@@ -121,7 +121,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// predict boost factor before stake
-    public fun predict_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+    public fun predict_boost_factor<X, Y>(
         account: address,
         user_lp_amount: u128
     ): u64 acquires UserInfo {
@@ -139,7 +139,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// boost for farm
-    public fun boost_to_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
+    public fun boost_to_farm_pool<X, Y>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer,
         boost_amount: u128,
@@ -182,7 +182,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// unboost for farm unstake
-    public fun unboost_from_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
+    public fun unboost_from_farm_pool<X, Y>(
         _cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer)
     acquires UserInfo, VeStarTreasuryCapabilityWrapper, BoostEventStruct {
@@ -217,7 +217,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// update boost info when lp or vestar value change
-    public fun update_boost_for_farm_pool<X: copy + drop + store, Y: copy + drop + store>(
+    public fun update_boost_for_farm_pool<X, Y>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer,
         stake_id: u64
@@ -239,7 +239,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// set user boost info
-    public fun set_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+    public fun set_boost_factor<X, Y>(
         _cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer,
         new_boost_factor: u64
@@ -258,7 +258,7 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// boost factor change and triggers
-    fun update_boost_factor<X: copy + drop + store, Y: copy + drop + store>(
+    fun update_boost_factor<X, Y>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer,
         stake_id: u64
@@ -296,7 +296,7 @@ module swap_admin::TokenSwapFarmBoost {
         user_info.boost_factor = new_boost_factor;
     }
 
-    fun update_pool_and_stake_weight<X: copy + drop + store, Y: copy + drop + store>(
+    fun update_pool_and_stake_weight<X, Y>(
         cap: &YieldFarming::ParameterModifyCapability<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>,
         account: &signer,
         stake_id: u64,
