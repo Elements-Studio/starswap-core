@@ -6,7 +6,6 @@ module swap_admin::TokenSwapFarm {
     use std::error;
     use std::signer;
     use std::string;
-    use std::vector;
 
     use starcoin_framework::account;
     use starcoin_framework::coin;
@@ -435,16 +434,17 @@ module swap_admin::TokenSwapFarm {
             coin::register<STAR::STAR>(account);
         };
 
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-                    account_addr
-                ))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
-        };
+        // TODO(VR): DEPRECATED upgrade process
+        // // after pool alloc mode upgrade
+        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     //check if need extend
+        //     if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
+        //         (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+        //             account_addr
+        //         ))) {
+        //         extend_farm_stake_resource<X, Y>(account);
+        //     };
+        // };
 
         // Actual stake
         let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
@@ -465,65 +465,60 @@ module swap_admin::TokenSwapFarm {
             });
     }
 
-    fun extend_farm_stake_resource<X,
-                                   Y>(
-        account: &signer
-    ) acquires FarmPoolCapability {
-        let account_addr = signer::address_of(account);
-        //double check if need extend
-        if (!(YieldFarming::exists_stake_at_address<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-            account_addr
-        ) &&
-            (!YieldFarming::exists_stake_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr)))) {
-            return
-        };
-
-        // Access Control
-        let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
-
-        let stake_ids = YieldFarming::query_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-            account_addr
-        );
-        let len = vector::length(&stake_ids);
-        let idx = 0;
-        loop {
-            if (idx >= len) {
-                break
-            };
-            let stake_id = vector::borrow(&stake_ids, idx);
-            YieldFarming::extend_farm_stake_info<
-                PoolTypeFarmPool,
-                coin::Coin<LiquidityToken<X, Y>>
-            >(
-                account,
-                *stake_id,
-                &farm_cap.cap
-            );
-
-            idx = idx + 1;
-        }
-    }
+    // fun extend_farm_stake_resource<X, Y>(account: &signer) acquires FarmPoolCapability {
+    //     let account_addr = signer::address_of(account);
+    //     //double check if need extend
+    //     if (!(YieldFarming::exists_stake_at_address<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+    //         account_addr
+    //     ) &&
+    //         (!YieldFarming::exists_stake_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr)))) {
+    //         return
+    //     };
+    //
+    //     // Access Control
+    //     let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
+    //
+    //     let stake_ids = YieldFarming::query_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+    //         account_addr
+    //     );
+    //     let len = vector::length(&stake_ids);
+    //     let idx = 0;
+    //     loop {
+    //         if (idx >= len) {
+    //             break
+    //         };
+    //         let stake_id = vector::borrow(&stake_ids, idx);
+    //         YieldFarming::extend_farm_stake_info<
+    //             PoolTypeFarmPool,
+    //             coin::Coin<LiquidityToken<X, Y>>
+    //         >(
+    //             account,
+    //             *stake_id,
+    //             &farm_cap.cap
+    //         );
+    //
+    //         idx = idx + 1;
+    //     }
+    // }
 
 
     /// Unstake liquidity Token pair
-    public fun unstake<X,
-                       Y>(
-        account: &signer,
-        amount: u128
-    ) acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
+    public fun unstake<X, Y>(account: &signer, amount: u128) acquires FarmPoolCapability, FarmPoolStake, FarmPoolEvent {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = signer::address_of(account);
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-                    account_addr
-                ))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
-        };
+
+        // TODO(VR): DEPRECATED upgrade process
+        // // after pool alloc mode upgrade
+        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     //check if need extend
+        //     if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
+        //         (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+        //             account_addr
+        //         ))) {
+        //         extend_farm_stake_resource<X, Y>(account);
+        //     };
+        // };
 
         // Actual stake
         let farm_cap = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
@@ -551,16 +546,18 @@ module swap_admin::TokenSwapFarm {
         TokenSwapConfig::assert_global_freeze();
 
         let account_addr = signer::address_of(account);
+
+        // TODO(VR): DEPRECATED upgrade process
         // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-                    account_addr
-                ))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
-        };
+        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     //check if need extend
+        //     if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(account_addr) &&
+        //         (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+        //             account_addr
+        //         ))) {
+        //         extend_farm_stake_resource<X, Y>(account);
+        //     };
+        // };
 
         let farm_harvest_cap = borrow_global_mut<FarmPoolStake<X, Y>>(account_addr);
         let token = YieldFarming::harvest<
@@ -617,8 +614,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query stake amount from user
-    public fun query_stake<X,
-                           Y>(
+    public fun query_stake<X, Y>(
         account: address
     ): u128 acquires FarmPoolStake {
         if (exists<FarmPoolStake<X, Y>>(account)) {
@@ -630,9 +626,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X,
-                                        Y>()
-    : u128 acquires FarmPoolCapability, FarmPoolInfo {
+    public fun query_release_per_second<X, Y>(): u128 acquires FarmPoolCapability, FarmPoolInfo {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
             cap.release_per_seconds
@@ -768,6 +762,7 @@ module swap_admin::TokenSwapFarm {
 
         let own_asset_amount = (coin::value<LiquidityToken<X, Y>>(&own_asset_token) as u128);
 
+        // TODO(VR): DEPRECATED upgrade process
         // Restake to pool
         // after pool alloc mode upgrade
         // let (new_harvest_cap, stake_id) = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
@@ -812,30 +807,29 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// boost for farm
-    public fun boost<X,
-                     Y>(
-        account: &signer,
-        boost_amount: u128)
-    acquires FarmPoolStake, FarmPoolCapability {
+    public fun boost<X, Y>(account: &signer, boost_amount: u128) acquires FarmPoolStake, FarmPoolCapability {
         let user_addr = signer::address_of(account);
-        let (is_white_list_boost, _) = TokenSwapConfig::get_white_list_boost_switch();
-        assert!(! is_white_list_boost, ERR_WHITE_LIST_BOOST_IS_OPEN);
-        // after pool alloc mode upgrade
-        if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            //check if need extend
-            if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr) &&
-                (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
-                    user_addr
-                ))) {
-                extend_farm_stake_resource<X, Y>(account);
-            };
-        };
+        // let (is_white_list_boost, _) = TokenSwapConfig::get_white_list_boost_switch();
+        // assert!(! is_white_list_boost, ERR_WHITE_LIST_BOOST_IS_OPEN);
+
+        // TODO(VR): DEPRECATED upgrade process
+        // // after pool alloc mode upgrade
+        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     //check if need extend
+        //     if (YieldFarming::exists_stake_list<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user_addr) &&
+        //         (!YieldFarming::exists_stake_list_extend<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+        //             user_addr
+        //         ))) {
+        //         extend_farm_stake_resource<X, Y>(account);
+        //     };
+        // };
 
         let farm = borrow_global<FarmPoolStake<X, Y>>(user_addr);
         let farm_cap = borrow_global<FarmPoolCapability<X, Y>>(@swap_admin);
         TokenSwapFarmBoost::boost_to_farm_pool<X, Y>(&farm_cap.cap, account, boost_amount, farm.id)
     }
 
+    // TODO(VR): DEPRECATED white list
     /// boost for farm
     // public fun wl_boost<X,
     //                     Y>(
@@ -876,6 +870,7 @@ module swap_admin::TokenSwapFarm {
     // }
 
 
+    // TODO(VR): DEPRECATED white list
     // #[test]
     // fun test_wl_boost() {
     //     let public_key = x"d6da1bea14990ad936a848c2a375a2c105d5038ce726ed03f8700998c4e840b5";
@@ -884,9 +879,7 @@ module swap_admin::TokenSwapFarm {
     //     assert!(Signature::ed25519_verify(signature, public_key, BCS::to_bytes(&message)), 1001);
     // }
 
-    public fun update_token_pool_index<X, Y>(
-        signer: &signer
-    ) acquires FarmPoolCapability {
+    public fun update_token_pool_index<X, Y>(signer: &signer) acquires FarmPoolCapability {
         STAR::assert_genesis_address(signer);
 
         assert!(

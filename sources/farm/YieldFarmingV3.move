@@ -46,8 +46,9 @@ module swap_admin::YieldFarmingV3 {
     }
 
     struct FarmingAsset<phantom PoolType, phantom AssetT> has key, store {
-        asset_total_weight: u128,
         // reform: before is actually equivalent to asset amount, after is equivalent to asset weight
+        asset_total_weight: u128,
+
         harvest_index: u128,
         last_update_timestamp: u64,
         // Release count per seconds
@@ -142,6 +143,7 @@ module swap_admin::YieldFarmingV3 {
     /// this will config yield farming global pool info
     public fun initialize_global_pool_info<PoolType: store>(account: &signer, pool_release_per_second: u128) {
         TokenSwapConfig::assert_admin(account);
+
         assert!(!exists<YieldFarmingGlobalPoolInfo<PoolType>>(
             signer::address_of(account)),
             error::invalid_state(ERR_YIELD_FARMING_GLOBAL_POOL_INFO_ALREADY_EXIST)
@@ -172,18 +174,18 @@ module swap_admin::YieldFarmingV3 {
         pool_info.pool_release_per_second = pool_release_per_second;
     }
 
-    /// DEPRECATED call
-    public fun modify_global_release_per_second<PoolType: store, AssetT: store>(
-        _cap: &ParameterModifyCapability<PoolType, AssetT>,
-        _broker: address,
-        _pool_release_per_second: u128
-    ) {
-        abort error::invalid_state(ERR_DEPRECATED)
-        // assert!(pool_release_per_second > 0, error::invalid_state(ERR_INVALID_PARAMETER));
-        // let pool_info =
-        //     borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
-        // pool_info.pool_release_per_second = pool_release_per_second;
-    }
+    // /// DEPRECATED call
+    // public fun modify_global_release_per_second<PoolType: store, AssetT: store>(
+    //     _cap: &ParameterModifyCapability<PoolType, AssetT>,
+    //     _broker: address,
+    //     _pool_release_per_second: u128
+    // ) {
+    //     abort error::invalid_state(ERR_DEPRECATED)
+    //     // assert!(pool_release_per_second > 0, error::invalid_state(ERR_INVALID_PARAMETER));
+    //     // let pool_info =
+    //     //     borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
+    //     // pool_info.pool_release_per_second = pool_release_per_second;
+    // }
 
     /// Add asset pools v2
     /// Called only by admin
@@ -235,31 +237,32 @@ module swap_admin::YieldFarmingV3 {
     }
 
 
-    /// ParameterModifyCapability Access control
-    public fun extend_farm_stake_info<PoolType: store, AssetT: store>(
-        account: &signer,
-        stake_id: u64,
-        _cap: &ParameterModifyCapability<PoolType, AssetT>
-    ) acquires StakeList, StakeListExtend {
-        let user_addr = signer::address_of(account);
-        if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
-            move_to(account, StakeListExtend<PoolType, AssetT> {
-                next_id: 0,
-                items: vector::empty<StakeExtend<PoolType, AssetT>>(),
-            });
-        };
-
-        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
-        let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
-
-        let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-        vector::push_back<StakeExtend<PoolType, AssetT>>(&mut stake_list_extend.items, StakeExtend<PoolType, AssetT> {
-            id: stake_id,
-            asset_amount: stake.asset_weight,
-            weight_factor: stake.asset_multiplier,
-        });
-        stake_list_extend.next_id = stake_id;
-    }
+    // TODO(VR): deprecated, upgrade farming staking
+    // /// ParameterModifyCapability Access control
+    // public fun extend_farm_stake_info<PoolType: store, AssetT: store>(
+    //     account: &signer,
+    //     stake_id: u64,
+    //     _cap: &ParameterModifyCapability<PoolType, AssetT>
+    // ) acquires StakeList, StakeListExtend {
+    //     let user_addr = signer::address_of(account);
+    //     if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
+    //         move_to(account, StakeListExtend<PoolType, AssetT> {
+    //             next_id: 0,
+    //             items: vector::empty<StakeExtend<PoolType, AssetT>>(),
+    //         });
+    //     };
+    //
+    //     let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+    //     let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
+    //
+    //     let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
+    //     vector::push_back<StakeExtend<PoolType, AssetT>>(&mut stake_list_extend.items, StakeExtend<PoolType, AssetT> {
+    //         id: stake_id,
+    //         asset_amount: stake.asset_weight,
+    //         weight_factor: stake.asset_multiplier,
+    //     });
+    //     stake_list_extend.next_id = stake_id;
+    // }
 
     // modify parameter v2
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );

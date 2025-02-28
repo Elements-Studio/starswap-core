@@ -114,15 +114,15 @@ module swap_admin::TokenSwapVestarMinter {
         (MintCapability {}, TreasuryCapability {})
     }
 
-    public fun mint_with_cap(
-        _signer: &signer,
-        _id: u64,
-        _pledge_time_sec: u64,
-        _staked_amount: u128,
-        _cap: &MintCapability
-    ) {
-        abort error::invalid_argument(ERROR_FUNCTION_OBSOLETE)
-    }
+    // public fun mint_with_cap(
+    //     _signer: &signer,
+    //     _id: u64,
+    //     _pledge_time_sec: u64,
+    //     _staked_amount: u128,
+    //     _cap: &MintCapability
+    // ) {
+    //     abort error::invalid_argument(ERROR_FUNCTION_OBSOLETE)
+    // }
 
     /// Mint Vestar with capability
     public fun mint_with_cap_T<TokenT: store>(
