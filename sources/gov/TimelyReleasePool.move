@@ -31,7 +31,7 @@ module swap_admin::TimelyReleasePool {
     struct WithdrawCapability<phantom PoolT, phantom TokenT> has key, store {}
 
 
-    public fun init<PoolT: store, TokenT: store>(
+    public fun init<PoolT: store, TokenT>(
         sender: &signer,
         init_token: coin::Coin<TokenT>,
         begin_time: u64,
@@ -59,7 +59,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// Uninitialize a timely pool
-    public fun uninit<PoolT: store, TokenT: store>(cap: WithdrawCapability<PoolT, TokenT>, broker: address)
+    public fun uninit<PoolT: store, TokenT>(cap: WithdrawCapability<PoolT, TokenT>, broker: address)
     : coin::Coin<TokenT> acquires TimelyReleasePool {
         let WithdrawCapability<PoolT, TokenT> {} = cap;
         let TimelyReleasePool<PoolT, TokenT> {
@@ -76,7 +76,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// Deposit token to treasury
-    public fun deposit<PoolT: store, TokenT: store>(
+    public fun deposit<PoolT: store, TokenT>(
         broker: address,
         token: coin::Coin<TokenT>
     ) acquires TimelyReleasePool {
@@ -90,7 +90,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// Set release per time
-    public fun set_release_per_time<PoolT: store, TokenT: store>(
+    public fun set_release_per_time<PoolT: store, TokenT>(
         broker: address,
         release_per_time: u128,
         _cap: &WithdrawCapability<PoolT, TokenT>
@@ -99,7 +99,7 @@ module swap_admin::TimelyReleasePool {
         pool.release_per_time = release_per_time;
     }
 
-    public fun set_interval<PoolT: store, TokenT: store>(
+    public fun set_interval<PoolT: store, TokenT>(
         broker: address,
         interval: u64,
         _cap: &WithdrawCapability<PoolT, TokenT>
@@ -109,7 +109,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// Withdraw from treasury
-    public fun withdraw<PoolT: store, TokenT: store>(
+    public fun withdraw<PoolT: store, TokenT>(
         broker: address,
         _cap: &WithdrawCapability<PoolT, TokenT>
     ): coin::Coin<TokenT> acquires TimelyReleasePool {
@@ -136,7 +136,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// Update latest withdraw time and latest release time of pool
-    fun update_pool_times<PoolT: store, TokenT: store>(
+    fun update_pool_times<PoolT: store, TokenT>(
         pool: &mut TimelyReleasePool<PoolT, TokenT>,
         now_seconds: u64
     ) {
@@ -158,7 +158,7 @@ module swap_admin::TimelyReleasePool {
     }
 
     /// query pool info
-    public fun query_pool_info<PoolT: store, TokenT: store>(
+    public fun query_pool_info<PoolT: store, TokenT>(
         broker: address
     ): (u128, u128, u128, u64, u64, u64, u64, u128)
     acquires TimelyReleasePool {

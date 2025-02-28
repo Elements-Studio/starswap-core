@@ -39,7 +39,7 @@ module swap_admin::STAR {
         type_info::type_name<Coin>() == string::utf8(b"0x8c109349c6bd91411d6bc962e080c4a3::STAR::STAR")
     }
 
-    public fun assert_genesis_address(account : &signer) {
+    public fun assert_genesis_address(account: &signer) {
         assert!(signer::address_of(account) == token_address(), ERROR_NOT_GENESIS_ACCOUNT);
     }
 

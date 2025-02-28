@@ -1,14 +1,12 @@
-address SwapAdmin {
-module BuyBackSTAR {
+module swap_admin::BuyBackSTAR {
 
-    use StarcoinFramework::STC;
-    use StarcoinFramework::Account;
+    use starcoin_framework::coin;
+    use starcoin_framework::starcoin_coin::STC;
 
-    use SwapAdmin::BuyBack;
-    use SwapAdmin::STAR;
-    use SwapAdmin::TimelyReleasePool;
-    use SwapAdmin::TokenSwapRouter;
-    use StarcoinFramework::Errors;
+    use swap_admin::BuyBack;
+    use swap_admin::STAR::STAR;
+    use swap_admin::TimelyReleasePool;
+    use swap_admin::TokenSwapRouter;
 
     struct BuyBackSTAR has store {}
 
@@ -23,16 +21,16 @@ module BuyBackSTAR {
     }
 
     public entry fun uninit(sender: signer) {
-        BuyBack::dismiss<BuyBackSTAR, STC::STC>(&sender);
+        BuyBack::dismiss<BuyBackSTAR, STC>(&sender);
     }
 
     public entry fun buy_back(sender: signer) {
-        BuyBack::buy_back<BuyBackSTAR, STAR::STAR, STC::STC>(&sender, @BuyBackAccount);
+        BuyBack::buy_back<BuyBackSTAR, STAR, STC>(&sender, @buy_back_account);
     }
 
     public entry fun deposit(sender: signer, amount: u128) {
-        let token = Account::withdraw<STC::STC>(&sender, amount);
-        BuyBack::deposit<BuyBackSTAR, STC::STC>(@BuyBackAccount, token);
+        let token = coin::withdraw<STC>(&sender, (amount as u64));
+        BuyBack::deposit<BuyBackSTAR, STC>(@buy_back_account, token);
     }
 
     public fun init_func(
@@ -43,7 +41,7 @@ module BuyBackSTAR {
         release_per_time: u128
     ) {
         BuyBack::init_event(sender);
-        BuyBack::accept<BuyBackSTAR, STAR::STAR, STC::STC>(
+        BuyBack::accept<BuyBackSTAR, STAR, STC>(
             sender,
             total_amount,
             begin_time,
@@ -62,10 +60,10 @@ module BuyBackSTAR {
             interval,
             current_time_stamp,
             current_time_amount,
-        ) = TimelyReleasePool::query_pool_info<BuyBackSTAR, STC::STC>(@BuyBackAccount);
+        ) = TimelyReleasePool::query_pool_info<BuyBackSTAR, STC>(@buy_back_account);
 
         let amount_y_out = if (current_time_amount > 0) {
-            TokenSwapRouter::compute_y_out<STC::STC, STAR::STAR>(current_time_amount)
+            TokenSwapRouter::compute_y_out<STC, STAR>(current_time_amount)
         } else {
             0
         };
@@ -84,20 +82,14 @@ module BuyBackSTAR {
     }
 
     public fun pool_exists(): bool {
-        BuyBack::pool_exists<BuyBackSTAR, STC::STC>(@BuyBackAccount)
+        BuyBack::pool_exists<BuyBackSTAR, STC>(@buy_back_account)
     }
 
     public entry fun set_release_per_time(sender: signer, release_per_time: u128) {
-        BuyBack::set_release_per_time<BuyBackSTAR, STC::STC>(&sender, release_per_time);
+        BuyBack::set_release_per_time<BuyBackSTAR, STC>(&sender, release_per_time);
     }
 
     public entry fun set_interval(sender: signer, interval: u64) {
-        BuyBack::set_interval<BuyBackSTAR, STC::STC>(&sender, interval);
+        BuyBack::set_interval<BuyBackSTAR, STC>(&sender, interval);
     }
-
-    /// DEPRECRATED
-    public entry fun upgrade_event_store_for_barnard(_account: signer) {
-        abort Errors::deprecated(1)
-    }
-}
 }
