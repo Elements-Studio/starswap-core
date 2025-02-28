@@ -8,14 +8,12 @@ module swap_admin::TokenSwapScripts {
     use swap_admin::TokenSwapRouter3;
 
     /// register swap for admin user
-    public entry fun register_swap_pair<X,
-                                          Y>(account: signer) {
+    public entry fun register_swap_pair<X, Y>(account: signer) {
         TokenSwapRouter::register_swap_pair<X, Y>(&account);
     }
 
     /// Add liquidity for user
-    public entry fun add_liquidity<X,
-                                     Y>(
+    public entry fun add_liquidity<X, Y>(
         signer: signer,
         amount_x_desired: u128,
         amount_y_desired: u128,

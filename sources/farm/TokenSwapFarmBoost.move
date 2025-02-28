@@ -306,9 +306,20 @@ module swap_admin::TokenSwapFarmBoost {
     ) {
         let account_addr = signer::address_of(account);
         // check if need udpate
-        YieldFarming::update_pool_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(cap,
-            @swap_admin, new_asset_weight, last_asset_weight);
-        YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(cap,
-            @swap_admin, account_addr, stake_id, new_weight_factor, new_asset_weight, last_asset_weight);
+        YieldFarming::update_pool_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+            cap,
+            @swap_admin,
+            new_asset_weight,
+            last_asset_weight
+        );
+        YieldFarming::update_pool_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(
+            cap,
+            @swap_admin,
+            account_addr,
+            stake_id,
+            new_weight_factor,
+            new_asset_weight,
+            last_asset_weight
+        );
     }
 }

@@ -3,8 +3,11 @@
 module swap_admin::STAR {
     use std::signer;
     use std::string;
-    use starcoin_std::type_info;
+
+    use starcoin_framework::coin;
     use starcoin_framework::managed_coin;
+
+    use starcoin_std::type_info;
 
     /// STAR token marker.
     struct STAR has copy, drop, store {}
@@ -32,6 +35,13 @@ module swap_admin::STAR {
     /// Burn STAR with account signer
     public fun burn(account: &signer, amount: u128) {
         managed_coin::burn<STAR>(account, (amount as u64));
+    }
+
+    /// Burn STAR by passed in coin structure
+    public fun burn_coin(account: &signer, coin: coin::Coin<STAR>) {
+        let coin_amount = coin::value(&coin);
+        coin::deposit(signer::address_of(account), coin);
+        managed_coin::burn<STAR>(account, coin_amount);
     }
 
     /// Returns true if `TokenType` is `STAR::STAR`
