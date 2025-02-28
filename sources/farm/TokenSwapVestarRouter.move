@@ -1,14 +1,13 @@
-address SwapAdmin {
+module swap_admin::TokenSwapVestarRouter {
 
-module TokenSwapVestarRouter {
-    use StarcoinFramework::Signer;
-    use StarcoinFramework::Errors;
+    use std::error;
+    use std::signer;
 
-    use SwapAdmin::TokenSwapConfig;
-    use SwapAdmin::TokenSwapSyrup;
-    use SwapAdmin::TokenSwapFarmBoost;
-    use SwapAdmin::TokenSwapVestarMinter;
-    use SwapAdmin::STAR;
+    use swap_admin::TokenSwapConfig;
+    use swap_admin::TokenSwapSyrup;
+    use swap_admin::TokenSwapFarmBoost;
+    use swap_admin::TokenSwapVestarMinter;
+    use swap_admin::STAR;
 
     const ERROR_ALLOC_MODEL_NOT_OPEN: u64 = 101;
 
@@ -16,7 +15,7 @@ module TokenSwapVestarRouter {
         cap: TokenSwapVestarMinter::MintCapability,
     }
 
-    public fun stake_hook<TokenT: store>(
+    public fun stake_hook<TokenT>(
         signer: &signer,
         pledge_time_sec: u64,
         amount: u128,
@@ -26,22 +25,24 @@ module TokenSwapVestarRouter {
             return
         };
 
-        let id = TokenSwapSyrup::get_global_stake_id<TokenT>(Signer::address_of(signer));
-        TokenSwapVestarMinter::mint_with_cap_T<TokenT>(signer,
+        let id = TokenSwapSyrup::get_global_stake_id<TokenT>(signer::address_of(signer));
+        TokenSwapVestarMinter::mint_with_cap_T<TokenT>(
+            signer,
             id,
             pledge_time_sec,
             amount,
-            &cap.cap);
+            &cap.cap
+        );
     }
 
-    public fun stake_hook_with_id<TokenT: store>(
+    public fun stake_hook_with_id<TokenT>(
         signer: &signer,
         id: u64,
         pledge_time_sec: u64,
         amount: u128,
         cap: &VestarRouterCapability
     ) {
-        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), Errors::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
+        assert!(TokenSwapConfig::get_alloc_mode_upgrade_switch(), error::invalid_state(ERROR_ALLOC_MODEL_NOT_OPEN));
 
         TokenSwapVestarMinter::mint_with_cap_T<TokenT>(signer,
             id,
@@ -50,14 +51,14 @@ module TokenSwapVestarRouter {
             &cap.cap);
     }
 
-    public fun unstake_hook<TokenT: store>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
+    public fun unstake_hook<TokenT>(signer: &signer, id: u64, cap: &VestarRouterCapability) {
         if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
             return
         };
         TokenSwapVestarMinter::burn_with_cap_T<TokenT>(signer, id, &cap.cap);
     }
 
-    public fun exists_record<TokenT: store>(user_addr: address, id: u64): bool {
+    public fun exists_record<TokenT>(user_addr: address, id: u64): bool {
         TokenSwapVestarMinter::exists_record<TokenT>(user_addr, id)
     }
 
@@ -79,11 +80,10 @@ module TokenSwapVestarRouter {
         }
     }
 
-    ///TODO: Turn over capability from script to syrup boost on barnard
-    public fun turnover_vestar_mintcap_for_barnard(cap: TokenSwapVestarMinter::MintCapability): VestarRouterCapability {
-        VestarRouterCapability{
-            cap
-        }
-    }
-}
+    // ///TODO: Turn over capability from script to syrup boost on barnard
+    // public fun turnover_vestar_mintcap_for_barnard(cap: TokenSwapVestarMinter::MintCapability): VestarRouterCapability {
+    //     VestarRouterCapability{
+    //         cap
+    //     }
+    // }
 }

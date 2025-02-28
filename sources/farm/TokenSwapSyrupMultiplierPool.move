@@ -159,12 +159,8 @@ module swap_admin::TokenSwapSyrupMultiplierPool {
     /// @return (key_list, multiplier_list, asset_amount_list)
     /// key_list split by `|`
     public fun query_all_pools<PoolType: store, AssetType: store>(
-        broker: address,
-    ): (
-        vector<u8>,
-        vector<u64>,
-        vector<u128>
-    ) acquires MultiplierPoolsGlobalInfo {
+        broker: address
+    ): (vector<u8>, vector<u64>, vector<u128>) acquires MultiplierPoolsGlobalInfo {
         let info =
             borrow_global<MultiplierPoolsGlobalInfo<PoolType, AssetType>>(broker);
         let key_list = vector::empty<u8>();

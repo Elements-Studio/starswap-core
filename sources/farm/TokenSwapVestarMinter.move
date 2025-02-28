@@ -125,7 +125,7 @@ module swap_admin::TokenSwapVestarMinter {
     // }
 
     /// Mint Vestar with capability
-    public fun mint_with_cap_T<TokenT: store>(
+    public fun mint_with_cap_T<TokenT>(
         signer: &signer,
         id: u64,
         pledge_time_sec: u64,
@@ -161,7 +161,7 @@ module swap_admin::TokenSwapVestarMinter {
     // }
 
     /// Burn Vestar with capability
-    public fun burn_with_cap_T<TokenT: store>(signer: &signer, id: u64, _cap: &MintCapability)
+    public fun burn_with_cap_T<TokenT>(signer: &signer, id: u64, _cap: &MintCapability)
     acquires Treasury, VestarOwnerCapability, MintRecordListT, VestarEventHandler, MintRecordList {
         let user_addr = signer::address_of(signer);
 
@@ -220,7 +220,7 @@ module swap_admin::TokenSwapVestarMinter {
     }
 
     /// Query amount in record by given id number
-    public fun value_of_id_by_token<TokenT: store>(user_addr: address, id: u64): u128 acquires MintRecordListT {
+    public fun value_of_id_by_token<TokenT>(user_addr: address, id: u64): u128 acquires MintRecordListT {
         if (!exists<MintRecordListT<TokenT>>(user_addr)) {
             return 0
         };
@@ -285,7 +285,7 @@ module swap_admin::TokenSwapVestarMinter {
     }
 
     /// Add vestar mint record
-    fun add_to_record<TokenT: store>(
+    fun add_to_record<TokenT>(
         signer: &signer,
         id: u64,
         pledge_time_sec: u64,
@@ -316,7 +316,7 @@ module swap_admin::TokenSwapVestarMinter {
     }
 
     /// Pop vestar mint record
-    fun pop_from_record<TokenT: store>(signer: &signer, id: u64)
+    fun pop_from_record<TokenT>(signer: &signer, id: u64)
     : option::Option<MintRecordT<TokenT>> acquires MintRecordListT, MintRecordList {
         let user_addr = signer::address_of(signer);
 
@@ -337,7 +337,7 @@ module swap_admin::TokenSwapVestarMinter {
         }
     }
 
-    fun find_idx_by_id<TokenT: store>(c: &vector<MintRecordT<TokenT>>, id: u64): option::Option<u64> {
+    fun find_idx_by_id<TokenT>(c: &vector<MintRecordT<TokenT>>, id: u64): option::Option<u64> {
         let len = vector::length(c);
         if (len == 0) {
             return option::none()
@@ -392,7 +392,7 @@ module swap_admin::TokenSwapVestarMinter {
     }
 
     /// Auto convert to new if exist old record list
-    public fun maybe_upgrade_records<TokenT: store>(
+    public fun maybe_upgrade_records<TokenT>(
         user_addr: address,
         items: &mut vector<MintRecordT<TokenT>>
     ) acquires MintRecordList {
@@ -404,7 +404,7 @@ module swap_admin::TokenSwapVestarMinter {
         update_record_to_recordT<TokenT>(&mut old_record_list, items);
     }
 
-    public fun update_record_to_recordT<TokenT: store>(record_list: &mut vector<MintRecord>,
+    public fun update_record_to_recordT<TokenT>(record_list: &mut vector<MintRecord>,
                                                        record_list_t: &mut vector<MintRecordT<TokenT>>) {
         let len = vector::length(record_list);
         if (len == 0) {
@@ -433,7 +433,7 @@ module swap_admin::TokenSwapVestarMinter {
     }
 
     /// Check vestar record has exists
-    public fun exists_record<TokenT: store>(user_addr: address, id: u64): bool acquires MintRecordListT {
+    public fun exists_record<TokenT>(user_addr: address, id: u64): bool acquires MintRecordListT {
         if (!exists<MintRecordListT<TokenT>>(user_addr)) {
             return false
         };
