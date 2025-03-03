@@ -27,6 +27,7 @@ module swap_admin::MultiChain {
     //     event: event::EventHandle<GenesisEvent>
     // }
 
+    #[event]
     struct GenesisEvent has drop, store {
         chain: vector<u8>,
         token_code: string::String,

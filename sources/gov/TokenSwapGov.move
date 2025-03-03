@@ -11,24 +11,23 @@ module swap_admin::TokenSwapGov {
     use starcoin_framework::coin;
     use starcoin_framework::event;
     use starcoin_framework::timestamp;
-
     use starcoin_std::math64;
     use starcoin_std::type_info::type_name;
 
     use swap_admin::STAR;
     use swap_admin::TokenSwapConfig;
     use swap_admin::TokenSwapFarm;
-    use swap_admin::TokenSwapGovPoolType::{PoolTypeCommunity, PoolTypeDeveloperFund, PoolTypeFarmPool, PoolTypeIDO,
+    use swap_admin::TokenSwapGovPoolType::{
+        PoolTypeCommunity, PoolTypeDeveloperFund,
+        PoolTypeFarmPool, PoolTypeIDO,
         PoolTypeProtocolTreasury, PoolTypeSyrup
     };
     use swap_admin::TokenSwapSyrup;
 
     #[test_only]
     use starcoin_std::debug;
-
     #[test_only]
     use starcoin_std::math128;
-
 
     //2022-03-05 10:00:00 UTC+8
     const GENESIS_TIMESTAMP: u64 = 1646445600;
