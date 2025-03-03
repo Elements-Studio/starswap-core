@@ -223,6 +223,7 @@ module swap_admin::TokenSwapGov {
         locked_total_timestamp: u64,
     }
 
+    #[event]
     struct LinearGovTreasuryWithdrawEvent has drop, store {
         pool_type: string::String,
         amount: u128,
@@ -231,6 +232,7 @@ module swap_admin::TokenSwapGov {
         receiver: address,
     }
 
+    #[event]
     struct GenesisGovTreasuryWithdrawEvent has drop, store {
         pool_type: string::String,
         amount: u128,
@@ -248,6 +250,7 @@ module swap_admin::TokenSwapGov {
     //     burn_linearGovTreasury_event_handler:Event::EventHandle<LinearGovTreasuryMultiBurnEvent>,
     // }
 
+    #[event]
     struct LinearGovTreasuryMultiBurnEvent has drop, store {
         amount: u128,
         chain: vector<u8>,

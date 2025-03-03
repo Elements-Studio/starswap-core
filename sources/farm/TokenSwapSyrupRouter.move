@@ -210,7 +210,7 @@ module swap_admin::TokenSwapSyrupRouter {
     //     abort error::invalid_state(ERR_DEPRECATED)
     // }
 
-    public entry fun update_token_pool_index<T>(signer: signer){
+    public entry fun update_token_pool_index<T>(signer: signer) {
         TokenSwapSyrup::update_token_pool_index<T>(&signer)
     }
 }
