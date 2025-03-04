@@ -1,49 +1,44 @@
-address SwapAdmin {
-module CommonHelper {
-    use StarcoinFramework::Token;
-    use StarcoinFramework::Account;
-    use StarcoinFramework::Signer;
-    use SwapAdmin::TokenMock;
+module swap_admin::CommonHelper {
 
+    use std::signer;
+    use std::string;
+
+    use starcoin_framework::coin;
+    use starcoin_framework::managed_coin;
+    use starcoin_std::type_info::type_name;
 
     const PRECISION_9: u8 = 9;
     const PRECISION_18: u8 = 18;
 
-    public fun safe_accept_token<TokenType: store>(account: &signer) {
-        if (!Account::is_accepts_token<TokenType>(Signer::address_of(account))) {
-            Account::do_accept_token<TokenType>(account);
+    public fun safe_mint<T>(account: &signer, token_amount: u128) {
+        if (!coin::is_account_registered<T>(signer::address_of(account))) {
+            coin::register<T>(account);
         };
+        managed_coin::mint<T>(account, signer::address_of(account), (token_amount as u64));
     }
 
-    public fun safe_mint<TokenType: store>(account: &signer, token_amount: u128) {
-        let is_accept_token = Account::is_accepts_token<TokenType>(Signer::address_of(account));
-        if (!is_accept_token) {
-            Account::do_accept_token<TokenType>(account);
-        };
-        let token = TokenMock::mint_token<TokenType>(token_amount);
-        Account::deposit<TokenType>(Signer::address_of(account), token);
+    public fun transfer<T>(account: &signer, token_address: address, token_amount: u128) {
+        coin::transfer<T>(account, token_address, (token_amount as u64))
     }
 
-    public fun transfer<TokenType: store>(account: &signer, token_address: address, token_amount: u128){
-        let token = Account::withdraw<TokenType>(account, token_amount);
-         Account::deposit(token_address, token);
+    public fun get_safe_balance<T>(token_address: address): u128 {
+        (coin::balance<T>(token_address) as u128)
     }
 
-    public fun get_safe_balance<TokenType: store>(token_address: address): u128{
-        let token_balance: u128 = 0;
-        if (Account::is_accepts_token<TokenType>(token_address)) {
-            token_balance = Account::balance<TokenType>(token_address);
-        };
-        token_balance
+    public fun register_and_mint<T>(account: &signer, precision: u8, token_amount: u128) {
+        let type_name = type_name<T>();
+        managed_coin::initialize<T>(
+            account,
+            *string::bytes(&type_name),
+            *string::bytes(&type_name),
+            precision,
+            true
+        );
+        managed_coin::mint<T>(account, signer::address_of(account), (token_amount as u64));
     }
 
-    public fun register_and_mint<TokenType: store>(account: &signer, precision: u8, token_amount: u128) {
-        TokenMock::register_token<TokenType>(account, precision);
-        safe_mint<TokenType>(account, token_amount);
-    }
-
-    public fun pow_amount<Token: store>(amount: u128): u128 {
-        amount * Token::scaling_factor<Token>()
+    public fun pow_amount<T>(amount: u128): u128 {
+        amount * (coin::decimals<T>() as u128)
     }
 
     public fun pow_10(exp: u8): u128 {
@@ -59,6 +54,4 @@ module CommonHelper {
         };
         result_val
     }
-
-}
 }
