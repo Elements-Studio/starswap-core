@@ -105,9 +105,9 @@ module swap_admin::TokenSwapFarm {
         //abandoned fields
     }
 
-    struct FarmMultiplier<phantom X, phantom Y> has key, store {
-        multiplier: u64,
-    }
+    // struct FarmMultiplier<phantom X, phantom Y> has key, store {
+    //     multiplier: u64,
+    // }
 
     struct FarmPoolStake<phantom X, phantom Y> has key, store {
         id: u64,
@@ -295,16 +295,16 @@ module swap_admin::TokenSwapFarm {
     // }
 
     /// Get farm multiplier of second per releasing
-    public fun get_farm_multiplier<X, Y>()
-    : u64 acquires FarmMultiplier, FarmPoolInfo {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
-            farm_mult.multiplier
-            // Get farm mutiplier, equals to pool alloc_point
-        } else {
-            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
-            (farm_pool_info.alloc_point as u64)
-        }
+    public fun get_farm_multiplier<X, Y>(): u64 acquires FarmPoolInfo {
+        // if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     let farm_mult = borrow_global_mut<FarmMultiplier<X, Y>>(STAR::token_address());
+        //     farm_mult.multiplier
+        //     // Get farm mutiplier, equals to pool alloc_point
+        // }
+        // else {
+        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+        (farm_pool_info.alloc_point as u64)
+        //}
     }
 
 
@@ -626,20 +626,20 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query release per second
-    public fun query_release_per_second<X, Y>(): u128 acquires FarmPoolCapability, FarmPoolInfo {
-        if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-            let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
-            cap.release_per_seconds
-        } else {
-            let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
-            let (
-                total_alloc_point,
-                pool_release_per_second
-            ) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(
-                STAR::token_address()
-            );
-            pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
-        }
+    public fun query_release_per_second<X, Y>(): u128 acquires FarmPoolInfo {
+        // if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
+        //     let cap = borrow_global<FarmPoolCapability<X, Y>>(STAR::token_address());
+        //     cap.release_per_seconds
+        // } else {
+        let farm_pool_info = borrow_global<FarmPoolInfo<X, Y>>(STAR::token_address());
+        let (
+            total_alloc_point,
+            pool_release_per_second
+        ) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(
+            STAR::token_address()
+        );
+        pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
+        // }
     }
 
     /// Query farm golbal pool info

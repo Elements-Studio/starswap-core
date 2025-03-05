@@ -411,17 +411,14 @@ module swap_admin::TokenSwapSyrup {
 
     /// Update pool allocation point
     /// Only called by admin
-    public fun update_allocation_point<T>(
-        signer: &signer,
-        alloc_point: u128
-    ) acquires Syrup, SyrupExtInfoV2 {
+    public fun update_allocation_point<T>(signer: &signer, alloc_point: u128) acquires Syrup, SyrupExtInfoV2 {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
-        assert!(
-            TokenSwapConfig::get_alloc_mode_upgrade_switch(),
-            error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON)
-        );
+        // assert!(
+        //     TokenSwapConfig::get_alloc_mode_upgrade_switch(),
+        //     error::invalid_state(ERROR_ALLOC_MODE_UPGRADE_SWITCH_NOT_TURNED_ON)
+        // );
 
         let broker = signer::address_of(signer);
         let syrup = borrow_global<Syrup<T>>(broker);

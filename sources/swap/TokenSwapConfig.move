@@ -325,14 +325,14 @@ module swap_admin::TokenSwapConfig {
     }
 
     ///  Pool alloc mode upgrade switch
-    public fun get_alloc_mode_upgrade_switch(): bool {
-        if (on_chain_config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
-            let conf = on_chain_config::get_by_address<AllocModeUpgradeSwitch>(admin_address());
-            conf.upgrade_switch
-        } else {
-            DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH
-        }
-    }
+    // public fun get_alloc_mode_upgrade_switch(): bool {
+    //     if (on_chain_config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
+    //         let conf = on_chain_config::get_by_address<AllocModeUpgradeSwitch>(admin_address());
+    //         conf.upgrade_switch
+    //     } else {
+    //         DEFAULT_SWAP_ALLOC_MODE_UPGRADE_SWITCH
+    //     }
+    // }
 
     ///  White list boost switch
     public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey: vector<u8>) {
