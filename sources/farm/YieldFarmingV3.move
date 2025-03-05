@@ -7,15 +7,19 @@ module swap_admin::YieldFarmingV3 {
     use std::error;
     use std::option;
     use std::signer;
+    use std::string;
     use std::vector;
 
     use starcoin_framework::coin;
     use starcoin_framework::timestamp;
 
+    use starcoin_std::debug;
+    use starcoin_std::simple_map;
+    use starcoin_std::type_info::type_name;
+
     use swap_admin::BigExponential;
     use swap_admin::STAR;
     use swap_admin::TokenSwapConfig;
-    use swap_admin::YieldFarmingLibrary;
 
     const ERR_DEPRECATED: u64 = 1;
 
@@ -39,6 +43,29 @@ module swap_admin::YieldFarmingV3 {
     const ERR_YIELD_FARMING_GLOBAL_POOL_INFO_ALREADY_EXIST: u64 = 120;
     const ERR_INVALID_PARAMETER: u64 = 121;
 
+    /// There are two concepts: **business pools** and **asset pools**, where a business pool contains multiple asset pools.
+    ///
+    //// 1. **Business pools** are represented by the structure `YieldFarmingGlobalPoolInfo`, with its type defined by the `TokenSwapGovPoolType.move` contract.
+    ///  It controls the **total distribution amount per second** for all assets in the pool.
+    ///
+    /// 2. **Asset pools** are represented by the structure `FarmingAsset<phantom PoolType, phantom AssetT>`.
+    /// The pool's assets are constrained by the parameter `AssetT`, and all `AssetT` assets share the per-second release amount defined in `PoolType`. The `alloc_point` indicates the **weight value** of the current asset pool.
+    ///
+    /// 3. When updating the `alloc_point` of an asset pool (indicating changes to the weight distribution across all pools),
+    /// the **total allocation points** of the corresponding business pool must be recalculated.
+    ///
+    /// 4. For reward calculations: A user's rewards are determined by the pool's allocation points (`alloc_point`),
+    /// which are used to compute the user's **weighted share**, and ultimately derive the final reward amount.
+    ///
+    struct YieldFarmingGlobalPoolInfo<phantom PoolType> has key, store {
+        // total allocation points. Must be the sum of all allocation points in all pools,
+        total_alloc_point: u128,
+        //  Sigma (per pool alloc_point)
+        pool_release_per_second: u128,
+        // Registration of Asset type
+        alloc_point_registration: simple_map::SimpleMap<string::String, u128>,
+    }
+
     /// The object of yield farming
     /// RewardTokenT meaning token of yield farming
     struct Farming<phantom PoolType, phantom RewardTokenT> has key, store {
@@ -48,25 +75,16 @@ module swap_admin::YieldFarmingV3 {
     struct FarmingAsset<phantom PoolType, phantom AssetT> has key, store {
         // reform: before is actually equivalent to asset amount, after is equivalent to asset weight
         asset_total_weight: u128,
-
+        // asset_total_weight: u128, // Sigma (per user lp_amount *  user boost_factor)
+        asset_total_amount: u128,
+        // Harvest index for current asset Pool
         harvest_index: u128,
+        // This pool latest update time by user or calling
         last_update_timestamp: u64,
-        // Release count per seconds
-        release_per_second: u128,
-        //abandoned fields
         // Start time, by seconds, user can operate stake only after this timestamp
         start_time: u64,
-        // Representing the pool is alive, false: not alive, true: alive.
-        alive: bool,
-        //abandoned fields
-    }
-
-    struct FarmingAssetExtend<phantom PoolType, phantom AssetT> has key, store {
-        //        asset_total_weight: u128, // Sigma (per user lp_amount *  user boost_factor)
-        asset_total_amount: u128,
-        //Sigma (per user lp_amount)
+        // Pool alloc point
         alloc_point: u128,
-        //pool alloc point
     }
 
     /// To store user's asset token
@@ -74,17 +92,10 @@ module swap_admin::YieldFarmingV3 {
         id: u64,
         asset: AssetT,
         asset_weight: u128,
+        asset_amount: u128,
         // reform: before is actually equivalent to asset amount, after is equivalent to asset weight
         last_harvest_index: u128,
         gain: u128,
-        asset_multiplier: u64,
-        //abandoned fields
-    }
-
-    struct StakeExtend<phantom PoolType, phantom AssetT> has key, store {
-        id: u64,
-        //option, option<u64>
-        asset_amount: u128,
         //weight factor, if farm: weight_factor = user boost factor * 100; if stake: weight_factor = stepwise multiplier
         weight_factor: u64,
     }
@@ -92,19 +103,6 @@ module swap_admin::YieldFarmingV3 {
     struct StakeList<phantom PoolType, AssetT> has key, store {
         next_id: u64,
         items: vector<Stake<PoolType, AssetT>>,
-    }
-
-    struct StakeListExtend<phantom PoolType, phantom AssetT> has key, store {
-        next_id: u64,
-        items: vector<StakeExtend<PoolType, AssetT>>,
-    }
-
-    struct YieldFarmingGlobalPoolInfo<phantom PoolType> has key, store {
-        // total allocation points. Must be the sum of all allocation points in all pools.
-        total_alloc_point: u128,
-        //Sigma (per pool alloc_point)
-        pool_release_per_second: u128,
-        // pool_release_per_second
     }
 
     /// Capability to modify parameter such as period and release amount
@@ -152,6 +150,7 @@ module swap_admin::YieldFarmingV3 {
         move_to(account, YieldFarmingGlobalPoolInfo<PoolType> {
             total_alloc_point: 0,
             pool_release_per_second,
+            alloc_point_registration: simple_map::new(),
         });
     }
 
@@ -201,20 +200,20 @@ module swap_admin::YieldFarmingV3 {
 
         //update global pool info total alloc point
         let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(address);
-        golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point + alloc_point;
+        simple_map::add(&mut golbal_pool_info.alloc_point_registration, Self::get_asset_name<PoolType, AssetT>(), alloc_point);
+        //golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point + alloc_point;
 
         move_to(account, FarmingAsset<PoolType, AssetT> {
+            asset_total_amount: 0,
             asset_total_weight: 0,
             harvest_index: 0,
             last_update_timestamp: now_seconds,
-            release_per_second: 0, //abandoned fields
             start_time: now_seconds + delay,
-            alive: false
+            alloc_point: 0,
         });
-        move_to(account, FarmingAssetExtend<PoolType, AssetT> {
-            asset_total_amount: 0,
-            alloc_point,
-        });
+
+        Self::recal_total_alloc_point(golbal_pool_info);
+
         ParameterModifyCapability<PoolType, AssetT> {}
     }
 
@@ -236,35 +235,7 @@ module swap_admin::YieldFarmingV3 {
         coin::extract<RewardTokenT>(&mut farming.treasury_token, (amount as u64))
     }
 
-
-    // TODO(VR): deprecated, upgrade farming staking
-    // /// ParameterModifyCapability Access control
-    // public fun extend_farm_stake_info<PoolType: store, AssetT: store>(
-    //     account: &signer,
-    //     stake_id: u64,
-    //     _cap: &ParameterModifyCapability<PoolType, AssetT>
-    // ) acquires StakeList, StakeListExtend {
-    //     let user_addr = signer::address_of(account);
-    //     if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
-    //         move_to(account, StakeListExtend<PoolType, AssetT> {
-    //             next_id: 0,
-    //             items: vector::empty<StakeExtend<PoolType, AssetT>>(),
-    //         });
-    //     };
-    //
-    //     let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
-    //     let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
-    //
-    //     let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-    //     vector::push_back<StakeExtend<PoolType, AssetT>>(&mut stake_list_extend.items, StakeExtend<PoolType, AssetT> {
-    //         id: stake_id,
-    //         asset_amount: stake.asset_weight,
-    //         weight_factor: stake.asset_multiplier,
-    //     });
-    //     stake_list_extend.next_id = stake_id;
-    // }
-
-    // modify parameter v2
+    /// modify parameter v2
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );
     /// gain = (current_index - last_index) * user_amount * boost_factor;
     /// asset_total_weight = Sigma (per user lp_amount *  user boost_factor)
@@ -273,18 +244,16 @@ module swap_admin::YieldFarmingV3 {
         broker: address,
         alloc_point: u128, //new pool alloc point
         last_alloc_point: u128, //last pool alloc point
-    ) acquires FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+    ) acquires FarmingAsset, YieldFarmingGlobalPoolInfo {
         let now_seconds = timestamp::now_seconds();
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
         // Calculate the index that has occurred first, and then update the pool info
         farming_asset.harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
             farming_asset,
-            farming_asset_extend,
             now_seconds
         );
         farming_asset.last_update_timestamp = now_seconds;
-        farming_asset_extend.alloc_point = alloc_point;
+        farming_asset.alloc_point = alloc_point;
 
         //update global pool info total alloc point
         let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
@@ -297,14 +266,12 @@ module swap_admin::YieldFarmingV3 {
         broker: address,
         new_asset_weight: u128, //new stake asset weight
         last_asset_weight: u128, //last stake asset weight
-    ) acquires FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+    ) acquires FarmingAsset, YieldFarmingGlobalPoolInfo {
         let now_seconds = timestamp::now_seconds();
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
         // Calculate the index that has occurred first, and then update the pool info
         farming_asset.harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
             farming_asset,
-            farming_asset_extend,
             now_seconds
         );
         //update pool asset weight
@@ -321,14 +288,11 @@ module swap_admin::YieldFarmingV3 {
         new_weight_factor: u64, //new stake weight factor
         new_asset_weight: u128, //new stake asset weight
         _last_asset_weight: u128, //last stake asset weight
-    ) acquires FarmingAsset, StakeList, StakeListExtend {
+    ) acquires FarmingAsset, StakeList {
         let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
 
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
-        let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
-
-        let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-        let stake_extend = get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, stake_id);
+        let stake = Self::get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
 
         let period_gain = calculate_withdraw_amount_v2(
             farming_asset.harvest_index,
@@ -339,8 +303,7 @@ module swap_admin::YieldFarmingV3 {
         stake.gain = stake.gain + period_gain;
         stake.last_harvest_index = farming_asset.harvest_index;
         stake.asset_weight = new_asset_weight;
-
-        stake_extend.weight_factor = new_weight_factor;
+        stake.weight_factor = new_weight_factor;
     }
 
     /// Update the harvesting index of the pool for outside update some parameters
@@ -348,17 +311,14 @@ module swap_admin::YieldFarmingV3 {
     public fun update_pool_index<PoolType: store, RewardTokenT, AssetT: store>(
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,
-    ) acquires YieldFarmingGlobalPoolInfo, FarmingAsset, FarmingAssetExtend {
+    ) acquires YieldFarmingGlobalPoolInfo, FarmingAsset {
         let now_seconds = timestamp::now_seconds();
         let farming_asset =
             borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let farming_asset_extend =
-            borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
 
         // Calculate the index that has occurred first, and then update the pool info
         farming_asset.harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
             farming_asset,
-            farming_asset_extend,
             now_seconds
         );
         // Update pool harvest index
@@ -371,14 +331,12 @@ module swap_admin::YieldFarmingV3 {
         broker: address,
         total_amount: u128,
         total_weight: u128,
-    ) acquires FarmingAsset, FarmingAssetExtend {
+    ) acquires FarmingAsset {
         let asset =
             borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-        let asset_ext =
-            borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
 
         asset.asset_total_weight = total_weight;
-        asset_ext.asset_total_amount = total_amount;
+        asset.asset_total_amount = total_amount;
     }
 
     /// Call by stake user, staking amount of asset in order to get yield farming token
@@ -391,21 +349,17 @@ module swap_admin::YieldFarmingV3 {
         weight_factor: u64, //if farm: weight_factor = user boost factor * 100; if stake: weight_factor = stepwise multiplier
         deadline: u64,
         _cap: &ParameterModifyCapability<PoolType, AssetT>)
-    : (
-        HarvestCapability<PoolType, AssetT>,
-        u64
-    ) acquires StakeList, StakeListExtend, FarmingAsset, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+    : (HarvestCapability<PoolType, AssetT>, u64) acquires StakeList, FarmingAsset, YieldFarmingGlobalPoolInfo {
         assert!(
             exists<FarmingAsset<PoolType, AssetT>>(broker_addr),
             error::invalid_state(ERR_FARMING_ASSET_NOT_EXISTS)
         );
 
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
-        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker_addr);
         let now_seconds = timestamp::now_seconds();
 
         intra_pool_state_check_v2<PoolType, AssetT>(now_seconds, farming_asset);
-        assert!(farming_asset_extend.alloc_point > 0, error::invalid_state(ERR_FARMING_NOT_ALIVE));
+        assert!(farming_asset.alloc_point > 0, error::invalid_state(ERR_FARMING_NOT_ALIVE));
 
         let user_addr = signer::address_of(signer);
         if (!exists<StakeList<PoolType, AssetT>>(user_addr)) {
@@ -418,15 +372,6 @@ module swap_admin::YieldFarmingV3 {
             );
         };
 
-        if (!exists<StakeListExtend<PoolType, AssetT>>(user_addr)) {
-            move_to(signer,
-                StakeListExtend<PoolType, AssetT> {
-                    next_id: 0,
-                    items: vector::empty<StakeExtend<PoolType, AssetT>>(),
-                }
-            );
-        };
-
         let (harvest_index, gain) = if (farming_asset.asset_total_weight <= 0) {
             let golbal_pool_info =
                 borrow_global<YieldFarmingGlobalPoolInfo<PoolType>>(broker_addr);
@@ -435,14 +380,13 @@ module swap_admin::YieldFarmingV3 {
                 0,
                 golbal_pool_info.pool_release_per_second *
                     (time_period as u128) *
-                    farming_asset_extend.alloc_point /
+                    farming_asset.alloc_point /
                     golbal_pool_info.total_alloc_point
             )
         } else {
             (
                 calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
                     farming_asset,
-                    farming_asset_extend,
                     now_seconds
                 ),
                 0
@@ -456,19 +400,10 @@ module swap_admin::YieldFarmingV3 {
             Stake<PoolType, AssetT> {
                 id: stake_id,
                 asset,
+                asset_amount,
                 asset_weight,
                 last_harvest_index: harvest_index,
                 gain,
-                asset_multiplier: 1, //abandoned fields
-            }
-        );
-
-        let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-        vector::push_back<StakeExtend<PoolType, AssetT>>(
-            &mut stake_list_extend.items,
-            StakeExtend<PoolType, AssetT> {
-                id: stake_id,
-                asset_amount,
                 weight_factor,
             }
         );
@@ -476,18 +411,12 @@ module swap_admin::YieldFarmingV3 {
         farming_asset.harvest_index = harvest_index;
         farming_asset.asset_total_weight = farming_asset.asset_total_weight + asset_weight;
         farming_asset.last_update_timestamp = now_seconds;
-
-        farming_asset_extend.asset_total_amount = farming_asset_extend.asset_total_amount + asset_amount;
+        farming_asset.asset_total_amount = farming_asset.asset_total_amount + asset_amount;
 
         stake_list.next_id = stake_id;
-        stake_list_extend.next_id = stake_id;
 
         // Normalize deadline
-        deadline = if (deadline > 0) {
-            deadline + now_seconds
-        } else {
-            0
-        };
+        deadline = if (deadline > 0) { deadline + now_seconds } else { 0 };
 
         // Return values
         (
@@ -505,11 +434,8 @@ module swap_admin::YieldFarmingV3 {
         signer: &signer,
         broker: address,
         cap: HarvestCapability<PoolType, AssetT>
-    ): (
-        AssetT,
-        coin::Coin<RewardTokenT>
-    )
-    acquires Farming, FarmingAsset, FarmingAssetExtend, StakeList, StakeListExtend, YieldFarmingGlobalPoolInfo {
+    ): (AssetT, coin::Coin<RewardTokenT>)
+    acquires Farming, FarmingAsset, StakeList, YieldFarmingGlobalPoolInfo {
         // Destroy capability
         let HarvestCapability<PoolType, AssetT> { stake_id, deadline } = cap;
 
@@ -524,63 +450,28 @@ module swap_admin::YieldFarmingV3 {
         let Stake<PoolType, AssetT> {
             id: out_stake_id,
             asset: staked_asset,
-            asset_weight: staked_asset_weight,
+            asset_amount: asset_amount,
+            asset_weight: asset_weight,
             last_harvest_index: staked_latest_harvest_index,
             gain: staked_gain,
-            asset_multiplier: _staked_asset_multiplier, //abandoned fields
+            weight_factor: _weight_factor
         } = pop_stake<PoolType, AssetT>(&mut items.items, stake_id);
 
         assert!(stake_id == out_stake_id, error::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
         assert_check_maybe_deadline(now_seconds, deadline);
 
-        //TODO can be clean up after pool alloc mode upgrade
-        let (
+
+        let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
+            farming_asset,
+            now_seconds
+        );
+
+        //TODO how to cacl compatible ? asset_weight = staked_asset_weight or asset_weight = staked_asset_weight * staked_weight_factor ?
+        let period_gain = calculate_withdraw_amount_v2(
             new_harvest_index,
-            now_seconds,
-            period_gain,
-            asset_weight,
-            asset_amount
-        ) =
-        //    =
-        //     if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //     let (new_harvest_index, now_seconds) = if (farming_asset.alive) {
-        //         (calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds), now_seconds)
-        //     } else {
-        //         (farming_asset.harvest_index, farming_asset.last_update_timestamp)
-        //     };
-        //
-        //     let asset_weight = staked_asset_weight * (staked_asset_multiplier as u128);
-        //     let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
-        //         new_harvest_index,
-        //         staked_latest_harvest_index,
-        //         asset_weight,
-        //     );
-        //     (new_harvest_index, now_seconds, period_gain, asset_weight, staked_asset_weight)
-        //     // after pool alloc mode upgrade
-        // } else
-        {
-            let farming_asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
-            let items_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(signer::address_of(signer));
-            let StakeExtend<PoolType, AssetT> {
-                id: _out_stake_id2,
-                asset_amount: staked_asset_amount,
-                weight_factor: _staked_weight_factor,
-            } = pop_stake_extend<PoolType, AssetT>(&mut items_extend.items, stake_id);
-
-            let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
-                farming_asset,
-                farming_asset_extend,
-                now_seconds
-            );
-
-            //TODO how to cacl compatible ? asset_weight = staked_asset_weight or asset_weight = staked_asset_weight * staked_weight_factor ?
-            let period_gain = calculate_withdraw_amount_v2(
-                new_harvest_index,
-                staked_latest_harvest_index,
-                staked_asset_weight
-            );
-            (new_harvest_index, now_seconds, period_gain, staked_asset_weight, staked_asset_amount)
-        };
+            staked_latest_harvest_index,
+            asset_weight
+        );
 
         let withdraw_token = coin::extract<RewardTokenT>(
             &mut farming.treasury_token,
@@ -591,14 +482,9 @@ module swap_admin::YieldFarmingV3 {
         // Update farm asset
         farming_asset.harvest_index = new_harvest_index;
         farming_asset.asset_total_weight = farming_asset.asset_total_weight - asset_weight;
+        farming_asset.asset_total_amount = farming_asset.asset_total_amount - asset_amount;
         farming_asset.last_update_timestamp = now_seconds;
 
-        // update farming asset extend
-        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //TODO can borrow twice in a function ?
-        let farming_asset_extend = borrow_global_mut<FarmingAssetExtend<PoolType, AssetT>>(broker);
-        farming_asset_extend.asset_total_amount = farming_asset_extend.asset_total_amount - asset_amount;
-        // };
         (staked_asset, withdraw_token)
     }
 
@@ -608,7 +494,7 @@ module swap_admin::YieldFarmingV3 {
         broker_addr: address,
         amount: u128,
         cap: &HarvestCapability<PoolType, AssetT>
-    ): coin::Coin<RewardTokenT> acquires Farming, FarmingAsset, FarmingAssetExtend, StakeList, StakeListExtend, YieldFarmingGlobalPoolInfo {
+    ): coin::Coin<RewardTokenT> acquires Farming, FarmingAsset, StakeList, YieldFarmingGlobalPoolInfo {
         let farming = borrow_global_mut<Farming<PoolType, RewardTokenT>>(broker_addr);
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
 
@@ -623,41 +509,15 @@ module swap_admin::YieldFarmingV3 {
 
         assert_check_maybe_deadline(now_seconds, cap.deadline);
 
-        //TODO can be clean up after pool alloc mode upgrade
-        let (new_harvest_index, now_seconds, period_gain) =
-        //     if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //     let (new_harvest_index, now_seconds) = if (farming_asset.alive) {
-        //         (calculate_harvest_index_with_asset<PoolType, AssetT>(farming_asset, now_seconds), now_seconds)
-        //     } else {
-        //         (farming_asset.harvest_index, farming_asset.last_update_timestamp)
-        //     };
-        //
-        //     let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
-        //     let period_gain = YieldFarmingLibrary::calculate_withdraw_amount(
-        //         new_harvest_index,
-        //         stake.last_harvest_index,
-        //         asset_weight,
-        //     );
-        //     (new_harvest_index, now_seconds, period_gain)
-        //     // after pool alloc mode upgrade
-        // } else
-        {
-            let farming_asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker_addr);
-            let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-            let _stake_extend = get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, cap.stake_id);
-
-            let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
-                farming_asset,
-                farming_asset_extend,
-                now_seconds
-            );
-            let period_gain = calculate_withdraw_amount_v2(
-                new_harvest_index,
-                stake.last_harvest_index,
-                stake.asset_weight
-            );
-            (new_harvest_index, now_seconds, period_gain)
-        };
+        let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
+            farming_asset,
+            now_seconds
+        );
+        let period_gain = calculate_withdraw_amount_v2(
+            new_harvest_index,
+            stake.last_harvest_index,
+            stake.asset_weight
+        );
 
         let total_gain = stake.gain + period_gain;
         //assert!(total_gain > 0, error::limit_exceeded(ERR_FARMING_HAVERST_NO_GAIN));
@@ -690,9 +550,14 @@ module swap_admin::YieldFarmingV3 {
         user_addr: address,
         broker_addr: address,
         cap: &HarvestCapability<PoolType, AssetT>
-    ): u128 acquires FarmingAsset, StakeList, FarmingAssetExtend, YieldFarmingGlobalPoolInfo {
+    ): u128 acquires FarmingAsset, StakeList, YieldFarmingGlobalPoolInfo {
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker_addr);
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
+
+        debug::print(&string::utf8(b"YieldFarmingV3::query_expect_gain | show farming_asset and stake_list"));
+        debug::print(&user_addr);
+        debug::print(farming_asset);
+        debug::print(stake_list);
 
         // Start check
         let now_seconds = timestamp::now_seconds();
@@ -705,39 +570,20 @@ module swap_admin::YieldFarmingV3 {
             cap.deadline
         };
 
-        let stake = get_stake(&mut stake_list.items, cap.stake_id);
-        //TODO can be clean up after pool alloc mode upgrade
-        // let new_gain = if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //     // Calculate new harvest index
-        //     let new_harvest_index = calculate_harvest_index_with_asset<PoolType, AssetT>(
-        //         farming_asset,
-        //         now_seconds
-        //     );
-        //
-        //     let asset_weight = stake.asset_weight * (stake.asset_multiplier as u128);
-        //     let new_gain = YieldFarmingLibrary::calculate_withdraw_amount(
-        //         new_harvest_index,
-        //         stake.last_harvest_index,
-        //         asset_weight
-        //     );
-        //     new_gain
-        //     // after pool alloc mode upgrade
-        // } else
-        let new_gain = {
-            let farming_asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker_addr);
-            // Calculate new harvest index
-            let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
-                farming_asset,
-                farming_asset_extend,
-                now_seconds
-            );
-            let new_gain = calculate_withdraw_amount_v2(
-                new_harvest_index,
-                stake.last_harvest_index,
-                stake.asset_weight
-            );
-            new_gain
-        };
+        let stake = Self::get_stake(&mut stake_list.items, cap.stake_id);
+        // Calculate new harvest index
+        let new_harvest_index = calculate_harvest_index_with_asset_v2<PoolType, AssetT>(
+            farming_asset,
+            now_seconds
+        );
+        let new_gain = Self::calculate_withdraw_amount_v2(
+            new_harvest_index,
+            stake.last_harvest_index,
+            stake.asset_weight
+        );
+        debug::print(&string::utf8(b"YieldFarmingV3::query_expect_gain | new gain: "));
+        debug::print(&new_harvest_index);
+        debug::print(&new_gain);
         stake.gain + new_gain
     }
 
@@ -746,40 +592,20 @@ module swap_admin::YieldFarmingV3 {
     /// @return farming_asset_extend.asset_total_amount
     public fun query_total_stake<PoolType: store, AssetT: store>(
         broker: address
-    ): u128 acquires FarmingAssetExtend {
-        //TODO can be clean up after pool alloc mode upgrade
-        // if (!TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //     let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
-        //     farming_asset.asset_total_weight
-        //     // after pool alloc mode upgrade
-        // } else
-        {
-            let farming_asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
-            farming_asset_extend.asset_total_amount
-        }
+    ): u128 acquires FarmingAsset {
+        let farming_asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
+        farming_asset.asset_total_amount
     }
 
     /// Query stake from user staking objects.
     public fun query_stake<PoolType: store, AssetT: store>(
         account: address,
         id: u64
-    ): u128 acquires StakeListExtend {
-        //TODO can be clean up after pool alloc mode upgrade
-        // if ((!TokenSwapConfig::get_alloc_mode_upgrade_switch()) || (!exists<StakeListExtend<PoolType, AssetT>>(
-        //     account
-        // ))) {
-        //     let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
-        //     let stake = get_stake(&mut stake_list.items, id);
-        //     assert!(stake.id == id, error::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
-        //     stake.asset_weight
-        //     // after pool alloc mode upgrade
-        // } else
-        {
-            let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(account);
-            let stake_extend = get_stake_extend(&mut stake_list_extend.items, id);
-            assert!(stake_extend.id == id, error::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
-            stake_extend.asset_amount
-        }
+    ): u128 acquires StakeList {
+        let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(account);
+        let stake = Self::get_stake(&mut stake_list.items, id);
+        assert!(stake.id == id, error::invalid_state(ERR_FARMING_STAKE_INDEX_ERROR));
+        stake.asset_amount
     }
 
 
@@ -806,12 +632,7 @@ module swap_admin::YieldFarmingV3 {
     }
 
     /// Query stake id list from user
-    public fun query_stake_list<
-        PoolType: store,
-        AssetT: store
-    >(
-        user_addr: address
-    ): vector<u64> acquires StakeList {
+    public fun query_stake_list<PoolType: store, AssetT: store>(user_addr: address): vector<u64> acquires StakeList {
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
         let len = vector::length(&stake_list.items);
         if (len <= 0) {
@@ -831,29 +652,15 @@ module swap_admin::YieldFarmingV3 {
         ret_list
     }
 
-    /// Queyry pool info from pool type
-    /// return value: (alive, release_per_second, asset_total_weight, harvest_index)
-    // public fun query_info<PoolType: store, AssetT: store>(_broker: address): (bool, u128, u128, u128) {
-    //     abort error::invalid_state(ERR_DEPRECATED)
-    //     // let asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
-    //     // (
-    //     //     asset.alive,
-    //     //     asset.release_per_second,
-    //     //     asset.asset_total_weight,
-    //     //     asset.harvest_index
-    //     // )
-    // }
-
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
     public fun query_pool_info_v2<PoolType: store, AssetT: store>(
         broker: address
-    ): (u128, u128, u128, u128) acquires FarmingAsset, FarmingAssetExtend {
+    ): (u128, u128, u128, u128) acquires FarmingAsset {
         let asset = borrow_global<FarmingAsset<PoolType, AssetT>>(broker);
-        let asset_extend = borrow_global<FarmingAssetExtend<PoolType, AssetT>>(broker);
         (
-            asset_extend.alloc_point,
-            asset_extend.asset_total_amount,
+            asset.alloc_point,
+            asset.asset_total_amount,
             asset.asset_total_weight,
             asset.harvest_index
         )
@@ -872,21 +679,6 @@ module swap_admin::YieldFarmingV3 {
         )
     }
 
-    /// Update farming asset
-    fun calculate_harvest_index_with_asset<PoolType: store, AssetT: store>(
-        farming_asset: &FarmingAsset<PoolType, AssetT>,
-        now_seconds: u64
-    ): u128 {
-        // Debug::print(farming_asset);
-        // Debug::print(&now_seconds);
-        YieldFarmingLibrary::calculate_harvest_index_with_asse_info(
-            farming_asset.asset_total_weight,
-            farming_asset.harvest_index,
-            farming_asset.last_update_timestamp,
-            farming_asset.release_per_second,
-            now_seconds
-        )
-    }
 
     /// calculate pool harvest index
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );
@@ -894,7 +686,6 @@ module swap_admin::YieldFarmingV3 {
     /// if stake:  asset_total_weight = Sigma (per user lp_amount *  stepwise_multiplier)
     fun calculate_harvest_index_with_asset_v2<PoolType: store, AssetT: store>(
         farming_asset: &FarmingAsset<PoolType, AssetT>,
-        farming_asset_extend: &FarmingAssetExtend<PoolType, AssetT>,
         now_seconds: u64
     ): u128 acquires YieldFarmingGlobalPoolInfo {
         assert!(
@@ -913,7 +704,7 @@ module swap_admin::YieldFarmingV3 {
         let time_period = now_seconds - farming_asset.last_update_timestamp;
         let global_pool_reward = golbal_pool_info.pool_release_per_second * (time_period as u128);
         let pool_reward = BigExponential::exp(
-            global_pool_reward * farming_asset_extend.alloc_point,
+            global_pool_reward * farming_asset.alloc_point,
             golbal_pool_info.total_alloc_point
         );
 
@@ -925,8 +716,29 @@ module swap_admin::YieldFarmingV3 {
                 BigExponential::div_exp(pool_reward, BigExponential::exp_direct(farming_asset.asset_total_weight))
             )
         };
-
         BigExponential::to_safe_u128(((farming_asset.harvest_index as u256) + harvest_index_period))
+    }
+
+    fun recal_total_alloc_point<PoolType: store>(info: &mut YieldFarmingGlobalPoolInfo<PoolType>) {
+        let values = simple_map::values(&info.alloc_point_registration);
+        let total_value = 0;
+        let len = vector::length(&values);
+        loop {
+            let i = 0;
+            total_value = total_value + *vector::borrow(&values, i);
+            i = i + 1;
+            if (i >= len) {
+                break
+            }
+        };
+        info.total_alloc_point = total_value;
+    }
+
+    fun get_asset_name<PoolType, AssetT>(): string::String {
+        let name = type_name<PoolType>();
+        string::append(&mut name, string::utf8(b"::"));
+        string::append(&mut name, type_name<AssetT>());
+        name
     }
 
     /// calculate user gain index
@@ -954,19 +766,6 @@ module swap_admin::YieldFarmingV3 {
         };
     }
 
-    /// DEPRECATED
-    /// Pool state check function
-    // fun intra_pool_state_check<PoolType: store, AssetT: store>(
-    //     _now_seconds: u64,
-    //     _farming_asset: &FarmingAsset<PoolType, AssetT>
-    // ) {
-    //     abort error::invalid_state(ERR_DEPRECATED)
-    //     // Check is alive
-    //     // assert!(farming_asset.alive, error::invalid_state(ERR_FARMING_NOT_ALIVE));
-    //
-    //     // Pool Start state check
-    //     // assert!(now_seconds >= farming_asset.start_time, error::invalid_state(ERR_FARMING_NOT_READY));
-    // }
 
     /// Pool state check function
     fun intra_pool_state_check_v2<PoolType: store, AssetT: store>(
@@ -998,12 +797,11 @@ module swap_admin::YieldFarmingV3 {
         }
     }
 
-    fun get_stake<PoolType: store,
-                  AssetType: store>(
+    fun get_stake<PoolType: store, AssetType: store>(
         c: &mut vector<Stake<PoolType, AssetType>>,
         id: u64
     ): &mut Stake<PoolType, AssetType> {
-        let idx = find_idx_by_id<PoolType, AssetType>(c, id);
+        let idx = Self::find_idx_by_id<PoolType, AssetType>(c, id);
         assert!(option::is_some<u64>(&idx), error::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         vector::borrow_mut<Stake<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
     }
@@ -1012,82 +810,20 @@ module swap_admin::YieldFarmingV3 {
         c: &mut vector<Stake<PoolType, AssetType>>,
         id: u64
     ): Stake<PoolType, AssetType> {
-        let idx = find_idx_by_id<PoolType, AssetType>(c, id);
+        let idx = Self::find_idx_by_id<PoolType, AssetType>(c, id);
         assert!(option::is_some(&idx), error::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
         vector::remove<Stake<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
-    }
-
-
-    fun find_idx_by_id_extend<PoolType: store, AssetType: store>(
-        c: &vector<StakeExtend<PoolType, AssetType>>,
-        id: u64
-    ): option::Option<u64> {
-        let len = vector::length(c);
-        if (len == 0) {
-            return option::none()
-        };
-        let idx = len - 1;
-        loop {
-            let el = vector::borrow(c, idx);
-            if (el.id == id) {
-                return option::some(idx)
-            };
-            if (idx == 0) {
-                return option::none()
-            };
-            idx = idx - 1;
-        }
-    }
-
-    fun get_stake_extend<
-        PoolType: store,
-        AssetType: store
-    >(
-        c: &mut vector<StakeExtend<PoolType, AssetType>>,
-        id: u64
-    ): &mut StakeExtend<PoolType, AssetType> {
-        let idx = find_idx_by_id_extend<PoolType, AssetType>(c, id);
-        assert!(option::is_some<u64>(&idx), error::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
-        vector::borrow_mut<StakeExtend<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
-    }
-
-    fun pop_stake_extend<
-        PoolType: store,
-        AssetType: store
-    >(
-        c: &mut vector<StakeExtend<PoolType, AssetType>>,
-        id: u64
-    ): StakeExtend<PoolType, AssetType> {
-        let idx = find_idx_by_id_extend<PoolType, AssetType>(c, id);
-        assert!(option::is_some(&idx), error::invalid_state(ERR_FARMING_STAKE_NOT_EXISTS));
-        vector::remove<StakeExtend<PoolType, AssetType>>(c, option::destroy_some<u64>(idx))
     }
 
     public fun get_stake_info<PoolType: store, AssetT: store>(
         account: &signer,
         stake_id: u64
-    ): (
-        u64,
-        u128,
-        u128,
-        u128,
-        u64,
-        u128,
-        u64
-    ) acquires StakeList, StakeListExtend {
+    ): (u64, u128, u128, u128, u64, u128, u64) acquires StakeList {
         let user_addr = signer::address_of(account);
         let stake_list = borrow_global_mut<StakeList<PoolType, AssetT>>(user_addr);
-        let stake = get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
+        let stake = Self::get_stake<PoolType, AssetT>(&mut stake_list.items, stake_id);
 
-        let (asset_amount, weight_factor) = if (exists_stake_list_extend<PoolType, AssetT>(user_addr)) {
-            let stake_list_extend = borrow_global_mut<StakeListExtend<PoolType, AssetT>>(user_addr);
-            let stake_extend = get_stake_extend<PoolType, AssetT>(&mut stake_list_extend.items, stake_id);
-            (stake_extend.asset_amount, stake_extend.weight_factor)
-        } else {
-            (0, 0)
-        };
-
-        (stake.id, stake.asset_weight, stake.last_harvest_index, stake.gain, stake.asset_multiplier, asset_amount, weight_factor)
+        (stake.id, stake.asset_weight, stake.last_harvest_index, stake.gain, 0, stake.asset_amount, stake.weight_factor)
     }
 
     /// View Treasury Remaining
@@ -1098,14 +834,8 @@ module swap_admin::YieldFarmingV3 {
 
     /// Get global stake id
     public fun get_global_stake_id<PoolType: store, AssetT: store>(user_addr: address): u64 acquires StakeList {
-        // if (TokenSwapConfig::get_alloc_mode_upgrade_switch()) {
-        //     let stake_list_ext = borrow_global<StakeListExtend<PoolType, AssetT>>(user_addr);
-        //     stake_list_ext.next_id
-        // } else
-        {
-            let stake_list = borrow_global<StakeList<PoolType, AssetT>>(user_addr);
-            stake_list.next_id
-        }
+        let stake_list = borrow_global<StakeList<PoolType, AssetT>>(user_addr);
+        stake_list.next_id
     }
 
     /// Get information by given capability
@@ -1138,15 +868,5 @@ module swap_admin::YieldFarmingV3 {
     /// Check stake list at address exists.
     public fun exists_stake_list<PoolType: store, AssetT: store>(account: address): bool {
         return exists<StakeList<PoolType, AssetT>>(account)
-    }
-
-    /// Check stake list extend at address exists.
-    public fun exists_stake_list_extend<PoolType: store, AssetT: store>(account: address): bool {
-        return exists<StakeListExtend<PoolType, AssetT>>(account)
-    }
-
-    /// Check stake list extend at address exists.
-    public fun exists_stake_extend<PoolType: store, AssetT: store>(account: address): bool {
-        return exists<StakeExtend<PoolType, AssetT>>(account)
     }
 }

@@ -652,8 +652,7 @@ module swap_admin::TokenSwapFarm {
 
 
     /// Inner stake operation that unstake all from pool and combind new amount to total asset, then restake.
-    fun inner_stake<X,
-                    Y>(
+    fun inner_stake<X, Y>(
         account: &signer,
         amount: u128,
         farm_cap: &FarmPoolCapability<X, Y>
