@@ -201,7 +201,6 @@ module swap_admin::YieldFarmingV3 {
         //update global pool info total alloc point
         let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(address);
         simple_map::add(&mut golbal_pool_info.alloc_point_registration, Self::get_asset_name<PoolType, AssetT>(), alloc_point);
-        //golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point + alloc_point;
 
         move_to(account, FarmingAsset<PoolType, AssetT> {
             asset_total_amount: 0,
@@ -209,7 +208,7 @@ module swap_admin::YieldFarmingV3 {
             harvest_index: 0,
             last_update_timestamp: now_seconds,
             start_time: now_seconds + delay,
-            alloc_point: 0,
+            alloc_point,
         });
 
         Self::recal_total_alloc_point(golbal_pool_info);
@@ -243,7 +242,7 @@ module swap_admin::YieldFarmingV3 {
         _cap: &ParameterModifyCapability<PoolType, AssetT>,
         broker: address,
         alloc_point: u128, //new pool alloc point
-        last_alloc_point: u128, //last pool alloc point
+        _last_alloc_point: u128, //last pool alloc point
     ) acquires FarmingAsset, YieldFarmingGlobalPoolInfo {
         let now_seconds = timestamp::now_seconds();
         let farming_asset = borrow_global_mut<FarmingAsset<PoolType, AssetT>>(broker);
@@ -257,7 +256,12 @@ module swap_admin::YieldFarmingV3 {
 
         //update global pool info total alloc point
         let golbal_pool_info = borrow_global_mut<YieldFarmingGlobalPoolInfo<PoolType>>(broker);
-        golbal_pool_info.total_alloc_point = golbal_pool_info.total_alloc_point - last_alloc_point + alloc_point;
+        simple_map::upsert(
+            &mut golbal_pool_info.alloc_point_registration,
+            Self::get_asset_name<PoolType, AssetT>(),
+            alloc_point,
+        );
+        Self::recal_total_alloc_point<PoolType>(golbal_pool_info);
     }
 
     /// call when weight_factor change, update pool info
