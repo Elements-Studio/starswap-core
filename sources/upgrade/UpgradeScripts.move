@@ -37,7 +37,7 @@ module swap_admin::UpgradeScripts {
         syrup_pool_release_per_second: u128,
     ) {
         TokenSwapConfig::assert_admin(account);
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
+        // TokenSwapConfig::set_alloc_mode_upgrade_switch(account, true);
 
         TokenSwapGov::genesis_initialize(account);
         TokenSwapGov::upgrade_dao_treasury_genesis_func(account);

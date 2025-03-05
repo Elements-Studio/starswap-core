@@ -49,7 +49,8 @@ module swap_admin::YieldFarmingV3 {
     ///  It controls the **total distribution amount per second** for all assets in the pool.
     ///
     /// 2. **Asset pools** are represented by the structure `FarmingAsset<phantom PoolType, phantom AssetT>`.
-    /// The pool's assets are constrained by the parameter `AssetT`, and all `AssetT` assets share the per-second release amount defined in `PoolType`. The `alloc_point` indicates the **weight value** of the current asset pool.
+    /// The pool's assets are constrained by the parameter `AssetT`, and all `AssetT` assets share the per-second release amount defined in `PoolType`.
+    /// The `alloc_point` indicates the **weight value** of the current asset pool.
     ///
     /// 3. When updating the `alloc_point` of an asset pool (indicating changes to the weight distribution across all pools),
     /// the **total allocation points** of the corresponding business pool must be recalculated.

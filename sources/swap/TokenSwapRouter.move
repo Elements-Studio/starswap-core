@@ -365,8 +365,7 @@ module swap_admin::TokenSwapRouter {
     }
 
     /// Poundage rate from swap fee
-    public fun set_poundage_rate<X,
-                                 Y>(signer: &signer, num: u64, denum: u64) {
+    public fun set_poundage_rate<X, Y>(signer: &signer, num: u64, denum: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -376,8 +375,7 @@ module swap_admin::TokenSwapRouter {
         };
     }
 
-    public entry fun upgrade_tokenpair_to_tokenswappair<X,
-                                                        Y>(signer: signer) {
+    public entry fun upgrade_tokenpair_to_tokenswappair<X, Y>(signer: signer) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -388,9 +386,11 @@ module swap_admin::TokenSwapRouter {
     }
 
     /// Operation rate from all swap fee
-    public fun set_swap_fee_operation_rate(signer: &signer,
-                                           num: u64,
-                                           denum: u64) {
+    public fun set_swap_fee_operation_rate(
+        signer: &signer,
+        num: u64,
+        denum: u64
+    ) {
         TokenSwapConfig::set_swap_fee_operation_rate(signer, num, denum);
     }
 
@@ -398,7 +398,8 @@ module swap_admin::TokenSwapRouter {
     public fun set_swap_fee_operation_rate_v2<X, Y>(
         signer: &signer,
         num: u64,
-        denum: u64) {
+        denum: u64
+    ) {
         TokenSwapConfig::set_swap_fee_operation_rate_v2<X, Y>(signer, num, denum);
     }
 
@@ -412,10 +413,10 @@ module swap_admin::TokenSwapRouter {
         TokenSwapConfig::set_global_freeze_switch(signer, freeze);
     }
 
-    /// Set alloc mode upgrade switch
-    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-        TokenSwapConfig::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
-    }
+    // /// Set alloc mode upgrade switch
+    // public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
+    //     TokenSwapConfig::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
+    // }
 
     /// Set white list boost switch
     public fun set_white_list_boost_switch(

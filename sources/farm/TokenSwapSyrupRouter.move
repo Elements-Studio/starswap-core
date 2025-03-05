@@ -55,7 +55,7 @@ module swap_admin::TokenSwapSyrupRouter {
 
     // /// DEPRECATED
     // /// Set release per second for token type pool
-    // public entry fun set_release_per_second<T: copy + drop + store>(
+    // public entry fun set_release_per_second<T>(
     //     _signer: signer,
     //     _release_per_second: u128
     // ) {
@@ -64,7 +64,7 @@ module swap_admin::TokenSwapSyrupRouter {
     // }
 
     // /// Set alivestate for token type pool
-    // public entry fun set_alive<T: copy + drop + store>(
+    // public entry fun set_alive<T>(
     //     _signer: signer,
     //     _alive: bool
     // ) {

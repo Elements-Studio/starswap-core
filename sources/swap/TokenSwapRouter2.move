@@ -11,9 +11,7 @@ module swap_admin::TokenSwapRouter2 {
     const ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED: u64 = 1002;
     const ERROR_ROUTER_X_IN_OVER_LIMIT_MAX: u64 = 1003;
 
-    public fun get_amount_in<X,
-                             R: copy + drop + store,
-                             Y>(amount_y_out: u128): (u128, u128) {
+    public fun get_amount_in<X, R, Y>(amount_y_out: u128): (u128, u128) {
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<R, Y>();
         let (reserve_r, reserve_y) = TokenSwapRouter::get_reserves<R, Y>();
         let r_in = TokenSwapLibrary::get_amount_in(amount_y_out, reserve_r, reserve_y, fee_numberator, fee_denumerator);
@@ -25,9 +23,7 @@ module swap_admin::TokenSwapRouter2 {
         (r_in, x_in)
     }
 
-    public fun get_amount_out<X,
-                              R: copy + drop + store,
-                              Y>(amount_x_in: u128): (u128, u128) {
+    public fun get_amount_out<X, R, Y>(amount_x_in: u128): (u128, u128) {
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<X, R>();
         let (reserve_x, reserve_r) = TokenSwapRouter::get_reserves<X, R>();
         let r_out = TokenSwapLibrary::get_amount_out(
@@ -45,9 +41,7 @@ module swap_admin::TokenSwapRouter2 {
         (r_out, y_out)
     }
 
-    public fun swap_exact_token_for_token<X,
-                                          R: copy + drop + store,
-                                          Y>(
+    public fun swap_exact_token_for_token<X, R, Y>(
         signer: &signer,
         amount_x_in: u128,
         amount_y_out_min: u128) {
@@ -59,9 +53,7 @@ module swap_admin::TokenSwapRouter2 {
         TokenSwapRouter::swap_exact_token_for_token<R, Y>(signer, r_out, amount_y_out_min);
     }
 
-    public fun swap_token_for_exact_token<X,
-                                          R: copy + drop + store,
-                                          Y>(
+    public fun swap_token_for_exact_token<X, R, Y>(
         signer: &signer,
         amount_x_in_max: u128,
         amount_y_out: u128

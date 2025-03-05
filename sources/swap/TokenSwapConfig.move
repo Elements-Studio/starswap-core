@@ -310,19 +310,19 @@ module swap_admin::TokenSwapConfig {
         }
     }
 
-    /// Pool alloc mode upgrade switch
-    public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-        assert_admin(signer);
-
-        let config = AllocModeUpgradeSwitch {
-            upgrade_switch,
-        };
-        if (on_chain_config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
-            on_chain_config::set<AllocModeUpgradeSwitch>(signer, config);
-        } else {
-            on_chain_config::publish_new_config<AllocModeUpgradeSwitch>(signer, config);
-        }
-    }
+    // /// Pool alloc mode upgrade switch
+    // public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
+    //     assert_admin(signer);
+    //
+    //     let config = AllocModeUpgradeSwitch {
+    //         upgrade_switch,
+    //     };
+    //     if (on_chain_config::config_exist_by_address<AllocModeUpgradeSwitch>(admin_address())) {
+    //         on_chain_config::set<AllocModeUpgradeSwitch>(signer, config);
+    //     } else {
+    //         on_chain_config::publish_new_config<AllocModeUpgradeSwitch>(signer, config);
+    //     }
+    // }
 
     ///  Pool alloc mode upgrade switch
     // public fun get_alloc_mode_upgrade_switch(): bool {
