@@ -12,14 +12,11 @@
 
 //# run --signers A1
 script {
-//    use StarcoinFramework::Debug;
-
     fun test(_signer: signer) {
         let a1_address = @0x8a25c80bfa4a16a9bf294b9817857030;
         let a3_address = @0xc9c2ddf0c7501352ff135c6d99a21169;
         assert!(a1_address != @A1, 1001);
         assert!(a3_address != @A3, 1002);
-//        Debug::print(&@A3);
     }
 }
 // check: EXECUTED
