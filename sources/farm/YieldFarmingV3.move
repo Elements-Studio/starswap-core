@@ -679,7 +679,31 @@ module swap_admin::YieldFarmingV3 {
         (global_pool_info.total_alloc_point, global_pool_info.pool_release_per_second, )
     }
 
-    /// calculate pool harvest index
+    /// There contains a pair of coordinated calculation logics for yield computation in liquidity mining scenarios:
+    /// **1. Pool Harvest Index Calculation (`calculate_harvest_index_with_asset_v2`)**
+    ///   **Function**: Computes the harvest index increment for an asset pool over a time period and updates the global index
+    ///   **Core Formula**:
+    ///   ```
+    ///   harvest_index = base_reward * allocation_ratio / total_weight
+    ///   base_reward = (current_time - last_update) * pool_release_per_second
+    ///   allocation_ratio = asset_alloc_point / total_alloc_point
+    ///   ```
+    /// **Special Logic**:
+    ///   Returns original index when business pool's total allocation point <= 0 (inactive state)
+    ///   Uses base reward directly when asset total weight is 0 (initial state)
+    ///   Supports two business types:
+    ///     *Farming Pool*: Total weight = sigma(user_lp_amount * boost_factor)
+    ///     *Staking Pool*: Total weight = sigma(user_lp_amount * stepwise_multiplier)
+    ///
+    /// **2. User Withdrawal Calculation (`calculate_withdraw_amount_v2`)**
+    ///  **Function**: Computes withdrawable amount based on user's asset weight and index difference
+    ///  **Formula**:
+    ///   ```
+    ///  amount = (current_index - last_index) * user_asset_weight
+    ///   ```
+    /// **Special Handling**:
+    ///  Uses index difference directly when user asset weight is 0
+    ///  Employs fixed-point arithmetic for precision, converts result to u128
     ///
     /// harvest_index = (current_timestamp - last_timestamp) * pool_release_per_second * (alloc_point/total_alloc_point)  / (asset_total_weight );
     /// if farm:   asset_total_weight = Sigma (per user lp_amount *  user boost_factor)
@@ -702,59 +726,61 @@ module swap_admin::YieldFarmingV3 {
         };
 
         let time_period = now_seconds - farming_asset.last_update_timestamp;
-        let global_pool_reward = business_pool.pool_release_per_second * (time_period as u128);
-        let pool_reward = BigExponential::exp(
-            global_pool_reward * (farming_asset.alloc_point as u128),
-            (business_pool.total_alloc_point as u128)
+        let increment_harvest_index = Self::calc_asset_pool_increment_harvest_index(
+            business_pool.total_alloc_point,
+            farming_asset.alloc_point,
+            farming_asset.asset_total_weight,
+            time_period,
+            business_pool.pool_release_per_second,
         );
-
-        // calculate period harvest index and global pool info when asset_total_weight is zero
-        let harvest_index_period = if (farming_asset.asset_total_weight <= 0) {
-            BigExponential::mantissa(pool_reward)
-        } else {
-            BigExponential::mantissa(
-                BigExponential::div_exp(pool_reward, BigExponential::exp_from_u256(farming_asset.asset_total_weight))
-            )
-        };
-        farming_asset.harvest_index + harvest_index_period
+        farming_asset.harvest_index + increment_harvest_index
     }
 
     /// calculate user gain index
     /// if farm:  gain = (current_index - last_index) * user_asset_weight; user_asset_weight = user_amount * boost_factor;
     /// if stake: gain = (current_index - last_index) * user_asset_weight; user_asset_weight = user_amount * stepwise_multiplier;
     fun calculate_withdraw_amount_v2(
-        harvest_index: u256,
         last_harvest_index: u256,
+        current_harvest_index: u256,
         user_asset_weight: u256
     ): u128 {
         assert!(
-            harvest_index >= last_harvest_index,
+            current_harvest_index >= last_harvest_index,
             error::invalid_argument(ERR_FARMING_CALC_LAST_IDX_BIGGER_THAN_NOW)
         );
-        let amount_u256 =
-            (user_asset_weight as u256) * ((harvest_index - last_harvest_index) as u256);
+        let amount_u256 = if (user_asset_weight > 0) {
+            user_asset_weight * (current_harvest_index - last_harvest_index)
+        } else {
+            (current_harvest_index - last_harvest_index)
+        };
         BigExponential::truncate(BigExponential::exp_from_u256(amount_u256))
     }
 
+    /// To facilitate testing, the incremental calculation process for `harvest_index` is encapsulated here.
+    /// time_period by seconds
+    ///
     fun calc_asset_pool_increment_harvest_index(
         busi_alloc_point: u64,
         asset_alloc_point: u64,
-        asset_total_weight: u128,
+        asset_total_weight: u256,
         time_period: u64,
         busi_release_per_sec: u128,
     ): u256 {
+        if (busi_alloc_point == 0 || asset_alloc_point == 0) {
+            return 0
+        };
+
         let busi_pool_reward = busi_release_per_sec * (time_period as u128);
         let pool_reward = BigExponential::exp(
             busi_pool_reward * (asset_alloc_point as u128),
             (busi_alloc_point as u128)
         );
-
         // calculate period harvest index and global pool info when asset_total_weight is zero
         if (asset_total_weight <= 0) {
             BigExponential::mantissa(pool_reward)
         } else {
             BigExponential::mantissa(
-                BigExponential::div_exp(pool_reward, BigExponential::exp_direct(asset_total_weight))
+                BigExponential::div_exp(pool_reward, BigExponential::exp_from_u256(asset_total_weight))
             )
         }
     }
@@ -893,13 +919,123 @@ module swap_admin::YieldFarmingV3 {
     }
 
     #[test]
-    public fun test_calc_increment_harvest_index() {
-        let basic_index = Self::calc_asset_pool_increment_harvest_index(
-            100, 100, 1000000000, 1, 1);
-        let increment_index = Self::calc_asset_pool_increment_harvest_index(
-            100, 100, 1000000000, 1, 1);
-        debug::print(&increment_index);
+    public fun test_calc_increment_harvest_index_basic() {
+        let total_weight = 100_000_000;
 
-        let amount = Self::calculate_withdraw_amount_v2(basic_index, increment_index, 1000000000);
+        // from second 0 - 1, release 1 per second
+        debug::print(&string::utf8(b"test_calc_increment_harvest_index_basic | #1"));
+        let index_1 = Self::calc_asset_pool_increment_harvest_index(
+            100, 100,
+            0, 1, 1
+        );
+        // From #0 to #1, expect 1
+        let amount = Self::calculate_withdraw_amount_v2(0, index_1, 0);
+        debug::print(&index_1);
+        debug::print(&amount);
+        assert!(amount == 1, 101);
+
+        // from second N - N + 2, release 1 per second
+        debug::print(&string::utf8(b"test_calc_increment_harvest_index_basic | #n - #n+2"));
+        let index_n = Self::calc_asset_pool_increment_harvest_index(
+            100, 100,
+            total_weight, 1, 1
+        );
+        let index_n_2 = index_n + Self::calc_asset_pool_increment_harvest_index(
+            100, 100,
+            total_weight, 2, 1
+        );
+
+        // expect 2
+        debug::print(&index_n);
+        debug::print(&index_n_2);
+        let amount = Self::calculate_withdraw_amount_v2(index_n, index_n_2, total_weight);
+        debug::print(&amount);
+        assert!(amount == 2, 102);
+    }
+
+    #[test]
+    public fun test_calc_increment_harvest_index_edge_case() {
+        let mock_small_asset_weight = 1_000_000u256;
+        let mock_large_asset_weight = 1_000_000_000u256;
+
+        // case 1: business pool inactivte (total_alloc_point=0)
+        {
+            let index_inactive = Self::calc_asset_pool_increment_harvest_index(
+                0, // busi_alloc_point=0
+                100,
+                mock_small_asset_weight,
+                100,
+                1
+            );
+            // not take any rewards
+            assert!(index_inactive == 0, 101);
+        };
+
+        // case 2: time period is 0
+        {
+            let index_zero_time = Self::calc_asset_pool_increment_harvest_index(
+                100,
+                100,
+                mock_small_asset_weight,
+                0,
+                1
+            );
+            // not take any rewards
+            assert!(index_zero_time == 0, 102);
+        };
+
+        {
+            // case 3: weight is 0
+            let index_diff = 1_000u256;
+            let withdraw_zero_weight = Self::calculate_withdraw_amount_v2(
+                0u256,
+                index_diff,
+                0u256,
+            );
+            assert!(withdraw_zero_weight == BigExponential::truncate(BigExponential::exp_from_u256(index_diff)), 103);
+        };
+
+        {
+            // case 4: Precision processing of extremely micro reward value
+            let micro_reward_idx = Self::calc_asset_pool_increment_harvest_index(
+                100,
+                1,
+                mock_large_asset_weight,
+                1,
+                1,
+            );
+            // expect = (1 * 1 * 1 / 100) / 1_000_000_000 = 0.00000000000001
+            debug::print(&micro_reward_idx);
+            let reward_amount = BigExponential::truncate(
+                BigExponential::exp_from_u256(mock_large_asset_weight * micro_reward_idx)
+            );
+            assert!(reward_amount == 0, 104);
+        };
+
+        {
+
+            // case 5: 50% percent allocation
+            let half_index = Self::calc_asset_pool_increment_harvest_index(
+                200,
+                100, // 50% allocation point
+                mock_small_asset_weight,
+                100,
+                2
+            );
+            let reward_amount = BigExponential::truncate(
+                BigExponential::exp_from_u256(mock_small_asset_weight * half_index)
+            );
+            debug::print(&reward_amount);
+            assert!(reward_amount == 100, 105);
+        };
+
+        {
+            // case 6: Continuity test when weight increases
+            let index_t1 = Self::calc_asset_pool_increment_harvest_index(100, 100, 0u256, 1, 1);
+            let index_t2 = index_t1 + Self::calc_asset_pool_increment_harvest_index(100, 100, 100u256, 1, 1);
+            // Verify state transition from zero weight to non-zero weight
+            let amount = Self::calculate_withdraw_amount_v2(index_t1, index_t2, 100u256);
+            assert!(amount == 1, 106);
+        };
     }
 }

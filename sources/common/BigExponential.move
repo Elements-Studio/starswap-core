@@ -71,7 +71,7 @@ module swap_admin::BigExponential {
 
     public fun div_exp(a: Exp, b: Exp): Exp {
         Exp {
-            mantissa: a.mantissa + b.mantissa
+            mantissa: a.mantissa / b.mantissa
         }
     }
 
