@@ -38,7 +38,7 @@ module swap_admin::CommonHelper {
     }
 
     public fun pow_amount<T>(amount: u128): u128 {
-        amount * (coin::decimals<T>() as u128)
+        amount * Self::pow_10(coin::decimals<T>())
     }
 
     public fun pow_10(exp: u8): u128 {

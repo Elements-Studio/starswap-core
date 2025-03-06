@@ -22,7 +22,7 @@ module swap_admin::TokenSwapFarmRouter {
     //     // };
     // }
 
-    public entry fun add_farm_pool_v2<X, Y>(account: &signer, alloc_point: u128) {
+    public entry fun add_farm_pool_v2<X, Y>(account: &signer, alloc_point: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -125,7 +125,7 @@ module swap_admin::TokenSwapFarmRouter {
     // }
 
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_info_v2<X, Y>(): (u128, u128, u128, u128) {
+    public fun query_info_v2<X, Y>(): (u64, u128, u256, u256) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -158,7 +158,7 @@ module swap_admin::TokenSwapFarmRouter {
     // }
 
     /// Set farm alloc point
-    public entry fun set_farm_alloc_point<X, Y>(signer: &signer, alloc_point: u128) {
+    public entry fun set_farm_alloc_point<X, Y>(signer: &signer, alloc_point: u64) {
         let order = TokenSwap::compare_token<X, Y>();
         assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
         if (order == 1) {
@@ -190,7 +190,7 @@ module swap_admin::TokenSwapFarmRouter {
     }
 
     /// Query farm golbal pool info
-    public fun query_global_pool_info(): (u128, u128) {
+    public fun query_global_pool_info(): (u64, u128) {
         TokenSwapFarm::query_global_pool_info()
     }
 

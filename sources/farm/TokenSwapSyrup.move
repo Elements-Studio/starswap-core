@@ -53,7 +53,7 @@ module swap_admin::TokenSwapSyrup {
     /// Syrup pool extend information
     struct SyrupExtInfoV2<phantom T> has key, store {
         multiplier_pool_cap: TokenSwapSyrupMultiplierPool::PoolCapability<PoolTypeSyrup, coin::Coin<T>>,
-        alloc_point: u128,
+        alloc_point: u64,
     }
 
     struct SyrupStakeList<phantom T> has key, store {
@@ -137,7 +137,7 @@ module swap_admin::TokenSwapSyrup {
         /// admin address
         admin: address,
         /// Alloc point
-        alloc_point: u128,
+        alloc_point: u64,
         /// delay
         delay: u64,
     }
@@ -171,7 +171,7 @@ module swap_admin::TokenSwapSyrup {
         /// admin address
         admin: address,
         /// alloc point
-        alloc_point: u128,
+        alloc_point: u64,
     }
 
     // Event emitted when stake been called
@@ -231,7 +231,7 @@ module swap_admin::TokenSwapSyrup {
 
     /// Initialized global pool
     public fun initialize_global_pool_info(account: &signer, pool_release_per_second: u128) {
-        YieldFarming::initialize_global_pool_info<PoolTypeSyrup>(account, pool_release_per_second);
+        YieldFarming::initialize_business_pool_info<PoolTypeSyrup>(account, pool_release_per_second);
     }
 
     // /// TODO: DEPRECATED call
@@ -274,7 +274,7 @@ module swap_admin::TokenSwapSyrup {
     /// Add syrup pool for token type v2
     public fun add_pool_v2<T>(
         signer: &signer,
-        alloc_point: u128,
+        alloc_point: u64,
         delay: u64
     ) {
         // Only called by the genesis
@@ -315,7 +315,7 @@ module swap_admin::TokenSwapSyrup {
         STAR::assert_genesis_address(signer);
 
         // Updated release per second for `PoolTypeSyrup`
-        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeSyrup>(
+        YieldFarming::modify_business_release_per_second_by_admin<PoolTypeSyrup>(
             signer,
             pool_release_per_second
         );
@@ -331,7 +331,7 @@ module swap_admin::TokenSwapSyrup {
 
         // Updated harvest index of token type
         let syrup = borrow_global_mut<Syrup<T>>(broker_addr());
-        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
+        YieldFarming::update_asset_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
             &syrup.param_cap,
             broker_addr(),
         );
@@ -411,7 +411,7 @@ module swap_admin::TokenSwapSyrup {
 
     /// Update pool allocation point
     /// Only called by admin
-    public fun update_allocation_point<T>(signer: &signer, alloc_point: u128) acquires Syrup, SyrupExtInfoV2 {
+    public fun update_allocation_point<T>(signer: &signer, alloc_point: u64) acquires Syrup, SyrupExtInfoV2 {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
 
@@ -424,7 +424,7 @@ module swap_admin::TokenSwapSyrup {
         let syrup = borrow_global<Syrup<T>>(broker);
         let syrup_ext_info = borrow_global_mut<SyrupExtInfoV2<T>>(broker);
 
-        YieldFarming::update_pool<
+        YieldFarming::update_asset_pool<
             PoolTypeSyrup,
             STAR::STAR,
             coin::Coin<T>
@@ -529,7 +529,7 @@ module swap_admin::TokenSwapSyrup {
             signer,
             broker_addr,
             stake_token,
-            amount * (stepwise_multiplier as u128),
+            (amount as u256) * (stepwise_multiplier as u256),
             amount,
             stepwise_multiplier,
             pledge_time_sec,
@@ -687,16 +687,16 @@ module swap_admin::TokenSwapSyrup {
         YieldFarming::query_stake_list<PoolTypeSyrup, coin::Coin<T>>(user_addr)
     }
 
-    /// query info for syrup pool
-    public fun query_release_per_second<T>(): u128 {
-        abort error::invalid_state(ERR_DEPRECATED)
-        // let syrup = borrow_global<Syrup<T>>(STAR::token_address());
-        // syrup.release_per_second
-    }
+    // /// query info for syrup pool
+    // public fun query_release_per_second<T>(): u128 {
+    //     abort error::invalid_state(ERR_DEPRECATED)
+    //     // let syrup = borrow_global<Syrup<T>>(STAR::token_address());
+    //     // syrup.release_per_second
+    // }
 
     /// Queyry global pool info
     /// return value: (total_alloc_point, pool_release_per_second)
-    public fun query_syrup_info(): (u128, u128) {
+    public fun query_syrup_info(): (u64, u128) {
         YieldFarming::query_global_pool_info<PoolTypeSyrup>(STAR::token_address())
     }
 
@@ -725,7 +725,7 @@ module swap_admin::TokenSwapSyrup {
 
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_pool_info_v2<T>(): (u128, u128, u128, u128) {
+    public fun query_pool_info_v2<T>(): (u64, u128, u256, u256) {
         YieldFarming::query_pool_info_v2<PoolTypeSyrup, coin::Coin<T>>(STAR::token_address())
     }
 
@@ -862,12 +862,12 @@ module swap_admin::TokenSwapSyrup {
     public fun adjust_total_amount<T>(
         account: &signer,
         total_amount: u128,
-        total_weight: u128,
+        total_weight: u256,
     ) acquires Syrup {
         STAR::assert_genesis_address(account);
 
         let syrup = borrow_global<Syrup<T>>(broker_addr());
-        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
+        YieldFarming::update_asset_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
             &syrup.param_cap,
             broker_addr()
         );
@@ -889,15 +889,12 @@ module swap_admin::TokenSwapSyrup {
         let (
             total_amount,
             total_weight
-        ) = TokenSwapSyrupMultiplierPool::query_total_amount<
-            PoolTypeSyrup,
-            coin::Coin<T>
-        >(
+        ) = TokenSwapSyrupMultiplierPool::query_total_amount<PoolTypeSyrup, coin::Coin<T>>(
             broker_addr
         );
 
         let syrup = borrow_global<Syrup<T>>(broker_addr);
-        YieldFarming::update_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
+        YieldFarming::update_asset_pool_index<PoolTypeSyrup, STAR::STAR, coin::Coin<T>>(
             &syrup.param_cap,
             broker_addr()
         );

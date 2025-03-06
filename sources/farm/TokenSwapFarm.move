@@ -116,9 +116,8 @@ module swap_admin::TokenSwapFarm {
     }
 
     struct FarmPoolInfo<phantom X, phantom Y> has key, store {
-        alloc_point: u128
+        alloc_point: u64
     }
-
 
     /// Initialize farm big pool
     public fun initialize_farm_pool(
@@ -143,7 +142,7 @@ module swap_admin::TokenSwapFarm {
     ) {
         // Only called by the genesis
         STAR::assert_genesis_address(account);
-        YieldFarming::initialize_global_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
+        YieldFarming::initialize_business_pool_info<PoolTypeFarmPool>(account, pool_release_per_second);
     }
 
     // /// DEPRECATED call
@@ -192,7 +191,7 @@ module swap_admin::TokenSwapFarm {
     /// Initialize Liquidity pair gov pool, only called by token issuer
     public fun add_farm_v2<X, Y>(
         signer: &signer,
-        alloc_point: u128
+        alloc_point: u64
     ) acquires FarmPoolEvent {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
@@ -260,7 +259,7 @@ module swap_admin::TokenSwapFarm {
         STAR::assert_genesis_address(signer);
 
         // Updated release per second for `PoolTypeFarmPool`
-        YieldFarming::modify_global_release_per_second_by_admin<PoolTypeFarmPool>(
+        YieldFarming::modify_business_release_per_second_by_admin<PoolTypeFarmPool>(
             signer,
             pool_release_per_second
         );
@@ -310,7 +309,7 @@ module swap_admin::TokenSwapFarm {
 
     public fun set_farm_alloc_point<X, Y>(
         signer: &signer,
-        alloc_point: u128
+        alloc_point: u64
     ) acquires FarmPoolCapability, FarmPoolInfo, FarmPoolEvent {
         // Only called by the genesis
         STAR::assert_genesis_address(signer);
@@ -320,7 +319,7 @@ module swap_admin::TokenSwapFarm {
         let farm_pool_info = borrow_global_mut<FarmPoolInfo<X, Y>>(broker);
         let last_alloc_point = farm_pool_info.alloc_point;
 
-        YieldFarming::update_pool<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
+        YieldFarming::update_asset_pool<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
             &cap.cap,
             broker,
             alloc_point,
@@ -599,7 +598,7 @@ module swap_admin::TokenSwapFarm {
 
     /// Query pool info from pool type v2
     /// return value: (alloc_point, asset_total_amount, asset_total_weight, harvest_index)
-    public fun query_info_v2<X, Y>(): (u128, u128, u128, u128) {
+    public fun query_info_v2<X, Y>(): (u64, u128, u256, u256) {
         YieldFarming::query_pool_info_v2<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(STAR::token_address())
     }
 
@@ -609,7 +608,7 @@ module swap_admin::TokenSwapFarm {
     }
 
     /// Query all stake weight
-    public fun query_total_stake_weight<X, Y>(user: address): u128 {
+    public fun query_total_stake_weight<X, Y>(user: address): u256 {
         YieldFarming::query_stake_weight<PoolTypeFarmPool, coin::Coin<LiquidityToken<X, Y>>>(user)
     }
 
@@ -638,13 +637,13 @@ module swap_admin::TokenSwapFarm {
         ) = YieldFarming::query_global_pool_info<PoolTypeFarmPool>(
             STAR::token_address()
         );
-        pool_release_per_second * farm_pool_info.alloc_point / total_alloc_point
+        pool_release_per_second * (farm_pool_info.alloc_point as u128) / (total_alloc_point as u128)
         // }
     }
 
     /// Query farm golbal pool info
     /// (total_alloc_point, pool_release_per_second)
-    public fun query_global_pool_info(): (u128, u128) {
+    public fun query_global_pool_info(): (u64, u128) {
         YieldFarming::query_global_pool_info<PoolTypeFarmPool>(
             STAR::token_address()
         )
@@ -888,7 +887,7 @@ module swap_admin::TokenSwapFarm {
 
         // Updated harvest index of token type
         let farm = borrow_global_mut<FarmPoolCapability<X, Y>>(STAR::token_address());
-        YieldFarming::update_pool_index<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
+        YieldFarming::update_asset_pool_index<PoolTypeFarmPool, STAR::STAR, coin::Coin<LiquidityToken<X, Y>>>(
             &farm.cap,
             STAR::token_address(),
         );

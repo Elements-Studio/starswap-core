@@ -116,8 +116,8 @@ module swap_admin::TokenSwapFarmBoost {
     }
 
     /// calculation asset weight for boost
-    public fun calculate_boost_weight(amount: u128, boost_factor: u64): u128 {
-        amount * (boost_factor as u128) / (BOOST_FACTOR_PRECESION as u128)
+    public fun calculate_boost_weight(amount: u128, boost_factor: u64): u256 {
+        (amount as u256) * (boost_factor as u256) / (BOOST_FACTOR_PRECESION as u256)
     }
 
     /// predict boost factor before stake
@@ -301,8 +301,8 @@ module swap_admin::TokenSwapFarmBoost {
         account: &signer,
         stake_id: u64,
         new_weight_factor: u64, //new stake weight factor
-        new_asset_weight: u128, //new stake asset weight
-        last_asset_weight: u128, //last stake asset weight)
+        new_asset_weight: u256, //new stake asset weight
+        last_asset_weight: u256, //last stake asset weight)
     ) {
         let account_addr = signer::address_of(account);
         // check if need udpate

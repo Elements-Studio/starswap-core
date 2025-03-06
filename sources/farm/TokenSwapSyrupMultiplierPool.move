@@ -192,7 +192,7 @@ module swap_admin::TokenSwapSyrupMultiplierPool {
     /// @return (total_amount, total_weight)
     public fun query_total_amount<PoolType: store, AssetType: store>(
         broker: address,
-    ): (u128, u128, ) acquires MultiplierPoolsGlobalInfo {
+    ): (u128, u256, ) acquires MultiplierPoolsGlobalInfo {
         let (
             _,
             multiplier_list,
@@ -210,7 +210,7 @@ module swap_admin::TokenSwapSyrupMultiplierPool {
         );
 
         let total_amount: u128 = 0;
-        let total_weight: u128 = 0;
+        let total_weight: u256 = 0;
         let idx = 0;
         let len = vector::length(&amount_list);
         loop {
@@ -221,7 +221,7 @@ module swap_admin::TokenSwapSyrupMultiplierPool {
             let stepwise_amount = *vector::borrow(&amount_list, idx);
             let stepwise_mulitplier = *vector::borrow(&multiplier_list, idx);
             total_amount = total_amount + stepwise_amount;
-            total_weight = total_weight + stepwise_amount * (stepwise_mulitplier as u128);
+            total_weight = total_weight + (stepwise_amount as u256) * (stepwise_mulitplier as u256);
 
             idx = idx + 1;
         };

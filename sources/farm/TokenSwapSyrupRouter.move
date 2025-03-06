@@ -26,16 +26,13 @@ module swap_admin::TokenSwapSyrupRouter {
 
     public entry fun add_pool<T>(
         signer: signer,
-        alloc_point: u128,
+        alloc_point: u64,
         delay: u64
     ) {
         TokenSwapSyrup::add_pool_v2<T>(&signer, alloc_point, delay);
     }
 
-    public entry fun update_allocation_point<T: store>(
-        signer: signer,
-        alloc_point: u128
-    ) {
+    public entry fun update_allocation_point<T: store>(signer: signer, alloc_point: u64) {
         TokenSwapSyrup::update_allocation_point<T>(&signer, alloc_point);
     }
 
@@ -150,7 +147,7 @@ module swap_admin::TokenSwapSyrupRouter {
     public entry fun adjust_total_amount_entry<T>(
         account: signer,
         total_amount: u128,
-        total_weight: u128,
+        total_weight: u256,
     ) {
         TokenSwapSyrup::adjust_total_amount<T>(&account, total_amount, total_weight);
     }
