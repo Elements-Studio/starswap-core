@@ -581,14 +581,19 @@ module swap_admin::YieldFarmingV3 {
             farming_asset,
             now_seconds
         );
+
+        debug::print(&string::utf8(b"YieldFarmingV3::query_expect_gain | calculate_withdraw_amount_v2: "));
+        debug::print(&new_harvest_index);
+        debug::print(&stake.last_harvest_index);
+        debug::print(&stake.asset_weight);
+        debug::print(&stake.gain);
+
         let new_gain = Self::calculate_withdraw_amount_v2(
             new_harvest_index,
             stake.last_harvest_index,
             stake.asset_weight
         );
         debug::print(&string::utf8(b"YieldFarmingV3::query_expect_gain | new gain: "));
-        debug::print(&new_harvest_index);
-        debug::print(&stake.gain);
         debug::print(&new_gain);
         stake.gain + new_gain
     }
@@ -740,8 +745,8 @@ module swap_admin::YieldFarmingV3 {
     /// if farm:  gain = (current_index - last_index) * user_asset_weight; user_asset_weight = user_amount * boost_factor;
     /// if stake: gain = (current_index - last_index) * user_asset_weight; user_asset_weight = user_amount * stepwise_multiplier;
     fun calculate_withdraw_amount_v2(
-        last_harvest_index: u256,
         current_harvest_index: u256,
+        last_harvest_index: u256,
         user_asset_weight: u256
     ): u128 {
         assert!(
@@ -948,7 +953,7 @@ module swap_admin::YieldFarmingV3 {
         // expect 2
         debug::print(&index_n);
         debug::print(&index_n_2);
-        let amount = Self::calculate_withdraw_amount_v2(index_n, index_n_2, total_weight);
+        let amount = Self::calculate_withdraw_amount_v2(index_n_2, index_n, total_weight);
         debug::print(&amount);
         assert!(amount == 2, 102);
     }
@@ -988,8 +993,8 @@ module swap_admin::YieldFarmingV3 {
             // case 3: weight is 0
             let index_diff = 1_000u256;
             let withdraw_zero_weight = Self::calculate_withdraw_amount_v2(
-                0u256,
                 index_diff,
+                0u256,
                 0u256,
             );
             assert!(withdraw_zero_weight == BigExponential::truncate(BigExponential::exp_from_u256(index_diff)), 103);
@@ -1034,7 +1039,7 @@ module swap_admin::YieldFarmingV3 {
             let index_t1 = Self::calc_asset_pool_increment_harvest_index(100, 100, 0u256, 1, 1);
             let index_t2 = index_t1 + Self::calc_asset_pool_increment_harvest_index(100, 100, 100u256, 1, 1);
             // Verify state transition from zero weight to non-zero weight
-            let amount = Self::calculate_withdraw_amount_v2(index_t1, index_t2, 100u256);
+            let amount = Self::calculate_withdraw_amount_v2(index_t2, index_t1, 100u256);
             assert!(amount == 1, 106);
         };
     }
