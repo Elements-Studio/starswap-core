@@ -1,82 +1,132 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
+//# init -n test --public-keys swap_admin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
 //# faucet --addr alice --amount 10000000000000000
 
-//# faucet --addr SwapAdmin --amount 10000000000000000
+//# faucet --addr swap_admin --amount 10000000000000000
 
-//# run --signers SwapAdmin
+//# publish
+module swap_admin::CoinMock {
+    struct WUSDT {}
+}
+
+//# run --signers swap_admin
 script {
-    use SwapAdmin::TokenMock::{Self, WUSDT};
+    use std::string;
+    use swap_admin::CoinMock::WUSDT;
+    use starcoin_framework::managed_coin;
 
-    fun init_token(signer: signer) {
-        let precision: u8 = 9; //STC precision is also 9.
-        TokenMock::register_token<WUSDT>(&signer, precision);
+    fun init_token(swap_admin: &signer) {
+        managed_coin::initialize<WUSDT>(
+            swap_admin,
+            *string::bytes(&string::utf8(b"WUSDT")),
+            *string::bytes(&string::utf8(b"WUSDT")),
+            9,
+            true,
+        );
     }
 }
 // check: EXECUTED
 
-//# run --signers SwapAdmin
+//# run --signers swap_admin
 script {
-    use SwapAdmin::TokenMock::{WUSDT};
-    use SwapAdmin::TokenSwap;
-    use StarcoinFramework::STC::STC;
+    use swap_admin::CoinMock::WUSDT;
+    use swap_admin::TokenSwap;
+    use starcoin_framework::starcoin_coin::STC;
 
-    fun register_token_pair(signer: signer) {
-        //token pair register must be swap admin account
-        TokenSwap::register_swap_pair<STC, WUSDT>(&signer);
+    fun register_token_pair(swap_admin: &signer) {
+        // token pair register must be swap admin account
+        TokenSwap::register_swap_pair<STC, WUSDT>(swap_admin);
         assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 
 //# run --signers alice
 script {
-    use StarcoinFramework::Debug;
-    use StarcoinFramework::STC::STC;
-    use StarcoinFramework::Math;
+    use starcoin_framework::coin;
+    use swap_admin::CoinMock::WUSDT;
 
-    use SwapAdmin::CommonHelper;
-    use SwapAdmin::TokenMock::WUSDT;
-    //use SwapAdmin::TokenSwap;
-    use SwapAdmin::TokenSwapRouter;
-    use SwapAdmin::TokenSwapLibrary;
-    use SwapAdmin::TokenSwapConfig;
+    fun alice_register_wusdt(alice: &signer) {
+        coin::register<WUSDT>(alice);
+    }
+}
 
-    fun main(signer: signer) {
-        let precision: u8 = 9; //STC precision is also 9.
 
-        let scaling_factor = Math::pow(10, (precision as u64));// STC/WUSDT = 1:5
-        let stc_amount: u128 = 1000 * scaling_factor;
-        let usdt_amount: u128 = 1000 * scaling_factor;
+//# run --signers swap_admin
+script {
+    use swap_admin::CommonHelper::{safe_mint_to, pow_amount};
+    use swap_admin::CoinMock::WUSDT;
 
-        CommonHelper::safe_mint<WUSDT>(&signer, usdt_amount);
+    fun swap_admin_mint_usdt_to_alice(swap_admin: &signer) {
+        safe_mint_to<WUSDT>(swap_admin, @alice, pow_amount<WUSDT>(1000));
+    }
+}
+
+
+
+//# run --signers alice
+script {
+    use std::string;
+    use starcoin_std::debug;
+    use starcoin_framework::starcoin_coin::STC;
+
+    use swap_admin::CommonHelper::pow_amount;
+    use swap_admin::CoinMock::WUSDT;
+    use swap_admin::TokenSwapRouter;
+    use swap_admin::TokenSwapLibrary;
+    use swap_admin::TokenSwapConfig;
+
+    fun add_liquidity_and_check_cal_output_test(alice: &signer) {
+        //let scaling_factor = math128::pow(10, 9);// STC/WUSDT = 1:5
+        // let stc_amount: u128 = 1000 * scaling_factor;
+        // let usdt_amount: u128 = 1000 * scaling_factor;
+
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Add liquidity, STC/WUSDT = 1:1
-        let amount_stc_desired: u128 = 1 * scaling_factor;
-        let amount_usdt_desired: u128 = 1 * scaling_factor;
-        let amount_stc_min: u128 = stc_amount;
-        let amount_usdt_min: u128 = usdt_amount;
-        TokenSwapRouter::add_liquidity<STC, WUSDT>(&signer,
-            amount_stc_desired, amount_usdt_desired, amount_stc_min, amount_usdt_min);
+        let amount_stc_desired: u128 = pow_amount<STC>(1);
+        let amount_usdt_desired: u128 = pow_amount<WUSDT>(1);
+        let amount_stc_min: u128 = pow_amount<STC>(1000);
+        let amount_usdt_min: u128 = pow_amount<WUSDT>(1000);
+        TokenSwapRouter::add_liquidity<STC, WUSDT>(
+            alice,
+            amount_stc_desired,
+            amount_usdt_desired,
+            amount_stc_min,
+            amount_usdt_min
+        );
         let total_liquidity: u128 = TokenSwapRouter::total_liquidity<STC, WUSDT>();
-        assert!(total_liquidity > 0, 10000);
+        assert!(total_liquidity > 0, 100);
 
         let (fee_numberator, fee_denumerator) = TokenSwapConfig::get_poundage_rate<STC, WUSDT>();
         let (reserve_x, reserve_y) = TokenSwapRouter::get_reserves<STC, WUSDT>();
-        //Debug::print<u128>(&reserve_x);
-        //Debug::print<u128>(&reserve_y);
-        assert!(reserve_x >= amount_stc_desired, 10001);
+        //debug::print<u128>(&reserve_x);
+        //debug::print<u128>(&reserve_y);
+        assert!(reserve_x >= amount_stc_desired, 101);
         // assert!(reserve_y >=, 10002);
 
-        let amount_out_1 = TokenSwapLibrary::get_amount_out(10 * scaling_factor, reserve_x, reserve_y, fee_numberator, fee_denumerator);
-        Debug::print<u128>(&amount_out_1);
+        let amount_out_1 = TokenSwapLibrary::get_amount_out(
+            pow_amount<STC>(10),
+            reserve_x,
+            reserve_y,
+            fee_numberator,
+            fee_denumerator
+        );
+        debug::print<u128>(&amount_out_1);
         // assert!(1 * scaling_factor >= (1 * scaling_factor * reserve_y) / reserve_x * (997 / 1000), 1003);
 
         let amount_out_2 = TokenSwapLibrary::quote(amount_stc_desired, reserve_x, reserve_y);
-        Debug::print<u128>(&amount_out_2);
-        // assert!(amount_out_2 <= amount_usdt_desired, 1004);
+        debug::print<u128>(&amount_out_2);
+        assert!(amount_out_2 <= amount_usdt_desired, 104);
 
-        let amount_out_3 = TokenSwapLibrary::get_amount_in(100, 100000000, 10000000000, 3, 1000);
-        Debug::print<u128>(&amount_out_3);
-        //assert!(amount_out_3 >= amount_stc_desired, 1005);
+        let amount_out_3 = TokenSwapLibrary::get_amount_in(
+            100,
+            100000000,
+            10000000000,
+            3,
+            1000
+        );
+        debug::print(&string::utf8(b"add_liquidity_and_check_cal_output_test | "));
+        debug::print<u128>(&amount_out_3);
+        debug::print<u128>(&amount_stc_desired);
+        // assert!(amount_out_3 >= amount_stc_desired, 105);
     }
 }
