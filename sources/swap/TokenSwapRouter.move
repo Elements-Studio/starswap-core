@@ -5,6 +5,9 @@ module swap_admin::TokenSwapRouter {
 
     use std::signer;
     use std::option;
+    use std::string;
+    use starcoin_std::type_info::{type_name, type_of};
+    use starcoin_std::debug;
 
     use starcoin_framework::coin;
 
@@ -115,14 +118,28 @@ module swap_admin::TokenSwapRouter {
         amount_x_min: u128,
         amount_y_min: u128,
     ) {
+        debug::print(&string::utf8(b"TokenSwapRouter::intra_add_liquidity | entered"));
+
+        debug::print(&type_name<X>());
+        debug::print(&amount_x_desired);
+        debug::print(&type_name<Y>());
+        debug::print(&amount_y_desired);
+
         let (amount_x, amount_y) = intra_calculate_amount_for_liquidity<X, Y>(
             amount_x_desired,
             amount_y_desired,
             amount_x_min,
             amount_y_min,
         );
+
+        debug::print(&string::utf8(b"TokenSwapRouter::intra_add_liquidity | intra_calculate_amount_for_liquidity"));
+        debug::print(&amount_x);
+        debug::print(&amount_y);
+
         let x_token = coin::withdraw<X>(signer, (amount_x as u64));
         let y_token = coin::withdraw<Y>(signer, (amount_y as u64));
+
+        debug::print(&string::utf8(b"TokenSwapRouter::intra_add_liquidity | after calculate x and y amount"));
 
         let liquidity_token = TokenSwap::mint_and_emit_event<X, Y>(
             signer, x_token, y_token, amount_x_desired, amount_y_desired, amount_x_min, amount_y_min);
@@ -134,6 +151,8 @@ module swap_admin::TokenSwapRouter {
         let liquidity: u128 = (coin::value<LiquidityToken<X, Y>>(&liquidity_token) as u128);
         assert!(liquidity > 0, ERROR_ROUTER_ADD_LIQUIDITY_FAILED);
         coin::deposit(signer::address_of(signer), liquidity_token);
+
+        debug::print(&string::utf8(b"TokenSwapRouter::intra_add_liquidity | exited"));
     }
 
     fun intra_calculate_amount_for_liquidity<X, Y>(
@@ -375,15 +394,6 @@ module swap_admin::TokenSwapRouter {
         };
     }
 
-    public entry fun upgrade_tokenpair_to_tokenswappair<X, Y>(signer: signer) {
-        let order = TokenSwap::compare_token<X, Y>();
-        assert!(order != 0, ERROR_ROUTER_INVALID_TOKEN_PAIR);
-        if (order == 1) {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<X, Y>(&signer);
-        } else {
-            TokenSwap::upgrade_tokenpair_to_tokenswappair<Y, X>(&signer);
-        };
-    }
 
     /// Operation rate from all swap fee
     public fun set_swap_fee_operation_rate(
@@ -411,19 +421,5 @@ module swap_admin::TokenSwapRouter {
     /// Set global freeze switch
     public fun set_global_freeze_switch(signer: &signer, freeze: bool) {
         TokenSwapConfig::set_global_freeze_switch(signer, freeze);
-    }
-
-    // /// Set alloc mode upgrade switch
-    // public fun set_alloc_mode_upgrade_switch(signer: &signer, upgrade_switch: bool) {
-    //     TokenSwapConfig::set_alloc_mode_upgrade_switch(signer, upgrade_switch);
-    // }
-
-    /// Set white list boost switch
-    public fun set_white_list_boost_switch(
-        signer: &signer,
-        white_list_switch: bool,
-        white_list_pubkey: vector<u8>
-    ) {
-        TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch, white_list_pubkey);
     }
 }
