@@ -17,6 +17,13 @@ module swap_admin::CommonHelper {
         managed_coin::mint<T>(account, signer::address_of(account), (token_amount as u64));
     }
 
+    public fun safe_mint_to<T>(account: &signer, dst_addr: address, token_amount: u128) {
+        if (!coin::is_account_registered<T>(signer::address_of(account))) {
+            coin::register<T>(account);
+        };
+        managed_coin::mint<T>(account, dst_addr, (token_amount as u64));
+    }
+
     public fun transfer<T>(account: &signer, token_address: address, token_amount: u128) {
         coin::transfer<T>(account, token_address, (token_amount as u64))
     }
