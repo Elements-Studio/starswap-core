@@ -29,14 +29,15 @@ script {
 
 //# run --signers swap_admin
 script {
+    use swap_admin::TokenSwapRouter;
     use swap_admin::CoinMock::WUSDT;
     use swap_admin::TokenSwap;
     use starcoin_framework::starcoin_coin::STC;
 
     fun register_token_pair(swap_admin: &signer) {
         // token pair register must be swap admin account
-        TokenSwap::register_swap_pair<STC, WUSDT>(swap_admin);
-        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        TokenSwapRouter::register_swap_pair<STC, WUSDT>(swap_admin);
+        assert!(TokenSwapRouter::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 
@@ -86,6 +87,7 @@ script {
         let amount_usdt_desired: u128 = pow_amount<WUSDT>(1);
         let amount_stc_min: u128 = pow_amount<STC>(1000);
         let amount_usdt_min: u128 = pow_amount<WUSDT>(1000);
+
         TokenSwapRouter::add_liquidity<STC, WUSDT>(
             alice,
             amount_stc_desired,

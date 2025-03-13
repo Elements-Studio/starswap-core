@@ -83,14 +83,14 @@ script {
 //# run --signers swap_admin
 script {
     use swap_admin::CoinMock::WUSDT;
-    use swap_admin::TokenSwap;
+    use swap_admin::TokenSwapRouter;
 
     use starcoin_framework::starcoin_coin::STC;
 
     fun swap_admin_register_token_pair(swap_admin: &signer) {
         //token pair register must be swap admin account
-        TokenSwap::register_swap_pair<STC, WUSDT>(swap_admin);
-        assert!(TokenSwap::swap_pair_exists<STC, WUSDT>(), 111);
+        TokenSwapRouter::register_swap_pair<STC, WUSDT>(swap_admin);
+        assert!(TokenSwapRouter::swap_pair_exists<STC, WUSDT>(), 111);
     }
 }
 // check: EXECUTED
