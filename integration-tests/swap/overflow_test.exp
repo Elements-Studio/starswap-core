@@ -1,26 +1,26 @@
-processed 9 tasks
+processed 8 tasks
 
-task 4 'run'. lines 19-28:
+task 4 'run'. lines 22-62:
 {
-  "gas_used": 132082,
+  "gas_used": 1548078,
   "status": "Executed"
 }
 
-task 5 'run'. lines 31-44:
+task 5 'run'. lines 63-76:
 {
-  "gas_used": 149736,
+  "gas_used": 562118,
   "status": "Executed"
 }
 
-task 6 'run'. lines 46-58:
-{
-  "gas_used": 457535,
-  "status": "Executed"
-}
+task 6 'run'. lines 79-112:
+warning[W09001]: unused alias
+   ┌─ TEMPFILE3:84:30
+   │
+84 │     use starcoin_std::debug::print;
+   │                              ^^^^^ Unused 'use' of alias 'print'. Consider removing it
 
-task 7 'run'. lines 61-78:
 {
-  "gas_used": 325259,
+  "gas_used": 1894457,
   "status": {
     "ExecutionFailure": {
       "location": {
@@ -29,14 +29,14 @@ task 7 'run'. lines 61-78:
           "name": "TokenSwap"
         }
       },
-      "function": 13,
-      "code_offset": 21
+      "function": 11,
+      "code_offset": 41
     }
   }
 }
 
-task 8 'run'. lines 81-103:
+task 7 'run'. lines 115-136:
 {
-  "gas_used": 22914,
+  "gas_used": 27215,
   "status": "Executed"
 }
