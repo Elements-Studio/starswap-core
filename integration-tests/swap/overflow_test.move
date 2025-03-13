@@ -62,7 +62,7 @@ script {
 
 //# run --signers swap_admin
 script {
-    use alice::coin_mock::{WUSDT};
+    use alice::coin_mock::WUSDT;
     use swap_admin::TokenSwapRouter;
     use swap_admin::TokenSwap;
     use starcoin_framework::starcoin_coin::STC;
@@ -78,10 +78,8 @@ script {
 
 //# run --signers alice
 script {
-    use std::string;
     use swap_admin::TokenSwapRouter;
-    use alice::coin_mock::{WUSDT};
-    use starcoin_std::debug;
+    use alice::coin_mock::WUSDT;
     use starcoin_framework::starcoin_coin::STC;
 
     fun add_liquidity_overflow(alice: &signer) {
