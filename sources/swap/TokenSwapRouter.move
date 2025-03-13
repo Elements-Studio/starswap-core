@@ -6,7 +6,7 @@ module swap_admin::TokenSwapRouter {
     use std::signer;
     use std::option;
     use std::string;
-    use starcoin_std::type_info::{type_name, type_of};
+    use starcoin_std::type_info::{type_name};
     use starcoin_std::debug;
 
     use starcoin_framework::coin;
