@@ -28,17 +28,6 @@ module swap_admin::CommonHelper {
         (coin::balance<T>(token_address) as u128)
     }
 
-    // public fun register_and_mint<T>(account: &signer, precision: u8, token_amount: u128) {
-    //     let name = struct_name(&type_of<T>());
-    //     managed_coin::initialize<T>(
-    //         account,
-    //         name,
-    //         name,
-    //         precision,
-    //         true
-    //     );
-    //     managed_coin::mint<T>(account, signer::address_of(account), (token_amount as u64));
-    // }
 
     public fun pow_amount<T>(amount: u128): u128 {
         amount * Self::pow_10(coin::decimals<T>())
@@ -48,15 +37,6 @@ module swap_admin::CommonHelper {
         math128::pow(10, (exp as u128))
     }
 
-    // public fun pow(base: u64, exp: u8): u128 {
-    //     let result_val = 1u128;
-    //     let i = 0;
-    //     while (i < exp) {
-    //         result_val = result_val * (base as u128);
-    //         i = i + 1;
-    //     };
-    //     result_val
-    // }
 
     #[test]
     public fun test_pow_10() {
