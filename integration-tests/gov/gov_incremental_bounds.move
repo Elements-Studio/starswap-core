@@ -28,7 +28,7 @@ script {
 }
 
 // This timestamp is two years after the time of the pledge + 1 second,otherwise the calculation will be incorrect.
-//# block --author 0x1 --timestamp 1709518600
+//# block --author 0x1 --timestamp 1709518600000
 
 //# run --signers SwapAdmin
 script {
