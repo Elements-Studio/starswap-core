@@ -1,9 +1,6 @@
-//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5 --public-keys BuyBackAccount=0x760670dd3a152f7130534758d366eea7540078832e0985cde498c40c9a2b6ae3 --addresses BuyBackAccount=0xa1869437e19a33eba1b7277218af539c
-
-//# faucet --addr alice --amount 10000000000000000
+//# init -n test --public-keys SwapAdmin=0x5510ddb2f172834db92842b0b640db08c2bc3cd986def00229045d78cc528ac5
 
 //# faucet --addr SwapAdmin --amount 10000000000000000
-
 
 
 //# run --signers SwapAdmin
