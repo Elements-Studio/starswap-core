@@ -24,8 +24,14 @@ module TokenSwapConfig {
     const SWAP_FEE_SWITCH_ON: bool = true;
     const SWAP_FEE_SWITCH_OFF: bool = false;
 
+    /// Default maximum single-swap output as percentage of reserve.
+    /// 30 means a single swap cannot take more than 30% of the output token reserve.
+    /// 0 means disabled (no limit).
+    const DEFAULT_SWAP_OUTPUT_LIMIT_PCT: u64 = 0;
+
     const ERROR_NOT_HAS_PRIVILEGE: u64 = 101;
     const ERROR_GLOBAL_FREEZE: u64 = 102;
+    const ERROR_SWAP_OUTPUT_OVER_LIMIT: u64 = 103;
 
     struct SwapFeePoundageConfig<phantom X, phantom Y> has copy, drop, store {
         numerator: u64,
@@ -354,6 +360,53 @@ module TokenSwapConfig {
         } else {
             (DEFAULT_WHITE_LIST_BOOST_SWITCH, DEFAULT_WHITE_LIST_BOOST_PUBKEY)
         }
+    }
+
+    /// Per-pair swap output limit: the max percentage of output-token reserve
+    /// that a single swap can take.  A value of 30 means 30%.  0 = disabled.
+    struct SwapOutputLimitConfig<phantom X, phantom Y> has copy, drop, store {
+        /// max output as percentage of reserve (0-100, 0 = disabled)
+        limit_pct: u64,
+    }
+
+    /// Set the per-pair swap output limit percentage.  Only admin.
+    public fun set_swap_output_limit<X: copy + drop + store,
+                                     Y: copy + drop + store>(
+        signer: &signer,
+        limit_pct: u64
+    ) {
+        assert_admin(signer);
+        let config = SwapOutputLimitConfig<X, Y> { limit_pct };
+        if (Config::config_exist_by_address<SwapOutputLimitConfig<X, Y>>(admin_address())) {
+            Config::set<SwapOutputLimitConfig<X, Y>>(signer, config);
+        } else {
+            Config::publish_new_config<SwapOutputLimitConfig<X, Y>>(signer, config);
+        }
+    }
+
+    /// Get the per-pair swap output limit percentage (0 = disabled).
+    public fun get_swap_output_limit<X: copy + drop + store,
+                                     Y: copy + drop + store>(): u64 {
+        if (Config::config_exist_by_address<SwapOutputLimitConfig<X, Y>>(admin_address())) {
+            let conf = Config::get_by_address<SwapOutputLimitConfig<X, Y>>(admin_address());
+            conf.limit_pct
+        } else {
+            DEFAULT_SWAP_OUTPUT_LIMIT_PCT
+        }
+    }
+
+    /// Abort if `amount_out` exceeds `limit_pct`% of `reserve_out`.
+    /// Does nothing when `limit_pct == 0` (disabled).
+    public fun assert_swap_output_limit<X: copy + drop + store,
+                                        Y: copy + drop + store>(
+        amount_out: u128,
+        reserve_out: u128
+    ) {
+        let limit_pct = get_swap_output_limit<X, Y>();
+        if (limit_pct == 0) { return };
+        // amount_out <= reserve_out * limit_pct / 100
+        let max_output = reserve_out * (limit_pct as u128) / 100;
+        assert!(amount_out <= max_output, Errors::limit_exceeded(ERROR_SWAP_OUTPUT_OVER_LIMIT));
     }
 
     public fun admin_address(): address {

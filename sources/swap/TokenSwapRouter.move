@@ -213,6 +213,10 @@ module TokenSwapRouter {
         let y_out = compute_y_out<X, Y>(amount_x_in);
         assert!(y_out >= amount_y_out_min, ERROR_ROUTER_Y_OUT_LESSTHAN_EXPECTED);
 
+        // Enforce per-pair swap output limit (e.g. max 30% of Y reserve per swap)
+        let (_, reserve_y) = get_reserves<X, Y>();
+        TokenSwapConfig::assert_swap_output_limit<X, Y>(y_out, reserve_y);
+
         // do actual swap
         let token_x = Account::withdraw<X>(signer, amount_x_in);
         let (token_x_out, token_y_out);
@@ -257,6 +261,10 @@ module TokenSwapRouter {
         // calculate actual x in
         let x_in = compute_x_in<X, Y>(amount_y_out);
         assert!(x_in <= amount_x_in_max, ERROR_ROUTER_X_IN_OVER_LIMIT_MAX);
+
+        // Enforce per-pair swap output limit (e.g. max 30% of Y reserve per swap)
+        let (_, reserve_y) = get_reserves<X, Y>();
+        TokenSwapConfig::assert_swap_output_limit<X, Y>(amount_y_out, reserve_y);
 
         // do actual swap
         let token_x = Account::withdraw<X>(signer, x_in);
