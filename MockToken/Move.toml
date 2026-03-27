@@ -3,10 +3,10 @@ name = "Mock-Token"
 version = "0.0.1"
 
 [addresses]
-FAI = "0x3b0938dc785c301e9295a3f3202903bc"
-WEN = "0x3b0938dc785c301e9295a3f3202903bc"
-Bridge = "0x3b0938dc785c301e9295a3f3202903bc"
-NativeBridge = "0x3b0938dc785c301e9295a3f3202903bc"
+FAI = "0xa1dd4cde7cbd7459540d39683479890d"
+WEN = "0xa1dd4cde7cbd7459540d39683479890d"
+Bridge = "0xa1dd4cde7cbd7459540d39683479890d"
+NativeBridge = "0xa1dd4cde7cbd7459540d39683479890d"
 
 [dependencies.StarcoinFramework]
 git = "https://github.com/starcoinorg/starcoin-framework.git"
