@@ -163,5 +163,15 @@ module TokenSwapScripts {
         TokenSwapLibrary::get_amount_out(x_in_value, reserve_x, reverse_y, fee_numberator, fee_denumerator)
     }
 
+    /// Set per-pair swap output limit percentage.
+    /// limit_pct = 0 disables the limit; limit_pct = 30 means max 30% of reserve per swap.
+    public entry fun set_swap_output_limit<X: copy + drop + store,
+                                           Y: copy + drop + store>(
+        signer: signer,
+        limit_pct: u64,
+    ) {
+        TokenSwapRouter::set_swap_output_limit<X, Y>(&signer, limit_pct);
+    }
+
 }
 }

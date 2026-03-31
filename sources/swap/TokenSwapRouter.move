@@ -419,5 +419,13 @@ module TokenSwapRouter {
     public fun set_white_list_boost_switch(signer: &signer, white_list_switch: bool, white_list_pubkey:vector<u8>){
         TokenSwapConfig::set_white_list_boost_switch(signer, white_list_switch,white_list_pubkey);
     }
+
+    /// Set per-pair swap output limit percentage (0 = disabled, 30 = max 30% of reserve per swap)
+    public fun set_swap_output_limit<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        limit_pct: u64,
+    ) {
+        TokenSwapConfig::set_swap_output_limit<X, Y>(signer, limit_pct);
+    }
 }
 }

@@ -1,12 +1,12 @@
 [package]
 name = "Starswap-Core"
-version = "2.0.6"
+version = "2.1.0"
 
 [addresses]
 StarcoinFramework = "0x1"
-SwapAdmin = "0xa1dd4cde7cbd7459540d39683479890d"
-SwapFeeAdmin = "0x1aa60c3d8de05f335e8359945873d4c1"
-BuyBackAccount = "0x3c8d4dfb7f03908e7296394e12d1b8ac"
+SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
+SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
+BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 
 [dependencies.StarcoinFramework]
 git = "https://github.com/starcoinorg/starcoin-framework.git"
