@@ -4,9 +4,9 @@ version = "2.1.0"
 
 [addresses]
 StarcoinFramework = "0x1"
-SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
-SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
-BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
+SwapAdmin = "0xb9bad301cc50cb623efac44b81f7289b"
+SwapFeeAdmin = "0x25ea0e4f37f497b0359aa467c98ce014"
+BuyBackAccount = "0xe058652cad0a9fc58591b3ee72452038"
 
 [dependencies.StarcoinFramework]
 git = "https://github.com/starcoinorg/starcoin-framework.git"
