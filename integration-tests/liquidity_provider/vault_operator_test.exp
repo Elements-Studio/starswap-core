@@ -1,0 +1,95 @@
+processed 19 tasks
+
+task 5 'run'. lines 13-20:
+{
+  "gas_used": 132082,
+  "status": "Executed"
+}
+
+task 6 'run'. lines 22-32:
+{
+  "gas_used": 146363,
+  "status": "Executed"
+}
+
+task 7 'run'. lines 34-43:
+{
+  "gas_used": 410980,
+  "status": "Executed"
+}
+
+task 8 'run'. lines 45-62:
+{
+  "gas_used": 415376,
+  "status": "Executed"
+}
+
+task 9 'run'. lines 63-75:
+{
+  "gas_used": 153736,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 76-87:
+{
+  "gas_used": 76625,
+  "status": "Executed"
+}
+
+task 11 'run'. lines 88-100:
+{
+  "gas_used": 78198,
+  "status": "Executed"
+}
+
+task 12 'run'. lines 101-120:
+{
+  "gas_used": 186287,
+  "status": "Executed"
+}
+
+task 13 'run'. lines 121-137:
+{
+  "gas_used": 329020,
+  "status": "Executed"
+}
+
+task 14 'run'. lines 138-156:
+{
+  "gas_used": 410852,
+  "status": "Executed"
+}
+
+task 15 'run'. lines 157-169:
+{
+  "gas_used": 92786,
+  "status": "Executed"
+}
+
+task 16 'run'. lines 170-189:
+{
+  "gas_used": 182953,
+  "status": "Executed"
+}
+
+task 17 'run'. lines 190-206:
+{
+  "gas_used": 75675,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20004"
+    }
+  }
+}
+
+task 18 'run'. lines 207-221:
+{
+  "gas_used": 379893,
+  "status": "Executed"
+}
