@@ -8,9 +8,8 @@ SwapAdmin = "0x8c109349c6bd91411d6bc962e080c4a3"
 SwapFeeAdmin = "0x9572abb16f9d9e9b009cc1751727129e"
 BuyBackAccount = "0xa1869437e19a33eba1b7277218af539c"
 
-[dependencies.StarcoinFramework]
-git = "https://github.com/starcoinorg/starcoin-framework.git"
-rev = "198d236f071819257ebdf54ed4502099a7daaaf5"
+[dependencies]
+StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "345a3900a0064dc57a9560235bc72c12f03448b1" }
 
 [dependencies.Mock-Token]
 local = "./MockToken"
