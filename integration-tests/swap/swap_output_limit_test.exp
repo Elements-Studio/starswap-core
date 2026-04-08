@@ -49,7 +49,7 @@ task 11 'run'. lines 119-134:
     "MoveAbort": {
       "location": {
         "Module": {
-          "address": "0x1d852ac2fbb3e7fe6780ca896095c0a6",
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapConfig"
         }
       },
@@ -65,7 +65,7 @@ task 12 'run'. lines 136-153:
     "MoveAbort": {
       "location": {
         "Module": {
-          "address": "0x1d852ac2fbb3e7fe6780ca896095c0a6",
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
           "name": "TokenSwapConfig"
         }
       },
