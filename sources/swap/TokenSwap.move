@@ -146,6 +146,7 @@ module TokenSwap {
     const ERROR_SWAP_ADDLIQUIDITY_INVALID: u64 = 2007;
     const ERROR_SWAP_TOKEN_NOT_EXISTS: u64 = 2008;
     const ERROR_SWAP_TOKEN_FEE_INVALID: u64 = 2009;
+    const ERROR_SWAP_SWAPOUT_OVER_LIMIT: u64 = 2010;
 
     const EQUAL: u8 = 0;
     const LESS_THAN: u8 = 1;
@@ -332,6 +333,7 @@ module TokenSwap {
         let y_in_value = Token::value(&y_in);
         assert!(x_in_value > 0 || y_in_value > 0, ERROR_SWAP_TOKEN_INSUFFICIENT);
         let (x_reserve, y_reserve) = get_reserves<X, Y>();
+        assert!(x_out * 10 <= x_reserve * 3 && y_out * 10 <= y_reserve * 3, ERROR_SWAP_SWAPOUT_OVER_LIMIT);
         let token_pair = borrow_global_mut<TokenSwapPair<X, Y>>(TokenSwapConfig::admin_address());
         Token::deposit(&mut token_pair.token_x_reserve, x_in);
         Token::deposit(&mut token_pair.token_y_reserve, y_in);

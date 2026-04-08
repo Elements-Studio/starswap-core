@@ -188,7 +188,7 @@ script {
     use StarcoinFramework::Debug;
 
     fun swap_exact_token_for_token(signer: signer) {
-        let amount_x_in = 15000;
+        let amount_x_in = 5000;
         let amount_y_out_min = 10;
         let token_balance = CommonHelper::get_safe_balance<WDAI>(Signer::address_of(&signer));
         assert!(token_balance == 0, 201);
