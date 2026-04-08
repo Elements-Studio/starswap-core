@@ -81,8 +81,8 @@ script {
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Add liquidity, STC/WUSDT = 1:5
-        let amount_stc_desired: u128 = 100 * scaling_factor;
-        let amount_usdt_desired: u128 = 500 * scaling_factor;
+        let amount_stc_desired: u128 = 1000 * scaling_factor;
+        let amount_usdt_desired: u128 = 5000 * scaling_factor;
         let amount_stc_min: u128 = 1 * scaling_factor;
         let amount_usdt_min: u128 = 1 * scaling_factor;
 
