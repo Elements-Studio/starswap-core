@@ -1,0 +1,129 @@
+processed 18 tasks
+
+task 5 'run'. lines 13-20:
+{
+  "gas_used": 132082,
+  "status": "Executed"
+}
+
+task 6 'run'. lines 22-32:
+{
+  "gas_used": 149672,
+  "status": "Executed"
+}
+
+task 7 'run'. lines 34-43:
+{
+  "gas_used": 407006,
+  "status": "Executed"
+}
+
+task 8 'run'. lines 45-57:
+{
+  "gas_used": 407428,
+  "status": "Executed"
+}
+
+task 9 'run'. lines 59-68:
+{
+  "gas_used": 76327,
+  "status": "Executed"
+}
+
+task 10 'run'. lines 70-81:
+{
+  "gas_used": 72651,
+  "status": "Executed"
+}
+
+task 11 'run'. lines 82-100:
+{
+  "gas_used": 325322,
+  "status": "Executed"
+}
+
+task 12 'run'. lines 102-120:
+{
+  "gas_used": 71701,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20004"
+    }
+  }
+}
+
+task 13 'run'. lines 122-138:
+{
+  "gas_used": 64661,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20004"
+    }
+  }
+}
+
+task 14 'run'. lines 140-158:
+{
+  "gas_used": 64742,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20002"
+    }
+  }
+}
+
+task 15 'run'. lines 160-175:
+{
+  "gas_used": 64742,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20002"
+    }
+  }
+}
+
+task 16 'run'. lines 177-191:
+{
+  "gas_used": 53272,
+  "status": {
+    "MoveAbort": {
+      "location": {
+        "Module": {
+          "address": "0x8c109349c6bd91411d6bc962e080c4a3",
+          "name": "SwapLiquidityProvider"
+        }
+      },
+      "abort_code": "20001"
+    }
+  }
+}
+
+task 17 'run'. lines 193-228:
+{
+  "gas_used": 444037,
+  "status": "Executed"
+}
