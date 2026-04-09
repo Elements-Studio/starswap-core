@@ -17,6 +17,16 @@ mpm integration-test
 
 ### Run Unit Tests
 
+> **Note**: The project uses StarcoinFramework v11 (`198d236f`) for compatibility with starcoin/mpm v1.13.20. However, v11's UnitTest module uses `Std::UnitTest` (uppercase), while mpm v1.13.20 expects v12's `std::unit_test` (lowercase). You need to patch the mpm cache before running tests:
+>
+> ```bash
+> # First build to populate the cache, then patch
+> mpm package build
+> ./scripts/patch_v11_unittest.sh
+> ```
+>
+> This only needs to be done once per machine (or after clearing `~/.move` cache).
+
 ```commandline
 mpm package test
 ```

@@ -3,4 +3,5 @@
 mpm package build
 mpm package test
 mpm integration-test
+mpm check-compatibility
 mpm release

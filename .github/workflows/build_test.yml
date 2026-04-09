@@ -17,6 +17,12 @@ jobs:
         run: |
           bash scripts/dev_setup.sh -b -t -p
 
+      - name: build and patch v11 UnitTest
+        run: |
+          source "$HOME/.profile"
+          mpm package build
+          bash scripts/patch_v11_unittest.sh
+
       - name: starcoin unittest
         run: |
           source "$HOME/.profile"
@@ -25,12 +31,7 @@ jobs:
       - name: starcoin integration test
         run: |
           source "$HOME/.profile"
-          mpm integration-test 
-
-      - name: build
-        run: |
-          source "$HOME/.profile"
-          mpm package build
+          mpm integration-test
 
       - name: check changed files
         run: bash ./scripts/changed_files.sh
